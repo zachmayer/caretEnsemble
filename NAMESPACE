@@ -1,0 +1,6 @@
+export(caretEnsemble)
+export(glmnetOpt)
+export(greedOptRMSE)
+export(greedOptROC)
+export(lmOpt)
+export(predict.caretEnsemble)
