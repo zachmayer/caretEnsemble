@@ -55,24 +55,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
   stopifnot(length(unique(indexes))==1)
 
   #Extract resampled predictions from each model
-  modelLibrary <- lapply(all.models, function(x) {x$pred})
-  
-  #Extract the best tuning parameters from each model
-  tunes <- lapply(all.models, function(x) {x$bestTune})
-  
-  #Subset the resampled predictions to the model with the best tune and sort
-  newModels <- lapply(1:length(modelLibrary), function(x) NA)
-  for (i in 1:length(modelLibrary)){
-    out <- modelLibrary[[i]]
-    tune <- tunes[[i]]
-    for (name in names(tune)){
-      out <- out[out[,name]==tune[,name],]
-    }
-    out <- out[order(out$Resample, out$rowIndex),]
-    newModels[[i]] <- out
-  }
-  modelLibrary <- newModels
-  rm(newModels)
+  modelLibrary <- extractBestPreds(all.models)
   
   #Insert checks here: observeds are all equal, row indexes are equal, Resamples are equal
   

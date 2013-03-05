@@ -1,5 +1,6 @@
 export(caretEnsemble)
 export(caretStack)
+export(extractBestPreds)
 export(greedOptAUC)
 export(greedOptRMSE)
 export(multiPredict)
