@@ -1,23 +1,4 @@
 Package: caretEnsemble
 Type: Package
 Title: Framework for combining caret models into ensembles
-Version: 1.0
-Date: 2013-03-01
-Author: Zach Mayer
-Maintainer: Zach Mayer <zach.mayer@gmail.com>
-Description: This package consists primarily of one function: caretEnsemble.
-    This function takes a collection of caret models and finds a good linear
-    combination of those models, using either linear regression or iterative
-    greedy selection. It returns an object of the caretEnsemlbe S3 class, which
-    contains the models and has a predict class.  Currently, this framework
-    supports regression models and 2-class classification models.  It DOES NOT
-    allow you to combine multi-class classification models, or form combined
-    ensembles of classification and regression models.\
-Depends:
-    R (>= 2.14.0),
-    caret
-License: GPL-2
-Collate:
-    'caretEnsemble.R'
-    'optAUC.R'
-    'OptRMSE.R'
+2 main methods:  caretEnsemble which uses greedy optimization to combine predictive models, and caretStack, which uses a "meta" caret model to combine several caret models.
