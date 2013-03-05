@@ -1,4 +1,3 @@
-
 #' Weighted average of several predictive models
 #' 
 #' Find a good linear combination of several classification or regression models, 
