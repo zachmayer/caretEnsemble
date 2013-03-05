@@ -1,3 +1,43 @@
+
+#' Check that a list of models are all train objects and are ready to be ensembled together
+#' 
+#' @param list_of_models a list of caret models to check
+#' @export
+checkModels_extractTypes <- function(list_of_models, ...){
+  require('caret')
+  
+  #TODO: Add helpful error messages
+  
+  #Check that we have a list of train models
+  stopifnot(class(list_of_models)=='list')
+  stopifnot(all(sapply(list_of_models, function(x) class(x)[1])=='train'))
+  
+  #Check that models have proper types
+  types <- sapply(list_of_models, function(x) x$modelType)
+  stopifnot(all(types %in% c('Classification', 'Regression')))
+  stopifnot(all(types==types[1])) #Maybe in the future we can combine reg and class models
+  if (types[1]=='Classification' & length(unique(list_of_models[[1]]$pred$obs))!=2){
+    stop('Not yet implemented for multiclass problems')
+  }
+  
+  #Check that classification models saved probabilities TODO: ALLOW NON PROB MODELS!
+  if (types[1]=='Classification'){
+    probModels <- sapply(list_of_models, function(x) modelLookup(x$method)[1,'probModel'])
+    stopifnot(all(probModels))
+    classProbs <- sapply(list_of_models, function(x) x$control$classProbs)
+    stopifnot(all(classProbs))
+  }
+  
+  #Check that all models saved their predictions so we can ensemble them
+  stopifnot(all(sapply(list_of_models, function(x) x$control$savePredictions)))
+  
+  #Check that every model used the same resampling indexes
+  indexes <- lapply(list_of_models, function(x) x$control$index)
+  stopifnot(length(unique(indexes))==1)
+  
+  return(types)
+}
+
 #' Make a matrix of predictions from a list of caret models
 #' 
 #' @param list_of_models a list of caret models to make predictions for
@@ -48,4 +88,12 @@ extractBestPreds <- function(list_of_models){
   }
   rm(modelLibrary)
   return(newModels)
+}
+
+#' Check that a list of predictions from caret models are all valid
+#' 
+#' @param list_of_models a list of caret models to check
+#' @export
+checkPred <- function(list_of_models, ...){
+  stop('NOT IMPLEMENTED')
 }

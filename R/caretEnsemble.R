@@ -21,38 +21,14 @@
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 caretEnsemble <- function(all.models, optFUN=NULL, ...){
   
-  #TODO: Add progressbar argument
+  #TODO: Add progressbar argument and move optFUN to an all.models control argument
   
   #Libraries
   require('caret')
   require('pbapply')
-  
-  #Check that we have a list of train models
-  stopifnot(class(all.models)=='list')
-  stopifnot(all(sapply(all.models, function(x) class(x)[1])=='train'))
-  
-  #Check that models have proper types
-  types <- sapply(all.models, function(x) x$modelType)
-  stopifnot(all(types %in% c('Classification', 'Regression')))
-  stopifnot(all(types==types[1])) #Maybe in the future we can combine reg and class models
-  if (types[1]=='Classification' & length(unique(all.models[[1]]$pred$obs))!=2){
-    stop('Not yet implemented for multiclass problems')
-  }
-  
-  #Check that classification models saved probabilities TODO: ALLOW NON PROB MODELS!
-  if (types[1]=='Classification'){
-    probModels <- sapply(all.models, function(x) modelLookup(x$method)[1,'probModel'])
-    stopifnot(all(probModels))
-    classProbs <- sapply(all.models, function(x) x$control$classProbs)
-    stopifnot(all(classProbs))
-  }
-  
-  #Check that all models saved their predictions so we can ensemble them
-  stopifnot(all(sapply(all.models, function(x) x$control$savePredictions)))
 
-  #Check that every model used the same resampling indexes
-  indexes <- lapply(all.models, function(x) x$control$index)
-  stopifnot(length(unique(indexes))==1)
+  #Check the models
+  types <- checkModels_extractTypes(all.models)
 
   #Extract resampled predictions from each model
   modelLibrary <- extractBestPreds(all.models)
