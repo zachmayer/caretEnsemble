@@ -132,9 +132,9 @@ multiPredict <- function(list_of_models, type, newdata=NULL, ...){
   
   preds <- pbsapply(list_of_models, function(x){
     if (type=='Classification' & x$control$classProbs){
-      predict(x, type='prob', ...)[,2]
+      predict(x, type='prob', newdata=newdata, ...)[,2]
     } else {
-      predict(x, type='raw', ...)
+      predict(x, type='raw', newdata=newdata, ...)
     }
   })
   colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)

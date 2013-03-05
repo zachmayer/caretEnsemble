@@ -42,6 +42,8 @@ caretStack <- function(all.models, ...){
 #' @param ... arguments (including newdata) to pass to predict.train.
 #' @export
 predict.caretStack <- function(ensemble, newdata=NULL, ...){
+  #TODO: grab type argument
+  #TODO: rename my "type" variable
   type <- checkModels_extractTypes(ensemble$models)
   preds <- multiPredict(ensemble$models, newdata=newdata, type)
   out <- predict(ensemble$ens_model, newdata=preds, ...)
