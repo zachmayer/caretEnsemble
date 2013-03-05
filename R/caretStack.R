@@ -17,43 +17,35 @@
 #' @return S3 caretStack object
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 caretStack <- function(all.models, ...){
-  
-  stop('Not implemented')
-  #TODO: Add progressbar argument
+
+  #TODO: Add progressbar argument and move optFUN to an all.models control argument
   
   #Libraries
   require('caret')
   require('pbapply')
   
-
+  #Check the models, and make a matrix of obs and preds
+  predobs <- makePredObsMatrix(all.models)
+  
+  #Build a caret model
+  model <- train(predobs$preds, predobs$obs, ...)
+  
   #Return final model
+  out <- list(models=all.models, ens_model=model, error=model$results)
   class(out) <- 'caretStack'
   return(out) 
 }
 
 #' Make predictions from a caretStack. This function passes the data to each function in 
-#' turn to make a matrix of predictions...
-#' @param stack A caretStack to make predictions from.
-#' @param ... arguments (including newdata) to pass to predict.train. DO NOT SPECIFY the
-#' "type" argument.
+#' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
+#' weights to get a single, combined vector of predictions.
+#' @param ensemble a caretStack to make predictions from.
+#' @param ... arguments (including newdata) to pass to predict.train.
 #' @export
-predict.caretStack <- function(stack, ...){
-  #TODO: Add progressbar argument
-  
-  stop('Not implemented')
-  require('pbapply')
-  types <- sapply(stack$models, function(x) x$modelType)
-  stopifnot(all(types==types[1]))
-  stopifnot(types[1] %in% c('Classification', 'Regression'))
-  
-  preds <- multiPredict(stack$models, types, ...)
-  
-  if (types[1]=='Classification' & stack$stack_model$control$classProbs){
-    out <- predict(stack$stack_model, newdata=preds, type='prob', ...)
-  } else {
-    out <- predict(stack$stack_model, newdata=preds, type='raw', ...)
-  }
-
+predict.caretStack <- function(ensemble, newdata=NULL, ...){
+  type <- checkModels_extractTypes(ensemble$models)
+  preds <- multiPredict(ensemble$models, newdata=NULL, type)
+  out <- predict(ensemble$ens_model, newdata=preds, ...)
   return(out)
 }
 

@@ -9,7 +9,7 @@ test_that("We can multiPredict", {
   expect_true(all(colnames(out)==c("rf", "lm", "glm")))
 })
 
-context("Does the ensembling and prediction work?")
+context("Does ensembling and prediction work?")
 
 test_that("We can ensemble regression models", {
   data('models_reg')
@@ -29,12 +29,12 @@ test_that("We can ensemble classification models", {
   expect_true(length(pred.class)==150)
 })
 
-context("Does the stacking and prediction work?")
+context("Does stacking and prediction work?")
 
 test_that("We can stack regression models", {
   data('models_reg')
-  ens.reg <- caretStack(models_reg, iter=1000)
-  expect_that(ens.reg, is_a("caretEnsemble"))
+  ens.reg <- caretStack(models_reg, method='rpart', trControl=trainControl(number=5))
+  expect_that(ens.reg, is_a("caretStack"))
   pred.reg <- predict(ens.reg, X.reg)
   expect_true(is.numeric(pred.reg))
   expect_true(length(pred.reg)==150)
@@ -42,9 +42,12 @@ test_that("We can stack regression models", {
 
 test_that("We can stack classification models", {
   data('models_class')
-  ens.class <- caretStack(models_class, iter=1000)
-  expect_that(ens.class, is_a("caretEnsemble"))
-  pred.class <- predict(ens.class, X.class)
+  ens.class <- caretStack(models_class, method='rpart', trControl=trainControl(number=5))
+  expect_that(ens.class, is_a("caretStack"))
+  pred.class <- predict(ens.class, X.class, type='prob')[,2]
   expect_true(is.numeric(pred.class))
   expect_true(length(pred.class)==150)
+  raw.class <- predict(ens.class, X.class, type='raw')
+  expect_true(is.factor(raw.class))
+  expect_true(length(raw.class)==150)
 })

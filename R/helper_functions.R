@@ -5,7 +5,7 @@
 #' 
 #' @param list_of_models a list of caret models to check
 #' @export
-checkModels_extractTypes <- function(list_of_models, ...){
+checkModels_extractTypes <- function(list_of_models){
   require('caret')
   
   #TODO: Add helpful error messages
@@ -79,7 +79,7 @@ extractBestPreds <- function(list_of_models){
 #' @param list_of_models a list of caret models to check
 #' @export
 #' 
-checkPreds <- function(list_of_models, ...){
+checkPreds <- function(list_of_models){
   stop('NOT IMPLEMENTED')
 }
 
@@ -111,7 +111,7 @@ makePredObsMatrix <- function(list_of_models){
   }
   
   #Name the predicteds and return
-  names(preds) <- make.names(sapply(list_of_models, function(x) x$method))
+  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method))
   return(list(obs=obs, preds=preds, type=type)) 
 }
 
@@ -120,9 +120,13 @@ makePredObsMatrix <- function(list_of_models){
 #' @param list_of_models a list of caret models to make predictions for
 #' @param type Classification or Regression
 #' @param ... additional arguments to pass to predict.train.  DO NOT PASS
-#' the "type" argument.
+#' the "type" argument.  Classsification models will returns probabilities
+#' if possible, and regression models will return "raw".
 #' @export
-multiPredict <- function(list_of_models, type, ...){
+multiPredict <- function(list_of_models, type, newdata=NULL, ...){
+  
+  #TODO: Add progressbar argument
+  
   require('caret')
   require('pbapply')
   
