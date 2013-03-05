@@ -66,18 +66,13 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' Make predictions from a caretEnsemble. This function passes the data to each function in 
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
-#' @param ensemble A caretEnsemble to make predictions from.
+#' @param ensemble a caretEnsemble to make predictions from.
 #' @param ... arguments (including newdata) to pass to predict.train.
 #' @export
 predict.caretEnsemble <- function(ensemble, ...){
-  #TODO: Add progressbar argument
-  
-  require('pbapply')
-  types <- sapply(ensemble$models, function(x) x$modelType)
-  stopifnot(all(types==types[1]))
-  stopifnot(types[1] %in% c('Classification', 'Regression'))
-  
-  preds <- multiPredict(ensemble$models, types[1], ...)
+  type <- checkModels_extractTypes(ensemble$models)
+  preds <- multiPredict(ensemble$models, type, ...)
   out <- as.numeric(preds %*% ensemble$weights)
   return(out)
 }
+
