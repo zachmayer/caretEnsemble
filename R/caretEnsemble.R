@@ -127,7 +127,7 @@ predict.caretEnsemble <- function(ensemble, ...){
   stopifnot(all(types==types[1]))
   stopifnot(types[1] %in% c('Classification', 'Regression'))
   
-  preds <- multiPredict(stack$models, types, ...)
+  preds <- multiPredict(ensemble$models, types[1], ...)
   out <- as.numeric(preds %*% ensemble$weights)
   return(out)
 }
