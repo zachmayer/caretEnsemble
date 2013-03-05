@@ -4,7 +4,7 @@
 #' @param Y
 #' @param iter
 #' @export
-greedOptROC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
+greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
   require('caTools')
 
   if(is.character(Y)){

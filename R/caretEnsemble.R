@@ -8,7 +8,10 @@
 #' values of mtry, you must build a model for each value of mtry.  If you
 #' use several values of mtry in one train model, (e.g. tuneGrid =
 #' expand.grid(.mtry=2:5)), caret will select the best value of mtry 
-#' before we get a chance to include it in the ensemble.
+#' before we get a chance to include it in the ensemble.  By default, 
+#' RMSE is used to ensemble regression models, and AUC is used to ensemble
+#' Classification models.  This function does not currently support multi-class
+#' problems
 #' 
 #' @param all.models a list of caret models to ensemble.
 #' @param optFUN the optimization function to use
@@ -16,10 +19,9 @@
 #' @export
 #' @return S3 caretEnsemble object
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
-caretEnsemble <- function(all.models, optFUN=greedOptRMSE, ...){
+caretEnsemble <- function(all.models, optFUN=NULL, ...){
   
-  #Notes:
-  #For now, minimizing RMSE, regression only
+  #TODO: Add progressbar argument
   
   #Libraries
   require('caret')
@@ -37,7 +39,7 @@ caretEnsemble <- function(all.models, optFUN=greedOptRMSE, ...){
     stop('Not yet implemented for multiclass problems')
   }
   
-  #Check that classification models saved probabilities
+  #Check that classification models saved probabilities TODO: ALLOW NON PROB MODELS!
   if (types[1]=='Classification'){
     probModels <- sapply(all.models, function(x) modelLookup(x$method)[1,'probModel'])
     stopifnot(all(probModels))
@@ -87,6 +89,15 @@ caretEnsemble <- function(all.models, optFUN=greedOptRMSE, ...){
     preds <- sapply(modelLibrary, function(x) as.numeric(x[,positive]))
   }
   
+  #If the optimization function is NULL, choose defauls
+  if (is.null(optFUN)){
+    if (types[1]=='Classification') {
+      optFUN <- greedOptAUC
+    } else {
+      optFUN <- greedOptRMSE
+    }
+  }
+  
   #Determine weights
   weights <- optFUN(preds, obs, ...)
   weights[! is.finite(weights)] <- 0
@@ -100,17 +111,17 @@ caretEnsemble <- function(all.models, optFUN=greedOptRMSE, ...){
   #Remove 0-weighted models
   keep <- which(weights != 0)
   
-  #Determine RMSE #TODO: AUC FOR CLASS
+  #Determine RMSE
   if (types[1] == "Regression"){
-    metric <- 'RMSE'
     error <- RMSE(preds %*% weights, obs)
   } else {
     metric <- 'AUC'
     error <- colAUC(preds %*% weights, obs)
+    names(error) <- 'AUC'
   }
 
   #Return final model
-  out <- list(models=all.models[keep], weights=weights[keep], error=error, metric=metric)
+  out <- list(models=all.models[keep], weights=weights[keep], error=error)
   class(out) <- 'caretEnsemble'
   return(out) 
 }
@@ -122,6 +133,8 @@ caretEnsemble <- function(all.models, optFUN=greedOptRMSE, ...){
 #' @param ... arguments (including newdata) to pass to predict.train.
 #' @export
 predict.caretEnsemble <- function(ensemble, ...){
+  #TODO: Add progressbar argument
+  
   require('pbapply')
   types <- sapply(ensemble$models, function(x) x$modelType)
   stopifnot(all(types==types[1]))

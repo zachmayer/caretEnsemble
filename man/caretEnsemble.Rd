@@ -2,7 +2,7 @@
 \alias{caretEnsemble}
 \title{Combine several predictive models via weights}
 \usage{
-  caretEnsemble(all.models, optFUN = greedOptRMSE, ...)
+  caretEnsemble(all.models, optFUN = NULL, ...)
 }
 \arguments{
   \item{all.models}{a list of caret models to ensemble.}
@@ -28,7 +28,10 @@
   use several values of mtry in one train model, (e.g.
   tuneGrid = expand.grid(.mtry=2:5)), caret will select the
   best value of mtry before we get a chance to include it
-  in the ensemble.
+  in the ensemble.  By default, RMSE is used to ensemble
+  regression models, and AUC is used to ensemble
+  Classification models.  This function does not currently
+  support multi-class problems
 }
 \references{
   \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
