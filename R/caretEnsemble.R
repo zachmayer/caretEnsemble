@@ -1,4 +1,4 @@
-#' Weighted average of several predictive models
+#' Combine several predictive models via weights
 #' 
 #' Find a good linear combination of several classification or regression models, 
 #' using either linear regression, elastic net regression, or greedy optimization.
@@ -139,6 +139,5 @@ predict.caretEnsemble <- function(ensemble, ...){
   })
   preds <- do.call(cbind, preds)
   out <- as.numeric(preds %*% ensemble$weights)
-  out <- cutoffPreds(out, ensemble$cutoff[1], ensemble$cutoff[2])
   return(out)
 }

@@ -21,3 +21,4 @@ Collate:
     'caretEnsemble.R'
     'optAUC.R'
     'OptRMSE.R'
+    'caretStack.R'

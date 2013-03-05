@@ -1,4 +1,5 @@
 export(caretEnsemble)
+export(caretStack)
 export(glmnetOpt)
 export(greedOptRMSE)
 export(greedOptROC)

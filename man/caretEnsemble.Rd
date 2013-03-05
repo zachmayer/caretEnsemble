@@ -1,6 +1,6 @@
 \name{caretEnsemble}
 \alias{caretEnsemble}
-\title{Weighted average of several predictive models}
+\title{Combine several predictive models via weights}
 \usage{
   caretEnsemble(all.models, optFUN = greedOptRMSE, ...)
 }
