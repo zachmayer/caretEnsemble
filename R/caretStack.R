@@ -19,6 +19,7 @@
 caretStack <- function(all.models, ...){
   
   stop('Not implemented')
+  #TODO: Add progressbar argument
   
   #Libraries
   require('caret')
@@ -37,6 +38,7 @@ caretStack <- function(all.models, ...){
 #' "type" argument.
 #' @export
 predict.caretStack <- function(stack, ...){
+  #TODO: Add progressbar argument
   
   stop('Not implemented')
   require('pbapply')
