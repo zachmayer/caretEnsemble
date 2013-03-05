@@ -4,7 +4,8 @@ context("Does stacking and prediction work?")
 test_that("We can stack regression models", {
   set.seed(96367)
   data('models_reg')
-  ens.reg <- caretStack(models_reg, method='lm', preProcess='pca', trControl=trainControl(number=2))
+  ens.reg <- caretStack(models_reg, method='lm', preProcess='pca', 
+                        trControl=trainControl(number=2, allowParallel=FALSE))
   expect_that(ens.reg, is_a("caretStack"))
   pred.reg <- predict(ens.reg, X.reg)
   expect_true(is.numeric(pred.reg))
@@ -14,7 +15,8 @@ test_that("We can stack regression models", {
 test_that("We can stack classification models", {
   set.seed(42)
   data('models_class')
-  ens.class <- caretStack(models_class, method='rpart', trControl=trainControl(number=2))
+  ens.class <- caretStack(models_class, method='rpart', 
+                          trControl=trainControl(number=2, allowParallel=FALSE))
   expect_that(ens.class, is_a("caretStack"))
   pred.class <- predict(ens.class, X.class, type='prob')[,2]
   expect_true(is.numeric(pred.class))
