@@ -111,7 +111,7 @@ makePredObsMatrix <- function(list_of_models){
   }
   
   #Name the predicteds and return
-  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method))
+  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
   return(list(obs=obs, preds=preds, type=type)) 
 }
 
@@ -137,7 +137,7 @@ multiPredict <- function(list_of_models, type, newdata=NULL, ...){
       predict(x, type='raw', ...)
     }
   })
-  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method))
+  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
   
   return(preds)
 }
