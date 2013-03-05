@@ -51,6 +51,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
   #Determine RMSE
   if (predobs$type == "Regression"){
     error <- RMSE(predobs$preds %*% weights, predobs$obs)
+    names(error) <- 'RMSE'
   } else {
     metric <- 'AUC'
     error <- colAUC(predobs$preds %*% weights, predobs$obs)
