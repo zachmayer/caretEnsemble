@@ -125,19 +125,9 @@ predict.caretEnsemble <- function(ensemble, ...){
   require('pbapply')
   types <- sapply(ensemble$models, function(x) x$modelType)
   stopifnot(all(types==types[1]))
+  stopifnot(types[1] %in% c('Classification', 'Regression'))
   
-  preds <- pblapply(ensemble$models, function(x){
-    if (types[1]=='Classification' & x$control$classProbs){
-      predict(x, type='prob', ...)[,2]
-    } else if (types[1]=='Classification'){
-      as.numeric(predict(x, type='raw', ...))-1
-    } else if (types[1]=='Regression'){
-      as.numeric(predict(x, type='raw', ...))
-    } else {
-      stop(paste('Error with', x$method, 'model\n', 'Model type must be Classification or Regression'))
-    }
-  })
-  preds <- do.call(cbind, preds)
+  preds <- multiPredict(stack$models, types, ...)
   out <- as.numeric(preds %*% ensemble$weights)
   return(out)
 }

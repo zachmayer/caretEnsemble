@@ -44,15 +44,7 @@ predict.caretStack <- function(stack, ...){
   stopifnot(all(types==types[1]))
   stopifnot(types[1] %in% c('Classification', 'Regression'))
   
-  preds <- pblapply(ensemble$models, function(x){
-    if (types[1]=='Classification' & x$control$classProbs){
-      predict(x, type='prob', ...)[,2]
-    } else {
-      predict(x, type='raw', ...)
-    }
-  })
-  preds <- do.call(cbind, preds)
-  colnames(preds) <- ''
+  preds <- multiPredict(stack$models, types, ...)
   
   if (types[1]=='Classification' & stack$stack_model$control$classProbs){
     out <- predict(stack$stack_model, newdata=preds, type='prob', ...)
