@@ -43,7 +43,7 @@ caretStack <- function(all.models, ...){
 #' @export
 predict.caretStack <- function(ensemble, newdata=NULL, ...){
   type <- checkModels_extractTypes(ensemble$models)
-  preds <- multiPredict(ensemble$models, newdata=NULL, type)
+  preds <- multiPredict(ensemble$models, newdata=newdata, type)
   out <- predict(ensemble$ens_model, newdata=preds, ...)
   return(out)
 }
