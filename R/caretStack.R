@@ -22,7 +22,6 @@ caretStack <- function(all.models, ...){
   
   #Libraries
   require('caret')
-  require('pbapply')
   
   #Check the models, and make a matrix of obs and preds
   predobs <- makePredObsMatrix(all.models)
