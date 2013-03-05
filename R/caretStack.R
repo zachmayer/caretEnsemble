@@ -56,3 +56,4 @@ predict.caretStack <- function(stack, ...){
 
   return(out)
 }
+

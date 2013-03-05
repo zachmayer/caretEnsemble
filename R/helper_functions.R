@@ -1,3 +1,5 @@
+#TODO: Move ensembling functions to their own document
+#TODO: Move predictions functions to their own document
 
 #' Check that a list of models are all train objects and are ready to be ensembled together
 #' 
@@ -12,16 +14,21 @@ checkModels_extractTypes <- function(list_of_models, ...){
   stopifnot(class(list_of_models)=='list')
   stopifnot(all(sapply(list_of_models, function(x) class(x)[1])=='train'))
   
-  #Check that models have proper types
+  #Check that models have the same type
   types <- sapply(list_of_models, function(x) x$modelType)
+  type <- types[1]
+  stopifnot(all(types==type)) #Maybe in the future we can combine reg and class models
+  
+  #Check that the model type is VALID
   stopifnot(all(types %in% c('Classification', 'Regression')))
-  stopifnot(all(types==types[1])) #Maybe in the future we can combine reg and class models
-  if (types[1]=='Classification' & length(unique(list_of_models[[1]]$pred$obs))!=2){
+
+  #Warn that we haven't yet implemented multiclass models
+  if (type=='Classification' & length(unique(list_of_models[[1]]$pred$obs))!=2){
     stop('Not yet implemented for multiclass problems')
   }
   
   #Check that classification models saved probabilities TODO: ALLOW NON PROB MODELS!
-  if (types[1]=='Classification'){
+  if (type=='Classification'){
     probModels <- sapply(list_of_models, function(x) modelLookup(x$method)[1,'probModel'])
     stopifnot(all(probModels))
     classProbs <- sapply(list_of_models, function(x) x$control$classProbs)
@@ -35,30 +42,7 @@ checkModels_extractTypes <- function(list_of_models, ...){
   indexes <- lapply(list_of_models, function(x) x$control$index)
   stopifnot(length(unique(indexes))==1)
   
-  return(types)
-}
-
-#' Make a matrix of predictions from a list of caret models
-#' 
-#' @param list_of_models a list of caret models to make predictions for
-#' @param type Classification or Regression
-#' @param ... additional arguments to pass to predict.train.  DO NOT PASS
-#' the "type" argument.
-#' @export
-multiPredict <- function(list_of_models, type, ...){
-  require('caret')
-  require('pbapply')
-  
-  preds <- pbsapply(list_of_models, function(x){
-    if (type=='Classification' & x$control$classProbs){
-      predict(x, type='prob', ...)[,2]
-    } else {
-      predict(x, type='raw', ...)
-    }
-  })
-  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method))
-  
-  return(preds)
+  return(type)
 }
 
 #' Extract predictions for the best tune from a list of caret models
@@ -94,6 +78,62 @@ extractBestPreds <- function(list_of_models){
 #' 
 #' @param list_of_models a list of caret models to check
 #' @export
-checkPred <- function(list_of_models, ...){
+#' 
+checkPreds <- function(list_of_models, ...){
   stop('NOT IMPLEMENTED')
+}
+
+#' Extract obs from one models, and a matrix of predictions from all other models
+#' 
+#' @param list_of_models a list of caret models to extract predictions from
+#' @export
+makePredObsMatrix <- function(list_of_models){
+  
+  #Check models and extract type (class or reg)
+  type <- checkModels_extractTypes(list_of_models)
+  
+  #Make a list of models
+  modelLibrary <- extractBestPreds(list_of_models)
+  
+  #Insert checks here: observeds are all equal, row indexes are equal, Resamples are equal
+  
+  #Extract observations from the frist model in the list
+  obs <- modelLibrary[[1]]$obs
+  if (type=='Classification'){
+    positive <- as.character(unique(modelLibrary[[1]]$obs)[2]) #IMPROVE THIS!
+  }
+  
+  #Extract predicteds
+  if (type=='Regression'){
+    preds <- sapply(modelLibrary, function(x) as.numeric(x$pred))
+  } else if (type=='Classification'){
+    preds <- sapply(modelLibrary, function(x) as.numeric(x[,positive]))
+  }
+  
+  #Name the predicteds and return
+  names(preds) <- make.names(sapply(list_of_models, function(x) x$method))
+  return(list(obs=obs, preds=preds, type=type)) 
+}
+
+#' Make a matrix of predictions from a list of caret models
+#' 
+#' @param list_of_models a list of caret models to make predictions for
+#' @param type Classification or Regression
+#' @param ... additional arguments to pass to predict.train.  DO NOT PASS
+#' the "type" argument.
+#' @export
+multiPredict <- function(list_of_models, type, ...){
+  require('caret')
+  require('pbapply')
+  
+  preds <- pbsapply(list_of_models, function(x){
+    if (type=='Classification' & x$control$classProbs){
+      predict(x, type='prob', ...)[,2]
+    } else {
+      predict(x, type='raw', ...)
+    }
+  })
+  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method))
+  
+  return(preds)
 }

@@ -27,55 +27,33 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
   require('caret')
   require('pbapply')
 
-  #Check the models
-  types <- checkModels_extractTypes(all.models)
+  #Check the models, and make a matrix of obs and preds
+  predobs <- makePredObsMatrix(all.models)
 
-  #Extract resampled predictions from each model
-  modelLibrary <- extractBestPreds(all.models)
-  
-  #Insert checks here: observeds are all equal, row indexes are equal, Resamples are equal
-  
-  #Extract Observeds
-  obs <- modelLibrary[[1]]$obs
-  if (types[[1]]=='Classification'){
-    positive <- as.character(unique(modelLibrary[[1]]$obs)[2]) #IMPROVE THIS!
-  }
-  
-  #Extract predicted
-  if (types[1]=='Regression'){
-    preds <- sapply(modelLibrary, function(x) as.numeric(x$pred))
-  } else if (types[1]=='Classification'){
-    preds <- sapply(modelLibrary, function(x) as.numeric(x[,positive]))
-  }
-  
-  #If the optimization function is NULL, choose defauls
+  #If the optimization function is NULL, choose default
   if (is.null(optFUN)){
-    if (types[1]=='Classification') {
+    if (predobs$type=='Classification') {
       optFUN <- greedOptAUC
-    } else {
-      optFUN <- greedOptRMSE
-    }
+    } else { optFUN <- greedOptRMSE }
   }
   
   #Determine weights
-  weights <- optFUN(preds, obs, ...)
+  weights <- optFUN(predobs$preds, predobs$obs, ...)
   weights[! is.finite(weights)] <- 0
   
-  #Normalize weights
+  #Normalize and name weights
   weights <- weights/sum(weights)
-  
-  #Name weights
   names(weights) <- sapply(all.models, function(x) x$method)
   
   #Remove 0-weighted models
   keep <- which(weights != 0)
   
   #Determine RMSE
-  if (types[1] == "Regression"){
-    error <- RMSE(preds %*% weights, obs)
+  if (predobs$type == "Regression"){
+    error <- RMSE(predobs$preds %*% weights, predobs$obs)
   } else {
     metric <- 'AUC'
-    error <- colAUC(preds %*% weights, obs)
+    error <- colAUC(predobs$preds %*% weights, predobs$obs)
     names(error) <- 'AUC'
   }
 
