@@ -68,12 +68,25 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
 #' @param ensemble a caretEnsemble to make predictions from.
-#' @param ... arguments (including newdata) to pass to predict.train.
+#' @param keepNA a logical indicating whether predictions should be made for all 
+#' cases where sufficient data exists or only for complete cases across all models
+#' @param ... arguments (including newdata) to pass to predict.train. These arguments 
+#' must be named
 #' @export
-predict.caretEnsemble <- function(ensemble, ...){
+predict.caretEnsemble <- function(ensemble, keepNA = TRUE, ...){
   type <- checkModels_extractTypes(ensemble$models)
   preds <- multiPredict(ensemble$models, type, ...)
-  out <- as.numeric(preds %*% ensemble$weights)
+  if(keepNA == TRUE){
+    message("Predictions being made only for cases with complete data")
+    out <- as.numeric(preds %*% ensemble$weights)
+  } else {
+    message("Predictions being made only from models with available data")
+    conf <- ifelse(is.na(preds), 0, 1)
+    conf <- as.numeric(conf %*% ensemble$weights) # A hacky way to represent missing information
+    preds <- ifelse(is.na(preds), 0, preds)
+    preds <- as.numeric(preds %*% ensemble$weights)
+    out <- list(predicted = preds, weight = conf)
+  }
   return(out)
 }
 
