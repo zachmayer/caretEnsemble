@@ -81,10 +81,11 @@ predict.caretEnsemble <- function(ensemble, keepNA = TRUE, ...){
     out <- as.numeric(preds %*% ensemble$weights)
   } else {
     message("Predictions being made only from models with available data")
-    conf <- ifelse(is.na(preds), 0, 1)
-    conf <- as.numeric(conf %*% ensemble$weights) # A hacky way to represent missing information
-    preds <- ifelse(is.na(preds), 0, preds)
-    preds <- as.numeric(preds %*% ensemble$weights)
+    conf <- ifelse(is.na(preds), NA, 1)
+    conf <- sweep(conf, MARGIN=2, ensemble$weights,`*`)
+    conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
+    conf <- t(conf); conf[is.na(conf)] <- 0
+    preds <- apply(preds, 1, function(x){weighted.mean(x, w=ensemble$weights, na.rm=TRUE)})
     out <- list(predicted = preds, weight = conf)
   }
   return(out)

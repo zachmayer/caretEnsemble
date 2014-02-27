@@ -85,6 +85,7 @@ MCAR.df <- function(df, p){
   return(df)
 }
 
+set.seed(3256)
 trainC[, c(1:17)] <- MCAR.df(trainC[, c(1:17)], 0.15)
 testC[, c(1:17)] <- MCAR.df(testC[, c(1:17)], 0.05)
 
@@ -100,6 +101,10 @@ glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
 set.seed(482)
 glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm', 
               trControl = myControl)
+# set.seed(482)
+# glm5 <- train(x = trainC[, c(12:17)], y = trainC[, "Class"], method = 'glm', 
+#               trControl = myControl)
+
 
 nestedList <- list(glm1, glm2, glm3, glm4)
 ensNest <- caretEnsemble(nestedList, iter=2000)
