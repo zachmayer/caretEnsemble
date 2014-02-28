@@ -7,7 +7,7 @@ weights to get a single, combined vector of predictions.}
   predict.caretEnsemble(ensemble, ...)
 }
 \arguments{
-  \item{ensemble}{A caretEnsemble to make predictions
+  \item{ensemble}{a caretEnsemble to make predictions
   from.}
 
   \item{...}{arguments (including newdata) to pass to

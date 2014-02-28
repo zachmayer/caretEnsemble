@@ -1,19 +1,22 @@
 \name{predict.caretStack}
 \alias{predict.caretStack}
 \title{Make predictions from a caretStack. This function passes the data to each function in
-turn to make a matrix of predictions...}
+turn to make a matrix of predictions, and then multiplies that matrix by the vector of
+weights to get a single, combined vector of predictions.}
 \usage{
-  predict.caretStack(stack, ...)
+  predict.caretStack(ensemble, newdata = NULL, ...)
 }
 \arguments{
-  \item{stack}{A caretStack to make predictions from.}
+  \item{ensemble}{a caretStack to make predictions from.}
 
   \item{...}{arguments (including newdata) to pass to
-  predict.train. DO NOT SPECIFY the "type" argument.}
+  predict.train.}
 }
 \description{
   Make predictions from a caretStack. This function passes
   the data to each function in turn to make a matrix of
-  predictions...
+  predictions, and then multiplies that matrix by the
+  vector of weights to get a single, combined vector of
+  predictions.
 }
 
