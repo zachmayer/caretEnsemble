@@ -2,7 +2,7 @@
 context("Does ensembling and prediction work?")
 
 test_that("We can ensemble regression models", {
-  data('models_reg')
+  load("../../data/models_reg.RData")
   ens.reg <- caretEnsemble(models_reg, iter=1000)
   expect_that(ens.reg, is_a("caretEnsemble"))
   pred.reg <- predict(ens.reg, X.reg)
@@ -11,7 +11,7 @@ test_that("We can ensemble regression models", {
 })
 
 test_that("We can ensemble classification models", {
-  data('models_class')
+  load("../../data/models_class.RData")
   ens.class <- caretEnsemble(models_class, iter=1000)
   expect_that(ens.class, is_a("caretEnsemble"))
   pred.class <- predict(ens.class, X.class)
