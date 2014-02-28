@@ -5,4 +5,7 @@ Title: Framework for combining caret models into ensembles
 See also the DESCRIPTION file.
 
 Install with:
-devtools:::install_github('caretEnsemble', 'zachmayer')
+library(devtools)
+library(testthat)
+install_github('caretEnsemble', 'zachmayer')
+test_package('caretEnsemble')
