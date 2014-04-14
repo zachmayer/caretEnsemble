@@ -23,3 +23,4 @@ Collate:
     'OptRMSE.R'
     'caretStack.R'
     'helper_functions.R'
+    'caretList.R'

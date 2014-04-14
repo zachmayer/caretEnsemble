@@ -1,5 +1,6 @@
 export(caretEnsemble)
 export(caretStack)
+export(buildModels)
 export(checkModels_extractTypes)
 export(checkPreds)
 export(extractBestPreds)
