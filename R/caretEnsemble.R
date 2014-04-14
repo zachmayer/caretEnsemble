@@ -73,6 +73,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments 
 #' must be named
 #' @export
+#' @method
 predict.caretEnsemble <- function(ensemble, keepNA = TRUE, ...){
   type <- checkModels_extractTypes(ensemble$models)
   preds <- multiPredict(ensemble$models, type, ...)
@@ -89,5 +90,45 @@ predict.caretEnsemble <- function(ensemble, keepNA = TRUE, ...){
     out <- list(predicted = preds, weight = conf)
   }
   return(out)
+}
+
+#' Summarize the results of caretEnsemble for the user.
+#' @param ensemble a caretEnsemble to make predictions from.
+#' @export
+summary.caretEnsemble <- function(ensemble){
+  types <- names(ensemble$models)
+  types <- paste(types, collapse = ", ")
+  wghts <- ensemble$weights
+  metric <- names(ensemble$error)
+  val <- ensemble$error[[1]]
+  cat(paste0("The following models were ensembled: ", types, " \n"))
+  cat("They were weighted: \n")
+  cat(paste0(paste0(wghts, collapse = " "), "\n"))
+  cat(paste0("The resulting ", metric, " is: ", round(val, 4), "\n"))
+  
+  # Add code to compare ensemble to individual models
+  cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
+  print(extractModRes(ensemble))
+}
+
+#' Extract the model accuracy metrics of the individual models in an ensemble object.
+#' @param ensemble a caretEnsemble to make predictions from.
+#' @export
+extractModRes <- function(ensemble){
+  if(class(ensemble) != "caretEnsemble") stop("extractModRes requires a caretEnsemble object")
+  modRes <- data.frame(method = names(ensemble$models), 
+                       metric = NA, 
+                       metricSD = NA)
+  
+  for(i in names(ensemble$models)){
+    dat <- ensemble$models[[i]]$results
+    metric <- ensemble$models[[i]]$metric
+    SDVAR <- paste0(ensemble$models[[i]]$metric, "SD")
+    best <- max(dat[, metric])
+    bestSD <- max(dat[dat[, metric] == best, SDVAR])
+    modRes[modRes[, "method"] == i, "metric"] <- best
+    modRes[modRes[, "method"] == i, "metricSD"] <- bestSD
+  }
+  return(modRes)
 }
 
