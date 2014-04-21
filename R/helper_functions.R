@@ -83,7 +83,9 @@ checkPreds <- function(list_of_models){
   stop('NOT IMPLEMENTED')
 }
 
-#' @description Extract obs from one models, and a matrix of predictions from all other models
+#' @title Make a prediction matrix from a list of models
+#' @description Extract obs from one models, and a matrix of predictions from all other models, a
+#' helper function
 #' 
 #' @param list_of_models a list of caret models to extract predictions from
 #' @export
@@ -115,19 +117,18 @@ makePredObsMatrix <- function(list_of_models){
   return(list(obs=obs, preds=preds, type=type)) 
 }
 
+#' @title Create a matrix of predictions for each of the models in a list
 #' @description Make a matrix of predictions from a list of caret models
 #' 
 #' @param list_of_models a list of caret models to make predictions for
 #' @param type Classification or Regression
+#' @param newdata a new data set to be predicted
 #' @param ... additional arguments to pass to predict.train.  DO NOT PASS
 #' the "type" argument.  Classsification models will returns probabilities
 #' if possible, and regression models will return "raw".
 #' @export
 multiPredict <- function(list_of_models, type, newdata=NULL, ...){
-  
   #TODO: Add progressbar argument
-  
-  require('caret')
   require('pbapply')
   
   preds <- pbsapply(list_of_models, function(x){

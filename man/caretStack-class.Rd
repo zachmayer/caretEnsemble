@@ -2,9 +2,6 @@
 \name{caretStack-class}
 \alias{caretStack-class}
 \title{Class "caretStack" of ensembled train objects from the caret package}
-\usage{
-caretStack(all.models, ...)
-}
 \description{
 Class "caretStack" of ensembled train objects from the
 caret package

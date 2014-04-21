@@ -11,9 +11,9 @@ tuneExtract <- function(x){
 #' Create uniform seeds across model fits to allow for ensembling
 #' 
 #' 
-#' @param ctrl a \code{\link{fitControl}} object passed by the user
+#' @param ctrl a \code{\link{trainControl}} object passed by the user
 #' @param M the maximum number of resamples necessary
-#' @return A \code{\link{fitControl}} object with a new slot, seeds
+#' @return A \code{\link{trainControl}} object with a new slot, seeds
 setSeeds <- function(ctrl, M){
   # M is the square of the tune-length
   B <- ctrl$number * ctrl$repeats
@@ -30,7 +30,7 @@ setSeeds <- function(ctrl, M){
 #' Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}} 
 #' function.
 #' 
-#' @param methodList a character vector of caret models to ensemble.
+#' @param x a character vector of caret models to ensemble.
 #' @return A list of \code{\link{train}} objects
 tmpExtract <- function(x){
   if(is.null(names(x))){

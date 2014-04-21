@@ -1,7 +1,10 @@
+\docType{class}
 \name{caretEnsemble}
 \alias{caretEnsemble}
-\title{Combine several predictive models via weights}
+\title{Class "caretEnsemble" of ensembled train objects from the caret package}
 \usage{
+caretEnsemble(all.models, optFUN = NULL, ...)
+
 caretEnsemble(all.models, optFUN = NULL, ...)
 }
 \arguments{
@@ -13,14 +16,22 @@ caretEnsemble(all.models, optFUN = NULL, ...)
   optimization function}
 }
 \value{
-S3 caretEnsemble object
+a \code{\linkS4class{caretEnsemble}} object
 }
 \description{
+Ensembled model from input train objects.
+
 Find a good linear combination of several classification or
 regression models, using either linear regression, elastic
 net regression, or greedy optimization.
 }
 \details{
+The object has the following items \itemize{ \item{models -
+a list of the original models to be ensembled}
+\item{weights - a matrix with the weights for each model}
+\item{error - the final accuracy metric of the ensembled
+models} }
+
 Every model in the "library" must be a separate
 \code{train} object.  For example, if you wish to combine a
 random forests with several different values of mtry, you
@@ -33,7 +44,19 @@ models, and AUC is used to ensemble Classification models.
 This function does not currently support multi-class
 problems
 }
+\section{Objects from the Class}{
+  Objects are created by calls to
+  \code{\link{caretEnsemble}}.
+}
+\examples{
+showClass("caretEnsemble")
+methods(class="caretEnsemble")
+}
 \references{
 \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 }
+\seealso{
+\code{\link{caretEnsemble}}
+}
+\keyword{classes}
 

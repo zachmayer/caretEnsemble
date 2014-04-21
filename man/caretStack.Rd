@@ -1,13 +1,14 @@
+\docType{class}
 \name{caretStack}
 \alias{caretStack}
-\title{Combine several predictive models via stacking}
+\title{Class "caretStack" of ensembled train objects from the caret package}
 \usage{
+caretStack(all.models, ...)
+
 caretStack(all.models, ...)
 }
 \arguments{
   \item{all.models}{a list of caret models to ensemble.}
-
-  \item{optFUN}{the optimization function to use}
 
   \item{...}{additional arguments to pass to the
   optimization function}
@@ -16,21 +17,33 @@ caretStack(all.models, ...)
 S3 caretStack object
 }
 \description{
+Class "caretStack" of ensembled train objects from the
+caret package
+
 Find a good linear combination of several classification or
 regression models, using either linear regression, elastic
 net regression, or greedy optimization.
 }
 \details{
-Every model in the "library" must be a separate
-\code{train} object.  For example, if you wish to combine a
-random forests with several different values of mtry, you
-must build a model for each value of mtry.  If you use
-several values of mtry in one train model, (e.g. tuneGrid =
-expand.grid(.mtry=2:5)), caret will select the best value
-of mtry before we get a chance to include it in the
-ensemble.
+The object has the following items \itemize{ \item{models -
+a list of the original models to be ensembled}
+\item{ens_model - a \code{\link{train}} object} \item{error
+- the final accuracy metric of the ensembled models} }
+
+Check the models, and make a matrix of obs and preds
+}
+\section{Objects from the Class}{
+  Objects are created by calls to \code{\link{caretStack}}.
+}
+\examples{
+showClass("caretEnsemble")
+methods(class="caretEnsemble")
 }
 \references{
 \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 }
+\seealso{
+\code{\link{caretEnsemble}}
+}
+\keyword{classes}
 

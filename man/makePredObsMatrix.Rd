@@ -1,5 +1,6 @@
 \name{makePredObsMatrix}
 \alias{makePredObsMatrix}
+\title{Make a prediction matrix from a list of models}
 \usage{
 makePredObsMatrix(list_of_models)
 }
@@ -9,6 +10,6 @@ makePredObsMatrix(list_of_models)
 }
 \description{
 Extract obs from one models, and a matrix of predictions
-from all other models
+from all other models, a helper function
 }
 

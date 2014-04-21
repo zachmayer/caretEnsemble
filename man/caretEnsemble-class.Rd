@@ -2,9 +2,6 @@
 \name{caretEnsemble-class}
 \alias{caretEnsemble-class}
 \title{Class "caretEnsemble" of ensembled train objects from the caret package}
-\usage{
-caretEnsemble(all.models, optFUN = NULL, ...)
-}
 \description{
 Ensembled model from input train objects.
 }

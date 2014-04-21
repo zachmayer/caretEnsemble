@@ -17,6 +17,12 @@ Depends:
     R (>= 2.14.0),
     caret, 
     caTools
+Imports: 
+    boot, 
+    methods,
+    pbapply
+Suggests: 
+    testthat
 License: GPL-2
 Collate:
     'caretEnsemble.R'

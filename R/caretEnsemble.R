@@ -1,10 +1,9 @@
 setOldClass("train")
+
 ##' @title Class "caretEnsemble" of ensembled train objects from the caret package
 ##'
 ##' @description Ensembled model from input train objects. 
 ##' 
-##' @name caretEnsemble-class
-##' @aliases caretEnsemble-class
 ##' @docType class
 ##' @section Objects from the Class: Objects are created by calls to
 ##' \code{\link{caretEnsemble}}.
@@ -21,7 +20,7 @@ setOldClass("train")
 ##'
 ##' showClass("caretEnsemble")
 ##' methods(class="caretEnsemble")
-##' @export
+##' @exportClass
 caretEnsemble <- setClass("caretEnsemble", representation(models = "list", 
                                                   weights = "data.frame", 
                                           error = "numeric"),
@@ -45,17 +44,10 @@ caretEnsemble <- setClass("caretEnsemble", representation(models = "list",
 #' @param all.models a list of caret models to ensemble.
 #' @param optFUN the optimization function to use
 #' @param ... additional arguments to pass to the optimization function
-#' @export
-#' @return S3 caretEnsemble object
+#' @return a \code{\linkS4class{caretEnsemble}} object
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
+#' @export
 caretEnsemble <- function(all.models, optFUN=NULL, ...){
-  
-  #TODO: Add progressbar argument and move optFUN to an all.models control argument
-  
-  #Libraries
-  require('caret')
-  require('pbapply')
-
   #Check the models, and make a matrix of obs and preds
   predobs <- makePredObsMatrix(all.models)
 
@@ -96,26 +88,26 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' Make predictions from a caretEnsemble. This function passes the data to each function in 
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
-#' @param ensemble a \code{\linkS4class{caretEnsemble}} to make predictions from.
+#' @param object a \code{\linkS4class{caretEnsemble}} to make predictions from.
 #' @param keepNA a logical indicating whether predictions should be made for all 
 #' cases where sufficient data exists or only for complete cases across all models
+#' @param newdata a dataframe of new data to make predictions on from the \code{\linkS4class{caretEnsemble}}
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments 
 #' must be named
 #' @export
-#' @method predict caretEnsemble
-predict.caretEnsemble <- function(ensemble, keepNA = TRUE, ...){
-  type <- checkModels_extractTypes(ensemble$models)
-  preds <- multiPredict(ensemble$models, type, ...)
+predict.caretEnsemble <- function(object, keepNA = TRUE, newdata = NULL, ...){
+  type <- checkModels_extractTypes(object$models)
+  preds <- multiPredict(object$models, type, ...)
   if(keepNA == TRUE){
     message("Predictions being made only for cases with complete data")
-    out <- as.numeric(preds %*% ensemble$weights)
+    out <- as.numeric(preds %*% object$weights)
   } else {
     message("Predictions being made only from models with available data")
     conf <- ifelse(is.na(preds), NA, 1)
-    conf <- sweep(conf, MARGIN=2, ensemble$weights,`*`)
+    conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
-    preds <- apply(preds, 1, function(x){weighted.mean(x, w=ensemble$weights, na.rm=TRUE)})
+    preds <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm=TRUE)})
     out <- list(predicted = preds, weight = conf)
   }
   return(out)
@@ -123,15 +115,15 @@ predict.caretEnsemble <- function(ensemble, keepNA = TRUE, ...){
 
 
 #' @title Summarize the results of caretEnsemble for the user.
-#' @param ensemble a \code{\linkS4class{caretEnsemble}} to make predictions from.
+#' @param object a \code{\linkS4class{caretEnsemble}} to make predictions from.
+#' @param ... optional additional parameters. 
 #' @export
-#' @method summary caretEnsemble
-summary.caretEnsemble <- function(ensemble){
-  types <- names(ensemble$models)
+summary.caretEnsemble <- function(object, ...){
+  types <- names(object$models)
   types <- paste(types, collapse = ", ")
-  wghts <- ensemble$weights
-  metric <- names(ensemble$error)
-  val <- ensemble$error[[1]]
+  wghts <- object$weights
+  metric <- names(object$error)
+  val <- object$error[[1]]
   cat(paste0("The following models were ensembled: ", types, " \n"))
   cat("They were weighted: \n")
   cat(paste0(paste0(wghts, collapse = " "), "\n"))
@@ -139,7 +131,7 @@ summary.caretEnsemble <- function(ensemble){
   
   # Add code to compare ensemble to individual models
   cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
-  print(extractModRes(ensemble))
+  print(extractModRes(object))
 }
 
 #' Extract the model accuracy metrics of the individual models in an ensemble object.

@@ -5,8 +5,7 @@
 tmpExtract(x)
 }
 \arguments{
-  \item{methodList}{a character vector of caret models to
-  ensemble.}
+  \item{x}{a character vector of caret models to ensemble.}
 }
 \value{
 A list of \code{\link{train}} objects
