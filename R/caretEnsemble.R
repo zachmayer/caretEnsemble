@@ -97,7 +97,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @export
 predict.caretEnsemble <- function(object, keepNA = TRUE, newdata = NULL, ...){
   type <- checkModels_extractTypes(object$models)
-  preds <- multiPredict(object$models, type, ...)
+  preds <- multiPredict(object$models, type, newdata = newdata, ...)
   if(keepNA == TRUE){
     message("Predictions being made only for cases with complete data")
     out <- as.numeric(preds %*% object$weights)
