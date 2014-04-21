@@ -91,13 +91,12 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @param object a \code{\linkS4class{caretEnsemble}} to make predictions from.
 #' @param keepNA a logical indicating whether predictions should be made for all 
 #' cases where sufficient data exists or only for complete cases across all models
-#' @param newdata a dataframe of new data to make predictions on from the \code{\linkS4class{caretEnsemble}}
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments 
 #' must be named
 #' @export
-predict.caretEnsemble <- function(object, keepNA = TRUE, newdata = NULL, ...){
+predict.caretEnsemble <- function(object, keepNA = TRUE, ...){
   type <- checkModels_extractTypes(object$models)
-  preds <- multiPredict(object$models, type, newdata = newdata, ...)
+  preds <- multiPredict(object$models, type, ...)
   if(keepNA == TRUE){
     message("Predictions being made only for cases with complete data")
     out <- as.numeric(preds %*% object$weights)

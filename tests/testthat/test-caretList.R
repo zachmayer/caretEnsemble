@@ -95,8 +95,15 @@ summary(ens4)
 ens2a <- caretEnsemble(test2a)
 summary(ens2a)
 
-ens3a <- caretEnsemble(test2a)
+ens3a <- caretEnsemble(test3a)
 summary(ens3a)
+
+# predictions
+
+mypreds <- predict(ens3a, keepNA = TRUE, newdata = test)
+length(mypreds)
+mypreds <- predict(ens3a, keepNA = FALSE, newdata = test)
+length(mypreds)
 
 
 # Test baseSeed is preserved if specified
