@@ -15,7 +15,8 @@ Description: This package consists primarily of one function: caretEnsemble.
     ensembles of classification and regression models.\
 Depends:
     R (>= 2.14.0),
-    caret
+    caret, 
+    caTools
 License: GPL-2
 Collate:
     'caretEnsemble.R'

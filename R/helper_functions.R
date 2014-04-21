@@ -1,15 +1,14 @@
 #TODO: Move ensembling functions to their own document
 #TODO: Move predictions functions to their own document
 
-#' Check that a list of models are all train objects and are ready to be ensembled together
+#' @title Check train models and extract their types
+#' @description Check that a list of models are all train objects and are ready to be ensembled together
 #' 
 #' @param list_of_models a list of caret models to check
 #' @export
 checkModels_extractTypes <- function(list_of_models){
-  require('caret')
-  
+  #require('caret')
   #TODO: Add helpful error messages
-  
   #Check that we have a list of train models
   stopifnot(class(list_of_models)=='list')
   stopifnot(all(sapply(list_of_models, function(x) class(x)[1])=='train'))
@@ -45,8 +44,8 @@ checkModels_extractTypes <- function(list_of_models){
   return(type)
 }
 
-#' Extract predictions for the best tune from a list of caret models
-#' 
+#' @title Extract the best predictions from a list of train objects
+#' @description Extract predictions for the best tune from a list of caret models
 #' @param list_of_models a list of caret models to extract predictions from
 #' @export
 extractBestPreds <- function(list_of_models){
@@ -74,7 +73,7 @@ extractBestPreds <- function(list_of_models){
   return(newModels)
 }
 
-#' Check that a list of predictions from caret models are all valid
+#' @description Check that a list of predictions from caret models are all valid
 #' 
 #' @param list_of_models a list of caret models to check
 #' @export
@@ -83,7 +82,7 @@ checkPreds <- function(list_of_models){
   stop('NOT IMPLEMENTED')
 }
 
-#' Extract obs from one models, and a matrix of predictions from all other models
+#' @description Extract obs from one models, and a matrix of predictions from all other models
 #' 
 #' @param list_of_models a list of caret models to extract predictions from
 #' @export
@@ -115,7 +114,7 @@ makePredObsMatrix <- function(list_of_models){
   return(list(obs=obs, preds=preds, type=type)) 
 }
 
-#' Make a matrix of predictions from a list of caret models
+#' @description Make a matrix of predictions from a list of caret models
 #' 
 #' @param list_of_models a list of caret models to make predictions for
 #' @param type Classification or Regression

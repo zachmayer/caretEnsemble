@@ -1,9 +1,38 @@
-#' Combine several predictive models via weights
+setOldClass("train")
+##' @title Class "caretEnsemble" of ensembled train objects from the caret package
+##'
+##' @description Ensembled model from input train objects. 
+##' 
+##' @name caretEnsemble-class
+##' @aliases caretEnsemble-class
+##' @docType class
+##' @section Objects from the Class: Objects are created by calls to
+##' \code{\link{caretEnsemble}}.
+##' @details
+##' The object has the following items
+##' \itemize{
+##' \item{models - a list of the original models to be ensembled}
+##' \item{weights - a matrix with the weights for each model}
+##' \item{error - the final accuracy metric of the ensembled models}
+##' }
+##' @seealso \code{\link{caretEnsemble}}
+##' @keywords classes
+##' @examples
+##'
+##' showClass("caretEnsemble")
+##' methods(class="caretEnsemble")
+##' @export
+caretEnsemble <- setClass("caretEnsemble", representation(models = "list", 
+                                                  weights = "data.frame", 
+                                          error = "numeric"),
+                  S3methods=TRUE)
+
+#' @title Combine several predictive models via weights
 #' 
-#' Find a good linear combination of several classification or regression models, 
+#' @description Find a good linear combination of several classification or regression models, 
 #' using either linear regression, elastic net regression, or greedy optimization.
 #' 
-#' Every model in the "library" must be a separate \code{train} object.  For 
+#' @details Every model in the "library" must be a separate \code{train} object.  For 
 #' example, if you wish to combine a random forests with several different 
 #' values of mtry, you must build a model for each value of mtry.  If you
 #' use several values of mtry in one train model, (e.g. tuneGrid =
@@ -67,13 +96,13 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' Make predictions from a caretEnsemble. This function passes the data to each function in 
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
-#' @param ensemble a caretEnsemble to make predictions from.
+#' @param ensemble a \code{\linkS4class{caretEnsemble}} to make predictions from.
 #' @param keepNA a logical indicating whether predictions should be made for all 
 #' cases where sufficient data exists or only for complete cases across all models
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments 
 #' must be named
 #' @export
-#' @method
+#' @method predict caretEnsemble
 predict.caretEnsemble <- function(ensemble, keepNA = TRUE, ...){
   type <- checkModels_extractTypes(ensemble$models)
   preds <- multiPredict(ensemble$models, type, ...)
@@ -92,9 +121,11 @@ predict.caretEnsemble <- function(ensemble, keepNA = TRUE, ...){
   return(out)
 }
 
-#' Summarize the results of caretEnsemble for the user.
-#' @param ensemble a caretEnsemble to make predictions from.
+
+#' @title Summarize the results of caretEnsemble for the user.
+#' @param ensemble a \code{\linkS4class{caretEnsemble}} to make predictions from.
 #' @export
+#' @method summary caretEnsemble
 summary.caretEnsemble <- function(ensemble){
   types <- names(ensemble$models)
   types <- paste(types, collapse = ", ")

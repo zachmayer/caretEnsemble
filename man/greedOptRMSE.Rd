@@ -1,17 +1,20 @@
 \name{greedOptRMSE}
 \alias{greedOptRMSE}
-\title{TODO}
+\title{Greedy optimization of the reduced mean square error}
 \usage{
-  greedOptRMSE(X, Y, iter = 100L)
+greedOptRMSE(X, Y, iter = 100L)
 }
 \arguments{
-  \item{X}{}
+  \item{X}{the matrix of predictors}
 
-  \item{Y}{}
+  \item{Y}{the dependent variable}
 
-  \item{iter}{}
+  \item{iter}{an integer for the number of iterations}
+}
+\value{
+A numeric of the weights for each model
 }
 \description{
-  TODO
+This algorithm optimizes the RMSE for regression models
 }
 

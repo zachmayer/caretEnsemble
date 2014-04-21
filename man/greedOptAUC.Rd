@@ -1,17 +1,21 @@
 \name{greedOptAUC}
 \alias{greedOptAUC}
-\title{TODO}
+\title{Greedy optimization of the area under the curve}
 \usage{
-  greedOptAUC(X, Y, iter = 100L)
+greedOptAUC(X, Y, iter = 100L)
 }
 \arguments{
-  \item{X}{}
+  \item{X}{the matrix of predictors}
 
-  \item{Y}{}
+  \item{Y}{the dependent variable}
 
-  \item{iter}{}
+  \item{iter}{an integer for the number of iterations}
+}
+\value{
+A numeric of the weights for each model
 }
 \description{
-  TODO
+This algorithm optimizes the area under the curve for
+classifcation models
 }
 
