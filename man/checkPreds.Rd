@@ -1,5 +1,6 @@
 \name{checkPreds}
 \alias{checkPreds}
+\title{Check predictions}
 \usage{
 checkPreds(list_of_models)
 }
