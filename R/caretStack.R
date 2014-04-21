@@ -1,9 +1,37 @@
-#' Combine several predictive models via stacking
+##' @title Class "caretStack" of ensembled train objects from the caret package
+##'
+##'
+##' @name caretStack-class
+##' @aliases caretStack-class
+##' @docType class
+##' @section Objects from the Class: Objects are created by calls to
+##' \code{\link{caretStack}}.
+##' @details
+##' The object has the following items
+##' \itemize{
+##' \item{models - a list of the original models to be ensembled}
+##' \item{ens_model - a \code{\link{train}} object}
+##' \item{error - the final accuracy metric of the ensembled models}
+##' }
+##' @seealso \code{\link{caretEnsemble}}
+##' @keywords classes
+##' @examples
+##'
+##' showClass("caretEnsemble")
+##' methods(class="caretEnsemble")
+##' @export
+caretStack <- setClass("caretStack", representation(models = "list", 
+                                                    ens_model = "train", 
+                                                          error = "numeric"),
+                          S3methods=TRUE)
+
+
+#' @title Combine several predictive models via stacking
 #' 
-#' Find a good linear combination of several classification or regression models, 
+#' @description Find a good linear combination of several classification or regression models, 
 #' using either linear regression, elastic net regression, or greedy optimization.
 #' 
-#' Every model in the "library" must be a separate \code{train} object.  For 
+#' @details Every model in the "library" must be a separate \code{train} object.  For 
 #' example, if you wish to combine a random forests with several different 
 #' values of mtry, you must build a model for each value of mtry.  If you
 #' use several values of mtry in one train model, (e.g. tuneGrid =
@@ -35,12 +63,14 @@ caretStack <- function(all.models, ...){
   return(out) 
 }
 
-#' Make predictions from a caretStack. This function passes the data to each function in 
+#' @title Make predictions from a caretStack
+#' @description Make predictions from a caretStack. This function passes the data to each function in 
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
-#' @param ensemble a caretStack to make predictions from.
+#' @param ensemble a  \code{\linkS4class{caretStack}} to make predictions from.
 #' @param ... arguments (including newdata) to pass to predict.train.
 #' @export
+#' @method predict caretStack
 predict.caretStack <- function(ensemble, newdata=NULL, ...){
   #TODO: grab type argument
   #TODO: rename my "type" variable
