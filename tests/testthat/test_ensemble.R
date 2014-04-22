@@ -1,5 +1,7 @@
 
 context("Does ensembling and prediction work?")
+library(caret)
+library(randomForest)
 
 test_that("We can ensemble regression models", {
   load("../../data/models_reg.RData")
