@@ -16,4 +16,7 @@ Description: This package consists primarily of one function: caretEnsemble.
 Depends:
     R (>= 2.14.0),
     caret
+Suggests:
+    testthat,
+    randomForest
 License: GPL-2
