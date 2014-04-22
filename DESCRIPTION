@@ -17,13 +17,13 @@ Depends:
     R (>= 2.14.0),
     caret, 
     caTools
+Suggests:
+    testthat,
+    randomForest
 Imports: 
     boot, 
     methods,
     pbapply
-Suggests: 
-    testthat
-License: GPL-2
 Collate:
     'caretEnsemble.R'
     'optAUC.R'
@@ -31,3 +31,4 @@ Collate:
     'caretStack.R'
     'helper_functions.R'
     'caretList.R'
+License: GPL-2

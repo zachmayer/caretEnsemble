@@ -1,5 +1,7 @@
 
 context("Does stacking and prediction work?")
+library(caret)
+library(randomForest)
 
 test_that("We can stack regression models", {
   set.seed(96367)
