@@ -1,6 +1,6 @@
 \name{multiPredict}
 \alias{multiPredict}
-\title{Make a matrix of predictions from a list of caret models}
+\title{Create a matrix of predictions for each of the models in a list}
 \usage{
 multiPredict(list_of_models, type, newdata = NULL, ...)
 }
@@ -9,6 +9,8 @@ multiPredict(list_of_models, type, newdata = NULL, ...)
   predictions for}
 
   \item{type}{Classification or Regression}
+
+  \item{newdata}{a new data set to be predicted}
 
   \item{...}{additional arguments to pass to predict.train.
   DO NOT PASS the "type" argument.  Classsification models

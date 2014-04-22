@@ -1,15 +1,19 @@
-
-
-tuneList <- list(rf=list(tuneGrid=data.frame(.mtry=c(2,4,8,1))), 
-                           nnet=list(tuneLength=10), 
-                   knn=list(tuneLength=25))
-
+#' Extract the tuning parameters from a list provided by the user
+#' 
+#' @param x a list of tuning parameters and methods passed by the user
+#' @return A simple list of the tuning parameters
 tuneExtract <- function(x){
   tuneType <- paste(names(x))
   tunePar <- x[[1]]
   return(list(tuneType = tuneType, tunePar = tunePar))
 }
 
+#' Create uniform seeds across model fits to allow for ensembling
+#' 
+#' 
+#' @param ctrl a \code{\link{trainControl}} object passed by the user
+#' @param M the maximum number of resamples necessary
+#' @return A \code{\link{trainControl}} object with a new slot, seeds
 setSeeds <- function(ctrl, M){
   # M is the square of the tune-length
   B <- ctrl$number * ctrl$repeats
@@ -21,6 +25,13 @@ setSeeds <- function(ctrl, M){
   return(ctrl)
 }
 
+#' Create a list of several train models from the caret package
+#' 
+#' Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}} 
+#' function.
+#' 
+#' @param x a character vector of caret models to ensemble.
+#' @return A list of \code{\link{train}} objects
 tmpExtract <- function(x){
   if(is.null(names(x))){
     tmp <- 0
@@ -33,9 +44,21 @@ tmpExtract <- function(x){
   return(tmp)
 }
 
-# TODO: allow user to pass pre-specified seeds or extract random seeds
-# TODO: consider making a tuneList method to identify the seed structure and build seeds
-
+#' Create a list of several train models from the caret package
+#' 
+#' Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}} 
+#' function.
+#' 
+#' @param methodList a character vector of caret models to ensemble.
+#' @param control a \code{\link{trainControl}} object
+#' @param x a matrix of predictors
+#' @param y the dependent variable being predicted
+#' @param tuneList optional, a list of the length of \code{methodList} with the tuning parameters for each method
+#' @param baseSeed optional, to preserve reproducibility, a base seed to be used in the resampling randomization
+#' @param tuneLength optional, the length of tuning to be done
+#' @param ... additional arguments to pass to \code{\link{train}}
+#' @export
+#' @return A list of \code{\link{train}} objects
 buildModels <- function(methodList, control, x, y, tuneList = NULL, baseSeed = NULL, tuneLength = NULL, ...) {
   if(!missing(tuneList)){
     methodList <- names(tuneList)
@@ -84,3 +107,5 @@ buildModels <- function(methodList, control, x, y, tuneList = NULL, baseSeed = N
   }
   return(modelList)
 }
+# TODO: allow user to pass pre-specified seeds or extract random seeds
+# TODO: consider making a tuneList method to identify the seed structure and build seeds

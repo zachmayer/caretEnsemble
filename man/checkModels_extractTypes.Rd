@@ -1,6 +1,6 @@
 \name{checkModels_extractTypes}
 \alias{checkModels_extractTypes}
-\title{Check that a list of models are all train objects and are ready to be ensembled together}
+\title{Check train models and extract their types}
 \usage{
 checkModels_extractTypes(list_of_models)
 }

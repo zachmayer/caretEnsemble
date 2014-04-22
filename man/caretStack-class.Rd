@@ -1,36 +1,16 @@
 \docType{class}
-\name{caretStack}
-\alias{caretStack}
+\name{caretStack-class}
+\alias{caretStack-class}
 \title{Class "caretStack" of ensembled train objects from the caret package}
-\usage{
-caretStack(all.models, ...)
-
-caretStack(all.models, ...)
-}
-\arguments{
-  \item{all.models}{a list of caret models to ensemble.}
-
-  \item{...}{additional arguments to pass to the
-  optimization function}
-}
-\value{
-S3 caretStack object
-}
 \description{
 Class "caretStack" of ensembled train objects from the
 caret package
-
-Find a good linear combination of several classification or
-regression models, using either linear regression, elastic
-net regression, or greedy optimization.
 }
 \details{
 The object has the following items \itemize{ \item{models -
 a list of the original models to be ensembled}
 \item{ens_model - a \code{\link{train}} object} \item{error
 - the final accuracy metric of the ensembled models} }
-
-Check the models, and make a matrix of obs and preds
 }
 \section{Objects from the Class}{
   Objects are created by calls to \code{\link{caretStack}}.
@@ -38,9 +18,6 @@ Check the models, and make a matrix of obs and preds
 \examples{
 showClass("caretEnsemble")
 methods(class="caretEnsemble")
-}
-\references{
-\url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 }
 \seealso{
 \code{\link{caretEnsemble}}

@@ -110,7 +110,7 @@ glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
 
 nestedList <- list(glm1, glm2, glm3, glm4)
 ensNest <- caretEnsemble(nestedList, iter=2000)
-pred.nest1 <- predict(ensNest, newdata=testC[, c(1:17)])
+pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
 pred.nest1a <- predict(ensNest, testC[, c(1:17)])
 pred.nest2 <- predict(ensNest, keepNA=FALSE, testC[, c(1:17)])
 pred.nestTrain_a <- predict(ensNest, keepNA = FALSE)

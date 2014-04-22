@@ -1,6 +1,6 @@
 \name{checkPreds}
 \alias{checkPreds}
-\title{Check that a list of predictions from caret models are all valid}
+\title{Check predictions}
 \usage{
 checkPreds(list_of_models)
 }

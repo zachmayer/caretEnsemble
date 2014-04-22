@@ -1,0 +1,8 @@
+TODO:
+
+- glmnetOpt
+- greedOptROC
+- lmOpt
+- checkPreds
+- Add progressbar argument and move optFUN to an all.models control argument
+- Add progressbar argument and move optFUN to an all.models control argument

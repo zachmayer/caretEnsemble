@@ -1,6 +1,6 @@
 \name{extractBestPreds}
 \alias{extractBestPreds}
-\title{Extract predictions for the best tune from a list of caret models}
+\title{Extract the best predictions from a list of train objects}
 \usage{
 extractBestPreds(list_of_models)
 }

@@ -4,11 +4,11 @@
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 weights to get a single, combined vector of predictions.}
 \usage{
-\method{predict}{caretEnsemble}(ensemble, keepNA = TRUE, ...)
+\method{predict}{caretEnsemble}(object, keepNA = TRUE, ...)
 }
 \arguments{
-  \item{ensemble}{a caretEnsemble to make predictions
-  from.}
+  \item{object}{a \code{\linkS4class{caretEnsemble}} to
+  make predictions from.}
 
   \item{keepNA}{a logical indicating whether predictions
   should be made for all cases where sufficient data exists
