@@ -14,6 +14,7 @@ test <- twoClassSim(n = 1500, intercept = -7, linearVars = 3,
 # Specify controls
 myControl = trainControl(method = "cv", number = 3, repeats = 1, 
                          p = 0.75, savePrediction = TRUE, 
+                         summaryFunction = twoClassSummary,
                          classProbs = TRUE, returnResamp = "final", 
                          returnData = TRUE, verboseIter = FALSE)
 
@@ -27,7 +28,7 @@ test1 <- buildModels(methodList = c("knn", "glm"), control = myControl,
 # Simple 4 method list
 test2 <- buildModels(methodList = c("knn", "glm", "treebag", "nnet"), control = myControl, 
                      x = train[, -23], 
-                     y = train[, "Class"])
+                     y = train[, "Class"], metric = "ROC")
 
 ens2 <- caretEnsemble(test2)
 summary(ens2)

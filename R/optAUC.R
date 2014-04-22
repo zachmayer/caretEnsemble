@@ -1,11 +1,12 @@
-
-#' TODO
-#' @param X
-#' @param Y
-#' @param iter
+#' Greedy optimization of the area under the curve
+#' @description This algorithm optimizes the area under the curve for classifcation models
+#' @param X the matrix of predictors
+#' @param Y the dependent variable
+#' @param iter an integer for the number of iterations
+#' @return A numeric of the weights for each model
 #' @export
 greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
-  require('caTools')
+  #require('caTools')
 
   if(is.character(Y)){
     Y <- factor(Y)

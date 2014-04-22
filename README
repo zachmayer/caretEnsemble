@@ -7,5 +7,6 @@ See also the DESCRIPTION file.
 Install with:
 library(devtools)
 library(testthat)
-install_github('caretEnsemble', 'zachmayer')
-test_package('caretEnsemble')
+install_github('zachmayer/caretEnsemble') #Master branch (currently has no tests)
+#install_github('zachmayer/caretEnsemble', ref = 'Dev') #Dev branch
+#test_package('caretEnsemble') #Run tests

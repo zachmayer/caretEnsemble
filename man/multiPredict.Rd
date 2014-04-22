@@ -1,8 +1,7 @@
 \name{multiPredict}
 \alias{multiPredict}
-\title{Make a matrix of predictions from a list of caret models}
 \usage{
-  multiPredict(list_of_models, type, newdata = NULL, ...)
+multiPredict(list_of_models, type, newdata = NULL, ...)
 }
 \arguments{
   \item{list_of_models}{a list of caret models to make
@@ -16,6 +15,6 @@
   models will return "raw".}
 }
 \description{
-  Make a matrix of predictions from a list of caret models
+Make a matrix of predictions from a list of caret models
 }
 
