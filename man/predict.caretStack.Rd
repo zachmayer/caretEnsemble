@@ -4,7 +4,7 @@
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 weights to get a single, combined vector of predictions.}
 \usage{
-  predict.caretStack(ensemble, newdata = NULL, ...)
+\method{predict}{caretStack}(ensemble, newdata = NULL, ...)
 }
 \arguments{
   \item{ensemble}{a caretStack to make predictions from.}
@@ -13,10 +13,9 @@ weights to get a single, combined vector of predictions.}
   predict.train.}
 }
 \description{
-  Make predictions from a caretStack. This function passes
-  the data to each function in turn to make a matrix of
-  predictions, and then multiplies that matrix by the
-  vector of weights to get a single, combined vector of
-  predictions.
+Make predictions from a caretStack. This function passes
+the data to each function in turn to make a matrix of
+predictions, and then multiplies that matrix by the vector
+of weights to get a single, combined vector of predictions.
 }
 

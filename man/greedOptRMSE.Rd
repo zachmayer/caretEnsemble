@@ -2,7 +2,7 @@
 \alias{greedOptRMSE}
 \title{TODO}
 \usage{
-  greedOptRMSE(X, Y, iter = 100L)
+greedOptRMSE(X, Y, iter = 100L)
 }
 \arguments{
   \item{X}{}
@@ -12,6 +12,6 @@
   \item{iter}{}
 }
 \description{
-  TODO
+TODO
 }
 

@@ -17,9 +17,3 @@ Depends:
     R (>= 2.14.0),
     caret
 License: GPL-2
-Collate:
-    'caretEnsemble.R'
-    'optAUC.R'
-    'OptRMSE.R'
-    'caretStack.R'
-    'helper_functions.R'
