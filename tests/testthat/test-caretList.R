@@ -2,6 +2,7 @@
 
 set.seed(442)
 library(caret)
+library(randomForest)
 train <- twoClassSim(n = 1000, intercept = -8, linearVars = 3, 
                      noiseVars = 10, corrVars = 4, corrValue = 0.6)
 test <- twoClassSim(n = 1500, intercept = -7, linearVars = 3, 
