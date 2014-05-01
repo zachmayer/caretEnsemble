@@ -27,7 +27,7 @@ test1 <- buildModels(methodList = c("knn", "glm"), control = myControl,
 
 
 # Simple 4 method list
-test2 <- buildModels(methodList = c("knn", "glm", "treebag", "nnet"), control = myControl, 
+test2 <- buildModels(methodList = c("knn", "glm", "treebag"), control = myControl, 
                      x = train[, -23], 
                      y = train[, "Class"], metric = "ROC")
 
@@ -38,6 +38,22 @@ summary(ens2)
 test2 <- buildModels(methodList = c("knn", "glm", "treebag", "nnet"), control = myControl, 
                      x = train[, -23], 
                      y = train[, "Class"], tuneLength = 4, baseSeed = 3252)
+
+
+# User specified tuneLength 
+# Simple two method list
+test1 <- buildModels(methodList = c("knn", "glm"), control = myControl, 
+                     x = train[, -23], tuneLength = 9, 
+                     y = train[, "Class"])
+
+
+# Simple 4 method list
+test2 <- buildModels(methodList = c("knn", "nnet", "treebag"), control = myControl, 
+                     x = train[, -23], tuneLength = 15, 
+                     y = train[, "Class"], metric = "ROC")
+
+
+# User specified metric
 
 
 
