@@ -34,6 +34,68 @@ test2 <- buildModels(methodList = c("knn", "glm", "treebag"), control = myContro
 ens2 <- caretEnsemble(test2)
 summary(ens2)
 
+test3 <- buildModels(methodList = c("pda", "lda2", "multinom", "bagFDA", "nnet", "gbm"), 
+                     control = myControl, 
+                     x = train[, -23], 
+                     y = train[ , "Class"], metric = "ROC")
+
+ens3 <- caretEnsemble(test3)
+summary(ens3)
+
+mypreds <- predict(ens3)
+
+mypreds <- predict(ens3, keepNA = TRUE, newdata = train[1:50, -23])
+
+"pls"      "lda2"     "multinom" "bagFDA"   "nnet"     "gbm"     
+
+
+predict2.caretEnsemble <- function(object, keepNA = TRUE, se = TRUE, ...){
+  type <- checkModels_extractTypes(object$models)
+  preds <- multiPredict(object$models, type, ...)
+  if(keepNA == TRUE){
+    message("Predictions being made only for cases with complete data")
+    out <- as.numeric(preds %*% object$weights)
+  } else {
+    message("Predictions being made only from models with available data")
+    conf <- ifelse(is.na(preds), NA, 1)
+    conf <- sweep(conf, MARGIN=2, object$weights,`*`)
+    conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
+    conf <- t(conf); conf[is.na(conf)] <- 0
+    point <- apply(point, 1, function(x){weighted.mean(x, w=object$weights, na.rm=TRUE)})
+    out <- list(predicted = point, weight = conf)
+  }
+  if(se = FALSE){
+   return(out) 
+  } else{
+    se <- 
+  }
+  return(out)
+}
+
+
+
+# calculate SE
+
+## Weighted sd
+## From Hmisc wtd.var
+wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = TRUE) {
+  if (!length(weights)) {
+    if (na.rm) 
+      x <- x[!is.na(x)]
+    return(sd(x))
+  }
+  if (na.rm) {
+    s <- !is.na(x + weights)
+    x <- x[s]
+    weights <- weights[s]
+  }
+  if (normwt) 
+    weights <- weights * length(x)/sum(weights)
+  xbar <- sum(weights * x)/sum(weights)
+  out <- sqrt(sum(weights * ((x - xbar)^2))/(sum(weights) - 1))
+  return(out)
+}
+
 
 test2 <- buildModels(methodList = c("knn", "glm", "treebag", "nnet"), control = myControl, 
                      x = train[, -23], 

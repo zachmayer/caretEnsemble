@@ -127,15 +127,15 @@ makePredObsMatrix <- function(list_of_models){
 #' the "type" argument.  Classsification models will returns probabilities
 #' if possible, and regression models will return "raw".
 #' @export
-multiPredict <- function(list_of_models, type, newdata=NULL, ...){
+multiPredict <- function(list_of_models, type, ...){
   #TODO: Add progressbar argument
   require('pbapply')
   
   preds <- pbsapply(list_of_models, function(x){
     if (type=='Classification' & x$control$classProbs){
-      predict(x, type='prob', newdata=newdata, ...)[,2]
+      predict(x, type='prob', ...)[,2]
     } else {
-      predict(x, type='raw', newdata=newdata, ...)
+      predict(x, type='raw', ...)
     }
   })
   colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)

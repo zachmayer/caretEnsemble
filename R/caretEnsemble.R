@@ -154,3 +154,25 @@ extractModRes <- function(ensemble){
   return(modRes)
 }
 
+#' @title Calculate the variable importance of variables in a caretEnsemble.
+#' @param x a \code{\linkS4class{caretEnsemble}} to make predictions from.
+#' @export
+varImp.caretEnsemble <- function(x){
+  require(digest)
+  a <- lapply(x$models, varImp)
+  # drop duplicates
+  a <- a[!duplicated(lapply(a, digest))]
+  # data.frame
+  dat <- rbind(as.data.frame(lapply(a, "[[", 1)))
+  # drop duplicates here
+  dat <- dat[!duplicated(lapply(dat, summary))]
+  names(dat) <- names(a)
+  #normalize
+  dat <- apply(dat, 2, function(d) d / sum(d) * 100)
+  wghts <- x$weights[names(x$weights) %in% names(a)]
+  #weight
+  wght <- apply(dat, 1, function(d) weighted.mean(d, w = wghts))
+  dat <- cbind(dat, wght)
+  dat <- as.data.frame(dat)
+  return(dat)
+}
