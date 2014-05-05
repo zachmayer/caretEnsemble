@@ -55,24 +55,32 @@ predict2.caretEnsemble <- function(object, keepNA = TRUE, se = TRUE, ...){
   if(keepNA == TRUE){
     message("Predictions being made only for cases with complete data")
     out <- as.numeric(preds %*% object$weights)
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
+    se.tmp <- 2 * se.tmp^2
   } else {
     message("Predictions being made only from models with available data")
     conf <- ifelse(is.na(preds), NA, 1)
     conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
-    point <- apply(point, 1, function(x){weighted.mean(x, w=object$weights, na.rm=TRUE)})
-    out <- list(predicted = point, weight = conf)
+    est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm=TRUE)})
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm=TRUE)
+    se.tmp <- 2 * se.tmp^2
+    out <- list(predicted = est, weight = conf)
   }
-  if(se = FALSE){
+  if(se == FALSE){
    return(out) 
   } else{
-    se <- 
+    if(keepNA == FALSE){
+      return(list(predicted = est, se = se.tmp, weight = conf))
+    }
+   return(cbind(out, se.tmp))
   }
-  return(out)
 }
 
+mypreds <- predict2.caretEnsemble(ens3, keepNA = TRUE, se = TRUE)
 
+mypreds <- predict2.caretEnsemble(ens3, keepNA = FALSE, se = TRUE)
 
 # calculate SE
 
