@@ -168,7 +168,7 @@ extractModRes <- function(ensemble){
 }
 
 #' @title Calculate the variable importance of variables in a caretEnsemble.
-#' @param x a \code{\linkS4class{caretEnsemble}} to make predictions from.
+#' @param x a \code{caretEnsemble} to make predictions from.
 #' @export
 varImp.caretEnsemble <- function(x){
   require(digest)

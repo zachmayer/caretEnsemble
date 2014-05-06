@@ -6,7 +6,7 @@
 \method{varImp}{caretEnsemble}(x)
 }
 \arguments{
-\item{x}{a \code{\linkS4class{caretEnsemble}} to make predictions from.}
+\item{x}{a \code{caretEnsemble} to make predictions from.}
 }
 \description{
 Calculate the variable importance of variables in a caretEnsemble.
