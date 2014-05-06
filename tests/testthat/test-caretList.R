@@ -27,17 +27,58 @@ test1 <- buildModels(methodList = c("knn", "glm"), control = myControl,
 
 
 # Simple 4 method list
-test2 <- buildModels(methodList = c("knn", "glm", "treebag", "nnet"), control = myControl, 
+test2 <- buildModels(methodList = c("knn", "glm", "treebag"), control = myControl, 
                      x = train[, -23], 
                      y = train[, "Class"], metric = "ROC")
 
 ens2 <- caretEnsemble(test2)
 summary(ens2)
 
+test3 <- buildModels(methodList = c("pda", "lda2", "multinom", "bagFDA", "nnet", "gbm"), 
+                     control = myControl, 
+                     x = train[, -23], 
+                     y = train[ , "Class"], metric = "ROC")
+
+ens3 <- caretEnsemble(test3)
+summary(ens3)
+
+mypreds <- predict(ens3)
+
+mypreds <- predict(ens3, keepNA = TRUE, newdata = train[1:50, -23])
+
+
+
+mypreds <- predict2.caretEnsemble(ens3, keepNA = TRUE, se = TRUE)
+
+mypreds <- predict2.caretEnsemble(ens3, keepNA = FALSE, se = TRUE)
+
+mypreds <- predict2.caretEnsemble(ens3, keepNA = TRUE, se = FALSE)
+
+mypreds <- predict2.caretEnsemble(ens3, keepNA = FALSE, se = FALSE)
+
+
+# calculate SE
+
 
 test2 <- buildModels(methodList = c("knn", "glm", "treebag", "nnet"), control = myControl, 
                      x = train[, -23], 
                      y = train[, "Class"], tuneLength = 4, baseSeed = 3252)
+
+
+# User specified tuneLength 
+# Simple two method list
+test1 <- buildModels(methodList = c("knn", "glm"), control = myControl, 
+                     x = train[, -23], tuneLength = 9, 
+                     y = train[, "Class"])
+
+
+# Simple 4 method list
+test2 <- buildModels(methodList = c("knn", "nnet", "treebag"), control = myControl, 
+                     x = train[, -23], tuneLength = 15, 
+                     y = train[, "Class"], metric = "ROC")
+
+
+# User specified metric
 
 
 

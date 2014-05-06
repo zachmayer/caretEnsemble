@@ -91,26 +91,39 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @param object a \code{\linkS4class{caretEnsemble}} to make predictions from.
 #' @param keepNA a logical indicating whether predictions should be made for all 
 #' cases where sufficient data exists or only for complete cases across all models
+#' @param se logical, should prediction errors be produced?
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments 
 #' must be named
 #' @export
-predict.caretEnsemble <- function(object, keepNA = TRUE, ...){
+predict.caretEnsemble <- function(object, keepNA = TRUE, se = TRUE, ...){
   type <- checkModels_extractTypes(object$models)
   preds <- multiPredict(object$models, type, ...)
   if(keepNA == TRUE){
     message("Predictions being made only for cases with complete data")
     out <- as.numeric(preds %*% object$weights)
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
+    se.tmp <- 2 * se.tmp^2
   } else {
     message("Predictions being made only from models with available data")
     conf <- ifelse(is.na(preds), NA, 1)
     conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
-    preds <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm=TRUE)})
-    out <- list(predicted = preds, weight = conf)
+    est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm=TRUE)})
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm=TRUE)
+    se.tmp <- 2 * se.tmp^2
+    out <- list(predicted = est, weight = conf)
   }
-  return(out)
+  if(se == FALSE){
+    return(out) 
+  } else{
+    if(keepNA == FALSE){
+      return(list(preds = data.frame(pred = est, se = se.tmp), weight = conf))
+    }
+    return(data.frame(pred = out, se = se.tmp))
+  }
 }
+
 
 
 #' @title Summarize the results of caretEnsemble for the user.
@@ -154,3 +167,25 @@ extractModRes <- function(ensemble){
   return(modRes)
 }
 
+#' @title Calculate the variable importance of variables in a caretEnsemble.
+#' @param x a \code{caretEnsemble} to make predictions from.
+#' @export
+varImp.caretEnsemble <- function(x){
+  require(digest)
+  a <- lapply(x$models, varImp)
+  # drop duplicates
+  a <- a[!duplicated(lapply(a, digest))]
+  # data.frame
+  dat <- rbind(as.data.frame(lapply(a, "[[", 1)))
+  # drop duplicates here
+  dat <- dat[!duplicated(lapply(dat, summary))]
+  names(dat) <- names(a)
+  #normalize
+  dat <- apply(dat, 2, function(d) d / sum(d) * 100)
+  wghts <- x$weights[names(x$weights) %in% names(a)]
+  #weight
+  wght <- apply(dat, 1, function(d) weighted.mean(d, w = wghts))
+  dat <- cbind(dat, wght)
+  dat <- as.data.frame(dat)
+  return(dat)
+}

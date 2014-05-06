@@ -87,7 +87,8 @@ buildModels <- function(methodList, control, x, y, tuneList = NULL, baseSeed = N
   for(i in methodList){
     set.seed(baseSeed)
     if(missing(tuneList)){
-      modelList[[i]] <- train(x = x, y=y, method = i, trControl = ctrl, ...)
+      modelList[[i]] <- train(x = x, y=y, method = i, trControl = ctrl, 
+                              tuneLength = tl, ...)
     } else {
       #stop("Not yet written")
       tmpTune <- tuneExtract(tuneList[[i]])

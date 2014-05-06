@@ -127,18 +127,45 @@ makePredObsMatrix <- function(list_of_models){
 #' the "type" argument.  Classsification models will returns probabilities
 #' if possible, and regression models will return "raw".
 #' @export
-multiPredict <- function(list_of_models, type, newdata=NULL, ...){
+multiPredict <- function(list_of_models, type, ...){
   #TODO: Add progressbar argument
   require('pbapply')
   
   preds <- pbsapply(list_of_models, function(x){
     if (type=='Classification' & x$control$classProbs){
-      predict(x, type='prob', newdata=newdata, ...)[,2]
+      predict(x, type='prob', ...)[,2]
     } else {
-      predict(x, type='raw', newdata=newdata, ...)
+      predict(x, type='raw', ...)
     }
   })
   colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
   
   return(preds)
+}
+
+
+#' @title Calculate a weighted standard deviation
+#' @description Used to weight deviations among ensembled model preditions
+#' 
+#' @param x a vector of numerics
+#' @param weights a vector of weights equal to length of x
+#' @param normwt  a logical indicating whether the weights should be normalized to 1
+#' @param na.rm a logical indicating how to handle missing values
+#' @export
+wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = TRUE) {
+  if (!length(weights)) {
+    if (na.rm) 
+      x <- x[!is.na(x)]
+    return(sd(x))
+  }
+  if (na.rm) {
+    s <- !is.na(x + weights)
+    x <- x[s]
+    weights <- weights[s]
+  }
+  if (normwt) 
+    weights <- weights * length(x)/sum(weights)
+  xbar <- sum(weights * x)/sum(weights)
+  out <- sqrt(sum(weights * ((x - xbar)^2))/(sum(weights) - 1))
+  return(out)
 }
