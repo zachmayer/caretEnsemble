@@ -90,12 +90,16 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' weights to get a single, combined vector of predictions.
 #' @param object a \code{\link{caretEnsemble}} to make predictions from.
 #' @param keepNA a logical indicating whether predictions should be made for all 
-#' cases where sufficient data exists or only for complete cases across all models
-#' @param se logical, should prediction errors be produced?
+#' cases where sufficient data exists or only for complete cases across all models. When 
+#' TRUE this does not predict for missing values. When FALSE, missing values are overwritten 
+#' with predictions where possible. 
+#' @param se logical, should prediction errors be produced? Default is false. 
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments 
 #' must be named
 #' @export
-predict.caretEnsemble <- function(object, keepNA = TRUE, se = TRUE, ...){
+predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
+  # Default se to FALSE
+  if(missing(se)){se <- FALSE}
   type <- checkModels_extractTypes(object$models)
   preds <- multiPredict(object$models, type, ...)
   if(keepNA == TRUE){
@@ -132,6 +136,10 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = TRUE, ...){
 #' @export
 summary.caretEnsemble <- function(object, ...){
   types <- names(object$models)
+  if(is.null(types)){
+    types <- as.vector(strsplit(paste0("model", 1:length(object$models)), split = " ", 
+                                fixed = TRUE), mode = "character")
+  }
   types <- paste(types, collapse = ", ")
   wghts <- object$weights
   metric <- names(object$error)
@@ -151,18 +159,22 @@ summary.caretEnsemble <- function(object, ...){
 #' @export
 extractModRes <- function(ensemble){
   if(class(ensemble) != "caretEnsemble") stop("extractModRes requires a caretEnsemble object")
-  modRes <- data.frame(method = names(ensemble$models), 
-                       metric = NA, 
-                       metricSD = NA)
-  
-  for(i in names(ensemble$models)){
+  methods <- names(ensemble$models)
+  if(is.null(methods)){
+    methods <- as.vector(strsplit(paste0("model", 1:length(ensemble$models)), split = " ", 
+                                fixed = TRUE), mode = "character")
+  } #sanitize names
+    modRes <- data.frame(method = methods, 
+                       metric = 0, 
+                       metricSD = 0, stringsAsFactors = FALSE) # prefill data frame
+    for(i in 1:length(ensemble$models)){
     dat <- ensemble$models[[i]]$results
     metric <- ensemble$models[[i]]$metric
     SDVAR <- paste0(ensemble$models[[i]]$metric, "SD")
     best <- max(dat[, metric])
     bestSD <- max(dat[dat[, metric] == best, SDVAR])
-    modRes[modRes[, "method"] == i, "metric"] <- best
-    modRes[modRes[, "method"] == i, "metricSD"] <- bestSD
+    modRes[i,  "metric"] <- best
+    modRes[i, "metricSD"] <- bestSD
   }
   return(modRes)
 }

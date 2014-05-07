@@ -111,8 +111,8 @@ glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
 nestedList <- list(glm1, glm2, glm3, glm4)
 ensNest <- caretEnsemble(nestedList, iter=2000)
 pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
-pred.nest1a <- predict(ensNest, testC[, c(1:17)])
-pred.nest2 <- predict(ensNest, keepNA=FALSE, testC[, c(1:17)])
+pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)])
+pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)])
 pred.nestTrain_a <- predict(ensNest, keepNA = FALSE)
 pred.nestTrain_b <- predict(ensNest, keepNA = TRUE)
 
@@ -134,3 +134,11 @@ test_that("We can ensemble models and handle missingness across predictors", {
 
 
 ## Test generics summary and predict
+
+summary(ensNest)
+
+pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se = TRUE)
+pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
+pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)], se = TRUE)
+pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
+
