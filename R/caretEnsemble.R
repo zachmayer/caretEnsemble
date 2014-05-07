@@ -88,7 +88,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' Make predictions from a caretEnsemble. This function passes the data to each function in 
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
-#' @param object a \code{\linkS4class{caretEnsemble}} to make predictions from.
+#' @param object a \code{\link{caretEnsemble}} to make predictions from.
 #' @param keepNA a logical indicating whether predictions should be made for all 
 #' cases where sufficient data exists or only for complete cases across all models
 #' @param se logical, should prediction errors be produced?
@@ -127,7 +127,7 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = TRUE, ...){
 
 
 #' @title Summarize the results of caretEnsemble for the user.
-#' @param object a \code{\linkS4class{caretEnsemble}} to make predictions from.
+#' @param object a \code{\link{caretEnsemble}} to make predictions from.
 #' @param ... optional additional parameters. 
 #' @export
 summary.caretEnsemble <- function(object, ...){
@@ -168,11 +168,17 @@ extractModRes <- function(ensemble){
 }
 
 #' @title Calculate the variable importance of variables in a caretEnsemble.
-#' @param x a \code{caretEnsemble} to make predictions from.
+#' @description This function wraps the \code{\link{varImp}} function in the 
+#' \code{caret} package to provide a weighted estimate of the importance of 
+#' variables in the ensembled models in a \code{caretEnsemble} object. Variable 
+#' importance is calculated and then averaged by the weight of the overall model 
+#' in the ensembled object. 
+#' @param object a \code{caretEnsemble} to make predictions from.
+#' @param ... additional arguments to pass to \code{\link{varImp}}
 #' @export
-varImp.caretEnsemble <- function(x){
+varImp.caretEnsemble <- function(object, ...){
   require(digest)
-  a <- lapply(x$models, varImp)
+  a <- lapply(object$models, varImp)
   # drop duplicates
   a <- a[!duplicated(lapply(a, digest))]
   # data.frame

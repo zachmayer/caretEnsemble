@@ -3,12 +3,18 @@
 \alias{varImp.caretEnsemble}
 \title{Calculate the variable importance of variables in a caretEnsemble.}
 \usage{
-\method{varImp}{caretEnsemble}(x)
+\method{varImp}{caretEnsemble}(object, ...)
 }
 \arguments{
-\item{x}{a \code{caretEnsemble} to make predictions from.}
+\item{object}{a \code{caretEnsemble} to make predictions from.}
+
+\item{...}{additional arguments to pass to \code{\link{varImp}}}
 }
 \description{
-Calculate the variable importance of variables in a caretEnsemble.
+This function wraps the \code{\link{varImp}} function in the
+\code{caret} package to provide a weighted estimate of the importance of
+variables in the ensembled models in a \code{caretEnsemble} object. Variable
+importance is calculated and then averaged by the weight of the overall model
+in the ensembled object.
 }
 

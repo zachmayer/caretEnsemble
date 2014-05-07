@@ -10,11 +10,9 @@ multiPredict(list_of_models, type, ...)
 
 \item{type}{Classification or Regression}
 
-\item{newdata}{a new data set to be predicted}
-
-\item{...}{additional arguments to pass to predict.train.  DO NOT PASS
-the "type" argument.  Classsification models will returns probabilities
-if possible, and regression models will return "raw".}
+\item{...}{additional arguments to pass to predict.train. Pass the \code{newdata}
+argument here, DO NOT PASS the "type" argument.  Classification models will
+return probabilities if possible, and regression models will return "raw".}
 }
 \description{
 Make a matrix of predictions from a list of caret models

@@ -8,7 +8,7 @@ weights to get a single, combined vector of predictions.}
 \method{predict}{caretEnsemble}(object, keepNA = TRUE, se = TRUE, ...)
 }
 \arguments{
-\item{object}{a \code{\linkS4class{caretEnsemble}} to make predictions from.}
+\item{object}{a \code{\link{caretEnsemble}} to make predictions from.}
 
 \item{keepNA}{a logical indicating whether predictions should be made for all
 cases where sufficient data exists or only for complete cases across all models}

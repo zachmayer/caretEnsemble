@@ -6,7 +6,7 @@
 \method{summary}{caretEnsemble}(object, ...)
 }
 \arguments{
-\item{object}{a \code{\linkS4class{caretEnsemble}} to make predictions from.}
+\item{object}{a \code{\link{caretEnsemble}} to make predictions from.}
 
 \item{...}{optional additional parameters.}
 }

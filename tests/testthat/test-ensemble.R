@@ -131,3 +131,6 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(length(pred.nest2$predicted[is.na(pred.nest2$predicted)])==0)
   expect_true(length(pred.nest1[is.na(pred.nest1)])>0)
 })
+
+
+## Test generics summary and predict
