@@ -7,7 +7,6 @@
 #' @param list_of_models a list of caret models to check
 #' @export
 checkModels_extractTypes <- function(list_of_models){
-  #require('caret')
   #TODO: Add helpful error messages
   #Check that we have a list of train models
   stopifnot(class(list_of_models)=='list')
@@ -49,9 +48,7 @@ checkModels_extractTypes <- function(list_of_models){
 #' @param list_of_models a list of caret models to extract predictions from
 #' @export
 extractBestPreds <- function(list_of_models){
-  
   #TODO: add an optional progress bar?
-  
   #Extract resampled predictions from each model
   modelLibrary <- lapply(list_of_models, function(x) {x$pred})
   
@@ -128,8 +125,6 @@ makePredObsMatrix <- function(list_of_models){
 #' @export
 multiPredict <- function(list_of_models, type, ...){
   #TODO: Add progressbar argument
-  require('pbapply')
-  
   preds <- pbsapply(list_of_models, function(x){
     if (type=='Classification' & x$control$classProbs){
       predict(x, type='prob', ...)[,2]

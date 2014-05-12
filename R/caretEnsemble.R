@@ -1,7 +1,8 @@
 setOldClass("train")
 
 ##' @title Class "caretEnsemble" of ensembled train objects from the caret package
-##'
+##' @docType class
+##' @exportClass
 ##' @description Ensembled model from input train objects. 
 ##' 
 ##' @section Objects from the Class: Objects are created by calls to
@@ -19,8 +20,7 @@ setOldClass("train")
 ##'
 ##' showClass("caretEnsemble")
 ##' methods(class="caretEnsemble")
-##' @export
-caretEnsemble <- setClass("caretEnsemble", representation(models = "list", 
+setClass("caretEnsemble", representation(models = "list", 
                                                   weights = "data.frame", 
                                           error = "numeric"),
                   S3methods=TRUE)

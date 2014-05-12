@@ -1,4 +1,5 @@
 ##' @title Class "caretStack" of ensembled train objects from the caret package
+##' @docType class
 ##' @section Objects from the Class: Objects are created by calls to
 ##' \code{\link{caretStack}}.
 ##' @details
@@ -14,8 +15,8 @@
 ##'
 ##' showClass("caretEnsemble")
 ##' methods(class="caretEnsemble")
-##' @export
-caretStack <- setClass("caretStack", representation(models = "list", 
+##' @exportClass
+setClass("caretStack", representation(models = "list", 
                                                     ens_model = "train", 
                                                           error = "numeric"),
                           S3methods=TRUE)
