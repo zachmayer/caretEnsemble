@@ -85,12 +85,11 @@ buildModels <- function(methodList, control, x, y, tuneList = NULL, baseSeed = N
   modelList <- sapply(methodList, function(x) NULL)
 
   for(i in methodList){
-    set.seed(baseSeed)
+    set.seed(baseSeed) # so splits are same across resamples
     if(missing(tuneList)){
       modelList[[i]] <- train(x = x, y=y, method = i, trControl = ctrl, 
                               tuneLength = tl, ...)
     } else {
-      #stop("Not yet written")
       tmpTune <- tuneExtract(tuneList[[i]])
       if(length(tmpTune$tuneType)==0){
         tmpTune$tuneType <- "tuneLength"
@@ -101,12 +100,10 @@ buildModels <- function(methodList, control, x, y, tuneList = NULL, baseSeed = N
       }
       modelList[[i]] <- eval(parse(text = paste("train(x = x, y=y, method = i,  
                                                 trControl = ctrl,", tmpTune$tuneType, 
-                                                " = tmpTune$tunePar)")))
+                                                " = tmpTune$tunePar, ...)")))
       tmpTune <- NULL; Tune <- NULL
     }
    
   }
   return(modelList)
 }
-# TODO: allow user to pass pre-specified seeds or extract random seeds
-# TODO: consider making a tuneList method to identify the seed structure and build seeds
