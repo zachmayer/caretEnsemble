@@ -23,7 +23,8 @@ Suggests:
 Imports: 
     boot, 
     methods,
-    pbapply
+    pbapply, 
+    digest
 Collate:
     'caretEnsemble.R'
     'optAUC.R'

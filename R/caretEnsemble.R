@@ -4,7 +4,6 @@ setOldClass("train")
 ##'
 ##' @description Ensembled model from input train objects. 
 ##' 
-##' @docType class
 ##' @section Objects from the Class: Objects are created by calls to
 ##' \code{\link{caretEnsemble}}.
 ##' @details
@@ -20,7 +19,7 @@ setOldClass("train")
 ##'
 ##' showClass("caretEnsemble")
 ##' methods(class="caretEnsemble")
-##' @exportClass
+##' @export
 caretEnsemble <- setClass("caretEnsemble", representation(models = "list", 
                                                   weights = "data.frame", 
                                           error = "numeric"),
@@ -44,7 +43,7 @@ caretEnsemble <- setClass("caretEnsemble", representation(models = "list",
 #' @param all.models a list of caret models to ensemble.
 #' @param optFUN the optimization function to use
 #' @param ... additional arguments to pass to the optimization function
-#' @return a \code{\linkS4class{caretEnsemble}} object
+#' @return a \code{\link{caretEnsemble}} object
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 #' @export
 caretEnsemble <- function(all.models, optFUN=NULL, ...){
@@ -189,7 +188,6 @@ extractModRes <- function(ensemble){
 #' @param ... additional arguments to pass to \code{\link{varImp}}
 #' @export
 varImp.caretEnsemble <- function(object, ...){
-  require(digest)
   a <- lapply(object$models, varImp)
   # drop duplicates
   a <- a[!duplicated(lapply(a, digest))]
@@ -200,7 +198,7 @@ varImp.caretEnsemble <- function(object, ...){
   names(dat) <- names(a)
   #normalize
   dat <- apply(dat, 2, function(d) d / sum(d) * 100)
-  wghts <- x$weights[names(x$weights) %in% names(a)]
+  wghts <- object$weights[names(object$weights) %in% names(a)]
   #weight
   wght <- apply(dat, 1, function(d) weighted.mean(d, w = wghts))
   dat <- cbind(dat, wght)
