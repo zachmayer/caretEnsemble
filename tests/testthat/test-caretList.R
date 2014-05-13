@@ -23,7 +23,7 @@ myControl = trainControl(method = "cv", number = 3, repeats = 1,
 # Simple two method list
 test1 <- buildModels(methodList = c("knn", "glm"), control = myControl, 
                      x = train[, -23], 
-                     y = train[, "Class"])
+                     y = train[, "Class"], metric = "ROC")
 
 
 # Simple 4 method list
@@ -31,7 +31,7 @@ test2 <- buildModels(methodList = c("knn", "glm", "treebag"), control = myContro
                      x = train[, -23], 
                      y = train[, "Class"], metric = "ROC")
 
-test3 <- buildModels(methodList = c("pda", "lda2", "multinom", "bagFDA", "nnet", "gbm"), 
+test3 <- buildModels(methodList = c("pda", "knn", "glm"), 
                      control = myControl, 
                      x = train[, -23], 
                      y = train[ , "Class"], metric = "ROC")
@@ -43,16 +43,12 @@ test_that("buildModels returns a list", {
   expect_is(test3, "list")
 })
 
-ens1 <- caretEnsemble(test1)
-ens2 <- caretEnsemble(test2)
-ens3 <- caretEnsemble(test3)
-
 
 context("Test that buildModels can be ensembled")
 test_that("buildModels objects can be ensembled", {
-  expect_is(ens1, "caretEnsemble")
-  expect_is(ens2, "caretEnsemble")
-  expect_is(ens3, "caretEnsemble")
+  expect_is(caretEnsemble(test1), "caretEnsemble")
+  expect_is(caretEnsemble(test2), "caretEnsemble")
+  expect_is(caretEnsemble(test3), "caretEnsemble")
 })
 
 
@@ -64,12 +60,12 @@ myControl = trainControl(method = "cv", number = 3, repeats = 1,
                          returnData = TRUE, verboseIter = FALSE)
 
 
-test2 <- buildModels(methodList = c("knn", "glm", "multinom"), control = myControl, 
+test2 <- buildModels(methodList = c("knn", "multinom", "glm"), control = myControl, 
                      x = train[, -23], 
                      y = train[, "Class"], tuneLength = 4, baseSeed = 3252, 
                      metric = "Accuracy")
 
-test1 <- buildModels(methodList = c("knn", "glm", "multinom"), control = myControl, 
+test1 <- buildModels(methodList = c("knn", "multinom", "glm"), control = myControl, 
                      x = train[, -23], 
                      y = train[, "Class"], tuneLength = 7, baseSeed = 3252, 
                      metric = "Kappa")
@@ -137,12 +133,11 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   expect_equal(nrow(test3a[[1]]$results), 1)
   expect_equal(nrow(test3a[[2]]$results), 16)
   expect_equal(nrow(test3a[[3]]$results), 2)
-  expect_equal(nrow(test3a[[3]]$results), 3)
+  expect_equal(nrow(test3a[[4]]$results), 3)
 })
 
 
-rm(ens2, ens1, myEns1, myEns2, myEns2a, myEns3a, test1, test2, test2a, test3a, 
-   myEns)
+rm(myEns1, myEns2, myEns2a, myEns3a, test1, test2, test2a, test3a)
 
 context("Test regression")
 # Throws warning, but we're good
@@ -158,7 +153,7 @@ test1 <- buildModels(methodList = c("glm", "lm"), control = myControl2,
                      y = train[, 1])
 
 
-test2 <- buildModels(methodList = c("glm", "treebag", "nnet", "lm"), control = myControl2, 
+test2 <- buildModels(methodList = c("glm", "treebag", "lm"), control = myControl2, 
                      x = train[, c(-23, -1)], 
                      y = train[, 1])
 
