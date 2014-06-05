@@ -37,14 +37,14 @@ test3 <- buildModels(methodList = c("pda", "knn", "glm"),
                      y = train[ , "Class"], metric = "ROC")
 
 ## make seeds fail
-fitControl <- trainControl(method='cv', number = 5, savePredictions = FALSE, 
+fitControl <- trainControl(method='cv', number = 5, savePredictions = TRUE, 
                            classProbs=TRUE, summaryFunction = twoClassSummary)
 
 out <- buildModels(methodList = c("hda", "multinom"), control = fitControl, 
                    x = train[, -23], 
                    y = train[ , "Class"], metric = "ROC",
                    tuneLength = 4, baseSeed = 1204)
-
+out.ens <- caretEnsemble(out)
 
 context("Test that buildModels makes model lists")
 test_that("buildModels returns a list", {
