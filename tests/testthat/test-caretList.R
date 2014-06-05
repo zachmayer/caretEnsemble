@@ -31,20 +31,20 @@ test2 <- buildModels(methodList = c("knn", "glm", "treebag"), control = myContro
                      x = train[, -23], 
                      y = train[, "Class"], metric = "ROC")
 
-test3 <- buildModels(methodList = c("pda", "knn", "glm"), 
+test3 <- buildModels(methodList = c("lda", "knn", "glm"), 
                      control = myControl, 
                      x = train[, -23], 
                      y = train[ , "Class"], metric = "ROC")
 
 ## make seeds fail
-fitControl <- trainControl(method='cv', number = 5, savePredictions = TRUE, 
-                           classProbs=TRUE, summaryFunction = twoClassSummary)
-
-out <- buildModels(methodList = c("hda", "multinom"), control = fitControl, 
-                   x = train[, -23], 
-                   y = train[ , "Class"], metric = "ROC",
-                   tuneLength = 4, baseSeed = 1204)
-out.ens <- caretEnsemble(out)
+# fitControl <- trainControl(method='cv', number = 5, savePredictions = TRUE, 
+#                            classProbs=TRUE, summaryFunction = twoClassSummary)
+# 
+# out <- buildModels(methodList = c("hda", "multinom"), control = fitControl, 
+#                    x = train[, -23], 
+#                    y = train[ , "Class"], metric = "ROC",
+#                    tuneLength = 4, baseSeed = 1204)
+# out.ens <- caretEnsemble(out)
 
 context("Test that buildModels makes model lists")
 test_that("buildModels returns a list", {
@@ -70,12 +70,12 @@ myControl = trainControl(method = "cv", number = 3, repeats = 1,
                          returnData = TRUE, verboseIter = FALSE)
 
 
-test2 <- buildModels(methodList = c("knn", "multinom", "glm"), control = myControl, 
+test2 <- buildModels(methodList = c("knn", "nb", "glm"), control = myControl, 
                      x = train[, -23], 
                      y = train[, "Class"], tuneLength = 4, baseSeed = 3252, 
                      metric = "Accuracy")
 
-test1 <- buildModels(methodList = c("knn", "multinom", "glm"), control = myControl, 
+test1 <- buildModels(methodList = c("knn", "lda", "glm"), control = myControl, 
                      x = train[, -23], 
                      y = train[, "Class"], tuneLength = 7, baseSeed = 3252, 
                      metric = "Kappa")
@@ -105,8 +105,8 @@ context("Users can pass a custom tuneList")
 
 # User specifies methods and tuning parameters specifically using a tuneList
 tuneTest <- list(rf=list(tuneGrid=data.frame(.mtry=c(2,4,8,1))), 
-                 nnet=list(tuneLength=3), 
-                 knn=list(tuneLength=14))
+                 knn=list(tuneLength=9), 
+                 lda2=list(tuneLength=6))
 
 # Simple with mix of data.frame and tuneLength
 
@@ -120,16 +120,15 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   expect_is(test2a, "list")
   expect_equal(nrow(test2a[[1]]$results), 4)
   expect_equal(nrow(test2a[[2]]$results), 9)
-  expect_equal(nrow(test2a[[3]]$results), 14)
+  expect_equal(nrow(test2a[[3]]$results), 1)
 })
 
 context("More complex with multidimensional tuneGrid and NULL tuneLengths")
 
-tuneTest2 <- list(glm = list(NULL), nnet = list(tuneLength = 4), 
+tuneTest2 <- list(glm = list(NULL), lda2 = list(tuneLength = 4), 
                   knn = list(tuneLength = 2), 
-                  avNNet = list(tuneGrid = data.frame(.size = c(1, 3, 5), 
-                                                      .decay = c(0.8, 0.5, 0.2), 
-                                                      .bag = c(1, 20, 40))))
+                  nb = list(tuneGrid = expand.grid(.fL = c(0, 0.4, 0.8, 1, 2), 
+                                                  .usekernel = c(TRUE, FALSE))))
 
 
 test3a <- buildModels(tuneList = tuneTest2, control = myControl,  x = train[, -23], 
@@ -141,9 +140,9 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   expect_is(myEns3a, "caretEnsemble")
   expect_is(test3a, "list")
   expect_equal(nrow(test3a[[1]]$results), 1)
-  expect_equal(nrow(test3a[[2]]$results), 16)
+  expect_equal(nrow(test3a[[2]]$results), 1)
   expect_equal(nrow(test3a[[3]]$results), 2)
-  expect_equal(nrow(test3a[[4]]$results), 3)
+  expect_equal(nrow(test3a[[4]]$results), 10)
 })
 
 
@@ -163,7 +162,7 @@ test1 <- buildModels(methodList = c("glm", "lm"), control = myControl2,
                      y = train[, 1])
 
 
-test2 <- buildModels(methodList = c("glm", "treebag", "lm"), control = myControl2, 
+test2 <- buildModels(methodList = c("glm", "ppr", "lm"), control = myControl2, 
                      x = train[, c(-23, -1)], 
                      y = train[, 1])
 
