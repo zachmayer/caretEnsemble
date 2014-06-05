@@ -23,3 +23,17 @@ greedOptRMSE <- function(X, Y, iter = 100L){
   }
   return(weights)
 }
+
+#' Quadratic optimization of the reduced mean square error
+#' @description This algorithm optimizes the RMSE for regression models to avoid convex combinations
+#' @param X the matrix of predictors
+#' @param Y the dependent variable
+#' @return A numeric of the weights for each model
+#' @export
+qpOptRMSE <- function(x, y) {
+  D <- crossprod(x)
+  d <- crossprod(x, y)
+  A <- cbind(rep(1, ncol(x)), diag(ncol(x)))
+  bvec <- c(1, rep(0, ncol(x)))
+  solve.QP(Dmat=D, dvec=d, Amat=A, bvec=bvec, meq=1)$solution
+}
