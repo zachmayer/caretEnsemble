@@ -20,16 +20,9 @@ Depends:
 Suggests:
     testthat,
     randomForest
-Imports: 
-    boot, 
+Imports:
+    boot,
     methods,
-    pbapply, 
+    pbapply,
     digest
-Collate:
-    'caretEnsemble.R'
-    'optAUC.R'
-    'OptRMSE.R'
-    'caretStack.R'
-    'helper_functions.R'
-    'caretList.R'
 License: GPL-2
