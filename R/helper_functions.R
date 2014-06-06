@@ -21,8 +21,14 @@ checkModels_extractTypes <- function(list_of_models){
   stopifnot(all(types %in% c('Classification', 'Regression')))
 
   #Warn that we haven't yet implemented multiclass models
+  # add a check that if this is null you didn't set savePredictions in the trainControl
   if (type=='Classification' & length(unique(list_of_models[[1]]$pred$obs))!=2){
-    stop('Not yet implemented for multiclass problems')
+    if(is.null(unique(list_of_models[[1]]$pred$obs))){
+      stop('No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.')
+    } else {
+      stop('Not yet implemented for multiclass problems')
+    }
+    
   }
   
   #Check that classification models saved probabilities TODO: ALLOW NON PROB MODELS!

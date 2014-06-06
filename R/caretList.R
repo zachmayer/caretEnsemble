@@ -14,11 +14,15 @@ tuneExtract <- function(x){
 #' @param ctrl a \code{\link{trainControl}} object passed by the user
 #' @param M the maximum number of resamples necessary
 #' @return A \code{\link{trainControl}} object with a new slot, seeds
+#' @details Currently the seed structure is determined with the length of the 
+#' seed list being number * repeats +1 and the length of all vectors B -1 being 
+#' 20 * tuneLength^2 with the final vector being a single seed
 setSeeds <- function(ctrl, M){
   # M is the square of the tune-length
-  B <- ctrl$number * ctrl$repeats
+  B <- ctrl$number * ctrl$repeats 
   mseeds <- vector(mode = "list", length = B + 1)
   if(length(M) > 1){M <- max(M)}
+  M <- M * 20 # hack for arbitrary scalar
   for(i in 1:B) mseeds[[i]] <- .Random.seed[1:M] # is this the best way?
   mseeds[[B+1]] <- .Random.seed[1]
   ctrl$seeds <- mseeds

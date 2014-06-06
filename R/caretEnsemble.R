@@ -115,6 +115,7 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
     est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm=TRUE)})
     se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm=TRUE)
     se.tmp <- 2 * se.tmp^2
+    #se.tmp[!is.finite(se.tmp)] <- 0
     out <- list(predicted = est, weight = conf)
   }
   if(se == FALSE){
