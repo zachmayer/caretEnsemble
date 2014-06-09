@@ -2,6 +2,8 @@
 #TODO: add tests for every helper function
 
 context("Do the helper functions work for regression objects?")
+library(caret)
+library(randomForest)
 
 test_that("We can make the predobs matrix", {
   load("../../data/models_reg.RData")

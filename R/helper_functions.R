@@ -7,7 +7,6 @@
 #' @param list_of_models a list of caret models to check
 #' @export
 checkModels_extractTypes <- function(list_of_models){
-  #require('caret')
   #TODO: Add helpful error messages
   #Check that we have a list of train models
   stopifnot(class(list_of_models)=='list')
@@ -22,8 +21,14 @@ checkModels_extractTypes <- function(list_of_models){
   stopifnot(all(types %in% c('Classification', 'Regression')))
 
   #Warn that we haven't yet implemented multiclass models
+  # add a check that if this is null you didn't set savePredictions in the trainControl
   if (type=='Classification' & length(unique(list_of_models[[1]]$pred$obs))!=2){
-    stop('Not yet implemented for multiclass problems')
+    if(is.null(unique(list_of_models[[1]]$pred$obs))){
+      stop('No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.')
+    } else {
+      stop('Not yet implemented for multiclass problems')
+    }
+    
   }
   
   #Check that classification models saved probabilities TODO: ALLOW NON PROB MODELS!
@@ -49,9 +54,7 @@ checkModels_extractTypes <- function(list_of_models){
 #' @param list_of_models a list of caret models to extract predictions from
 #' @export
 extractBestPreds <- function(list_of_models){
-  
   #TODO: add an optional progress bar?
-  
   #Extract resampled predictions from each model
   modelLibrary <- lapply(list_of_models, function(x) {x$pred})
   
@@ -83,7 +86,9 @@ checkPreds <- function(list_of_models){
   stop('NOT IMPLEMENTED')
 }
 
-#' @description Extract obs from one models, and a matrix of predictions from all other models
+#' @title Make a prediction matrix from a list of models
+#' @description Extract obs from one models, and a matrix of predictions from all other models, a
+#' helper function
 #' 
 #' @param list_of_models a list of caret models to extract predictions from
 #' @export
@@ -115,29 +120,52 @@ makePredObsMatrix <- function(list_of_models){
   return(list(obs=obs, preds=preds, type=type)) 
 }
 
+#' @title Create a matrix of predictions for each of the models in a list
 #' @description Make a matrix of predictions from a list of caret models
 #' 
 #' @param list_of_models a list of caret models to make predictions for
 #' @param type Classification or Regression
-#' @param ... additional arguments to pass to predict.train.  DO NOT PASS
-#' the "type" argument.  Classsification models will returns probabilities
-#' if possible, and regression models will return "raw".
+#' @param ... additional arguments to pass to predict.train. Pass the \code{newdata} 
+#' argument here, DO NOT PASS the "type" argument.  Classification models will 
+#' return probabilities if possible, and regression models will return "raw".
 #' @export
-multiPredict <- function(list_of_models, type, newdata=NULL, ...){
-  
+multiPredict <- function(list_of_models, type, ...){
   #TODO: Add progressbar argument
-  
-  require('caret')
-  require('pbapply')
-  
   preds <- pbsapply(list_of_models, function(x){
     if (type=='Classification' & x$control$classProbs){
-      predict(x, type='prob', newdata=newdata, ...)[,2]
+      predict(x, type='prob', ...)[,2]
     } else {
-      predict(x, type='raw', newdata=newdata, ...)
+      predict(x, type='raw', ...)
     }
   })
   colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
   
   return(preds)
+}
+
+
+#' @title Calculate a weighted standard deviation
+#' @description Used to weight deviations among ensembled model preditions
+#' 
+#' @param x a vector of numerics
+#' @param weights a vector of weights equal to length of x
+#' @param normwt  a logical indicating whether the weights should be normalized to 1
+#' @param na.rm a logical indicating how to handle missing values
+#' @export
+wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = TRUE) {
+  if (!length(weights)) {
+    if (na.rm) 
+      x <- x[!is.na(x)]
+    return(sd(x))
+  }
+  if (na.rm) {
+    s <- !is.na(x + weights)
+    x <- x[s]
+    weights <- weights[s]
+  }
+  if (normwt) 
+    weights <- weights * length(x)/sum(weights)
+  xbar <- sum(weights * x)/sum(weights)
+  out <- sqrt(sum(weights * ((x - xbar)^2))/(sum(weights) - 1))
+  return(out)
 }

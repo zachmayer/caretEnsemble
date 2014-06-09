@@ -1,11 +1,10 @@
 setOldClass("train")
+
 ##' @title Class "caretEnsemble" of ensembled train objects from the caret package
-##'
+##' @docType class
+##' @exportClass
 ##' @description Ensembled model from input train objects. 
 ##' 
-##' @name caretEnsemble-class
-##' @aliases caretEnsemble-class
-##' @docType class
 ##' @section Objects from the Class: Objects are created by calls to
 ##' \code{\link{caretEnsemble}}.
 ##' @details
@@ -21,8 +20,7 @@ setOldClass("train")
 ##'
 ##' showClass("caretEnsemble")
 ##' methods(class="caretEnsemble")
-##' @export
-caretEnsemble <- setClass("caretEnsemble", representation(models = "list", 
+setClass("caretEnsemble", representation(models = "list", 
                                                   weights = "data.frame", 
                                           error = "numeric"),
                   S3methods=TRUE)
@@ -45,17 +43,10 @@ caretEnsemble <- setClass("caretEnsemble", representation(models = "list",
 #' @param all.models a list of caret models to ensemble.
 #' @param optFUN the optimization function to use
 #' @param ... additional arguments to pass to the optimization function
-#' @export
-#' @return S3 caretEnsemble object
+#' @return a \code{\link{caretEnsemble}} object
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
+#' @export
 caretEnsemble <- function(all.models, optFUN=NULL, ...){
-  
-  #TODO: Add progressbar argument and move optFUN to an all.models control argument
-  
-  #Libraries
-  require('caret')
-  require('pbapply')
-
   #Check the models, and make a matrix of obs and preds
   predobs <- makePredObsMatrix(all.models)
 
@@ -96,42 +87,63 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' Make predictions from a caretEnsemble. This function passes the data to each function in 
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
-#' @param ensemble a \code{\linkS4class{caretEnsemble}} to make predictions from.
+#' @param object a \code{\link{caretEnsemble}} to make predictions from.
 #' @param keepNA a logical indicating whether predictions should be made for all 
-#' cases where sufficient data exists or only for complete cases across all models
+#' cases where sufficient data exists or only for complete cases across all models. When 
+#' TRUE this does not predict for missing values. When FALSE, missing values are overwritten 
+#' with predictions where possible. 
+#' @param se logical, should prediction errors be produced? Default is false. 
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments 
 #' must be named
 #' @export
-#' @method predict caretEnsemble
-predict.caretEnsemble <- function(ensemble, keepNA = TRUE, ...){
-  type <- checkModels_extractTypes(ensemble$models)
-  preds <- multiPredict(ensemble$models, type, ...)
+predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
+  # Default se to FALSE
+  if(missing(se)){se <- FALSE}
+  type <- checkModels_extractTypes(object$models)
+  preds <- multiPredict(object$models, type, ...)
   if(keepNA == TRUE){
     message("Predictions being made only for cases with complete data")
-    out <- as.numeric(preds %*% ensemble$weights)
+    out <- as.numeric(preds %*% object$weights)
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
+    se.tmp <- 2 * se.tmp^2
   } else {
     message("Predictions being made only from models with available data")
     conf <- ifelse(is.na(preds), NA, 1)
-    conf <- sweep(conf, MARGIN=2, ensemble$weights,`*`)
+    conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
-    preds <- apply(preds, 1, function(x){weighted.mean(x, w=ensemble$weights, na.rm=TRUE)})
-    out <- list(predicted = preds, weight = conf)
+    est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm=TRUE)})
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm=TRUE)
+    se.tmp <- 2 * se.tmp^2
+    #se.tmp[!is.finite(se.tmp)] <- 0
+    out <- list(predicted = est, weight = conf)
   }
-  return(out)
+  if(se == FALSE){
+    return(out) 
+  } else{
+    if(keepNA == FALSE){
+      return(list(preds = data.frame(pred = est, se = se.tmp), weight = conf))
+    }
+    return(data.frame(pred = out, se = se.tmp))
+  }
 }
 
 
+
 #' @title Summarize the results of caretEnsemble for the user.
-#' @param ensemble a \code{\linkS4class{caretEnsemble}} to make predictions from.
+#' @param object a \code{\link{caretEnsemble}} to make predictions from.
+#' @param ... optional additional parameters. 
 #' @export
-#' @method summary caretEnsemble
-summary.caretEnsemble <- function(ensemble){
-  types <- names(ensemble$models)
+summary.caretEnsemble <- function(object, ...){
+  types <- names(object$models)
+  if(is.null(types)){
+    types <- as.vector(strsplit(paste0("model", 1:length(object$models)), split = " ", 
+                                fixed = TRUE), mode = "character")
+  }
   types <- paste(types, collapse = ", ")
-  wghts <- ensemble$weights
-  metric <- names(ensemble$error)
-  val <- ensemble$error[[1]]
+  wghts <- object$weights
+  metric <- names(object$error)
+  val <- object$error[[1]]
   cat(paste0("The following models were ensembled: ", types, " \n"))
   cat("They were weighted: \n")
   cat(paste0(paste0(wghts, collapse = " "), "\n"))
@@ -139,7 +151,7 @@ summary.caretEnsemble <- function(ensemble){
   
   # Add code to compare ensemble to individual models
   cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
-  print(extractModRes(ensemble))
+  print(extractModRes(object))
 }
 
 #' Extract the model accuracy metrics of the individual models in an ensemble object.
@@ -147,19 +159,50 @@ summary.caretEnsemble <- function(ensemble){
 #' @export
 extractModRes <- function(ensemble){
   if(class(ensemble) != "caretEnsemble") stop("extractModRes requires a caretEnsemble object")
-  modRes <- data.frame(method = names(ensemble$models), 
-                       metric = NA, 
-                       metricSD = NA)
-  
-  for(i in names(ensemble$models)){
+  methods <- names(ensemble$models)
+  if(is.null(methods)){
+    methods <- as.vector(strsplit(paste0("model", 1:length(ensemble$models)), split = " ", 
+                                fixed = TRUE), mode = "character")
+  } #sanitize names
+    modRes <- data.frame(method = methods, 
+                       metric = 0, 
+                       metricSD = 0, stringsAsFactors = FALSE) # prefill data frame
+    for(i in 1:length(ensemble$models)){
     dat <- ensemble$models[[i]]$results
     metric <- ensemble$models[[i]]$metric
     SDVAR <- paste0(ensemble$models[[i]]$metric, "SD")
     best <- max(dat[, metric])
     bestSD <- max(dat[dat[, metric] == best, SDVAR])
-    modRes[modRes[, "method"] == i, "metric"] <- best
-    modRes[modRes[, "method"] == i, "metricSD"] <- bestSD
+    modRes[i,  "metric"] <- best
+    modRes[i, "metricSD"] <- bestSD
   }
   return(modRes)
 }
 
+#' @title Calculate the variable importance of variables in a caretEnsemble.
+#' @description This function wraps the \code{\link{varImp}} function in the 
+#' \code{caret} package to provide a weighted estimate of the importance of 
+#' variables in the ensembled models in a \code{caretEnsemble} object. Variable 
+#' importance is calculated and then averaged by the weight of the overall model 
+#' in the ensembled object. 
+#' @param object a \code{caretEnsemble} to make predictions from.
+#' @param ... additional arguments to pass to \code{\link{varImp}}
+#' @export
+varImp.caretEnsemble <- function(object, ...){
+  a <- lapply(object$models, varImp)
+  # drop duplicates
+  a <- a[!duplicated(lapply(a, digest))]
+  # data.frame
+  dat <- rbind(as.data.frame(lapply(a, "[[", 1)))
+  # drop duplicates here
+  dat <- dat[!duplicated(lapply(dat, summary))]
+  names(dat) <- names(a)
+  #normalize
+  dat <- apply(dat, 2, function(d) d / sum(d) * 100)
+  wghts <- object$weights[names(object$weights) %in% names(a)]
+  #weight
+  wght <- apply(dat, 1, function(d) weighted.mean(d, w = wghts))
+  dat <- cbind(dat, wght)
+  dat <- as.data.frame(dat)
+  return(dat)
+}

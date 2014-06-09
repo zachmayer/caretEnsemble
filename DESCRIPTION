@@ -17,4 +17,12 @@ Depends:
     R (>= 2.14.0),
     caret,
     caTools
+Suggests:
+    testthat,
+    randomForest
+Imports:
+    boot,
+    methods,
+    pbapply,
+    digest
 License: GPL-2
