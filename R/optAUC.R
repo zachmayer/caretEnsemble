@@ -29,3 +29,28 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
   }
   return(weights)
 }
+
+#' Quadratic optimization of the AUC
+#' @description This algorithm optimizes the AUC for regression models to avoid convex combinations
+#' @param X the matrix of predictors
+#' @param Y the dependent variable
+#' @return A numeric of the weights for each model
+#' @export
+qpOptAUC <- function(x, y, offset = NULL, ...) {
+  if(is.character(y) | is.factor(y)){
+    y <- as.numeric(factor(y))
+  }
+  stopifnot(is.numeric(y))
+  if(missing(offset)){
+    offset <- FALSE
+  }
+  if(offset == TRUE){
+    y <- y-1
+  }
+  D <- crossprod(x)
+  d <- crossprod(x, y)
+  A <- cbind(rep(1, ncol(x)), diag(ncol(x)))
+  bvec <- c(1, rep(0, ncol(x)))
+  weights <- solve.QP(Dmat=D, dvec=d, Amat=A, bvec=bvec, meq=1)$solution
+  return(weights)
+}
