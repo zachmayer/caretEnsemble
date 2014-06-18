@@ -28,13 +28,24 @@ greedOptRMSE <- function(X, Y, iter = 100L){
 #' @description This algorithm optimizes the RMSE for regression models to avoid convex combinations
 #' @param X the matrix of predictors
 #' @param Y the dependent variable
+#' @author Sam Lendle
 #' @return A numeric of the weights for each model
 #' @export
-qpOptRMSE <- function(x, y, ...) {
+qpOptRMSE <- function(x, y) {
+  require(quadprog)
+  weights <- rep(0, ncol(x))
+  lin_indep_cols <- unique(cummax(qr(x)$pivot))
+  
+  if (length(lin_indep_cols) < ncol(x)) {
+    message("Some model predictions are identical or lin. dep. to other models and are assigned zero weights")
+    #or warning
+  }
+  x <- x[, lin_indep_cols]
+  
   D <- crossprod(x)
   d <- crossprod(x, y)
   A <- cbind(rep(1, ncol(x)), diag(ncol(x)))
   bvec <- c(1, rep(0, ncol(x)))
-  weights <- solve.QP(Dmat=D, dvec=d, Amat=A, bvec=bvec, meq=1)$solution
-  return(weights)
+  weights[lin_indep_cols] <- solve.QP(Dmat=D, dvec=d, Amat=A, bvec=bvec, meq=1)$solution
+  weights
 }
