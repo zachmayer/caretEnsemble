@@ -47,5 +47,5 @@ qpOptRMSE <- function(x, y) {
   A <- cbind(rep(1, ncol(x)), diag(ncol(x)))
   bvec <- c(1, rep(0, ncol(x)))
   weights[lin_indep_cols] <- solve.QP(Dmat=D, dvec=d, Amat=A, bvec=bvec, meq=1)$solution
-  weights
+  return(round(weights*100))
 }

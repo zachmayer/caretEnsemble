@@ -3,7 +3,7 @@
 \alias{qpOptRMSE}
 \title{Quadratic optimization of the reduced mean square error}
 \usage{
-qpOptRMSE(x, y, ...)
+qpOptRMSE(x, y)
 }
 \arguments{
 \item{X}{the matrix of predictors}
@@ -15,5 +15,8 @@ A numeric of the weights for each model
 }
 \description{
 This algorithm optimizes the RMSE for regression models to avoid convex combinations
+}
+\author{
+Sam Lendle
 }
 
