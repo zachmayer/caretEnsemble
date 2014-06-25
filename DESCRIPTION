@@ -23,6 +23,14 @@ Suggests:
 Imports:
     boot,
     methods,
-    pbapply,
-    digest
+    pbapply, 
+    digest,
+    quadprog
+Collate:
+    'caretEnsemble.R'
+    'optAUC.R'
+    'OptRMSE.R'
+    'caretStack.R'
+    'helper_functions.R'
+    'caretList.R'
 License: GPL-2
