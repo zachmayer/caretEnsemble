@@ -66,7 +66,7 @@ context("Test optimization procedure for AUC")
 
 predobs <- makePredObsMatrix(test2)
 
-weights1 <- qpOptAUC(predobs$preds, as.integer(predobs$obs))
+weights1 <- safeOptAUC(predobs$preds, as.integer(predobs$obs))
 weights3 <- greedOptAUC(predobs$preds, predobs$obs)
 
 

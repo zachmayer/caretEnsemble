@@ -38,7 +38,7 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
 #' @param iter an integer for the number of iterations
 #' @return A numeric of the weights for each model
 #' @export
-qpOptAUC <- function(X, Y, iter = 100L) {
+safeOptAUC <- function(X, Y, iter = 100L) {
   if(is.character(Y) | is.factor(Y)){
     Y <- as.numeric(factor(Y))
   }
