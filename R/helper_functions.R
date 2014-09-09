@@ -7,7 +7,6 @@
 #' @param list_of_models a list of caret models to check
 #' @export
 checkModels_extractTypes <- function(list_of_models){
-  #require('caret')
   #TODO: Add helpful error messages
   #Check that we have a list of train models
   stopifnot(class(list_of_models)=='list')
@@ -22,8 +21,14 @@ checkModels_extractTypes <- function(list_of_models){
   stopifnot(all(types %in% c('Classification', 'Regression')))
 
   #Warn that we haven't yet implemented multiclass models
+  # add a check that if this is null you didn't set savePredictions in the trainControl
   if (type=='Classification' & length(unique(list_of_models[[1]]$pred$obs))!=2){
-    stop('Not yet implemented for multiclass problems')
+    if(is.null(unique(list_of_models[[1]]$pred$obs))){
+      stop('No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.')
+    } else {
+      stop('Not yet implemented for multiclass problems')
+    }
+    
   }
   
   #Check that classification models saved probabilities TODO: ALLOW NON PROB MODELS!
@@ -49,9 +54,7 @@ checkModels_extractTypes <- function(list_of_models){
 #' @param list_of_models a list of caret models to extract predictions from
 #' @export
 extractBestPreds <- function(list_of_models){
-  
   #TODO: add an optional progress bar?
-  
   #Extract resampled predictions from each model
   modelLibrary <- lapply(list_of_models, function(x) {x$pred})
   
@@ -122,15 +125,12 @@ makePredObsMatrix <- function(list_of_models){
 #' 
 #' @param list_of_models a list of caret models to make predictions for
 #' @param type Classification or Regression
-#' @param newdata a new data set to be predicted
-#' @param ... additional arguments to pass to predict.train.  DO NOT PASS
-#' the "type" argument.  Classsification models will returns probabilities
-#' if possible, and regression models will return "raw".
+#' @param ... additional arguments to pass to predict.train. Pass the \code{newdata} 
+#' argument here, DO NOT PASS the "type" argument.  Classification models will 
+#' return probabilities if possible, and regression models will return "raw".
 #' @export
 multiPredict <- function(list_of_models, type, ...){
   #TODO: Add progressbar argument
-  require('pbapply')
-  
   preds <- pbsapply(list_of_models, function(x){
     if (type=='Classification' & x$control$classProbs){
       predict(x, type='prob', ...)[,2]

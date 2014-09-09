@@ -6,3 +6,7 @@ TODO:
 - checkPreds
 - Add progressbar argument and move optFUN to an all.models control argument
 - Add progressbar argument and move optFUN to an all.models control argument
+- Build unit tests for predictive error in caretEnsemble
+- Build unit tests for NA skipping and weighting
+- Document caretEnsemble better
+- Try patch to optimization functions

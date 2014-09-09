@@ -14,11 +14,15 @@ tuneExtract <- function(x){
 #' @param ctrl a \code{\link{trainControl}} object passed by the user
 #' @param M the maximum number of resamples necessary
 #' @return A \code{\link{trainControl}} object with a new slot, seeds
+#' @details Currently the seed structure is determined with the length of the 
+#' seed list being number * repeats +1 and the length of all vectors B -1 being 
+#' 20 * tuneLength^2 with the final vector being a single seed
 setSeeds <- function(ctrl, M){
   # M is the square of the tune-length
-  B <- ctrl$number * ctrl$repeats
+  B <- ctrl$number * ctrl$repeats 
   mseeds <- vector(mode = "list", length = B + 1)
   if(length(M) > 1){M <- max(M)}
+  M <- M * 20 # hack for arbitrary scalar
   for(i in 1:B) mseeds[[i]] <- .Random.seed[1:M] # is this the best way?
   mseeds[[B+1]] <- .Random.seed[1]
   ctrl$seeds <- mseeds
@@ -85,12 +89,11 @@ buildModels <- function(methodList, control, x, y, tuneList = NULL, baseSeed = N
   modelList <- sapply(methodList, function(x) NULL)
 
   for(i in methodList){
-    set.seed(baseSeed)
+    set.seed(baseSeed) # so splits are same across resamples
     if(missing(tuneList)){
       modelList[[i]] <- train(x = x, y=y, method = i, trControl = ctrl, 
                               tuneLength = tl, ...)
     } else {
-      #stop("Not yet written")
       tmpTune <- tuneExtract(tuneList[[i]])
       if(length(tmpTune$tuneType)==0){
         tmpTune$tuneType <- "tuneLength"
@@ -101,12 +104,10 @@ buildModels <- function(methodList, control, x, y, tuneList = NULL, baseSeed = N
       }
       modelList[[i]] <- eval(parse(text = paste("train(x = x, y=y, method = i,  
                                                 trControl = ctrl,", tmpTune$tuneType, 
-                                                " = tmpTune$tunePar)")))
+                                                " = tmpTune$tunePar, ...)")))
       tmpTune <- NULL; Tune <- NULL
     }
    
   }
   return(modelList)
 }
-# TODO: allow user to pass pre-specified seeds or extract random seeds
-# TODO: consider making a tuneList method to identify the seed structure and build seeds

@@ -16,7 +16,7 @@
 ##' showClass("caretEnsemble")
 ##' methods(class="caretEnsemble")
 ##' @exportClass
-caretStack <- setClass("caretStack", representation(models = "list", 
+setClass("caretStack", representation(models = "list", 
                                                     ens_model = "train", 
                                                           error = "numeric"),
                           S3methods=TRUE)
@@ -52,7 +52,7 @@ caretStack <- function(all.models, ...){
 #' @description Make predictions from a caretStack. This function passes the data to each function in 
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
-#' @param object a  \code{\linkS4class{caretStack}} to make predictions from.
+#' @param object a  \code{\link{caretStack}} to make predictions from.
 #' @param newdata a new dataframe to make predictions on 
 #' @param ... arguments to pass to \code{\link{predict.train}}.
 #' @export

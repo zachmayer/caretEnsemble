@@ -3,8 +3,10 @@ Type: Package
 Title: Framework for combining caret models into ensembles
 Version: 1.0
 Date: 2013-03-01
-Author: Zach Mayer
-Maintainer: Zach Mayer <zach.mayer@gmail.com>
+Authors@R: c(person(c("Zach"), "Mayer", role = c("aut", "cre"),
+    email = "zack.mayer@gmail.com"),
+    person(c("Jared", "E."), "Knowles", role=c("aut"),
+    email="jknowles@gmail.com"))
 Description: This package consists primarily of one function: caretEnsemble.
     This function takes a collection of caret models and finds a good linear
     combination of those models, using either linear regression or iterative
@@ -20,10 +22,12 @@ Depends:
 Suggests:
     testthat,
     randomForest
-Imports: 
-    boot, 
+Imports:
+    boot,
     methods,
-    pbapply
+    pbapply, 
+    digest,
+    quadprog
 Collate:
     'caretEnsemble.R'
     'optAUC.R'

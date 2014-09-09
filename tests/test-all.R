@@ -3,7 +3,7 @@ library(caretEnsemble)
 test_check("caretEnsemble")
 
 
-# test_file("tests/testthat/test-caretList.R")
-# test_file("tests/testthat/test-ensemble.R")
-# test_file("tests/testthat/test-helper_functions.R")
-# test_file("tests/testthat/test-caretStack.R")
+test_file("tests/testthat/test-caretList.R", reporter = "summary")
+test_file("tests/testthat/test-ensemble.R", reporter = "summary")
+test_file("tests/testthat/test-helper_functions.R", reporter = "minimal")
+test_file("tests/testthat/test-caretStack.R", reporter = "minimal")

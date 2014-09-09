@@ -111,8 +111,8 @@ glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
 nestedList <- list(glm1, glm2, glm3, glm4)
 ensNest <- caretEnsemble(nestedList, iter=2000)
 pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
-pred.nest1a <- predict(ensNest, testC[, c(1:17)])
-pred.nest2 <- predict(ensNest, keepNA=FALSE, testC[, c(1:17)])
+pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)])
+pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)])
 pred.nestTrain_a <- predict(ensNest, keepNA = FALSE)
 pred.nestTrain_b <- predict(ensNest, keepNA = TRUE)
 
@@ -123,7 +123,7 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_message(predict(ensNest, keepNA=FALSE, testC[, c(1:17)]))
   expect_true(is.numeric(pred.nest1))
   expect_true(is.list(pred.nest2))
-  expect_true(is.list(pred.nest1a))
+  expect_true(is.numeric(pred.nest1a))
   expect_true(length(pred.nestTrain_b)==2000)
   expect_true(length(pred.nest1)==1000)
   expect_true(length(pred.nestTrain_a$predicted)==2000)
@@ -131,3 +131,34 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(length(pred.nest2$predicted[is.na(pred.nest2$predicted)])==0)
   expect_true(length(pred.nest1[is.na(pred.nest1)])>0)
 })
+
+
+## Test generics summary and predict
+
+context("Test generic predict with errors")
+
+pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se = TRUE)
+pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
+pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)], se = TRUE)
+pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
+
+
+test_that("We can ensemble models and handle missingness across predictors", {
+  expect_is(pred.nest1, "data.frame")
+  expect_true(is.list(pred.nest2))
+  expect_is(pred.nest1a, "data.frame")
+  expect_is(pred.nestTrain_a, "list")
+  expect_identical(names(pred.nest1), c("pred", "se"))
+  expect_identical(names(pred.nest2), c("preds", "weight"))
+  expect_identical(names(pred.nest2$preds), names(pred.nest1))
+  expect_is(pred.nest2$weight, "matrix")
+  expect_identical(pred.nest1, pred.nest1a)
+  expect_true(length(pred.nest1)==2)
+  expect_true(nrow(pred.nestTrain_a$preds)==2000)
+  expect_true(nrow(pred.nest2$preds)==1000)
+ # expect_true(nrow(pred.nest2$preds[is.na(pred.nest2$preds)])==0)
+  expect_true(length(pred.nest1[is.na(pred.nest1)])>0)
+})
+
+
+
