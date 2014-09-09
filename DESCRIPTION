@@ -25,4 +25,4 @@ Imports:
     methods,
     pbapply,
     digest
-License: GPL-2
+License: MIT
