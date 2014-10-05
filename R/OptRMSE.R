@@ -32,7 +32,6 @@ greedOptRMSE <- function(X, Y, iter = 100L){
 #' @return A numeric of the weights for each model
 #' @export
 qpOptRMSE <- function(x, y) {
-  require(quadprog)
   weights <- rep(0, ncol(x))
   lin_indep_cols <- unique(cummax(qr(x)$pivot))
 
@@ -46,6 +45,6 @@ qpOptRMSE <- function(x, y) {
   d <- crossprod(x, y)
   A <- cbind(rep(1, ncol(x)), diag(ncol(x)))
   bvec <- c(1, rep(0, ncol(x)))
-  weights[lin_indep_cols] <- solve.QP(Dmat=D, dvec=d, Amat=A, bvec=bvec, meq=1)$solution
+  weights[lin_indep_cols] <- quadprog::solve.QP(Dmat=D, dvec=d, Amat=A, bvec=bvec, meq=1)$solution
   return(round(weights*100))
 }
