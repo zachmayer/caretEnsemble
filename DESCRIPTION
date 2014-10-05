@@ -4,7 +4,7 @@ Title: Framework for combining caret models into ensembles
 Version: 1.0
 Date: 2013-03-01
 Authors@R: c(person(c("Zach"), "Mayer", role = c("aut", "cre"),
-    email = "zack.mayer@gmail.com"),
+    email = "zach.mayer@gmail.com"),
     person(c("Jared", "E."), "Knowles", role=c("aut"),
     email="jknowles@gmail.com"))
 Description: This package consists primarily of one function: caretEnsemble.
