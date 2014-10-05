@@ -147,6 +147,7 @@ pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
 pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)], se = TRUE)
 pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
 
+
 test_that("We can ensemble models and handle missingness across predictors", {
   expect_is(pred.nest1, "data.frame")
   expect_true(is.list(pred.nest2))
