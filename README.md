@@ -8,9 +8,11 @@ Create ensemlbes of [caret models](https://github.com/topepo/caret)!  Each model
 
 Install with:
 ```
-library(devtools)
-library(testthat)
-install_github('zachmayer/caretEnsemble') #Master branch (currently has no tests)
-#install_github('zachmayer/caretEnsemble', ref = 'Dev') #Dev branch
-#test_package('caretEnsemble') #Run tests
+devtools::install_github('zachmayer/caretEnsemble@0.0')
 ```
+
+Bleeding edge version here (trying to get ready for CRAN release, very different from 0.0:
+```
+devtools::install_github('zachmayer/caretEnsemble')
+```
+
