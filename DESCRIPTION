@@ -26,6 +26,5 @@ Imports:
     boot,
     methods,
     pbapply,
-    digest,
-    quadprog
+    digest
 License: MIT
