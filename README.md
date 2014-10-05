@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/zachmayer/caretEnsemble.png?branch=master)](https://travis-ci.org/zachmayer/caretEnsemble)
+
 Package: caretEnsemble    
 Type: Package     
 Title: Framework for combining caret models into ensembles    
