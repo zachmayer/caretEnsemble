@@ -6,5 +6,7 @@ TODO:
 - checkPreds
 - Add progressbar argument and move optFUN to an all.models control argument
 - Add progressbar argument and move optFUN to an all.models control argument
-- in buildModels allow user to pass pre-specified seeds or extract random seeds
-- consider making a tuneList method to identify the seed structure and build seeds
+- Build unit tests for predictive error in caretEnsemble
+- Build unit tests for NA skipping and weighting
+- Document caretEnsemble better
+- Try patch to optimization functions
