@@ -4,7 +4,7 @@ Title: Framework for combining caret models into ensembles
 Version: 1.0
 Date: 2013-03-01
 Authors@R: c(person(c("Zach"), "Mayer", role = c("aut", "cre"),
-    email = "zack.mayer@gmail.com"),
+    email = "zach.mayer@gmail.com"),
     person(c("Jared", "E."), "Knowles", role=c("aut"),
     email="jknowles@gmail.com"))
 Description: This package consists primarily of one function: caretEnsemble.
@@ -17,22 +17,15 @@ Description: This package consists primarily of one function: caretEnsemble.
     ensembles of classification and regression models.\
 Depends:
     R (>= 2.14.0),
-    caret,
-    caTools
+    caret
 Suggests:
     testthat,
     randomForest
 Imports:
+    caTools,
     boot,
     methods,
-    pbapply, 
+    pbapply,
     digest,
     quadprog
-Collate:
-    'caretEnsemble.R'
-    'optAUC.R'
-    'OptRMSE.R'
-    'caretStack.R'
-    'helper_functions.R'
-    'caretList.R'
 License: MIT

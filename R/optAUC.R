@@ -12,17 +12,17 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
     Y <- factor(Y)
   }
   stopifnot(is.factor(Y))
-  
+
   N           <- ncol(X)
   weights     <- rep(0L, N)
   pred        <- 0 * X
   sum.weights <- 0L
-  
+
   while(sum.weights < iter) {
-    
+
     sum.weights   <- sum.weights + 1L
     pred          <-(pred + X) * (1L / sum.weights)
-    errors        <- colAUC(pred, Y)
+    errors        <- caTools::colAUC(pred, Y)
     best          <- which.max(errors)
     weights[best] <- weights[best] + 1L
     pred          <- pred[, best] * sum.weights
@@ -31,7 +31,7 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
 }
 
 #' Safe optimization of the AUC
-#' @description This algorithm optimizes the AUC for regression models to avoid ensembling 
+#' @description This algorithm optimizes the AUC for regression models to avoid ensembling
 #' where the ensembled model fits worse than any component model
 #' @param X the matrix of predictors
 #' @param Y the dependent variable
@@ -42,24 +42,24 @@ safeOptAUC <- function(X, Y, iter = 100L) {
   if(is.character(Y) | is.factor(Y)){
     Y <- as.numeric(factor(Y))
   }
-  
+
   N           <- ncol(X)
   weights     <- rep(0L, N)
   pred        <- 0 * X
   sum.weights <- 0L
-  stopper     <- max(colAUC(X, Y))
+  stopper     <- max(caTools::colAUC(X, Y))
   maxtest     <- 1
-  
+
   while((sum.weights < iter) & (maxtest >= stopper)) {
-    
+
     sum.weights   <- sum.weights + 1L
     pred          <-(pred + X) * (1L / sum.weights)
-    errors        <- colAUC(pred, Y)
+    errors        <- caTools::colAUC(pred, Y)
     best          <- which.max(errors)
     weights[best] <- weights[best] + 1L
     pred          <- pred[, best] * sum.weights
     maxtest       <- max(errors) # check we are better than no weights
   }
   return(weights)
-  
+
 }
