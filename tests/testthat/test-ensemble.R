@@ -4,7 +4,9 @@ library(caret)
 library(randomForest)
 
 test_that("We can ensemble regression models", {
-  load("../../data/models_reg.RData")
+  data(models_reg)
+  data(X.reg)
+  data(Y.reg)
   ens.reg <- caretEnsemble(models_reg, iter=1000)
   expect_that(ens.reg, is_a("caretEnsemble"))
   pred.reg <- predict(ens.reg)
@@ -13,7 +15,9 @@ test_that("We can ensemble regression models", {
 })
 
 test_that("We can ensemble classification models", {
-  load("../../data/models_class.RData")
+  data(models_class)
+  data(X.class)
+  data(Y.class)
   ens.class <- caretEnsemble(models_class, iter=1000)
   expect_that(ens.class, is_a("caretEnsemble"))
   pred.class <- predict(ens.class)
@@ -31,9 +35,9 @@ X.reg <- model.matrix(~ ., iris[, -1])
 mseeds <- vector(mode = "list", length = 12)
 for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
 mseeds[[12]] <- sample.int(1000, 1)
-myControl = trainControl(method = "cv", number = 10, repeats = 1, 
-                         p = 0.75, savePrediction = TRUE, 
-                         classProbs = FALSE, returnResamp = "final", 
+myControl = trainControl(method = "cv", number = 10, repeats = 1,
+                         p = 0.75, savePrediction = TRUE,
+                         classProbs = FALSE, returnResamp = "final",
                          returnData = TRUE, seeds = mseeds)
 
 
@@ -61,15 +65,15 @@ context("Does ensembling work with missingness")
 mseeds <- vector(mode = "list", length = 12)
 for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
 mseeds[[12]] <- sample.int(1000, 1)
-myControl = trainControl(method = "cv", number = 10, repeats = 1, 
-                         p = 0.75, savePrediction = TRUE, 
-                         classProbs = TRUE, returnResamp = "final", 
+myControl = trainControl(method = "cv", number = 10, repeats = 1,
+                         p = 0.75, savePrediction = TRUE,
+                         classProbs = TRUE, returnResamp = "final",
                          returnData = TRUE, seeds = mseeds)
 
-trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2, 
+trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
             corrType = "AR1", corrValue = 0.6, mislabel = 0)
 
-testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2, 
+testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
                       corrType = "AR1", corrValue = 0.6, mislabel = 0)
 
 MCAR.df <- function(df, p){
@@ -92,19 +96,19 @@ trainC[, c(1:17)] <- MCAR.df(trainC[, c(1:17)], 0.15)
 testC[, c(1:17)] <- MCAR.df(testC[, c(1:17)], 0.05)
 
 set.seed(482)
-glm1 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm', 
+glm1 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
               trControl = myControl)
 set.seed(482)
-glm2 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm', 
+glm2 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
                trControl = myControl, preProcess = "medianImpute")
 set.seed(482)
-glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm', 
+glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
               trControl = myControl)
 set.seed(482)
-glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm', 
+glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
               trControl = myControl)
 # set.seed(482)
-# glm5 <- train(x = trainC[, c(12:17)], y = trainC[, "Class"], method = 'glm', 
+# glm5 <- train(x = trainC[, c(12:17)], y = trainC[, "Class"], method = 'glm',
 #               trControl = myControl)
 
 

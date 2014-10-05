@@ -26,7 +26,7 @@ nn1 <- train(x = X.reg, y = Y.reg, method = 'knn', trControl = myControl)
 
 models_reg <- list(rf1, lm1, glm1, nn1)
 
-save(models_reg, Y.reg, X.reg, file="data/models_reg.RData")
+devtools::use_data(models_reg, Y.reg, X.reg)
 
 rm(i, glm1, lm1, nn1, rf1)
 rm(list = ls())
@@ -61,7 +61,7 @@ nn1 <- train(x = X.class, y = Y.class, method = 'knn', trControl = myControl)
 
 models_class <- list(rf1, glm1, svm1, nnet1, bag1, nn1)
 
-save(models_class, Y.class, X.class, file="data/models_class.RData")
+devtools::use_data(models_class, Y.class, X.class)
 
 rm(list=ls())
 

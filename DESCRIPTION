@@ -17,22 +17,15 @@ Description: This package consists primarily of one function: caretEnsemble.
     ensembles of classification and regression models.\
 Depends:
     R (>= 2.14.0),
-    caret,
-    caTools
+    caret
 Suggests:
     testthat,
     randomForest
 Imports:
+    caTools,
     boot,
     methods,
-    pbapply, 
+    pbapply,
     digest,
     quadprog
-Collate:
-    'caretEnsemble.R'
-    'optAUC.R'
-    'OptRMSE.R'
-    'caretStack.R'
-    'helper_functions.R'
-    'caretList.R'
 License: MIT
