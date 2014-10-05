@@ -35,4 +35,4 @@ Collate:
     'caretStack.R'
     'helper_functions.R'
     'caretList.R'
-License: GPL-2
+License: MIT
