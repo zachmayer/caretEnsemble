@@ -3,7 +3,7 @@
 \alias{predict.caretStack}
 \title{Make predictions from a caretStack}
 \usage{
-\method{predict}{caretStack}(object, newdata = NULL, ...)
+predict.caretStack(object, newdata = NULL, ...)
 }
 \arguments{
 \item{object}{a  \code{\link{caretStack}} to make predictions from.}

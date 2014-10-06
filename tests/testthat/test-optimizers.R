@@ -16,26 +16,9 @@ myControl2 = trainControl(method = "cv", number = 3, repeats = 1,
                           returnResamp = "final",
                           returnData = TRUE, verboseIter = FALSE)
 
-test1 <- buildModels(methodList = c("knn", "lm", "rlm", "pls"), control = myControl2,
-                     x = train[1:100, c(-23, -1)],
-                     y = train[1:100, 1])
 
-
-test2 <- buildModels(methodList = c("glm", "ppr", "lm", "knn"), control = myControl2,
-                     x = train[1:100, c(-23, -1)],
-                     y = train[1:100, 1])
-
-
-
-predobs <- makePredObsMatrix(test2)
-weights1 <- greedOptRMSE(predobs$preds, predobs$obs)
-weights2 <- qpOptRMSE(predobs$preds, predobs$obs)
-
-
-
-ens1 <- caretEnsemble(test1)
-
-ens2 <- caretEnsemble(test2)
+#weights1 <- greedOptRMSE(predobs$preds, predobs$obs)
+#weights2 <- qpOptRMSE(predobs$preds, predobs$obs)
 
 
 #######################
@@ -50,27 +33,13 @@ myControl = trainControl(method = "cv", number = 3, repeats = 1,
                          returnData = TRUE, verboseIter = FALSE)
 
 
-# Simple two method list
-test1 <- buildModels(methodList = c("knn", "glm"), control = myControl,
-                     x = train[, -23],
-                     y = train[, "Class"], metric = "ROC")
-
-
-# Simple 4 method list
-test2 <- buildModels(methodList = c("knn", "glm", "treebag"), control = myControl,
-                     x = train[, -23],
-                     y = train[, "Class"], metric = "ROC")
-
 
 context("Test optimization procedure for AUC")
+# weights1 <- safeOptAUC(predobs$preds, as.integer(predobs$obs))
+# weights3 <- greedOptAUC(predobs$preds, predobs$obs)
 
-predobs <- makePredObsMatrix(test2)
-
-weights1 <- safeOptAUC(predobs$preds, as.integer(predobs$obs))
-weights3 <- greedOptAUC(predobs$preds, predobs$obs)
-
-#Normalize and name weights
-weights1 <- weights1/sum(weights1)
-weights3 <- weights3/sum(weights3)
-expect_equal(weights1, weights3)
+# #Normalize and name weights
+# weights1 <- weights1/sum(weights1)
+# weights3 <- weights3/sum(weights3)
+# expect_equal(weights1, weights3)
 

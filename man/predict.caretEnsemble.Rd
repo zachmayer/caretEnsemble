@@ -5,7 +5,7 @@
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 weights to get a single, combined vector of predictions.}
 \usage{
-\method{predict}{caretEnsemble}(object, keepNA = TRUE, se = NULL, ...)
+predict.caretEnsemble(object, keepNA = TRUE, se = NULL, ...)
 }
 \arguments{
 \item{object}{a \code{\link{caretEnsemble}} to make predictions from.}
