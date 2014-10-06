@@ -194,7 +194,7 @@ extractModRes <- function(ensemble){
 varImp.caretEnsemble <- function(object, ...){
   a <- lapply(object$models, caret::varImp)
   # drop duplicates
-  a <- a[!duplicated(lapply(a, digest))]
+  a <- a[!duplicated(lapply(a, digest::digest))]
   # data.frame
   dat <- rbind(as.data.frame(lapply(a, "[[", 1)))
   # drop duplicates here

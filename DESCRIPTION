@@ -20,11 +20,12 @@ Depends:
     caret
 Suggests:
     testthat,
-    randomForest
+    randomForest,
+    e1071,
+    kernlab,
+    ipred
 Imports:
     caTools,
-    boot,
-    methods,
     pbapply,
     digest
 License: MIT
