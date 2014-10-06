@@ -182,6 +182,10 @@ extractModRes <- function(ensemble){
   return(modRes)
 }
 
+varImp <- function (object, ...){
+  UseMethod("varImp")
+}
+
 #' @title Calculate the variable importance of variables in a caretEnsemble.
 #' @description This function wraps the \code{\link{varImp}} function in the
 #' \code{caret} package to provide a weighted estimate of the importance of
