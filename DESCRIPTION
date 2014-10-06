@@ -17,7 +17,8 @@ Description: This package consists primarily of one function: caretEnsemble.
     ensembles of classification and regression models.\
 Depends:
     R (>= 2.14.0),
-    caret
+    caret,
+    methods
 Suggests:
     testthat,
     randomForest,
