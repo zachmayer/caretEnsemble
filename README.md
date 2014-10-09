@@ -18,4 +18,4 @@ Bleeding edge version here (trying to get ready for CRAN release, very different
 devtools::install_github('zachmayer/caretEnsemble')
 ```
 
-caretEnseble was inspired by [medley](https://github.com/mewo2/medley).
+caretEnsemble was inspired by [medley](https://github.com/mewo2/medley).
