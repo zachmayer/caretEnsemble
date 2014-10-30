@@ -182,34 +182,75 @@ extractModRes <- function(ensemble){
   return(modRes)
 }
 
-varImp <- function (object, ...){
-  UseMethod("varImp")
-}
-
 #' @title Calculate the variable importance of variables in a caretEnsemble.
 #' @description This function wraps the \code{\link{varImp}} function in the
 #' \code{caret} package to provide a weighted estimate of the importance of
 #' variables in the ensembled models in a \code{caretEnsemble} object. Variable
-#' importance is calculated and then averaged by the weight of the overall model
+#' importance for each model is calculated and then averaged by the weight of the overall model
 #' in the ensembled object.
 #' @param object a \code{caretEnsemble} to make predictions from.
-#' @param ... additional arguments to pass to \code{\link{varImp}}
+#' @param scale should importance values be scaled 0 to 100?
+#' @param weight should a model weighted importance be returned?
+#' @return A \code{\link{data.frame}} with one row per variable and one column
+#' per model in object
+#' @importFrom digest digest
 #' @export
-varImp.caretEnsemble <- function(object, ...){
+varImp.caretEnsemble <- function(object, ..., scale = TRUE, weight = TRUE){
   a <- lapply(object$models, caret::varImp)
+  # grab method names
+  names(a) <- make.unique(unlist(lapply(object$models, "[[", 1)), sep = "_")
   # drop duplicates
   a <- a[!duplicated(lapply(a, digest::digest))]
-  # data.frame
-  dat <- rbind(as.data.frame(lapply(a, "[[", 1)))
-  # drop duplicates here
-  dat <- dat[!duplicated(lapply(dat, summary))]
-  names(dat) <- names(a)
-  #normalize
-  dat <- apply(dat, 2, function(d) d / sum(d) * 100)
-  wghts <- object$weights[names(object$weights) %in% names(a)]
-  #weight
-  wght <- apply(dat, 1, function(d) weighted.mean(d, w = wghts))
-  dat <- cbind(dat, wght)
-  dat <- as.data.frame(dat)
-  return(dat)
+  # add a check to drop multiple columns
+  a <- lapply(a, clean_varImp)
+  dat <- varImpFrame(a)
+  if(scale == TRUE){
+    dat[,-1] <- apply(dat[, -1], 2, function(d) d / sum(d, na.rm = TRUE) * 100)
+  }
+  if(weight == FALSE){
+    names(dat) <- c("variable", names(a))
+    return(dat)
+  } else{
+    wghts <- object$weights[names(object$weights) %in% names(a)]
+    #weight
+    wght <- apply(dat[, -1], 1, function(d) weighted.mean(d, w = wghts, na.rm=TRUE))
+    if(scale == TRUE){
+      wght <- (wght / sum(wght, na.rm=TRUE)) * 100
+    }
+    dat <- cbind(dat, wght)
+    names(dat) <- c("variable", names(a), "ensemble")
+    dat <- as.data.frame(dat)
+    if(scale == FALSE){
+      warning("Weighting of unscaled importance factors may not make sense. Try again with scale = TRUE.")
+      return(dat)
+    } else{
+      return(dat)
+    }
+  }
 }
+
+# Break into get varImp
+# weight varImp
+clean_varImp <- function(x){
+  names(x$importance)[1] <- "Overall"
+  x$importance <- x$importance[,"Overall", drop=FALSE]
+  return(x$importance)
+}
+
+varImpFrame <- function(x){
+  dat <- do.call(rbind.data.frame, x)
+  # data.frame
+  dat <- dat[!duplicated(lapply(dat, summary))]
+  # Parse frame
+  dat$id <- row.names(dat)
+  dat$model <- sub("\\.[^\n]*", "",dat$id)
+  dat$var <- sub("^[^.]*", "", dat$id)
+  dat$var <- substr(dat$var, 2, nchar(dat$var))
+  # Parse intercept variables
+  dat$var[grep("Inter", dat$var)] <- "Intercept"
+  dat$id <- NULL
+  row.names(dat) <- NULL
+  dat <- reshape(dat, direction = "wide", v.names="Overall",
+                 idvar = "var", timevar = "model")
+}
+
