@@ -29,13 +29,12 @@ setSeeds <- function(ctrl, M){
   return(ctrl)
 }
 
-#' Create a list of several train models from the caret package
+#' Helper function to extract tune grids from arguments passed to tuneList
 #'
-#' Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
-#' function.
+#' Returns the tuneGrids of the tuneList
 #'
-#' @param x a character vector of caret models to ensemble.
-#' @return A list of \code{\link{train}} objects
+#' @param x list of tuning parameters for train objects
+#' @return The maximum length of any tuneGrid in the list
 tmpExtract <- function(x){
   if(is.null(names(x))){
     tmp <- 0
