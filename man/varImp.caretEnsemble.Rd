@@ -14,7 +14,7 @@
 This function wraps the \code{\link{varImp}} function in the
 \code{caret} package to provide a weighted estimate of the importance of
 variables in the ensembled models in a \code{caretEnsemble} object. Variable
-importance is calculated and then averaged by the weight of the overall model
+importance for each model is calculated and then averaged by the weight of the overall model
 in the ensembled object.
 }
 
