@@ -163,9 +163,10 @@ wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = TRUE) {
     x <- x[s]
     weights <- weights[s]
   }
-  if (normwt)
+  if (normwt){
     weights <- weights * length(x)/sum(weights)
+  }
   xbar <- sum(weights * x)/sum(weights)
-  out <- sqrt(sum(weights * ((x - xbar)^2))/(sum(weights) - 1))
+  out <- sqrt(sum(weights * ((x - xbar)^2))/(sum(weights)))
   return(out)
 }
