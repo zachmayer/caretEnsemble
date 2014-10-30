@@ -1,45 +1,50 @@
 setOldClass("train")
 
-##' @title Class "caretEnsemble" of ensembled train objects from the caret package
-##' @docType class
-##' @exportClass
-##' @description Ensembled model from input train objects. 
-##' 
-##' @section Objects from the Class: Objects are created by calls to
-##' \code{\link{caretEnsemble}}.
-##' @details
-##' The object has the following items
-##' \itemize{
-##' \item{models - a list of the original models to be ensembled}
-##' \item{weights - a matrix with the weights for each model}
-##' \item{error - the final accuracy metric of the ensembled models}
-##' }
-##' @seealso \code{\link{caretEnsemble}}
-##' @keywords classes
-##' @examples
-##'
-##' showClass("caretEnsemble")
-##' methods(class="caretEnsemble")
-setClass("caretEnsemble", representation(models = "list", 
-                                                  weights = "data.frame", 
-                                          error = "numeric"),
-                  S3methods=TRUE)
+
+#' @title Class "caretEnsemble" of ensembled train objects from the caret package
+#' @docType class
+#' @description Ensembled model from input train objects.
+#'
+#' @section Objects from the Class: Objects are created by calls to
+#' \code{\link{caretEnsemble}}.
+#' @details
+#' The object has the following items
+#' \itemize{
+#' \item{models - a list of the original models to be ensembled}
+#' \item{weights - a matrix with the weights for each model}
+#' \item{error - the final accuracy metric of the ensembled models}
+#' }
+#' @seealso \code{\link{caretEnsemble}}
+#' @keywords classes
+#' @examples
+#'
+#' showClass("caretEnsemble")
+#' methods(class="caretEnsemble")
+#' @export
+setClass(
+  "caretEnsemble",
+  representation(
+    models = "list",
+    weights = "data.frame",
+    error = "numeric"),
+  S3methods=TRUE)
+
 
 #' @title Combine several predictive models via weights
-#' 
-#' @description Find a good linear combination of several classification or regression models, 
+#'
+#' @description Find a good linear combination of several classification or regression models,
 #' using either linear regression, elastic net regression, or greedy optimization.
-#' 
-#' @details Every model in the "library" must be a separate \code{train} object.  For 
-#' example, if you wish to combine a random forests with several different 
+#'
+#' @details Every model in the "library" must be a separate \code{train} object.  For
+#' example, if you wish to combine a random forests with several different
 #' values of mtry, you must build a model for each value of mtry.  If you
 #' use several values of mtry in one train model, (e.g. tuneGrid =
-#' expand.grid(.mtry=2:5)), caret will select the best value of mtry 
-#' before we get a chance to include it in the ensemble.  By default, 
+#' expand.grid(.mtry=2:5)), caret will select the best value of mtry
+#' before we get a chance to include it in the ensemble.  By default,
 #' RMSE is used to ensemble regression models, and AUC is used to ensemble
 #' Classification models.  This function does not currently support multi-class
 #' problems
-#' 
+#'
 #' @param all.models a list of caret models to ensemble.
 #' @param optFUN the optimization function to use
 #' @param ... additional arguments to pass to the optimization function
@@ -56,44 +61,44 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
       optFUN <- greedOptAUC
     } else { optFUN <- greedOptRMSE }
   }
-  
+
   #Determine weights
   weights <- optFUN(predobs$preds, predobs$obs, ...)
   weights[! is.finite(weights)] <- 0
-  
+
   #Normalize and name weights
   weights <- weights/sum(weights)
   names(weights) <- sapply(all.models, function(x) x$method)
-  
+
   #Remove 0-weighted models
   keep <- which(weights != 0)
-  
+
   #Determine RMSE
   if (predobs$type == "Regression"){
     error <- RMSE(predobs$preds %*% weights, predobs$obs)
     names(error) <- 'RMSE'
   } else {
     metric <- 'AUC'
-    error <- colAUC(predobs$preds %*% weights, predobs$obs)
+    error <- caTools::colAUC(predobs$preds %*% weights, predobs$obs)
     names(error) <- 'AUC'
   }
 
   #Return final model
   out <- list(models=all.models[keep], weights=weights[keep], error=error)
   class(out) <- 'caretEnsemble'
-  return(out) 
+  return(out)
 }
 
-#' Make predictions from a caretEnsemble. This function passes the data to each function in 
+#' Make predictions from a caretEnsemble. This function passes the data to each function in
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
 #' @param object a \code{\link{caretEnsemble}} to make predictions from.
-#' @param keepNA a logical indicating whether predictions should be made for all 
-#' cases where sufficient data exists or only for complete cases across all models. When 
-#' TRUE this does not predict for missing values. When FALSE, missing values are overwritten 
-#' with predictions where possible. 
-#' @param se logical, should prediction errors be produced? Default is false. 
-#' @param ... arguments (including newdata) to pass to predict.train. These arguments 
+#' @param keepNA a logical indicating whether predictions should be made for all
+#' cases where sufficient data exists or only for complete cases across all models. When
+#' TRUE this does not predict for missing values. When FALSE, missing values are overwritten
+#' with predictions where possible.
+#' @param se logical, should prediction errors be produced? Default is false.
+#' @param ... arguments (including newdata) to pass to predict.train. These arguments
 #' must be named
 #' @export
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
@@ -119,7 +124,7 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
     out <- list(predicted = est, weight = conf)
   }
   if(se == FALSE){
-    return(out) 
+    return(out)
   } else{
     if(keepNA == FALSE){
       return(list(preds = data.frame(pred = est, se = se.tmp), weight = conf))
@@ -128,16 +133,14 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
   }
 }
 
-
-
 #' @title Summarize the results of caretEnsemble for the user.
 #' @param object a \code{\link{caretEnsemble}} to make predictions from.
-#' @param ... optional additional parameters. 
+#' @param ... optional additional parameters.
 #' @export
 summary.caretEnsemble <- function(object, ...){
   types <- names(object$models)
   if(is.null(types)){
-    types <- as.vector(strsplit(paste0("model", 1:length(object$models)), split = " ", 
+    types <- as.vector(strsplit(paste0("model", 1:length(object$models)), split = " ",
                                 fixed = TRUE), mode = "character")
   }
   types <- paste(types, collapse = ", ")
@@ -148,7 +151,7 @@ summary.caretEnsemble <- function(object, ...){
   cat("They were weighted: \n")
   cat(paste0(paste0(wghts, collapse = " "), "\n"))
   cat(paste0("The resulting ", metric, " is: ", round(val, 4), "\n"))
-  
+
   # Add code to compare ensemble to individual models
   cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
   print(extractModRes(object))
@@ -161,11 +164,11 @@ extractModRes <- function(ensemble){
   if(class(ensemble) != "caretEnsemble") stop("extractModRes requires a caretEnsemble object")
   methods <- names(ensemble$models)
   if(is.null(methods)){
-    methods <- as.vector(strsplit(paste0("model", 1:length(ensemble$models)), split = " ", 
+    methods <- as.vector(strsplit(paste0("model", 1:length(ensemble$models)), split = " ",
                                 fixed = TRUE), mode = "character")
   } #sanitize names
-    modRes <- data.frame(method = methods, 
-                       metric = 0, 
+    modRes <- data.frame(method = methods,
+                       metric = 0,
                        metricSD = 0, stringsAsFactors = FALSE) # prefill data frame
     for(i in 1:length(ensemble$models)){
     dat <- ensemble$models[[i]]$results
@@ -179,19 +182,23 @@ extractModRes <- function(ensemble){
   return(modRes)
 }
 
+varImp <- function (object, ...){
+  UseMethod("varImp")
+}
+
 #' @title Calculate the variable importance of variables in a caretEnsemble.
-#' @description This function wraps the \code{\link{varImp}} function in the 
-#' \code{caret} package to provide a weighted estimate of the importance of 
-#' variables in the ensembled models in a \code{caretEnsemble} object. Variable 
-#' importance is calculated and then averaged by the weight of the overall model 
-#' in the ensembled object. 
+#' @description This function wraps the \code{\link{varImp}} function in the
+#' \code{caret} package to provide a weighted estimate of the importance of
+#' variables in the ensembled models in a \code{caretEnsemble} object. Variable
+#' importance is calculated and then averaged by the weight of the overall model
+#' in the ensembled object.
 #' @param object a \code{caretEnsemble} to make predictions from.
 #' @param ... additional arguments to pass to \code{\link{varImp}}
 #' @export
 varImp.caretEnsemble <- function(object, ...){
-  a <- lapply(object$models, varImp)
+  a <- lapply(object$models, caret::varImp)
   # drop duplicates
-  a <- a[!duplicated(lapply(a, digest))]
+  a <- a[!duplicated(lapply(a, digest::digest))]
   # data.frame
   dat <- rbind(as.data.frame(lapply(a, "[[", 1)))
   # drop duplicates here
