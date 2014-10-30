@@ -195,7 +195,7 @@ extractModRes <- function(ensemble){
 #' per model in object
 #' @importFrom digest digest
 #' @export
-varImp.caretEnsemble <- function(object, ..., scale = TRUE, weight = FALSE){
+varImp.caretEnsemble <- function(object, ..., scale = TRUE, weight = TRUE){
   a <- lapply(object$models, caret::varImp)
   # grab method names
   names(a) <- make.unique(unlist(lapply(object$models, "[[", 1)), sep = "_")
