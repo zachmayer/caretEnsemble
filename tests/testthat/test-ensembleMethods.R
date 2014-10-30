@@ -26,7 +26,7 @@ test_that("We can get variable importance in regression models", {
 })
 
 
-test_that("We get warnings when scale is set to FALSE and weight is TRUE"){
+test_that("We get warnings when scale is set to FALSE and weight is TRUE", {
   gives_warning(varImp(ens.reg, scale = FALSE, weight = TRUE))
   gives_warning(varImp(ens.class, scale = FALSE, weight = TRUE))
   expect_warning(varImp(ens.reg, scale = FALSE, weight = TRUE),
@@ -39,14 +39,14 @@ test_that("We get warnings when scale is set to FALSE and weight is TRUE"){
                  "Weighting of unscaled")
   expect_warning(varImp(ens.class, scale = FALSE),
                  "Weighting of unscaled")
-}
+})
 
 ncol1 <- 7
 ncol2 <- 4
 nrow1 <- 6
 nrow2 <- 6
 
-test_that("We get the right dimensions back"){
+test_that("We get the right dimensions back", {
   expect_equal(ncol(varImp(ens.class)), ncol1)
   expect_equal(ncol(varImp(ens.class, weight = FALSE)), ncol1-1)
   expect_equal(ncol(varImp(ens.class, weight = TRUE)), ncol1)
@@ -59,4 +59,4 @@ test_that("We get the right dimensions back"){
   expect_equal(nrow(varImp(ens.reg)), nrow2)
   expect_equal(nrow(varImp(ens.reg, weight = FALSE)), nrow2)
   expect_equal(nrow(varImp(ens.reg, weight = TRUE)), nrow2)
-}
+})

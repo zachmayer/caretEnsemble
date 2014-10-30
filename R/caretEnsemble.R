@@ -21,6 +21,7 @@ setOldClass("train")
 #' showClass("caretEnsemble")
 #' methods(class="caretEnsemble")
 #' @export
+#' @import methods
 setClass(
   "caretEnsemble",
   representation(
@@ -191,12 +192,14 @@ extractModRes <- function(ensemble){
 #' @param object a \code{caretEnsemble} to make predictions from.
 #' @param scale should importance values be scaled 0 to 100?
 #' @param weight should a model weighted importance be returned?
+#' @param ... other arguments to be passed to varImp
 #' @return A \code{\link{data.frame}} with one row per variable and one column
 #' per model in object
 #' @importFrom digest digest
+#' @importFrom caret varImp
 #' @export
-varImp.caretEnsemble <- function(object, ..., scale = TRUE, weight = TRUE){
-  a <- lapply(object$models, caret::varImp)
+varImp.caretEnsemble <- function(object, scale = TRUE, weight = TRUE, ...){
+  a <- lapply(object$models, varImp)
   # grab method names
   names(a) <- make.unique(unlist(lapply(object$models, "[[", 1)), sep = "_")
   # drop duplicates
@@ -254,3 +257,4 @@ varImpFrame <- function(x){
                  idvar = "var", timevar = "model")
 }
 
+do.call(library, list('methods'))
