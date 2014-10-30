@@ -3,9 +3,9 @@
 set.seed(442)
 library(caret)
 library(randomForest)
-train <- twoClassSim(n = 1000, intercept = -8, linearVars = 3, 
+train <- twoClassSim(n = 1000, intercept = -8, linearVars = 3,
                      noiseVars = 10, corrVars = 4, corrValue = 0.6)
-test <- twoClassSim(n = 1500, intercept = -7, linearVars = 3, 
+test <- twoClassSim(n = 1500, intercept = -7, linearVars = 3,
                     noiseVars = 10, corrVars = 4, corrValue = 0.6)
 
 #######################
@@ -13,35 +13,35 @@ test <- twoClassSim(n = 1500, intercept = -7, linearVars = 3,
 ########################
 
 # Specify controls
-myControl = trainControl(method = "cv", number = 3, repeats = 1, 
-                         p = 0.75, savePrediction = TRUE, 
+myControl = trainControl(method = "cv", number = 3, repeats = 1,
+                         p = 0.75, savePrediction = TRUE,
                          summaryFunction = twoClassSummary,
-                         classProbs = TRUE, returnResamp = "final", 
+                         classProbs = TRUE, returnResamp = "final",
                          returnData = TRUE, verboseIter = FALSE)
 
 
 # Simple two method list
-test1 <- buildModels(methodList = c("knn", "glm"), control = myControl, 
-                     x = train[, -23], 
+test1 <- buildModels(methodList = c("knn", "glm"), control = myControl,
+                     x = train[, -23],
                      y = train[, "Class"], metric = "ROC")
 
 
 # Simple 4 method list
-test2 <- buildModels(methodList = c("knn", "glm", "treebag"), control = myControl, 
-                     x = train[, -23], 
+test2 <- buildModels(methodList = c("knn", "glm", "treebag"), control = myControl,
+                     x = train[, -23],
                      y = train[, "Class"], metric = "ROC")
 
-test3 <- buildModels(methodList = c("lda", "knn", "glm"), 
-                     control = myControl, 
-                     x = train[, -23], 
+test3 <- buildModels(methodList = c("lda", "knn", "glm"),
+                     control = myControl,
+                     x = train[, -23],
                      y = train[ , "Class"], metric = "ROC")
 
 ## make seeds fail
-# fitControl <- trainControl(method='cv', number = 5, savePredictions = TRUE, 
+# fitControl <- trainControl(method='cv', number = 5, savePredictions = TRUE,
 #                            classProbs=TRUE, summaryFunction = twoClassSummary)
-# 
-# out <- buildModels(methodList = c("hda", "multinom"), control = fitControl, 
-#                    x = train[, -23], 
+#
+# out <- buildModels(methodList = c("hda", "multinom"), control = fitControl,
+#                    x = train[, -23],
 #                    y = train[ , "Class"], metric = "ROC",
 #                    tuneLength = 4, baseSeed = 1204)
 # out.ens <- caretEnsemble(out)
@@ -64,20 +64,20 @@ test_that("buildModels objects can be ensembled", {
 
 context("Test that buildModels perserves user specified functions")
 
-myControl = trainControl(method = "cv", number = 3, repeats = 1, 
-                         p = 0.75, savePrediction = TRUE, 
-                         classProbs = TRUE, returnResamp = "final", 
+myControl = trainControl(method = "cv", number = 3, repeats = 1,
+                         p = 0.75, savePrediction = TRUE,
+                         classProbs = TRUE, returnResamp = "final",
                          returnData = TRUE, verboseIter = FALSE)
 
 
-test2 <- buildModels(methodList = c("knn", "nb", "glm"), control = myControl, 
-                     x = train[, -23], 
-                     y = train[, "Class"], tuneLength = 4, baseSeed = 3252, 
+test2 <- buildModels(methodList = c("knn", "nb", "glm"), control = myControl,
+                     x = train[, -23],
+                     y = train[, "Class"], tuneLength = 4, baseSeed = 3252,
                      metric = "Accuracy")
 
-test1 <- buildModels(methodList = c("knn", "lda", "glm"), control = myControl, 
-                     x = train[, -23], 
-                     y = train[, "Class"], tuneLength = 7, baseSeed = 3252, 
+test1 <- buildModels(methodList = c("knn", "lda", "glm"), control = myControl,
+                     x = train[, -23],
+                     y = train[, "Class"], tuneLength = 7, baseSeed = 3252,
                      metric = "Kappa")
 
 test_that("buildModels objects preserve user metric", {
@@ -104,13 +104,13 @@ test_that("User specified parameters can still be ensembled", {
 context("Users can pass a custom tuneList")
 
 # User specifies methods and tuning parameters specifically using a tuneList
-tuneTest <- list(rf=list(tuneGrid=data.frame(.mtry=c(2,4,8,1))), 
-                 knn=list(tuneLength=9), 
+tuneTest <- list(rf=list(tuneGrid=data.frame(.mtry=c(2,4,8,1))),
+                 knn=list(tuneLength=9),
                  lda2=list(tuneLength=6))
 
 # Simple with mix of data.frame and tuneLength
 
-test2a <- buildModels(tuneList = tuneTest, control = myControl,  x = train[, -23], 
+test2a <- buildModels(tuneList = tuneTest, control = myControl,  x = train[, -23],
                      y = train[, "Class"])
 
 myEns2a <- caretEnsemble(test2a)
@@ -125,13 +125,13 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
 
 context("More complex with multidimensional tuneGrid and NULL tuneLengths")
 
-tuneTest2 <- list(glm = list(NULL), lda2 = list(tuneLength = 4), 
-                  knn = list(tuneLength = 2), 
-                  nb = list(tuneGrid = expand.grid(.fL = c(0, 0.4, 0.8, 1, 2), 
+tuneTest2 <- list(glm = list(NULL), lda2 = list(tuneLength = 4),
+                  knn = list(tuneLength = 2),
+                  nb = list(tuneGrid = expand.grid(.fL = c(0, 0.4, 0.8, 1, 2),
                                                   .usekernel = c(TRUE, FALSE))))
 
 
-test3a <- buildModels(tuneList = tuneTest2, control = myControl,  x = train[, -23], 
+test3a <- buildModels(tuneList = tuneTest2, control = myControl,  x = train[, -23],
                       y = train[, "Class"])
 
 myEns3a <- caretEnsemble(test3a)
@@ -152,18 +152,18 @@ context("Test regression")
 # Throws warning, but we're good
 
 # Regression
-myControl2 = trainControl(method = "cv", number = 3, repeats = 1, 
-                          p = 0.75, savePrediction = TRUE, 
-                          returnResamp = "final", 
+myControl2 = trainControl(method = "cv", number = 3, repeats = 1,
+                          p = 0.75, savePrediction = TRUE,
+                          returnResamp = "final",
                           returnData = TRUE, verboseIter = FALSE)
 
-test1 <- buildModels(methodList = c("glm", "lm"), control = myControl2, 
-                     x = train[, c(-23, -1)], 
+test1 <- buildModels(methodList = c("glm", "lm"), control = myControl2,
+                     x = train[, c(-23, -1)],
                      y = train[, 1])
 
 
-test2 <- buildModels(methodList = c("glm", "ppr", "lm"), control = myControl2, 
-                     x = train[, c(-23, -1)], 
+test2 <- buildModels(methodList = c("glm", "ppr", "lm"), control = myControl2,
+                     x = train[, c(-23, -1)],
                      y = train[, 1])
 
 ens1 <- caretEnsemble(test1)

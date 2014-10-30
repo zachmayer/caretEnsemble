@@ -15,6 +15,7 @@ test_that("We can make the predobs matrix", {
 
 test_that("We can multiPredict", {
   data(models_reg)
+  data(X.reg)
   out <- multiPredict(models_reg, 'reg', newdata=X.reg)
   expect_that(out, is_a("matrix"))
   expect_true(all(dim(out)==c(150, 4)))

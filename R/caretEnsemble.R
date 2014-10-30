@@ -182,6 +182,10 @@ extractModRes <- function(ensemble){
   return(modRes)
 }
 
+varImp <- function (object, ...){
+  UseMethod("varImp")
+}
+
 #' @title Calculate the variable importance of variables in a caretEnsemble.
 #' @description This function wraps the \code{\link{varImp}} function in the
 #' \code{caret} package to provide a weighted estimate of the importance of
@@ -194,7 +198,7 @@ extractModRes <- function(ensemble){
 varImp.caretEnsemble <- function(object, ...){
   a <- lapply(object$models, caret::varImp)
   # drop duplicates
-  a <- a[!duplicated(lapply(a, digest))]
+  a <- a[!duplicated(lapply(a, digest::digest))]
   # data.frame
   dat <- rbind(as.data.frame(lapply(a, "[[", 1)))
   # drop duplicates here

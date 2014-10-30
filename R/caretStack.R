@@ -38,7 +38,6 @@ setClass(
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 caretStack <- function(all.models, ...){
 
-
   predobs <- makePredObsMatrix(all.models)
 
   #Build a caret model

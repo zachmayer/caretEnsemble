@@ -61,5 +61,4 @@ safeOptAUC <- function(X, Y, iter = 100L) {
     maxtest       <- max(errors) # check we are better than no weights
   }
   return(weights)
-
 }
