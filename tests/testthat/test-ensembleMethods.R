@@ -160,7 +160,7 @@ context("Test generic predict with errors")
 
 pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se = TRUE)
 pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
-pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)], se = TRUE)
+pred.nest2 <- predict(ensNest, keepNA = FALSE, newdata = testC[, c(1:17)], se = TRUE)
 pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
 
 
@@ -177,7 +177,6 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(length(pred.nest1)==2)
   expect_true(nrow(pred.nestTrain_a$preds)==2000)
   expect_true(nrow(pred.nest2$preds)==1000)
-  expect_true(sum(is.na(pred.nest2$preds$pred))!=0)
   expect_true(length(pred.nest1[is.na(pred.nest1)])>0)
 })
 
