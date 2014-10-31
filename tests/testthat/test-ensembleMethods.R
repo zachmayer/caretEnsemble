@@ -123,9 +123,7 @@ glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
 set.seed(482)
 glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
               trControl = myControl)
-# set.seed(482)
-# glm5 <- train(x = trainC[, c(12:17)], y = trainC[, "Class"], method = 'glm',
-#               trControl = myControl)
+
 
 
 nestedList <- list(glm1, glm2, glm3, glm4)
@@ -149,7 +147,6 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(length(pred.nest1)==1000)
   expect_true(length(pred.nestTrain_a$predicted)==2000)
   expect_true(length(pred.nest2$predicted)==1000)
-  expect_true(length(pred.nest2$predicted[is.na(pred.nest2$predicted)])!=0)
   expect_true(length(pred.nest1[is.na(pred.nest1)])>0)
 })
 
@@ -182,3 +179,78 @@ test_that("We can ensemble models and handle missingness across predictors", {
 
 
 context("Does prediction method work for regression")
+
+mseeds <- vector(mode = "list", length = 12)
+for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
+mseeds[[12]] <- sample.int(1000, 1)
+myControl = trainControl(method = "cv", number = 10, repeats = 1,
+                         p = 0.75, savePrediction = TRUE,
+                         returnResamp = "final",
+                         returnData = TRUE, seeds = mseeds)
+
+trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
+                      corrType = "AR1", corrValue = 0.6, mislabel = 0)
+
+testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
+                     corrType = "AR1", corrValue = 0.6, mislabel = 0)
+
+MCAR.df <- function(df, p){
+  MCARx <- function(x, p){
+    z <- rbinom(length(x), 1, prob=p)
+    x[z==1] <- NA
+    return(x)
+  }
+  if(length(p) == 1){
+    df <- apply(df, 2, MCARx, p)
+  } else if(length(p) > 1) {
+    df <- apply(df, 2, MCARx, sample(p, 1))
+  }
+  df <- as.data.frame(df)
+  return(df)
+}
+
+set.seed(3256)
+trainC[, c(1:15)] <- MCAR.df(trainC[, c(1:15)], 0.15)
+testC[, c(1:15)] <- MCAR.df(testC[, c(1:15)], 0.05)
+
+set.seed(482)
+glm1 <- train(x = trainC[, c(1:15)], y = trainC[, "Corr2"], method = 'glm',
+              trControl = myControl, metric = "RMSE")
+set.seed(482)
+glm2 <- train(x = trainC[, c(1:15)], y = trainC[, "Corr2"], method = 'glm',
+              trControl = myControl, preProcess = "medianImpute", metric = "RMSE")
+set.seed(482)
+glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Corr2"], method = 'glm',
+              trControl = myControl, metric = "RMSE")
+set.seed(482)
+glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Corr2"], method = 'glm',
+              trControl = myControl, metric = "RMSE")
+
+
+
+nestedList <- list(glm1, glm2, glm3, glm4)
+set.seed(482)
+ensNest <- caretEnsemble(nestedList, iter=2000)
+
+pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:15)], se = TRUE)
+pred.nest1a <- predict(ensNest, newdata = testC[, c(1:15)], se=TRUE)
+pred.nest2 <- predict(ensNest, keepNA = FALSE, newdata = testC[, c(1:15)], se = TRUE)
+pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
+
+test_that("We can ensemble models and handle missingness across predictors", {
+  expect_is(pred.nest1, "data.frame")
+  expect_true(is.list(pred.nest2))
+  expect_is(pred.nest1a, "data.frame")
+  expect_is(pred.nestTrain_a, "list")
+  expect_identical(names(pred.nest1), c("pred", "se"))
+  expect_identical(names(pred.nest2), c("preds", "weight"))
+  expect_identical(names(pred.nest2$preds), names(pred.nest1))
+  expect_is(pred.nest2$weight, "matrix")
+  expect_identical(pred.nest1, pred.nest1a)
+  expect_true(length(pred.nest1)==2)
+  expect_true(nrow(pred.nestTrain_a$preds)==2000)
+  expect_true(nrow(pred.nest2$preds)==1000)
+  expect_true(length(pred.nest1$pred[is.na(pred.nest1$pred)]) == 0)
+})
+
+
