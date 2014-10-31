@@ -64,7 +64,7 @@ nestedList <- list(glm1, glm2, glm3, glm4)
 test_that("We can ensemble models of different predictors", {
 ensNest <- caretEnsemble(nestedList, iter=1000)
 expect_that(ensNest, is_a("caretEnsemble"))
-pred.nest <- predict(ensNest, X.reg)
+pred.nest <- predict(ensNest, newdata = X.reg)
 expect_true(is.numeric(pred.nest))
 expect_true(length(pred.nest)==150)
 })
