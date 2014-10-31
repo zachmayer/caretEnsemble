@@ -60,7 +60,7 @@ test_that("wtd.sd applies weights correctly", {
   expect_false(sd(x1) == wtd.sd(x1, weights = x2, normwt=TRUE))
   expect_true(sd(x1) == wtd.sd(x1))
   expect_equal(sd(y), 5)
-  expect_equal(wtd.sd(y, weights = w1), 4.582576)
+  expect_equal(wtd.sd(y, weights = w1), 4.582576, tolerance = .001)
   expect_equal(wtd.sd(y, weights = w1), wtd.sd(y, weights = w1, normwt=TRUE))
   expect_equal(wtd.sd(y, weights = w1*100), wtd.sd(y, weights = w1*100, normwt=TRUE))
 })

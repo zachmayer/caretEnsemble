@@ -152,8 +152,6 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
 })
 
 
-rm(myEns1, myEns2, myEns2a, myEns3a, test1, test2, test2a, test3a)
-
 context("Test regression")
 # Throws warning, but we're good
 
