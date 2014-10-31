@@ -150,13 +150,17 @@ multiPredict <- function(list_of_models, type, ...){
 #' @param x a vector of numerics
 #' @param weights a vector of weights equal to length of x
 #' @param normwt  a logical indicating whether the weights should be normalized to 1
-#' @param na.rm a logical indicating how to handle missing values
+#' @param na.rm a logical indicating how to handle missing values, default = FALSE
 #' @export
-wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = TRUE) {
+wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = FALSE) {
   if (!length(weights)) {
     if (na.rm)
       x <- x[!is.na(x)]
     return(sd(x))
+  }
+  if(length(weights) != length(x)){
+    warning("length of the weights vector != the length of the x vector,
+            weights are being recycled.")
   }
   if (na.rm) {
     s <- !is.na(x + weights)

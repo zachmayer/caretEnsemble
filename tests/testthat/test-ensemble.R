@@ -3,10 +3,22 @@ context("Does ensembling and prediction work?")
 library(caret)
 library(randomForest)
 
+load(system.file("testdata/models_reg.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/X.reg.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/Y.reg.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/models_class.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/X.class.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/Y.class.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+
+
+
 test_that("We can ensemble regression models", {
-  data(models_reg)
-  data(X.reg)
-  data(Y.reg)
   ens.reg <- caretEnsemble(models_reg, iter=1000)
   expect_that(ens.reg, is_a("caretEnsemble"))
   pred.reg <- predict(ens.reg)
@@ -15,9 +27,6 @@ test_that("We can ensemble regression models", {
 })
 
 test_that("We can ensemble classification models", {
-  data(models_class)
-  data(X.class)
-  data(Y.class)
   ens.class <- caretEnsemble(models_class, iter=1000)
   expect_that(ens.class, is_a("caretEnsemble"))
   pred.class <- predict(ens.class)
@@ -124,8 +133,8 @@ pred.nestTrain_b <- predict(ensNest, keepNA = TRUE)
 test_that("We can ensemble models and handle missingness across predictors", {
   expect_that(ensNest, is_a("caretEnsemble"))
   pred.nest1 <- predict(ensNest,  newdata=testC[, c(1:17)])
-  expect_warning(predict(ensNest, testC[, c(1:17)]))
-  expect_message(predict(ensNest, keepNA=FALSE, testC[, c(1:17)]))
+  expect_message(predict(ensNest, newdata = testC[, c(1:17)]))
+  expect_message(predict(ensNest, keepNA=FALSE, newdata=testC[, c(1:17)]))
   expect_true(is.numeric(pred.nest1))
   expect_true(is.list(pred.nest2))
   expect_true(is.numeric(pred.nest1a))
@@ -134,33 +143,5 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(length(pred.nestTrain_a$predicted)==2000)
   expect_true(length(pred.nest2$predicted)==1000)
   expect_true(length(pred.nest2$predicted[is.na(pred.nest2$predicted)])==0)
-  expect_true(length(pred.nest1[is.na(pred.nest1)])>0)
-})
-
-
-## Test generics summary and predict
-
-context("Test generic predict with errors")
-
-pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se = TRUE)
-pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
-pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)], se = TRUE)
-pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
-
-
-test_that("We can ensemble models and handle missingness across predictors", {
-  expect_is(pred.nest1, "data.frame")
-  expect_true(is.list(pred.nest2))
-  expect_is(pred.nest1a, "data.frame")
-  expect_is(pred.nestTrain_a, "list")
-  expect_identical(names(pred.nest1), c("pred", "se"))
-  expect_identical(names(pred.nest2), c("preds", "weight"))
-  expect_identical(names(pred.nest2$preds), names(pred.nest1))
-  expect_is(pred.nest2$weight, "matrix")
-  expect_identical(pred.nest1, pred.nest1a)
-  expect_true(length(pred.nest1)==2)
-  expect_true(nrow(pred.nestTrain_a$preds)==2000)
-  expect_true(nrow(pred.nest2$preds)==1000)
-  expect_true(sum(is.na(pred.nest2$preds$pred))==0)
   expect_true(length(pred.nest1[is.na(pred.nest1)])>0)
 })

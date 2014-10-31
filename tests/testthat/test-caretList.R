@@ -69,7 +69,7 @@ test_that("longer tests", {
 
 })
 
-context("Test that buildModels perserves user specified functions")
+context("Test that buildModels preserves user specified functions")
 
 myControl = trainControl(method = "cv", number = 3, repeats = 1,
                          p = 0.75, savePrediction = TRUE,

@@ -105,22 +105,22 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
   # Default se to FALSE
   if(missing(se)){se <- FALSE}
-  type <- checkModels_extractTypes(object$models)
-  preds <- multiPredict(object$models, type, ...)
+  modtype <- checkModels_extractTypes(object$models)
+  preds <- multiPredict(object$models, type = modtype, ...)
   if(keepNA == TRUE){
     message("Predictions being made only for cases with complete data")
     out <- as.numeric(preds %*% object$weights)
     se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
-    se.tmp <- 2 * se.tmp^2
-  } else {
+#     se.tmp <- 2 * se.tmp
+  } else if(keepNA == FALSE){
     message("Predictions being made only from models with available data")
     conf <- ifelse(is.na(preds), NA, 1)
     conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
-    est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm=TRUE)})
-    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm=TRUE)
-    se.tmp <- 2 * se.tmp^2
+    est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm = TRUE)})
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm = TRUE)
+#     se.tmp <- 2 * se.tmp^2
     #se.tmp[!is.finite(se.tmp)] <- 0
     out <- list(predicted = est, weight = conf)
   }
