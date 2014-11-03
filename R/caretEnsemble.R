@@ -168,20 +168,101 @@ extractModRes <- function(ensemble){
     methods <- as.vector(strsplit(paste0("model", 1:length(ensemble$models)), split = " ",
                                 fixed = TRUE), mode = "character")
   } #sanitize names
-    modRes <- data.frame(method = methods,
-                       metric = 0,
-                       metricSD = 0, stringsAsFactors = FALSE) # prefill data frame
-    for(i in 1:length(ensemble$models)){
-    dat <- ensemble$models[[i]]$results
-    metric <- ensemble$models[[i]]$metric
-    SDVAR <- paste0(ensemble$models[[i]]$metric, "SD")
-    best <- max(dat[, metric])
-    bestSD <- max(dat[dat[, metric] == best, SDVAR])
-    modRes[i,  "metric"] <- best
-    modRes[i, "metricSD"] <- bestSD
-  }
+  metric <- names(ensemble$error)
+  modRes <- data.frame(method = methods,
+                       metric = unlist(lapply(ensemble$models,
+                                              getMetric.train,
+                                              metric = metric)),
+                       metricSD = unlist(lapply(ensemble$models,
+                                                getMetricSD.train,
+                                                metric = metric)),
+                       stringsAsFactors = FALSE) # prefill data frame
   return(modRes)
 }
+
+#' Extract a model accuracy metric from a \code{\link{train}} object.
+#' @param x a train object from the \code{caret} package.
+#' @param metric a character, either "RMSE" or "AUC" indicating which metric to extract
+#' @return A numeric representing the metric desired
+#' @rdname metrics
+#' @export
+getMetric <- function(x, metric){
+  UseMethod("getMetric")
+}
+
+#' @export
+getMetric.train <- function(x, metric= c("AUC", "RMSE")){
+  if(metric == "AUC"){
+    return(getAUC(x))
+  } else if(metric == "RMSE"){
+    return(getRMSE(x))
+  }
+}
+
+#' Extract the AUC metric from a \code{\link{train}} object.
+#' @param x a train object from the \code{caret} package.
+#' @return A numeric for the AUC of the best model
+#' @rdname metrics
+#' @export
+getAUC <- function(x){
+  UseMethod("getAUC")
+}
+
+#' @export
+#' @importFrom caTools colAUC
+getAUC.train <- function(x){
+  if(x$modelType != "Classification"){
+    stop("AUC can only be calculated for classification models")
+  }
+  AUC <- colAUC(x$pred$No, x$pred$obs)
+  return(as.numeric(AUC))
+}
+
+#' Extract the RMSE metric from a \code{\link{train}} object.
+#' @param x a train object from the \code{caret} package.
+#' @return A numeric for the RMSE of the best model
+#' @rdname metrics
+#' @export
+getRMSE <- function(x){
+  UseMethod("getRMSE")
+}
+
+#' @export
+#' @importFrom caret RMSE
+getRMSE.train <- function(x){
+  #TODO: decide about NAs
+  if(x$modelType != "Regression"){
+    stop("RMSE can only be calculated for regression models")
+  }
+  out <- RMSE(x$pred$pred, x$pred$obs)
+  return(as.numeric(out))
+}
+
+
+#' Extract the standard deviation from resamples for an accuracy metric from
+#' a \code{\link{train}} object.
+#' @param train a train object from the \code{caret} package.
+#' @param metric a character, either "RMSE" or "AUC" indicating which metric to extract
+#' @return A numeric for the standard deviation of the selected metric across
+#' resamples for the best model
+#' @rdname metrics
+#' @export
+getMetricSD <- function(x, metric){
+  UseMethod("getMetricSD")
+}
+
+#' @export
+getMetricSD.train <- function(x, metric = c("RMSE", "AUC")){
+  if(metric == "AUC"){
+    out <- by(x$pred[, c("No","obs")], x$pred[, "Resample"],
+       function(x) colAUC(x[,1], x[,2]))
+  } else if(metric == "RMSE"){
+    out <- by(x$pred[, c("pred","obs")], x$pred[, "Resample"],
+              function(x) RMSE(x[,1], x[,2]))
+  }
+  out <- sd(as.numeric(out))
+}
+
 
 #' @title Calculate the variable importance of variables in a caretEnsemble.
 #' @description This function wraps the \code{\link{varImp}} function in the

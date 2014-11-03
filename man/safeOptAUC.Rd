@@ -19,4 +19,9 @@ A numeric of the weights for each model
 This algorithm optimizes the AUC for regression models to avoid ensembling
 where the ensembled model fits worse than any component model
 }
+\details{
+This optimizer uses a stopping criterion that if the optimized model
+has an AUC that is worse than any individual model, it continues optimizing
+until this is no longer the case.
+}
 
