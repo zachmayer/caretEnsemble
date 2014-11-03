@@ -16,6 +16,8 @@ load(system.file("testdata/X.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/Y.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/stuGradMod.rda",
+                 package="caretEnsemble", mustWork=TRUE))
 ens.class <- caretEnsemble(models_class, iter=1000)
 # varImp struggles with the rf in our test suite, why?
 ens.reg <- caretEnsemble(models_reg[2:4], iter=1000)
@@ -108,9 +110,9 @@ test_that("getAUC and getMetric are identical", {
 
 test_that("Metrics are accurate for RMSE", {
   expect_equal(getRMSE(models_reg[[1]]), 0.3464599, tol = 0.00001)
-  expect_equal(getRMSE(models_reg[[1]]), 0.324923, tol = 0.00001)
-  expect_equal(getRMSE(models_reg[[1]]), 0.324923, tol = 0.00001)
-  expect_equal(getRMSE(models_reg[[1]]), 0.3567899, tol = 0.00001)
+  expect_equal(getRMSE(models_reg[[2]]), 0.324923, tol = 0.00001)
+  expect_equal(getRMSE(models_reg[[3]]), 0.324923, tol = 0.00001)
+  expect_equal(getRMSE(models_reg[[4]]), 0.3567899, tol = 0.00001)
 })
 
 test_that("getMetric and getRMSE are identical", {
@@ -125,7 +127,6 @@ test_that("getMetric and getRMSE are identical", {
 })
 
 context("Does summary method work as expected")
-
 
 
 test_that("No errors are thrown by a summary", {

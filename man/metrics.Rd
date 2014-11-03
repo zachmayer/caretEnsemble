@@ -2,49 +2,37 @@
 \name{getMetric}
 \alias{getAUC}
 \alias{getMetric}
-\alias{getMetricSD}
+\alias{getMetric.train}
 \alias{getRMSE}
-\title{Extract a model accuracy metric from a \code{\link{train}} object.}
+\title{Extract a model accuracy metric from an S3 object.}
 \usage{
 getMetric(x, metric)
+
+\method{getMetric}{train}(x, metric = c("AUC", "RMSE"))
 
 getAUC(x)
 
 getRMSE(x)
-
-getMetricSD(x, metric)
 }
 \arguments{
-\item{x}{a train object from the \code{caret} package.}
-
-\item{metric}{a character, either "RMSE" or "AUC" indicating which metric to extract}
-
-\item{x}{a train object from the \code{caret} package.}
-
-\item{x}{a train object from the \code{caret} package.}
-
-\item{train}{a train object from the \code{caret} package.}
+\item{x}{an object with model performanc metrics}
 
 \item{metric}{a character, either "RMSE" or "AUC" indicating which metric to extract}
 }
 \value{
-A numeric representing the metric desired
+A numeric representing the metric desired metric.
 
 A numeric for the AUC of the best model
 
 A numeric for the RMSE of the best model
-
-A numeric for the standard deviation of the selected metric across
-resamples for the best model
 }
 \description{
+Extract a model accuracy metric from an S3 object.
+
 Extract a model accuracy metric from a \code{\link{train}} object.
 
 Extract the AUC metric from a \code{\link{train}} object.
 
-Extract the RMSE metric from a \code{\link{train}} object.
-
-Extract the standard deviation from resamples for an accuracy metric from
-a \code{\link{train}} object.
+Extract the RMSE metric from a model object.
 }
 

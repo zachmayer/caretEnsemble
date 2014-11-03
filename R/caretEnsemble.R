@@ -111,7 +111,6 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
     message("Predictions being made only for cases with complete data")
     out <- as.numeric(preds %*% object$weights)
     se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
-#     se.tmp <- 2 * se.tmp
   } else if(keepNA == FALSE){
     message("Predictions being made only from models with available data")
     conf <- ifelse(is.na(preds), NA, 1)
@@ -120,8 +119,6 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
     conf <- t(conf); conf[is.na(conf)] <- 0
     est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm = TRUE)})
     se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm = TRUE)
-#     se.tmp <- 2 * se.tmp^2
-    #se.tmp[!is.finite(se.tmp)] <- 0
     out <- list(predicted = est, weight = conf)
   }
   if(se == FALSE){
@@ -155,7 +152,7 @@ summary.caretEnsemble <- function(object, ...){
 
   # Add code to compare ensemble to individual models
   cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
-  print(extractModRes(object))
+  print(extractModRes(object), row.names = FALSE)
 }
 
 #' Extract the model accuracy metrics of the individual models in an ensemble object.
@@ -180,16 +177,18 @@ extractModRes <- function(ensemble){
   return(modRes)
 }
 
-#' Extract a model accuracy metric from a \code{\link{train}} object.
-#' @param x a train object from the \code{caret} package.
+#' Extract a model accuracy metric from an S3 object.
+#' @param x an object with model performanc metrics
 #' @param metric a character, either "RMSE" or "AUC" indicating which metric to extract
-#' @return A numeric representing the metric desired
+#' @return A numeric representing the metric desired metric.
 #' @rdname metrics
 #' @export
 getMetric <- function(x, metric){
   UseMethod("getMetric")
 }
 
+#' Extract a model accuracy metric from a \code{\link{train}} object.
+#' @rdname metrics
 #' @export
 getMetric.train <- function(x, metric= c("AUC", "RMSE")){
   if(metric == "AUC"){
@@ -200,7 +199,6 @@ getMetric.train <- function(x, metric= c("AUC", "RMSE")){
 }
 
 #' Extract the AUC metric from a \code{\link{train}} object.
-#' @param x a train object from the \code{caret} package.
 #' @return A numeric for the AUC of the best model
 #' @rdname metrics
 #' @export
@@ -214,12 +212,16 @@ getAUC.train <- function(x){
   if(x$modelType != "Classification"){
     stop("AUC can only be calculated for classification models")
   }
-  AUC <- colAUC(x$pred$No, x$pred$obs)
+  bestPerf <- x$bestTune
+  colnames(bestPerf) <- gsub("^\\.", "", colnames(bestPerf))
+  dat <- merge(x$pred, bestPerf)
+  z <- table(dat$obs)
+  prevOutcome <- names(z)[z == max(z)]
+  AUC <- colAUC(dat[, prevOutcome], dat$obs)
   return(as.numeric(AUC))
 }
 
-#' Extract the RMSE metric from a \code{\link{train}} object.
-#' @param x a train object from the \code{caret} package.
+#' Extract the RMSE metric from a model object.
 #' @return A numeric for the RMSE of the best model
 #' @rdname metrics
 #' @export
@@ -228,24 +230,28 @@ getRMSE <- function(x){
 }
 
 #' @export
-#' @importFrom caret RMSE
 getRMSE.train <- function(x){
   #TODO: decide about NAs
   if(x$modelType != "Regression"){
     stop("RMSE can only be calculated for regression models")
   }
-  out <- RMSE(x$pred$pred, x$pred$obs)
+  bestPerf <- x$bestTune
+  colnames(bestPerf) <- gsub("^\\.", "", colnames(bestPerf))
+  dat <- merge(x$pred, bestPerf)
+  z <- table(dat$obs)
+  prevOutcome <- names(z)[z == max(z)]
+  out <- RMSE(dat$pred, dat$obs)
   return(as.numeric(out))
 }
 
 
 #' Extract the standard deviation from resamples for an accuracy metric from
-#' a \code{\link{train}} object.
-#' @param train a train object from the \code{caret} package.
+#' a model object.
+#' @param x an object with model performanc metrics
 #' @param metric a character, either "RMSE" or "AUC" indicating which metric to extract
 #' @return A numeric for the standard deviation of the selected metric across
-#' resamples for the best model
-#' @rdname metrics
+#' tuning parameters and resamples in the original object.
+#' @rdname metricsSD
 #' @export
 getMetricSD <- function(x, metric){
   UseMethod("getMetricSD")
@@ -254,13 +260,16 @@ getMetricSD <- function(x, metric){
 #' @export
 getMetricSD.train <- function(x, metric = c("RMSE", "AUC")){
   if(metric == "AUC"){
-    out <- by(x$pred[, c("No","obs")], x$pred[, "Resample"],
+    z <- table(x$pred$obs)
+    prevOutcome <- names(z)[z == max(z)]
+    out <- by(x$pred[, c(prevOutcome, "obs")], x$pred[, "Resample"],
        function(x) colAUC(x[,1], x[,2]))
   } else if(metric == "RMSE"){
     out <- by(x$pred[, c("pred","obs")], x$pred[, "Resample"],
               function(x) RMSE(x[,1], x[,2]))
   }
   out <- sd(as.numeric(out))
+  return(out)
 }
 
 
@@ -277,7 +286,6 @@ getMetricSD.train <- function(x, metric = c("RMSE", "AUC")){
 #' @return A \code{\link{data.frame}} with one row per variable and one column
 #' per model in object
 #' @importFrom digest digest
-#' @importFrom caret varImp
 #' @export
 varImp.caretEnsemble <- function(object, scale = TRUE, weight = TRUE, ...){
   a <- lapply(object$models, varImp)
@@ -338,4 +346,4 @@ varImpFrame <- function(x){
                  idvar = "var", timevar = "model")
 }
 
-do.call(library, list('methods'))
+do.call(library, list('methods', 'caret'))
