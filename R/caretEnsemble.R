@@ -191,6 +191,12 @@ getMetric <- function(x, metric){
 #' @rdname metrics
 #' @export
 getMetric.train <- function(x, metric= c("AUC", "RMSE")){
+  if(missing(metric)){
+    metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
+    warning("Metric not specified, so default is being chosen.")
+  }
+  metricTest <- ifelse(metric == "AUC", "Classification", "Regression")
+  stopifnot(x$modelType == metricTest)
   if(metric == "AUC"){
     return(getAUC(x))
   } else if(metric == "RMSE"){
@@ -259,6 +265,12 @@ getMetricSD <- function(x, metric){
 
 #' @export
 getMetricSD.train <- function(x, metric = c("RMSE", "AUC")){
+  if(missing(metric)){
+    metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
+    warning("Metric not specified, so default is being chosen.")
+  }
+  metricTest <- ifelse(metric == "AUC", "Classification", "Regression")
+  stopifnot(x$modelType == metricTest)
   if(metric == "AUC"){
     z <- table(x$pred$obs)
     prevOutcome <- names(z)[z == max(z)]
