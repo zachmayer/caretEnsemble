@@ -3,7 +3,7 @@
 \alias{caretStack}
 \title{Combine several predictive models via stacking}
 \usage{
-\method{predict}{caretStack}(all.models, ...)
+caretStack(all.models, ...)
 }
 \arguments{
 \item{all.models}{a list of caret models to ensemble.}

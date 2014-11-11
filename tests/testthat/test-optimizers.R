@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Test optimizers
-=======
 # ## Test optimizers
 #
 #
@@ -45,5 +42,3 @@
 # weights1 <- weights1/sum(weights1)
 # weights3 <- weights3/sum(weights3)
 # expect_equal(weights1, weights3)
->>>>>>> 6d5c0db380c4ecee692f26e2af30ec9765ba6494
-

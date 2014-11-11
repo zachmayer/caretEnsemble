@@ -266,8 +266,6 @@ getMetricSD.train <- function(x, metric = c("RMSE", "AUC")){
 #' @return A \code{\link{data.frame}} with one row per variable and one column
 #' per model in object
 #' @importFrom digest digest
-#' @importFrom caret varImp
-#' @method varImp caretEnsemble
 #' @export
 varImp.caretEnsemble <- function(object, scale = TRUE, weight = TRUE, ...){
   a <- lapply(object$models, varImp)
