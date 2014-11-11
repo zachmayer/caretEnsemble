@@ -57,12 +57,12 @@ caretStack <- function(all.models, ...){
 #' @param newdata a new dataframe to make predictions on
 #' @param ... arguments to pass to \code{\link{predict.train}}.
 #' @export
-predict.caretStack <- function(object, newdata=NULL, ...){
+setMethod("predict", "caretStack", function(object, newdata=NULL, ...){
   #TODO: grab type argument
   #TODO: rename my "type" variable
   type <- checkModels_extractTypes(object$models)
   preds <- multiPredict(object$models, newdata=newdata, type)
   out <- predict(object$ens_model, newdata=preds, ...)
   return(out)
-}
+})
 
