@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 todo.txt
 .git
+^data-raw$
+^\.travis\.yml$

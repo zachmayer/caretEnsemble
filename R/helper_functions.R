@@ -3,7 +3,7 @@
 
 #' @title Check train models and extract their types
 #' @description Check that a list of models are all train objects and are ready to be ensembled together
-#' 
+#'
 #' @param list_of_models a list of caret models to check
 #' @export
 checkModels_extractTypes <- function(list_of_models){
@@ -11,12 +11,12 @@ checkModels_extractTypes <- function(list_of_models){
   #Check that we have a list of train models
   stopifnot(class(list_of_models)=='list')
   stopifnot(all(sapply(list_of_models, function(x) class(x)[1])=='train'))
-  
+
   #Check that models have the same type
   types <- sapply(list_of_models, function(x) x$modelType)
   type <- types[1]
   stopifnot(all(types==type)) #Maybe in the future we can combine reg and class models
-  
+
   #Check that the model type is VALID
   stopifnot(all(types %in% c('Classification', 'Regression')))
 
@@ -28,9 +28,9 @@ checkModels_extractTypes <- function(list_of_models){
     } else {
       stop('Not yet implemented for multiclass problems')
     }
-    
+
   }
-  
+
   #Check that classification models saved probabilities TODO: ALLOW NON PROB MODELS!
   if (type=='Classification'){
     probModels <- sapply(list_of_models, function(x) modelLookup(x$method)[1,'probModel'])
@@ -38,14 +38,14 @@ checkModels_extractTypes <- function(list_of_models){
     classProbs <- sapply(list_of_models, function(x) x$control$classProbs)
     stopifnot(all(classProbs))
   }
-  
+
   #Check that all models saved their predictions so we can ensemble them
   stopifnot(all(sapply(list_of_models, function(x) x$control$savePredictions)))
-  
+
   #Check that every model used the same resampling indexes
   indexes <- lapply(list_of_models, function(x) x$control$index)
   stopifnot(length(unique(indexes))==1)
-  
+
   return(type)
 }
 
@@ -57,10 +57,10 @@ extractBestPreds <- function(list_of_models){
   #TODO: add an optional progress bar?
   #Extract resampled predictions from each model
   modelLibrary <- lapply(list_of_models, function(x) {x$pred})
-  
+
   #Extract the best tuning parameters from each model
   tunes <- lapply(list_of_models, function(x) {x$bestTune})
-  
+
   #Subset the resampled predictions to the model with the best tune and sort
   newModels <- lapply(1:length(modelLibrary), function(x) NA)
   for (i in 1:length(modelLibrary)){
@@ -78,10 +78,10 @@ extractBestPreds <- function(list_of_models){
 
 #' @title Check predictions
 #' @description Check that a list of predictions from caret models are all valid
-#' 
+#'
 #' @param list_of_models a list of caret models to check
 #' @export
-#' 
+#'
 checkPreds <- function(list_of_models){
   stop('NOT IMPLEMENTED')
 }
@@ -89,49 +89,49 @@ checkPreds <- function(list_of_models){
 #' @title Make a prediction matrix from a list of models
 #' @description Extract obs from one models, and a matrix of predictions from all other models, a
 #' helper function
-#' 
+#'
 #' @param list_of_models a list of caret models to extract predictions from
 #' @export
 makePredObsMatrix <- function(list_of_models){
-  
+
   #Check models and extract type (class or reg)
   type <- checkModels_extractTypes(list_of_models)
-  
+
   #Make a list of models
   modelLibrary <- extractBestPreds(list_of_models)
-  
+
   #Insert checks here: observeds are all equal, row indexes are equal, Resamples are equal
-  
+
   #Extract observations from the frist model in the list
   obs <- modelLibrary[[1]]$obs
   if (type=='Classification'){
     positive <- as.character(unique(modelLibrary[[1]]$obs)[2]) #IMPROVE THIS!
   }
-  
+
   #Extract predicteds
   if (type=='Regression'){
     preds <- sapply(modelLibrary, function(x) as.numeric(x$pred))
   } else if (type=='Classification'){
     preds <- sapply(modelLibrary, function(x) as.numeric(x[,positive]))
   }
-  
+
   #Name the predicteds and return
   colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
-  return(list(obs=obs, preds=preds, type=type)) 
+  return(list(obs=obs, preds=preds, type=type))
 }
 
 #' @title Create a matrix of predictions for each of the models in a list
 #' @description Make a matrix of predictions from a list of caret models
-#' 
+#'
 #' @param list_of_models a list of caret models to make predictions for
 #' @param type Classification or Regression
-#' @param ... additional arguments to pass to predict.train. Pass the \code{newdata} 
-#' argument here, DO NOT PASS the "type" argument.  Classification models will 
+#' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
+#' argument here, DO NOT PASS the "type" argument.  Classification models will
 #' return probabilities if possible, and regression models will return "raw".
 #' @export
 multiPredict <- function(list_of_models, type, ...){
   #TODO: Add progressbar argument
-  preds <- pbsapply(list_of_models, function(x){
+  preds <- pbapply::pbsapply(list_of_models, function(x){
     if (type=='Classification' & x$control$classProbs){
       predict(x, type='prob', ...)[,2]
     } else {
@@ -139,33 +139,38 @@ multiPredict <- function(list_of_models, type, ...){
     }
   })
   colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
-  
+
   return(preds)
 }
 
 
 #' @title Calculate a weighted standard deviation
 #' @description Used to weight deviations among ensembled model preditions
-#' 
+#'
 #' @param x a vector of numerics
 #' @param weights a vector of weights equal to length of x
 #' @param normwt  a logical indicating whether the weights should be normalized to 1
-#' @param na.rm a logical indicating how to handle missing values
+#' @param na.rm a logical indicating how to handle missing values, default = FALSE
 #' @export
-wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = TRUE) {
+wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = FALSE) {
   if (!length(weights)) {
-    if (na.rm) 
+    if (na.rm)
       x <- x[!is.na(x)]
     return(sd(x))
+  }
+  if(length(weights) != length(x)){
+    warning("length of the weights vector != the length of the x vector,
+            weights are being recycled.")
   }
   if (na.rm) {
     s <- !is.na(x + weights)
     x <- x[s]
     weights <- weights[s]
   }
-  if (normwt) 
+  if (normwt){
     weights <- weights * length(x)/sum(weights)
+  }
   xbar <- sum(weights * x)/sum(weights)
-  out <- sqrt(sum(weights * ((x - xbar)^2))/(sum(weights) - 1))
+  out <- sqrt(sum(weights * ((x - xbar)^2))/(sum(weights)))
   return(out)
 }
