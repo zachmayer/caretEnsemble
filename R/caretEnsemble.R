@@ -1,6 +1,3 @@
-setOldClass("train")
-
-
 #' @title Class "caretEnsemble" of ensembled train objects from the caret package
 #' @docType class
 #' @description Ensembled model from input train objects.
@@ -16,19 +13,12 @@ setOldClass("train")
 #' }
 #' @seealso \code{\link{caretEnsemble}}
 #' @keywords classes
-#' @examples
-#'
-#' showClass("caretEnsemble")
-#' methods(class="caretEnsemble")
 #' @export
-#' @import methods
-setClass(
-  "caretEnsemble",
-  representation(
-    models = "list",
-    weights = "data.frame",
-    error = "numeric"),
-  S3methods=TRUE)
+caretEnsemble <- function(models, weights, error, ...)  {
+  object <- list(models = models, weights = weights, error = error)
+  class(object) <- "caretEnsemble"
+  return (object)
+}
 
 
 #' @title Combine several predictive models via weights

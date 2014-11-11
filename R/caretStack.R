@@ -16,13 +16,11 @@
 #' showClass("caretEnsemble")
 #' methods(class="caretEnsemble")
 #' @export
-setClass(
-  "caretStack",
-  representation(
-    models = "list",
-    ens_model = "train",
-    error = "numeric"),
-  S3methods=TRUE)
+  caretStack <- function(models, ens_model, error, ...)  {
+    object <- list(models = models, ens_model = ens_model, error = error)
+    class(object) <- "caretStack"
+    return (object)
+  }
 
 #' @title Combine several predictive models via stacking
 #'
