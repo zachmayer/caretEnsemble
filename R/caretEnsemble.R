@@ -101,6 +101,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @param se logical, should prediction errors be produced? Default is false.
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments
 #' must be named
+#' @method predict caretEnsemble
 #' @export
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
   # Default se to FALSE
@@ -298,6 +299,8 @@ getMetricSD.train <- function(x, metric = c("RMSE", "AUC")){
 #' @return A \code{\link{data.frame}} with one row per variable and one column
 #' per model in object
 #' @importFrom digest digest
+#' @importFrom caret varImp
+#' @method varImp caretEnsemble
 #' @export
 varImp.caretEnsemble <- function(object, scale = TRUE, weight = TRUE, ...){
   a <- lapply(object$models, varImp)
