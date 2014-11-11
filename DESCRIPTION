@@ -24,7 +24,8 @@ Suggests:
     randomForest,
     e1071,
     kernlab,
-    ipred
+    ipred,
+    pROC
 Imports:
     caTools,
     pbapply,
