@@ -1,26 +1,23 @@
-#' @title Class "caretStack" of ensembled train objects from the caret package
-#' @docType class
-#' @section Objects from the Class: Objects are created by calls to
-#' \code{\link{caretStack}}.
-#' @details
-#' The object has the following items
-#' \itemize{
-#' \item{models - a list of the original models to be ensembled}
-#' \item{ens_model - a \code{\link{train}} object}
-#' \item{error - the final accuracy metric of the ensembled models}
-#' }
-#' @seealso \code{\link{caretEnsemble}}
-#' @keywords classes
-#' @examples
-#'
-#' showClass("caretEnsemble")
-#' methods(class="caretEnsemble")
-#' @export
-  caretStack <- function(models, ens_model, error, ...)  {
-    object <- list(models = models, ens_model = ens_model, error = error)
-    class(object) <- "caretStack"
-    return (object)
-  }
+# #' @title Class "caretStack" of ensembled train objects from the caret package
+# #' @docType class
+# #' @section Objects from the Class: Objects are created by calls to
+# #' \code{\link{caretStack}}.
+# #' @details
+# #' The object has the following items
+# #' \itemize{
+# #' \item{models - a list of the original models to be ensembled}
+# #' \item{ens_model - a \code{\link{train}} object}
+# #' \item{error - the final accuracy metric of the ensembled models}
+# #' }
+# #' @seealso \code{\link{caretEnsemble}}
+# #' @keywords classes
+# #' @examples
+# #' @export
+#   .caretStack <- function(models, ens_model, error, ...)  {
+#     object <- list(models = models, ens_model = ens_model, error = error)
+#     class(object) <- "caretStack"
+#     return (object)
+#   }
 
 #' @title Combine several predictive models via stacking
 #'

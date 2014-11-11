@@ -1,24 +1,24 @@
-#' @title Class "caretEnsemble" of ensembled train objects from the caret package
-#' @docType class
-#' @description Ensembled model from input train objects.
-#'
-#' @section Objects from the Class: Objects are created by calls to
-#' \code{\link{caretEnsemble}}.
-#' @details
-#' The object has the following items
-#' \itemize{
-#' \item{models - a list of the original models to be ensembled}
-#' \item{weights - a matrix with the weights for each model}
-#' \item{error - the final accuracy metric of the ensembled models}
-#' }
-#' @seealso \code{\link{caretEnsemble}}
-#' @keywords classes
-#' @export
-caretEnsemble <- function(models, weights, error, ...)  {
-  object <- list(models = models, weights = weights, error = error)
-  class(object) <- "caretEnsemble"
-  return (object)
-}
+# #' @title Class "caretEnsemble" of ensembled train objects from the caret package
+# #' @docType class
+# #' @description Ensembled model from input train objects.
+# #'
+# #' @section Objects from the Class: Objects are created by calls to
+# #' \code{\link{caretEnsemble}}.
+# #' @details
+# #' The object has the following items
+# #' \itemize{
+# #' \item{models - a list of the original models to be ensembled}
+# #' \item{weights - a matrix with the weights for each model}
+# #' \item{error - the final accuracy metric of the ensembled models}
+# #' }
+# #' @seealso \code{\link{caretEnsemble}}
+# #' @keywords classes
+# #' @export
+# .caretEnsemble <- function(models, weights, error, ...)  {
+#   object <- list(models = models, weights = weights, error = error)
+#   class(object) <- "caretEnsemble"
+#   return (object)
+# }
 
 
 #' @title Combine several predictive models via weights
