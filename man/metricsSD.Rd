@@ -13,7 +13,7 @@ getMetricSD(x, metric)
 }
 \value{
 A numeric for the standard deviation of the selected metric across
-resamples for the best model
+tuning parameters and resamples in the original object.
 }
 \description{
 Extract the standard deviation from resamples for an accuracy metric from

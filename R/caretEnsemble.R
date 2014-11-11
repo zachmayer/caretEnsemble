@@ -101,9 +101,8 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @param se logical, should prediction errors be produced? Default is false.
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments
 #' must be named
-#' @method predict caretEnsemble
 #' @export
-predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
+setMethod("predict", "caretEnsemble", function(object, keepNA = TRUE, se = NULL, ...){
   # Default se to FALSE
   if(missing(se)){se <- FALSE}
   modtype <- checkModels_extractTypes(object$models)
@@ -130,13 +129,13 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
     }
     return(data.frame(pred = out, se = se.tmp))
   }
-}
+})
 
 #' @title Summarize the results of caretEnsemble for the user.
 #' @param object a \code{\link{caretEnsemble}} to make predictions from.
 #' @param ... optional additional parameters.
 #' @export
-summary.caretEnsemble <- function(object, ...){
+setMethod("summary", "caretEnsemble", function(object, ...){
   types <- names(object$models)
   if(is.null(types)){
     types <- as.vector(strsplit(paste0("model", 1:length(object$models)), split = " ",
@@ -154,7 +153,7 @@ summary.caretEnsemble <- function(object, ...){
   # Add code to compare ensemble to individual models
   cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
   print(extractModRes(object), row.names = FALSE)
-}
+})
 
 #' Extract the model accuracy metrics of the individual models in an ensemble object.
 #' @param ensemble a caretEnsemble to make predictions from.
@@ -300,9 +299,8 @@ getMetricSD.train <- function(x, metric = c("RMSE", "AUC")){
 #' per model in object
 #' @importFrom digest digest
 #' @importFrom caret varImp
-#' @method varImp caretEnsemble
 #' @export
-varImp.caretEnsemble <- function(object, scale = TRUE, weight = TRUE, ...){
+setMethod("varImp", "caretEnsemble", function(object, scale = TRUE, weight = TRUE, ...){
   a <- lapply(object$models, varImp)
   # grab method names
   names(a) <- make.unique(unlist(lapply(object$models, "[[", 1)), sep = "_")
@@ -334,7 +332,7 @@ varImp.caretEnsemble <- function(object, scale = TRUE, weight = TRUE, ...){
       return(dat)
     }
   }
-}
+})
 
 # Break into get varImp
 # weight varImp
