@@ -6,8 +6,6 @@
 #' @return A numeric of the weights for each model
 #' @export
 greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
-  #require('caTools')
-
   if(is.character(Y)){
     Y <- factor(Y)
   }
@@ -37,6 +35,9 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
 #' @param Y the dependent variable
 #' @param iter an integer for the number of iterations
 #' @return A numeric of the weights for each model
+#' @details This optimizer uses a stopping criterion that if the optimized model
+#' has an AUC that is worse than any individual model, it continues optimizing
+#' until this is no longer the case.
 #' @export
 safeOptAUC <- function(X, Y, iter = 100L) {
   if(is.character(Y) | is.factor(Y)){

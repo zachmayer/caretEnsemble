@@ -3,7 +3,7 @@
 \alias{wtd.sd}
 \title{Calculate a weighted standard deviation}
 \usage{
-wtd.sd(x, weights = NULL, normwt = FALSE, na.rm = TRUE)
+wtd.sd(x, weights = NULL, normwt = FALSE, na.rm = FALSE)
 }
 \arguments{
 \item{x}{a vector of numerics}
@@ -12,7 +12,7 @@ wtd.sd(x, weights = NULL, normwt = FALSE, na.rm = TRUE)
 
 \item{normwt}{a logical indicating whether the weights should be normalized to 1}
 
-\item{na.rm}{a logical indicating how to handle missing values}
+\item{na.rm}{a logical indicating how to handle missing values, default = FALSE}
 }
 \description{
 Used to weight deviations among ensembled model preditions
