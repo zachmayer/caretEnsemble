@@ -36,16 +36,27 @@ my_control <- trainControl(
   )
 ```
 
-Once we have a common train control, we can fit 2 different predictive models using the `train` function from caret:
+Once we have a common train control, we can fit 2 different predictive models using the `train` function:
 ```{r, echo=TRUE, fig.show='hold'}
 suppressMessages(library('pROC'))
 suppressMessages(library('rpart'))
-suppressWarnings(model_glm <- train(Class ~ ., training, method='glm', preProc = c("center", "scale"), trControl=my_control, metric='ROC'))
-suppressWarnings(model_rpart <- train(Class ~ ., training, method='rpart', trControl=my_control, metric='ROC'))
+suppressWarnings(model_glm <- train(
+  Class ~ ., 
+  data=training, 
+  method='glm', 
+  preProc = c("center", "scale"), 
+  trControl=my_control,
+  metric='ROC'))
+suppressWarnings(model_rpart <- train(
+  Class ~ ., 
+  data=training, 
+  method='rpart', 
+  trControl=my_control, 
+  metric='ROC'))
 model_list <- list(logit=model_glm, tree=model_rpart)
 xyplot(resamples(model_list))
 ```
-
+    
 As you can see from this plot, these 2 models are pretty un-correllated, but the rpart model is ocassionally anti-predictive.
 
 We can confirm the 2 model's correllations with the `modelCor` function from caret:
@@ -66,7 +77,8 @@ suppressMessages(library('caTools'))
 model_preds <- lapply(model_list, predict, newdata=testing, type='prob')
 model_preds <- lapply(model_preds, function(x) x[,'M'])
 model_preds <- data.frame(model_preds)
-suppressWarnings(model_preds$ensemble <- predict(greedy_ensemble, newdata=testing))
+suppressMessages(ens_preds <- predict(greedy_ensemble, newdata=testing))
+model_preds$ensemble <- ens_preds
 colAUC(model_preds, testing$Class)
 ```
 The ensemble's AUC on the test set is about 7% higher than the best individual model.
