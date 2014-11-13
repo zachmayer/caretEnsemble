@@ -24,9 +24,12 @@ Suggests:
     e1071,
     kernlab,
     ipred,
-    pROC
+    pROC,
+    knitr,
+    mlbench
 Imports:
     caTools,
     pbapply,
     digest
 License: MIT + file LICENSE
+VignetteBuilder: knitr
