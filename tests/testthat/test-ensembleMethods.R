@@ -407,4 +407,11 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(length(pred.nest1$pred[is.na(pred.nest1$pred)]) == 0)
 })
 
+## Plot method
+plot(ens.class$models[[4]])
+
+
+
+
+
 

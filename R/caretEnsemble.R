@@ -52,7 +52,8 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
   }
 
   #Return final model
-  out <- list(models=all.models[keep], weights=weights[keep], error=error)
+  out <- list(models=all.models[keep], weights=weights[keep], error=error,
+              type = predobs$type)
   class(out) <- 'caretEnsemble'
   return(out)
 }
@@ -130,8 +131,9 @@ extractModRes <- function(ensemble){
   if(class(ensemble) != "caretEnsemble") stop("extractModRes requires a caretEnsemble object")
   methods <- names(ensemble$models)
   if(is.null(methods)){
-    methods <- as.vector(strsplit(paste0("model", 1:length(ensemble$models)), split = " ",
-                                fixed = TRUE), mode = "character")
+#     methods <- as.vector(strsplit(paste0("model", 1:length(ensemble$models)), split = " ",
+#                                 fixed = TRUE), mode = "character")
+    methods <- unlist(lapply(ensemble$models, "[[", 1))
   } #sanitize names
   metric <- names(ensemble$error)
   modRes <- data.frame(method = methods,
@@ -326,4 +328,178 @@ varImpFrame <- function(x){
                  idvar = "var", timevar = "model")
 }
 
-do.call(library, list('methods', 'caret'))
+
+#' @title Calculate the residuals from a caretEnsemble.
+#' @description This function calculates raw residuals for both regression and
+#' classification \code{caretEnsemble} objects.
+#' @param object a \code{caretEnsemble} to make predictions from.
+#' @param ... other arguments to be passed to residuals
+#' @return A numeric of the residuals.
+#' @export
+residuals.caretEnsemble <- function(object, ...){
+  if(object$type == "Regression"){
+    yhat <- predict(object)
+    y <- object$models[[1]]$trainingData$.outcome
+    resid <- y - yhat
+    return(resid)
+  } else if(object$type == "Classification"){
+    yhat <- predict(object)
+    y <- as.character(object$models[[1]]$trainingData$.outcome)
+    z <- table(y)
+    prevOutcome <- names(z)[z == max(z)]
+    y <- ifelse(y == prevOutcome, 0, 1)
+    resid <- y - yhat
+    return(resid)
+  }
+}
+
+# rstandard.caretEnsemble <- function(x){
+#   if(x$type == "Regression"){
+#     yhat <- predict(x)
+#     y <- x$models[[1]]$trainingData$.outcome
+#     resid <- y - yhat
+#     return(resid)
+#   } else if(x$type == "Classification"){
+#     yhat <- predict(x)
+#     y <- as.character(x$models[[1]]$trainingData$.outcome)
+#     z <- table(y)
+#     prevOutcome <- names(z)[z == max(z)]
+#     y <- ifelse(y == prevOutcome, 0, 1)
+#     resid <- y - yhat
+#     return(resid)
+#   }
+# }
+
+
+#' @title Supplement the data fitted to a caret ensemble model with model fit statistics
+#' @description This function constructs a dataframe consisting of the outcome,
+#' all of the predictors used in any of the models ensembled in a \code{caretEnsemble}
+#' object, and some model fit statistics.
+#' @param mode a \code{caretEnsemble} to extract predictors from
+#' @param data a data set, defaults to the data used to fit the model
+#' @param ... additional arguments to pass to fortify
+#' @return The original data with extra columns for fitted values and residuals
+#' @importFrom digest digest
+#' @export
+fortify.caretEnsemble <- function(model, data = NULL, ...){
+  data <- extractModFrame(model)
+  data$y <- model$models[[1]]$trainingData$.outcome
+  if(class(data$y) != "numeric"){
+    data$y <- as.character(data$y)
+    z <- table(data$y)
+    prevOutcome <- names(z)[z == max(z)]
+    data$y <- ifelse(data$y == prevOutcome, 0, 1)
+    data$y <- as.numeric(data$y)
+  }
+  data$.fitted <- predict(model)
+  data$.resid <- residuals(model)
+  return(data)
+}
+
+#' @title Extract a dataframe of all predictors used in a caretEnsemble object.
+#' @description This function constructs a dataframe consisting of the outcome
+#' and all of the predictors used in any of the models ensembled in a \code{caretEnsemble}
+#' object.
+#' @param mode a \code{caretEnsemble} to extract predictors from
+#' @return A data.frame combining all of the variables used across all models.
+#' @importFrom digest digest
+#' @export
+extractModFrame <- function(model){
+  datList <- vector("list", length = length(model$models))
+  for(i in 1: length(model$models)){
+    datList[[i]] <- model$models[[i]]$trainingData
+  }
+  modelFrame <- do.call(cbind, datList)
+  modelFrame <- modelFrame[!duplicated(lapply(modelFrame, digest))]
+  return(modelFrame)
+}
+
+
+#' @title Plot Diagnostics for an caretEnsemble Object
+#' @description This function makes a short plot of the performance of the component
+#' models of a \code{caretEnsemble} object on the AUC or RMSE metric
+#' @param x a \code{caretEnsemble} object
+#' @param ... additional arguments to pass to plot
+#' @return A plot
+#' @import ggplot2
+#' @export
+plot.caretEnsemble <- function(x, ...){
+  dat <- extractModRes(x)
+  metricLab <- names(x$error)
+  ggplot(dat, aes(x = method, y = metric, ymin = metric - metricSD,
+                  ymax = metric + metricSD)) + geom_pointrange() +
+    geom_hline(yintercept = x$error, color = I("red"), size = I(1.1)) +
+    theme_bw() + labs(x = "Individual Model Method", y = metricLab)
+}
+
+#' @title Convenience function for more in-depth diagnostic plots of caretEnsemble objects
+#' @description This function provides a more robust series of diagnostic plots
+#' for a caretEnsemble object.
+#' @param object a \code{caretEnsemble} object
+#' @param which an integer index for which of the plots to print
+#' @param mfrow an integer vector of length 2 specifying the number of rows and columns for plots
+#' @param xvars a vector of the names of x variables to plot against residuals
+#' @param ... additional arguments to pass to autoplot
+#' @return A grid of diagnostic plots
+#' @import ggplot2
+#' @export
+autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(2, 3),
+                                   xvars = NULL, ...){
+  plotdf <- suppressMessages(fortify(object))
+  g1 <- plot(object)
+  wghtFrame <- as.data.frame(object$weights)
+  wghtFrame$method <- row.names(wghtFrame)
+  names(wghtFrame) <- c("weights", "method")
+  g2 <- ggplot(plotdf, aes(.fitted, .resid)) + geom_point() + geom_smooth(se = FALSE) +
+    geom_hline(linetype = 2, size = 0.2) + scale_x_continuous("Fitted Values") +
+    scale_y_continuous("Residual") + labs(title = "Residuals vs Fitted") +
+    theme_bw()
+  g3 <- ggplot(wghtFrame, aes(method, weights)) +
+    geom_bar(stat = 'identity', fill = I("gray50"), color = I("black")) +
+    labs(title = "Model Weights", x = "Method", y = "Weights") + theme_bw()
+  if(missing(xvars)){
+    xvars <- names(plotdf)[!names(plotdf) %in% c("(Intercept)", ".outcome", "y",
+                                                 ".fitted", ".resid")]
+    xvars <- sample(xvars, 3)
+  }
+  # TODO: Insert checks for length ov xvars here
+  g4 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
+    geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
+    scale_y_continuous("Residuals") +
+    labs(title = paste0("Residuals Against ", xvars[1])) + theme_bw()
+  g5 <- ggplot(plotdf, aes_string(xvars[2], ".resid")) + geom_point() +
+    geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
+    scale_y_continuous("Residuals") +
+    labs(title = paste0("Residuals Against ", xvars[2])) + theme_bw()
+  g6 <- ggplot(plotdf, aes_string(xvars[3], ".resid")) + geom_point() +
+    geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
+    scale_y_continuous("Residuals") +
+    labs(title = paste0("Residuals Against ", xvars[3])) + theme_bw()
+  plots <- list(g1, g2, g3, g4, g5, g6)
+  grid::grid.newpage()
+  if (prod(mfrow) > 1) {
+    mypos <- expand.grid(1:mfrow[1], 1:mfrow[2])
+    mypos <- mypos[with(mypos, order(Var1)), ]
+    pushViewport(viewport(layout = grid.layout(mfrow[1],
+                                               mfrow[2])))
+    formatter <- function(.) {
+    }
+  }
+  else {
+    mypos <- data.frame(matrix(1, length(which), 2))
+    pushViewport(viewport(layout = grid.layout(1, 1)))
+    formatter <- function(.) {
+      .dontcare <- readline("Hit <Return> to see next plot: ")
+      grid.newpage()
+    }
+  }
+  j <- 1
+  for (i in which) {
+    formatter()
+    suppressWarnings(
+      print(plots[[i]], vp = viewport(layout.pos.row = mypos[j,
+                                                             ][1], layout.pos.col = mypos[j, ][2]))
+    )
+    j <- j + 1
+  }
+}
