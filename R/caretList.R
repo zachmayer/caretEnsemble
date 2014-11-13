@@ -60,8 +60,9 @@ tmpExtract <- function(x){
 #' @param baseSeed optional, to preserve reproducibility, a base seed to be used in the resampling randomization
 #' @param tuneLength optional, the length of tuning to be done
 #' @param ... additional arguments to pass to \code{\link{train}}
-#' @export
 #' @return A list of \code{\link{train}} objects
+#' @import caret
+#' @export
 buildModels <- function(methodList, control, x, y, tuneList = NULL, baseSeed = NULL, tuneLength = NULL, ...) {
   if(!missing(tuneList)){
     methodList <- names(tuneList)

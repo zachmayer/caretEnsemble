@@ -16,20 +16,24 @@ load(system.file("testdata/X.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/Y.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/stuGradMod.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+
+set.seed(2239)
 ens.class <- caretEnsemble(models_class, iter=1000)
 # varImp struggles with the rf in our test suite, why?
 ens.reg <- caretEnsemble(models_reg[2:4], iter=1000)
 
 test_that("We can get variable importance in classification models", {
   expect_is(varImp(ens.class), "data.frame")
-  expect_is(varImp(ens.class, scale = FALSE), "data.frame")
+#   expect_is(varImp(ens.class, scale = FALSE), "data.frame")
   expect_is(varImp(ens.class, weight = TRUE), "data.frame")
   expect_is(varImp(ens.class, scale = TRUE, weight = TRUE), "data.frame")
 })
 
 test_that("We can get variable importance in regression models", {
   expect_is(varImp(ens.reg), "data.frame")
-  expect_is(varImp(ens.reg, scale = FALSE), "data.frame")
+#   expect_is(varImp(ens.reg, scale = FALSE), "data.frame")
   expect_is(varImp(ens.reg, weight = TRUE), "data.frame")
   expect_is(varImp(ens.reg, scale = TRUE, weight = TRUE), "data.frame")
 })
@@ -71,9 +75,159 @@ test_that("We get the right dimensions back", {
 })
 
 
+context("Do metric extraction functions work as expected")
+
+test_that("Metric is used correctly", {
+  expect_error(getRMSE(ens.class$models[[1]]))
+  expect_error(getRMSE(ens.class$models[[3]]))
+  expect_error(getMetric(ens.class$models[[3]], metric = "RMSE"))
+  expect_error(getAUC(ens.reg$models[[1]]))
+  expect_error(getAUC(ens.reg$models[[2]]))
+  expect_error(getMetric(ens.reg$models[[2]], metric = "AUC"))
+})
+
+test_that("Metrics are accurate for AUC", {
+  expect_equal(getAUC(ens.class$models[[1]]), 0.9257279, tol = 0.0001)
+  expect_equal(getAUC(ens.class$models[[2]]), 0.942959, tol = 0.0001)
+  expect_equal(getAUC(ens.class$models[[3]]), 0.9178055, tol = 0.0001)
+  expect_equal(getAUC(ens.class$models[[4]]), 0.9378095, tol = 0.0001)
+  expect_equal(getAUC(ens.class$models[[5]]), 0.9120618, tol = 0.0001)
+  expect_equal(getAUC(ens.class$models[[6]]), 0.9250347, tol = 0.0001)
+})
+
+test_that("getAUC and getMetric are identical", {
+  expect_equal(getAUC(ens.class$models[[6]]),
+               getMetric(ens.class$models[[6]], metric = "AUC"), tol = 0.0001)
+  expect_equal(getAUC(ens.class$models[[5]]),
+               getMetric(ens.class$models[[5]], metric = "AUC"), tol = 0.0001)
+  expect_equal(getAUC(ens.class$models[[4]]),
+               getMetric(ens.class$models[[4]], metric = "AUC"), tol = 0.00001)
+  expect_equal(getAUC(ens.class$models[[3]]),
+               getMetric(ens.class$models[[3]], metric = "AUC"), tol = 0.00001)
+  expect_equal(getAUC(ens.class$models[[2]]),
+               getMetric(ens.class$models[[2]], metric = "AUC"), tol = 0.00001)
+  expect_equal(getAUC(ens.class$models[[1]]),
+               getMetric(ens.class$models[[1]], metric = "AUC"), tol = 0.00001)
+})
+
+test_that("Metrics are accurate for RMSE", {
+  expect_equal(getRMSE(models_reg[[1]]), 0.3348216, tol = 0.0001)
+  expect_equal(getRMSE(models_reg[[2]]), 0.324923, tol = 0.0001)
+  expect_equal(getRMSE(models_reg[[3]]), 0.324923, tol = 0.0001)
+  expect_equal(getRMSE(models_reg[[4]]), 0.3532128, tol = 0.0001)
+})
+
+test_that("getMetric and getRMSE are identical", {
+  expect_equal(getRMSE(models_reg[[1]]),
+               getMetric(models_reg[[1]], metric = "RMSE"), tol = 0.00001)
+  expect_equal(getRMSE(models_reg[[2]]),
+               getMetric(models_reg[[2]], metric = "RMSE"), tol = 0.00001)
+  expect_equal(getRMSE(models_reg[[3]]),
+               getMetric(models_reg[[3]], metric = "RMSE"), tol = 0.00001)
+  expect_equal(getRMSE(models_reg[[4]]),
+               getMetric(models_reg[[4]], metric = "RMSE"), tol = 0.00001)
+})
+
+test_that("getMetric fails when wrong metric is specificed", {
+  expect_error(getMetric(models_reg[[1]], metric = "AUC"))
+  expect_error(getMetric(models_reg[[2]], metric = "AUC"))
+  expect_error(getMetric(models_reg[[3]], metric = "AUC"))
+  expect_error(getMetric(models_reg[[4]], metric = "AUC"))
+  expect_error(getMetric(models_class[[1]], metric = "RMSE"))
+  expect_error(getMetric(models_class[[2]], metric = "RMSE"))
+  expect_error(getMetric(models_class[[3]], metric = "RMSE"))
+  expect_error(getMetric(models_class[[4]], metric = "RMSE"))
+})
+
+
+context("Metric Standard deviations are correct")
+
+test_that("getMetricSD warnings are correct", {
+  expect_warning(getMetricSD(models_reg[[1]]))
+  expect_warning(getMetricSD(models_class[[1]]))
+})
+
+test_that("getMetricSD fails when wrong metric is specificed", {
+  expect_error(getMetricSD(models_reg[[1]], metric = "AUC"))
+  expect_error(getMetricSD(models_reg[[2]], metric = "AUC"))
+  expect_error(getMetricSD(models_reg[[3]], metric = "AUC"))
+  expect_error(getMetricSD(models_reg[[4]], metric = "AUC"))
+  expect_error(getMetricSD(models_class[[1]], metric = "RMSE"))
+  expect_error(getMetricSD(models_class[[2]], metric = "RMSE"))
+  expect_error(getMetricSD(models_class[[3]], metric = "RMSE"))
+  expect_error(getMetricSD(models_class[[4]], metric = "RMSE"))
+})
+
+test_that("getMetricSD works for RMSE", {
+  expect_equal(getMetricSD(models_reg[[1]]), 0.06153832, tol = 0.00001)
+  expect_equal(getMetricSD(models_reg[[2]]), 0.05517874, tol = 0.00001)
+  expect_equal(getMetricSD(models_reg[[3]]), 0.05517874, tol = 0.00001)
+  expect_equal(getMetricSD(models_reg[[4]]), 0.07114711, tol = 0.00001)
+  expect_equal(getMetricSD(models_reg[[4]]),
+               getMetricSD(models_reg[[4]], metric = "RMSE"))
+  expect_equal(getMetricSD(models_reg[[3]]),
+               getMetricSD(models_reg[[3]], metric = "RMSE"))
+  expect_equal(getMetricSD(models_reg[[2]]),
+               getMetricSD(models_reg[[2]], metric = "RMSE"))
+  expect_equal(getMetricSD(models_reg[[1]]),
+               getMetricSD(models_reg[[1]], metric = "RMSE"))
+})
+
+test_that("getMetricSD works for AUC", {
+  expect_equal(getMetricSD(models_class[[1]]), 0.06200568, tol = 0.00001)
+  expect_equal(getMetricSD(models_class[[2]]), 0.05196865, tol = 0.00001)
+  expect_equal(getMetricSD(models_class[[3]]), 0.07725894, tol = 0.00001)
+  expect_equal(getMetricSD(models_class[[4]]), 0.05947062, tol = 0.00001)
+  expect_equal(getMetricSD(models_class[[4]]),
+               getMetricSD(models_class[[4]], metric = "AUC"))
+  expect_equal(getMetricSD(models_class[[3]]),
+               getMetricSD(models_class[[3]], metric = "AUC"))
+  expect_equal(getMetricSD(models_class[[2]]),
+               getMetricSD(models_class[[2]], metric = "AUC"))
+  expect_equal(getMetricSD(models_class[[1]]),
+               getMetricSD(models_class[[1]], metric = "AUC"))
+})
+
+context("Metrics in student examples")
+
+test_that("metrics work for AUC in imbalanced example", {
+  expect_equal(getMetric(studentEns$models[[1]]), 0.8538603, tol = 0.00001)
+  expect_equal(getMetric(studentEns$models[[2]]), 0.9238445, tol = 0.00001)
+  expect_equal(getMetric(studentEns$models[[3]]), 0.9243697, tol = 0.00001)
+  expect_equal(getMetric(studentEns$models[[4]]), 0.9624475, tol = 0.00001)
+  expect_equal(getMetric(studentEns$models[[4]]),
+               getMetric(studentEns$models[[4]], metric = "AUC"))
+  expect_equal(getMetric(studentEns$models[[3]]),
+               getMetric(studentEns$models[[3]], metric = "AUC"))
+  expect_equal(getMetric(studentEns$models[[2]]),
+               getMetric(studentEns$models[[2]], metric = "AUC"))
+  expect_equal(getMetric(studentEns$models[[1]]),
+               getMetric(studentEns$models[[1]], metric = "AUC"))
+})
+
+test_that("metric deviations work for AUC in imbalanced example", {
+  expect_equal(getMetricSD(studentEns$models[[1]]), 0.1113234, tol = 0.00001)
+  expect_equal(getMetricSD(studentEns$models[[2]]), 0.01121379, tol = 0.00001)
+  expect_equal(getMetricSD(studentEns$models[[3]]), 0.05124492, tol = 0.00001)
+  expect_equal(getMetricSD(studentEns$models[[4]]), 0.09980929, tol = 0.00001)
+  expect_equal(getMetricSD(studentEns$models[[4]]),
+               getMetricSD(studentEns$models[[4]], metric = "AUC"))
+  expect_equal(getMetricSD(studentEns$models[[3]]),
+               getMetricSD(studentEns$models[[3]], metric = "AUC"))
+  expect_equal(getMetricSD(studentEns$models[[2]]),
+               getMetricSD(studentEns$models[[2]], metric = "AUC"))
+  expect_equal(getMetricSD(studentEns$models[[1]]),
+               getMetricSD(studentEns$models[[1]], metric = "AUC"))
+})
+
 context("Does summary method work as expected")
 
 
+test_that("No errors are thrown by a summary", {
+  expect_output(summary(ens.class), "AUC")
+  expect_output(summary(ens.reg), "RMSE")
+  expect_output(summary(studentEns), "AUC")
+})
 
 
 context("Does prediction method work for classification")

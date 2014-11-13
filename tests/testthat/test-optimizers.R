@@ -42,4 +42,3 @@
 # weights1 <- weights1/sum(weights1)
 # weights3 <- weights3/sum(weights3)
 # expect_equal(weights1, weights3)
-
