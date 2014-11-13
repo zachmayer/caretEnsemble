@@ -1,29 +1,3 @@
-#' @title Class "caretStack" of ensembled train objects from the caret package
-#' @docType class
-#' @section Objects from the Class: Objects are created by calls to
-#' \code{\link{caretStack}}.
-#' @details
-#' The object has the following items
-#' \itemize{
-#' \item{models - a list of the original models to be ensembled}
-#' \item{ens_model - a \code{\link{train}} object}
-#' \item{error - the final accuracy metric of the ensembled models}
-#' }
-#' @seealso \code{\link{caretEnsemble}}
-#' @keywords classes
-#' @examples
-#'
-#' showClass("caretEnsemble")
-#' methods(class="caretEnsemble")
-#' @export
-setClass(
-  "caretStack",
-  representation(
-    models = "list",
-    ens_model = "train",
-    error = "numeric"),
-  S3methods=TRUE)
-
 #' @title Combine several predictive models via stacking
 #'
 #' @description Find a good linear combination of several classification or regression models,
@@ -33,9 +7,9 @@ setClass(
 #'
 #' @param all.models a list of caret models to ensemble.
 #' @param ... additional arguments to pass to the optimization function
-#' @export
 #' @return S3 caretStack object
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
+#' @export
 caretStack <- function(all.models, ...){
 
   predobs <- makePredObsMatrix(all.models)

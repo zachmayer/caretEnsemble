@@ -3,18 +3,26 @@
 \alias{varImp.caretEnsemble}
 \title{Calculate the variable importance of variables in a caretEnsemble.}
 \usage{
-\method{varImp}{caretEnsemble}(object, ...)
+\method{varImp}{caretEnsemble}(object, scale = TRUE, weight = TRUE, ...)
 }
 \arguments{
 \item{object}{a \code{caretEnsemble} to make predictions from.}
 
-\item{...}{additional arguments to pass to \code{\link{varImp}}}
+\item{scale}{should importance values be scaled 0 to 100?}
+
+\item{weight}{should a model weighted importance be returned?}
+
+\item{...}{other arguments to be passed to varImp}
+}
+\value{
+A \code{\link{data.frame}} with one row per variable and one column
+per model in object
 }
 \description{
 This function wraps the \code{\link{varImp}} function in the
 \code{caret} package to provide a weighted estimate of the importance of
 variables in the ensembled models in a \code{caretEnsemble} object. Variable
-importance is calculated and then averaged by the weight of the overall model
+importance for each model is calculated and then averaged by the weight of the overall model
 in the ensembled object.
 }
 

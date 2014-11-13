@@ -1,35 +1,3 @@
-setOldClass("train")
-
-
-#' @title Class "caretEnsemble" of ensembled train objects from the caret package
-#' @docType class
-#' @description Ensembled model from input train objects.
-#'
-#' @section Objects from the Class: Objects are created by calls to
-#' \code{\link{caretEnsemble}}.
-#' @details
-#' The object has the following items
-#' \itemize{
-#' \item{models - a list of the original models to be ensembled}
-#' \item{weights - a matrix with the weights for each model}
-#' \item{error - the final accuracy metric of the ensembled models}
-#' }
-#' @seealso \code{\link{caretEnsemble}}
-#' @keywords classes
-#' @examples
-#'
-#' showClass("caretEnsemble")
-#' methods(class="caretEnsemble")
-#' @export
-setClass(
-  "caretEnsemble",
-  representation(
-    models = "list",
-    weights = "data.frame",
-    error = "numeric"),
-  S3methods=TRUE)
-
-
 #' @title Combine several predictive models via weights
 #'
 #' @description Find a good linear combination of several classification or regression models,
@@ -100,27 +68,25 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @param se logical, should prediction errors be produced? Default is false.
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments
 #' must be named
+#' @method predict caretEnsemble
 #' @export
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
   # Default se to FALSE
   if(missing(se)){se <- FALSE}
-  type <- checkModels_extractTypes(object$models)
-  preds <- multiPredict(object$models, type, ...)
+  modtype <- checkModels_extractTypes(object$models)
+  preds <- multiPredict(object$models, type = modtype, ...)
   if(keepNA == TRUE){
     message("Predictions being made only for cases with complete data")
     out <- as.numeric(preds %*% object$weights)
     se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
-    se.tmp <- 2 * se.tmp^2
-  } else {
+  } else if(keepNA == FALSE){
     message("Predictions being made only from models with available data")
     conf <- ifelse(is.na(preds), NA, 1)
     conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
-    est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm=TRUE)})
-    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm=TRUE)
-    se.tmp <- 2 * se.tmp^2
-    #se.tmp[!is.finite(se.tmp)] <- 0
+    est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm = TRUE)})
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm = TRUE)
     out <- list(predicted = est, weight = conf)
   }
   if(se == FALSE){
@@ -154,7 +120,7 @@ summary.caretEnsemble <- function(object, ...){
 
   # Add code to compare ensemble to individual models
   cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
-  print(extractModRes(object))
+  print(extractModRes(object), row.names = FALSE)
 }
 
 #' Extract the model accuracy metrics of the individual models in an ensemble object.
@@ -167,49 +133,197 @@ extractModRes <- function(ensemble){
     methods <- as.vector(strsplit(paste0("model", 1:length(ensemble$models)), split = " ",
                                 fixed = TRUE), mode = "character")
   } #sanitize names
-    modRes <- data.frame(method = methods,
-                       metric = 0,
-                       metricSD = 0, stringsAsFactors = FALSE) # prefill data frame
-    for(i in 1:length(ensemble$models)){
-    dat <- ensemble$models[[i]]$results
-    metric <- ensemble$models[[i]]$metric
-    SDVAR <- paste0(ensemble$models[[i]]$metric, "SD")
-    best <- max(dat[, metric])
-    bestSD <- max(dat[dat[, metric] == best, SDVAR])
-    modRes[i,  "metric"] <- best
-    modRes[i, "metricSD"] <- bestSD
-  }
+  metric <- names(ensemble$error)
+  modRes <- data.frame(method = methods,
+                       metric = unlist(lapply(ensemble$models,
+                                              getMetric.train,
+                                              metric = metric)),
+                       metricSD = unlist(lapply(ensemble$models,
+                                                getMetricSD.train,
+                                                metric = metric)),
+                       stringsAsFactors = FALSE) # prefill data frame
   return(modRes)
 }
 
-varImp <- function (object, ...){
-  UseMethod("varImp")
+#' Extract a model accuracy metric from an S3 object.
+#' @param x an object with model performanc metrics
+#' @param metric a character, either "RMSE" or "AUC" indicating which metric to extract
+#' @return A numeric representing the metric desired metric.
+#' @rdname metrics
+#' @export
+getMetric <- function(x, metric){
+  UseMethod("getMetric")
 }
+
+#' Extract a model accuracy metric from a \code{\link{train}} object.
+#' @rdname metrics
+#' @export
+getMetric.train <- function(x, metric= c("AUC", "RMSE")){
+  if(missing(metric)){
+    metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
+    warning("Metric not specified, so default is being chosen.")
+  }
+  metricTest <- ifelse(metric == "AUC", "Classification", "Regression")
+  stopifnot(x$modelType == metricTest)
+  if(metric == "AUC"){
+    return(getAUC(x))
+  } else if(metric == "RMSE"){
+    return(getRMSE(x))
+  }
+}
+
+#' Extract the AUC metric from a \code{\link{train}} object.
+#' @return A numeric for the AUC of the best model
+#' @rdname metrics
+#' @export
+getAUC <- function(x){
+  UseMethod("getAUC")
+}
+
+#' @export
+#' @importFrom caTools colAUC
+getAUC.train <- function(x){
+  if(x$modelType != "Classification"){
+    stop("AUC can only be calculated for classification models")
+  }
+  bestPerf <- x$bestTune
+  colnames(bestPerf) <- gsub("^\\.", "", colnames(bestPerf))
+  dat <- merge(x$pred, bestPerf)
+  z <- table(dat$obs)
+  prevOutcome <- names(z)[z == max(z)]
+  AUC <- colAUC(dat[, prevOutcome], dat$obs)
+  return(as.numeric(AUC))
+}
+
+#' Extract the RMSE metric from a model object.
+#' @return A numeric for the RMSE of the best model
+#' @rdname metrics
+#' @export
+getRMSE <- function(x){
+  UseMethod("getRMSE")
+}
+
+#' @export
+getRMSE.train <- function(x){
+  #TODO: decide about NAs
+  if(x$modelType != "Regression"){
+    stop("RMSE can only be calculated for regression models")
+  }
+  bestPerf <- x$bestTune
+  colnames(bestPerf) <- gsub("^\\.", "", colnames(bestPerf))
+  dat <- merge(x$pred, bestPerf)
+  z <- table(dat$obs)
+  prevOutcome <- names(z)[z == max(z)]
+  out <- RMSE(dat$pred, dat$obs)
+  return(as.numeric(out))
+}
+
+
+#' Extract the standard deviation from resamples for an accuracy metric from
+#' a model object.
+#' @param x an object with model performanc metrics
+#' @param metric a character, either "RMSE" or "AUC" indicating which metric to extract
+#' @return A numeric for the standard deviation of the selected metric across
+#' tuning parameters and resamples in the original object.
+#' @rdname metricsSD
+#' @export
+getMetricSD <- function(x, metric){
+  UseMethod("getMetricSD")
+}
+
+#' @export
+getMetricSD.train <- function(x, metric = c("RMSE", "AUC")){
+  if(missing(metric)){
+    metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
+    warning("Metric not specified, so default is being chosen.")
+  }
+  metricTest <- ifelse(metric == "AUC", "Classification", "Regression")
+  stopifnot(x$modelType == metricTest)
+  if(metric == "AUC"){
+    z <- table(x$pred$obs)
+    prevOutcome <- names(z)[z == max(z)]
+    out <- by(x$pred[, c(prevOutcome, "obs")], x$pred[, "Resample"],
+       function(x) colAUC(x[,1], x[,2]))
+  } else if(metric == "RMSE"){
+    out <- by(x$pred[, c("pred","obs")], x$pred[, "Resample"],
+              function(x) RMSE(x[,1], x[,2]))
+  }
+  out <- sd(as.numeric(out))
+  return(out)
+}
+
 
 #' @title Calculate the variable importance of variables in a caretEnsemble.
 #' @description This function wraps the \code{\link{varImp}} function in the
 #' \code{caret} package to provide a weighted estimate of the importance of
 #' variables in the ensembled models in a \code{caretEnsemble} object. Variable
-#' importance is calculated and then averaged by the weight of the overall model
+#' importance for each model is calculated and then averaged by the weight of the overall model
 #' in the ensembled object.
 #' @param object a \code{caretEnsemble} to make predictions from.
-#' @param ... additional arguments to pass to \code{\link{varImp}}
+#' @param scale should importance values be scaled 0 to 100?
+#' @param weight should a model weighted importance be returned?
+#' @param ... other arguments to be passed to varImp
+#' @return A \code{\link{data.frame}} with one row per variable and one column
+#' per model in object
+#' @importFrom digest digest
 #' @export
-varImp.caretEnsemble <- function(object, ...){
-  a <- lapply(object$models, caret::varImp)
+varImp.caretEnsemble <- function(object, scale = TRUE, weight = TRUE, ...){
+  a <- lapply(object$models, varImp)
+  # grab method names
+  names(a) <- make.unique(unlist(lapply(object$models, "[[", 1)), sep = "_")
   # drop duplicates
   a <- a[!duplicated(lapply(a, digest::digest))]
-  # data.frame
-  dat <- rbind(as.data.frame(lapply(a, "[[", 1)))
-  # drop duplicates here
-  dat <- dat[!duplicated(lapply(dat, summary))]
-  names(dat) <- names(a)
-  #normalize
-  dat <- apply(dat, 2, function(d) d / sum(d) * 100)
-  wghts <- object$weights[names(object$weights) %in% names(a)]
-  #weight
-  wght <- apply(dat, 1, function(d) weighted.mean(d, w = wghts))
-  dat <- cbind(dat, wght)
-  dat <- as.data.frame(dat)
-  return(dat)
+  # add a check to drop multiple columns
+  a <- lapply(a, clean_varImp)
+  dat <- varImpFrame(a)
+  if(scale == TRUE){
+    dat[,-1] <- apply(dat[, -1], 2, function(d) d / sum(d, na.rm = TRUE) * 100)
+  }
+  if(weight == FALSE){
+    names(dat) <- c("variable", names(a))
+    return(dat)
+  } else{
+    wghts <- object$weights[names(object$weights) %in% names(a)]
+    #weight
+    wght <- apply(dat[, -1], 1, function(d) weighted.mean(d, w = wghts, na.rm=TRUE))
+    if(scale == TRUE){
+      wght <- (wght / sum(wght, na.rm=TRUE)) * 100
+    }
+    dat <- cbind(dat, wght)
+    names(dat) <- c("variable", names(a), "ensemble")
+    dat <- as.data.frame(dat)
+    if(scale == FALSE){
+      warning("Weighting of unscaled importance factors may not make sense. Try again with scale = TRUE.")
+      return(dat)
+    } else{
+      return(dat)
+    }
+  }
 }
+
+# Break into get varImp
+# weight varImp
+clean_varImp <- function(x){
+  names(x$importance)[1] <- "Overall"
+  x$importance <- x$importance[,"Overall", drop=FALSE]
+  return(x$importance)
+}
+
+varImpFrame <- function(x){
+  dat <- do.call(rbind.data.frame, x)
+  # data.frame
+  dat <- dat[!duplicated(lapply(dat, summary))]
+  # Parse frame
+  dat$id <- row.names(dat)
+  dat$model <- sub("\\.[^\n]*", "",dat$id)
+  dat$var <- sub("^[^.]*", "", dat$id)
+  dat$var <- substr(dat$var, 2, nchar(dat$var))
+  # Parse intercept variables
+  dat$var[grep("Inter", dat$var)] <- "Intercept"
+  dat$id <- NULL
+  row.names(dat) <- NULL
+  dat <- reshape(dat, direction = "wide", v.names="Overall",
+                 idvar = "var", timevar = "model")
+}
+
+do.call(library, list('methods', 'caret'))

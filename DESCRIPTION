@@ -17,14 +17,14 @@ Description: This package consists primarily of one function: caretEnsemble.
     ensembles of classification and regression models.\
 Depends:
     R (>= 2.14.0),
-    caret,
-    methods
+    caret
 Suggests:
     testthat,
     randomForest,
     e1071,
     kernlab,
-    ipred
+    ipred,
+    pROC
 Imports:
     caTools,
     pbapply,
