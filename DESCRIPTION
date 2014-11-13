@@ -28,5 +28,6 @@ Suggests:
 Imports:
     caTools,
     pbapply,
+    ggplot2,
     digest
 License: MIT + file LICENSE
