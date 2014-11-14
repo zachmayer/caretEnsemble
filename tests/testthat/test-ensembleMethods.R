@@ -427,7 +427,6 @@ context("Extract model results")
 modres1 <- extractModRes(ens.class)
 modres2 <- extractModRes(ens.reg)
 
-
 test_that("Model results do not come from train objects", {
   expect_false(identical(modres1[1, 2]), max(ens.class$models[[1]]$results$Accuracy))
   expect_false(identical(modres2[1, 2]), max(ens.reg$models[[1]]$results$RMSE))
@@ -446,7 +445,6 @@ test_that("Model results do come from proper calls to getMetric", {
   expect_identical(modres1[4, 2], getAUC(ens.class$models[[4]]))
   expect_identical(modres1[5, 2], getAUC(ens.class$models[[5]]))
   expect_identical(modres1[6, 2], getAUC(ens.class$models[[6]]))
-
 })
 
 test_that("Model metric standard deviations are truly best", {
@@ -468,12 +466,36 @@ test_that("Model metric standard deviations are truly best", {
                                                       "RMSE", which = "all"))))
 })
 
+modres3 <- extractModRes(ensNest)
+
+test_that("Model metrics extracted correctly from nested models", {
+  expect_identical(modres3[1, 3], getMetricSD(ensNest$models[[1]], "AUC", which = "best"))
+  expect_identical(modres3[2, 3], getMetricSD(ensNest$models[[2]], "AUC", which = "best"))
+  expect_identical(modres3[3, 3], getMetricSD(ensNest$models[[3]], "AUC", which = "best"))
+  expect_identical(modres3[4, 3], getMetricSD(ensNest$models[[4]], "AUC", which = "best"))
+})
+
+
 context("Extract model frame")
 
 # extractModFrame
 
-
+modF <- extractModFrame(ens.class)
+modF2 <- extractModFrame(ens.reg)
+modF3 <- extractModFrame(ensNest)
 ## Test generics summary and predict
+
+test_that("Model frame is bigger for ensemble than for component models", {
+  expect_true(ncol(modF) > ncol(ens.class$models[[2]]$trainingData))
+  expect_true(ncol(modF2) > ncol(ens.reg$models[[1]]$trainingData))
+  expect_true(ncol(modF3) > ncol(ensNest$models[[3]]$trainingData))
+  expect_true(ncol(modF3) > ncol(ensNest$models[[4]]$trainingData))
+  expect_true(nrow(modF) == nrow(ens.class$models[[2]]$trainingData))
+  expect_true(nrow(modF2) == nrow(ens.reg$models[[1]]$trainingData))
+  expect_true(nrow(modF3) == nrow(ensNest$models[[3]]$trainingData))
+  expect_true(nrow(modF3) == nrow(ensNest$models[[4]]$trainingData))
+})
+
 
 context("Test generic predict with errors")
 

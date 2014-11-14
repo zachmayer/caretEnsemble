@@ -30,5 +30,6 @@ Imports:
     pbapply,
     ggplot2,
     digest,
+    plyr,
     grid
 License: MIT + file LICENSE
