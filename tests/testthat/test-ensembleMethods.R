@@ -143,8 +143,8 @@ test_that("getMetric fails when wrong metric is specificed", {
 context("Metric Standard deviations are correct")
 
 test_that("getMetricSD warnings are correct", {
-  expect_warning(getMetricSD(models_reg[[1]]))
-  expect_warning(getMetricSD(models_class[[1]]))
+  expect_message(getMetricSD(models_reg[[1]]))
+  expect_message(getMetricSD(models_class[[1]]))
 })
 
 test_that("getMetricSD fails when wrong metric is specificed", {
@@ -159,10 +159,10 @@ test_that("getMetricSD fails when wrong metric is specificed", {
 })
 
 test_that("getMetricSD works for RMSE", {
-  expect_equal(getMetricSD(models_reg[[1]]), 0.06153832, tol = 0.00001)
+  expect_equal(getMetricSD(models_reg[[1]]), 0.05901624, tol = 0.00001)
   expect_equal(getMetricSD(models_reg[[2]]), 0.05517874, tol = 0.00001)
   expect_equal(getMetricSD(models_reg[[3]]), 0.05517874, tol = 0.00001)
-  expect_equal(getMetricSD(models_reg[[4]]), 0.07114711, tol = 0.00001)
+  expect_equal(getMetricSD(models_reg[[4]]), 0.07023269, tol = 0.00001)
   expect_equal(getMetricSD(models_reg[[4]]),
                getMetricSD(models_reg[[4]], metric = "RMSE"))
   expect_equal(getMetricSD(models_reg[[3]]),
@@ -174,10 +174,10 @@ test_that("getMetricSD works for RMSE", {
 })
 
 test_that("getMetricSD works for AUC", {
-  expect_equal(getMetricSD(models_class[[1]]), 0.06200568, tol = 0.00001)
+  expect_equal(getMetricSD(models_class[[1]]), 0.06244405, tol = 0.00001)
   expect_equal(getMetricSD(models_class[[2]]), 0.05196865, tol = 0.00001)
-  expect_equal(getMetricSD(models_class[[3]]), 0.07725894, tol = 0.00001)
-  expect_equal(getMetricSD(models_class[[4]]), 0.05947062, tol = 0.00001)
+  expect_equal(getMetricSD(models_class[[3]]), 0.06356099, tol = 0.00001)
+  expect_equal(getMetricSD(models_class[[4]]), 0.0761574, tol = 0.00001)
   expect_equal(getMetricSD(models_class[[4]]),
                getMetricSD(models_class[[4]], metric = "AUC"))
   expect_equal(getMetricSD(models_class[[3]]),
@@ -206,10 +206,10 @@ test_that("metrics work for AUC in imbalanced example", {
 })
 
 test_that("metric deviations work for AUC in imbalanced example", {
-  expect_equal(getMetricSD(studentEns$models[[1]]), 0.1113234, tol = 0.00001)
-  expect_equal(getMetricSD(studentEns$models[[2]]), 0.01121379, tol = 0.00001)
+  expect_equal(getMetricSD(studentEns$models[[1]]), 0.1021798, tol = 0.00001)
+  expect_equal(getMetricSD(studentEns$models[[2]]), 0.04485517, tol = 0.00001)
   expect_equal(getMetricSD(studentEns$models[[3]]), 0.05124492, tol = 0.00001)
-  expect_equal(getMetricSD(studentEns$models[[4]]), 0.09980929, tol = 0.00001)
+  expect_equal(getMetricSD(studentEns$models[[4]]), 0.09869388, tol = 0.00001)
   expect_equal(getMetricSD(studentEns$models[[4]]),
                getMetricSD(studentEns$models[[4]], metric = "AUC"))
   expect_equal(getMetricSD(studentEns$models[[3]]),
@@ -244,10 +244,10 @@ test_that("Plot objects are ggplot", {
 test_that("Plot objects have proper data", {
   tp <- plot(ens.class)
   tp2 <- plot(ens.reg)
-  expect_true(nrow(tp$data), 6)
-  expect_true(nrow(tp2$data), 2)
-  expect_identical(tp$data$method, names(ens.class$weights))
-  expect_identical(tp2$data$method, names(ens.reg$weights))
+  expect_equal(nrow(tp$data), 6)
+  expect_equal(nrow(tp2$data), 2)
+  expect_equal(tp$data$method, names(ens.class$weights))
+  expect_equal(tp2$data$method, names(ens.reg$weights))
 })
 
 context("fortify caretEnsemble")
@@ -261,10 +261,10 @@ test_that("Fortify produces proper data structures", {
 })
 
 test_that("Fortify produces proper dimensions", {
-  expect_identical(nrow(fort1), 150)
-  expect_identical(nrow(fort2), 150)
-  expect_identical(ncol(fort1), 10)
-  expect_identical(ncol(fort2), 10)
+  expect_equal(nrow(fort1), 150)
+  expect_equal(nrow(fort2), 150)
+  expect_equal(ncol(fort1), 10)
+  expect_equal(ncol(fort2), 10)
   expect_true(all(names(fort1) %in% names(fort2)))
 })
 
@@ -295,7 +295,7 @@ test_that("Residuals provided by residuals are proper for ensemble objects", {
   expect_identical(residTest, obs1 - predTest)
   expect_identical(residTest2, obs2 - predTest2)
   expect_false(identical(residTest2, predTest2 -obs2))
-  expect_false(identical(residTest, predTest -obs))
+  expect_false(identical(residTest, predTest -obs1))
 })
 
 mr1 <- multiResiduals(ens.class)
@@ -304,9 +304,9 @@ mr2 <- multiResiduals(ens.reg)
 test_that("Multiple residuals object is correct dimensions", {
   expect_identical(names(mr1), names(mr2))
   expect_identical(names(mr1), c("method", "id", "yhat", "resid", "y"))
-  expect_identical(nrow(mr1), 150 * length(ens.class$models))
-  expect_identical(nrow(mr2), 150 * length(ens.reg$models))
-  expect_identical(ncol(mr1), ncol(mr2))
+  expect_equal(nrow(mr1), 150 * length(ens.class$models))
+  expect_equal(nrow(mr2), 150 * length(ens.reg$models))
+  expect_equal(ncol(mr1), ncol(mr2))
 
 })
 
@@ -428,14 +428,14 @@ modres1 <- extractModRes(ens.class)
 modres2 <- extractModRes(ens.reg)
 
 test_that("Model results do not come from train objects", {
-  expect_false(identical(modres1[1, 2]), max(ens.class$models[[1]]$results$Accuracy))
-  expect_false(identical(modres2[1, 2]), max(ens.reg$models[[1]]$results$RMSE))
-  expect_false(identical(modres1[2, 2]), max(ens.class$models[[2]]$results$Accuracy))
-  expect_false(identical(modres2[2, 2]), max(ens.reg$models[[2]]$results$RMSE))
-  expect_false(identical(modres1[3, 2]), max(ens.class$models[[3]]$results$Accuracy))
-  expect_false(identical(modres1[4, 2]), max(ens.class$models[[4]]$results$Accuracy))
-  expect_false(identical(modres1[5, 2]), max(ens.class$models[[5]]$results$Accuracy))
-  expect_false(identical(modres1[6, 2]), max(ens.class$models[[6]]$results$Accuracy))
+  expect_false(identical(modres1[1, 2], max(ens.class$models[[1]]$results$Accuracy)))
+  expect_false(identical(modres2[1, 2], max(ens.reg$models[[1]]$results$RMSE)))
+  expect_false(identical(modres1[2, 2], max(ens.class$models[[2]]$results$Accuracy)))
+  expect_false(identical(modres2[2, 2], max(ens.reg$models[[2]]$results$RMSE)))
+  expect_false(identical(modres1[3, 2], max(ens.class$models[[3]]$results$Accuracy)))
+  expect_false(identical(modres1[4, 2], max(ens.class$models[[4]]$results$Accuracy)))
+  expect_false(identical(modres1[5, 2], max(ens.class$models[[5]]$results$Accuracy)))
+  expect_false(identical(modres1[6, 2], max(ens.class$models[[6]]$results$Accuracy)))
 })
 
 test_that("Model results do come from proper calls to getMetric", {
@@ -461,18 +461,17 @@ test_that("Model metric standard deviations are truly best", {
   expect_identical(modres2[1, 3], getMetricSD(ens.reg$models[[1]], "RMSE", which = "best"))
   expect_identical(modres2[2, 3], getMetricSD(ens.reg$models[[2]], "RMSE", which = "best"))
   expect_identical(modres2[1, 3], getMetricSD(ens.reg$models[[1]], "RMSE", which = "all"))
-  expect_false(identical(expect_identical(modres2[2, 3],
-                                          getMetricSD(ens.reg$models[[2]],
-                                                      "RMSE", which = "all"))))
+  expect_false(identical(modres2[2, 3], getMetricSD(ens.reg$models[[2]],
+                                                    "RMSE", which = "all")))
 })
 
 modres3 <- extractModRes(ensNest)
 
 test_that("Model metrics extracted correctly from nested models", {
-  expect_identical(modres3[1, 3], getMetricSD(ensNest$models[[1]], "AUC", which = "best"))
-  expect_identical(modres3[2, 3], getMetricSD(ensNest$models[[2]], "AUC", which = "best"))
-  expect_identical(modres3[3, 3], getMetricSD(ensNest$models[[3]], "AUC", which = "best"))
-  expect_identical(modres3[4, 3], getMetricSD(ensNest$models[[4]], "AUC", which = "best"))
+  expect_equal(modres3[1, 3], getMetricSD(ensNest$models[[1]], "AUC", which = "best"))
+  expect_equal(modres3[2, 3], getMetricSD(ensNest$models[[2]], "AUC", which = "best"))
+  expect_equal(modres3[3, 3], getMetricSD(ensNest$models[[3]], "AUC", which = "best"))
+  expect_equal(modres3[4, 3], getMetricSD(ensNest$models[[4]], "AUC", which = "best"))
 })
 
 
