@@ -229,6 +229,57 @@ test_that("No errors are thrown by a summary", {
   expect_output(summary(studentEns), "AUC")
 })
 
+context("Extract model Results")
+
+extractModFrame
+
+
+
+context("Plot.caretEnsemble")
+
+test_that("Plot objects are ggplot", {
+  expect_is(plot(ens.class), "ggplot")
+  expect_is(plot(ens.reg), "ggplot")
+  expect_is(plot(ens.reg$models[[2]]), "trellis")
+})
+
+
+test_that("Plot objects have proper data"){
+  tp <- plot(ens.class)
+  tp2 <- plot(ens.reg)
+  expect_true(nrow(tp$data), 6)
+  expect_true(nrow(tp2$data), 2)
+  expect_identical(tp$data$method, names(ens.class$weights))
+  expect_identical(tp2$data$method, names(ens.reg$weights))
+}
+
+context("fortify caretEnsemble")
+fortify.caretEnsemble
+
+
+context("autoplot caretEnsemble")
+
+
+context("Residual extraction")
+multiResiduals
+residTest <- residuals(ens.class)
+residTest2 <- residuals(ens.reg)
+obs1 <- ifelse(Y.class == "No", 0, 1)
+obs2 <- Y.reg
+predTest <- predict(ens.class)
+predTest2 <- predict(ens.reg)
+identical(residTest, obs1 - predTest)
+identical(residTest2, obs2 - predTest2)
+
+
+test_that("Residuals provided by residuals are proper for ensemble objects", {
+  expect_identical(residTest, obs1 - predTest)
+  expect_identical(residTest2, obs2 - predTest2)
+  expect_false(identical(residTest2, predTest2 -obs2))
+  expect_false(identical(residTest, predTest -obs))
+})
+
+residuals.caretEnsemble
 
 context("Does prediction method work for classification")
 

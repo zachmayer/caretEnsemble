@@ -491,8 +491,7 @@ plot.caretEnsemble <- function(x, ...){
 #' residuals against two random or user specified variables.
 #' @import ggplot2
 #' @import grid
-#' @importFrom plyr ddply
-#' @importFrom plyr .
+#' @import plyr
 #' @export
 autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
                                    xvars = NULL, ...){
