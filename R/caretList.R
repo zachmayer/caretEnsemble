@@ -10,8 +10,51 @@ methodCheck <- function(x){
   warning('NOT IMPLEMENTED')
   return(invisible(NULL))
 }
-indexCheck <- function(x){
-  warning('NOT IMPLEMENTED')
+trControlCheck <- function(x, n){
+
+  if(!x$savePredictions){
+    warning('trControl$savePredictions=FALSE.  Setting to TRUE so we can ensemble the models.')
+    x$savePredictions <- TRUE
+  }
+
+  if(!x$classProbs){
+    warning('trControl$classProbs=FALSE.  Setting to TRUE so we can ensemble the models.')
+    x$classProbs <- TRUE
+  }
+
+  if(is.null(x$index)){
+    warning('indexes not defined in trControl.  Attempting to set them ourselves, so each model in the ensemble will have the same resampling indexes.')
+    if(x$method=='none'){
+      stop("Models that aren't resampled cannot be ensembled.  All good ensemble methods rely on out-of sample data.  If you really need to ensemble without re-sampling, try the median or mean of the model's predictions.")
+
+    } else if(x$method=='boot'){
+      r <- createResample(y, times = x$number, list = TRUE)
+      x$index <- r
+    } else if(x$method=='cv'){
+      r <- createFolds(y, k = 10, list = TRUE, returnTrain = TRUE)
+      x$index <- r
+    } else if(x$method=='repeatedcv'){
+      r <- createMultiFolds(y, k = 10, times = 5)
+      x$index <- r
+    } else if(x$method=='LGOCV'){
+      r <- createDataPartition(
+        y,
+        times = 1,
+        p = 0.5,
+        list = TRUE,
+        groups = min(5, length(y)))
+      x$index <- r
+    } else {
+      stop(paste0('buildModels does not currently know how to handle cross-validation method=', x$method, '. Please specify trControl$index manually'))
+    }
+
+  }
+
+
+
+
+
+
   return(x)
 }
 
@@ -47,7 +90,7 @@ buildModels <- function(..., trControl = trainControl(), methodList = NULL, tune
   methodCheck(methodList)
 
   #Define the index slot of trControl if it is missing
-  trControl <- indexCheck(trControl)
+  trControl <- trControlCheck(trControl)
 
   #Squish trControl back onto the global arguments list
   global_args <- list(...)
