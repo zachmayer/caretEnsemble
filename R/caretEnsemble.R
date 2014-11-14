@@ -417,7 +417,7 @@ multiResiduals <- function(object, ...){
 #' @description This function constructs a dataframe consisting of the outcome,
 #' all of the predictors used in any of the models ensembled in a \code{caretEnsemble}
 #' object, and some model fit statistics.
-#' @param mode a \code{caretEnsemble} to extract predictors from
+#' @param model a \code{caretEnsemble} to extract predictors from
 #' @param data a data set, defaults to the data used to fit the model
 #' @param ... additional arguments to pass to fortify
 #' @return The original data with extra columns for fitted values and residuals
@@ -442,7 +442,7 @@ fortify.caretEnsemble <- function(model, data = NULL, ...){
 #' @description This function constructs a dataframe consisting of the outcome
 #' and all of the predictors used in any of the models ensembled in a \code{caretEnsemble}
 #' object.
-#' @param mode a \code{caretEnsemble} to extract predictors from
+#' @param model a \code{caretEnsemble} to extract predictors from
 #' @return A data.frame combining all of the variables used across all models.
 #' @importFrom digest digest
 #' @export
@@ -490,7 +490,9 @@ plot.caretEnsemble <- function(x, ...){
 #' across the fitted values. Bottom left and bottom right are the plots of the
 #' residuals against two random or user specified variables.
 #' @import ggplot2
-#' @importFrom grid pushViewport
+#' @import grid
+#' @importFrom plyr ddply
+#' @importFrom plyr .
 #' @export
 autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
                                    xvars = NULL, ...){
@@ -564,3 +566,7 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
     j <- j + 1
   }
 }
+
+
+utils::globalVariables(c(".fitted", ".resid", "method", "id", "yhat",
+                         "ymax", "yavg", "ymin", "metric", "metricSD"))

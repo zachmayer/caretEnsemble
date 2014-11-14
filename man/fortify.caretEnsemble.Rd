@@ -6,11 +6,11 @@
 \method{fortify}{caretEnsemble}(model, data = NULL, ...)
 }
 \arguments{
+\item{model}{a \code{caretEnsemble} to extract predictors from}
+
 \item{data}{a data set, defaults to the data used to fit the model}
 
 \item{...}{additional arguments to pass to fortify}
-
-\item{mode}{a \code{caretEnsemble} to extract predictors from}
 }
 \value{
 The original data with extra columns for fitted values and residuals

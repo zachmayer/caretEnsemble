@@ -6,7 +6,7 @@
 extractModFrame(model)
 }
 \arguments{
-\item{mode}{a \code{caretEnsemble} to extract predictors from}
+\item{model}{a \code{caretEnsemble} to extract predictors from}
 }
 \value{
 A data.frame combining all of the variables used across all models.
