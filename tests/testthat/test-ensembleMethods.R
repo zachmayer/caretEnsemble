@@ -241,14 +241,14 @@ test_that("Plot objects are ggplot", {
 })
 
 
-test_that("Plot objects have proper data"){
+test_that("Plot objects have proper data", {
   tp <- plot(ens.class)
   tp2 <- plot(ens.reg)
   expect_true(nrow(tp$data), 6)
   expect_true(nrow(tp2$data), 2)
   expect_identical(tp$data$method, names(ens.class$weights))
   expect_identical(tp2$data$method, names(ens.reg$weights))
-}
+})
 
 context("fortify caretEnsemble")
 
