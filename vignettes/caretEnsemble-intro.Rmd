@@ -11,7 +11,7 @@ vignette: >
 
 caretEnsemble is a package for making ensembles of caret models.  You should already be somewhat familiar with the caret package before trying out caretEnsemble.
 
-caretEnsemble has 2 primary methods for creating ensembles: caretEnsemble, which uses greedy optimization to create a simple linear blend of models and caretStack which uses a caret model to combine the outputs from several component caret models.
+caretEnsemble has 2 primary methods for creating ensembles: **caretEnsemble**, which uses greedy optimization to create a simple linear blend of models and **caretStack** which uses a caret model to combine the outputs from several component caret models.
 
 ## caretEnsemble
 
@@ -40,11 +40,11 @@ Once we have a common train control, we can fit 2 different predictive models us
 ```{r, echo=TRUE, fig.show='hold'}
 suppressMessages(library('pROC'))
 suppressMessages(library('rpart'))
+set.seed(42)
 suppressWarnings(model_glm <- train(
   Class ~ ., 
   data=training, 
   method='glm', 
-  preProc = c("center", "scale"), 
   trControl=my_control,
   metric='ROC'))
 suppressWarnings(model_rpart <- train(
@@ -53,39 +53,150 @@ suppressWarnings(model_rpart <- train(
   method='rpart', 
   trControl=my_control, 
   metric='ROC'))
-model_list <- list(logit=model_glm, tree=model_rpart)
+model_list <- list(glm=model_glm, rpart=model_rpart)
 xyplot(resamples(model_list))
 ```
     
-As you can see from this plot, these 2 models are pretty un-correllated, but the rpart model is ocassionally anti-predictive.
+As you can see from this plot, these 2 models are pretty un-correlated, and the rpart model is ocassionally anti-predictive, with a few re-samples showing AUCS around 0.3 to 0.4.
 
-We can confirm the 2 model's correllations with the `modelCor` function from caret:
+We can confirm the 2 model's correlation with the `modelCor` function from caret:
 ```{r, echo=TRUE}
 modelCor(resamples(model_list))
 ```
 
-These models make a good candidate for an ensemble: their predicitons are fairly un-correllated, but their overall accuaracy is similar.  We do a simple, linear greedy optimization on AUC using caretEnsemble:
-```{r, echo=TRUE}
+These models make a good candidate for an ensemble: their predicitons are fairly un-correlated, but their overall accuaracy is similar.  We do a simple, linear greedy optimization on AUC using caretEnsemble:
+```{r, echo=TRUE, results='hide'}
 suppressMessages(library('caretEnsemble'))
 greedy_ensemble <- caretEnsemble(model_list)
 summary(greedy_ensemble)
+```{r, echo=TRUE}
+summary(greedy_ensemble)
 ```
 
-The ensemble's AUC on the training set resamples is 0.76, which is about 6% better than the best individual model.  We can confirm this finding on the test set:
-```{r, echo=TRUE}
+The ensemble's AUC on the training set resamples is 0.76, which is about 7% better than the best individual model.  We can confirm this finding on the test set:
+```{r, echo=TRUE, results='hide'}
 suppressMessages(library('caTools'))
 model_preds <- lapply(model_list, predict, newdata=testing, type='prob')
 model_preds <- lapply(model_preds, function(x) x[,'M'])
 model_preds <- data.frame(model_preds)
 suppressMessages(ens_preds <- predict(greedy_ensemble, newdata=testing))
 model_preds$ensemble <- ens_preds
+```
+```{r, echo=TRUE}
 colAUC(model_preds, testing$Class)
 ```
-The ensemble's AUC on the test set is about 7% higher than the best individual model.
+The ensemble's AUC on the test set is about 6% higher than the best individual model.
+
+We can also use varImp to extract the variable importances from each member of the ensemble, as well as the final ensemble model:
+```{r, echo=TRUE, results='hide'}
+varImp(greedy_ensemble)
+```
+```{r, echo=FALSE, results='asis'}
+knitr::kable(varImp(greedy_ensemble))
+```
+
+The columns each sum up to 100.
+
+## buildModels
+
+buildModels is a shortcut for building lists of models to pass to caretEnsemble.  It is a little less flexible than fitting each model on your own, in that you cannot specify model-specific options or pre-processing, but it lets you easily fit many, many models in one call:
+```{r, echo=TRUE}
+x_train <- as.matrix(training[,-61])
+x_test <- as.matrix(testing[,-61])
+y_train <- training[,61]
+y_test <- testing[,61]
+suppressWarnings({
+  model_list2 <- buildModels(
+  methodList=c('glm', 'rpart'), 
+  control=my_control,
+  x=x_train, 
+  y=y_train,
+  baseSeed=42
+)})
+```
+Models fit with buildModels will yeild similar results to caret train models fit with their default parameters:
+```{r, echo=TRUE}
+summary(caretEnsemble(model_list2))
+```
+
+You can also add other, more customized models to the end of the stack, but be sure all the models in your ensemble use the same `trainControl` with the same set of resampling indexes:
+```{r, echo=TRUE}
+suppressMessages(library('MASS'))
+suppressWarnings({
+  model_list2[['lda']] <- train(
+    x_train, 
+    y_train,
+    method='lda', 
+    trControl=my_control
+    )
+  })
+greedy_ensemble2 <- caretEnsemble(model_list2)
+summary(greedy_ensemble2)
+```
+While the lda model is 3% more accurate than the rpart model, the ensemble of 3 models still outperforms the lda model by 6%.  We can also test this model on the test set:
+```{r, echo=TRUE, results='hide'}
+suppressMessages(library('caTools'))
+model_preds2 <- lapply(model_list2, predict, newdata=x_test, type='prob')
+model_preds2 <- lapply(model_preds2, function(x) x[,'M'])
+model_preds2 <- data.frame(model_preds2)
+suppressMessages(ens_preds2 <- predict(greedy_ensemble2, newdata=x_test))
+model_preds2$ensemble <- ens_preds2
+```
+```{r, echo=TRUE}
+colAUC(model_preds2, testing$Class)
+```
+Whoops! The ensemble slightly overfits the hold-out samples in the training set, with a self-reported AUC of .79, vs .77 on the test set.  In this case, most of the ensembles accuracy actually comes from the `lda` model.
 
 ## caretStack
+caretStack allows us to move beyond simple blends of models to using "meta-models" to ensemble collections of predictive models. DO NOT use the `trainControl` object you used to fit the training models to fit the ensemble.  The re-sampling indexes will be wrong.  Fortunatly, you don't need to be as fastidious with re-sampling indexes for caretStack, as it only fits one model.
 
+```{r, echo=TRUE, results='hide'}
+glm_ensemble <- caretStack(
+  model_list, 
+  method='glm',
+  metric='ROC',
+  trControl=trainControl(
+    method='boot',
+    number=10,
+    savePredictions=TRUE,
+    classProbs=TRUE,
+    summaryFunction=twoClassSummary
+  )
+)
+model_preds3 <- model_preds
+model_preds3$ensemble <- predict(glm_ensemble, newdata=testing, type='prob')$M
+```
+```{r, echo=TRUE, reuslts='show'}
+CF <- coef(glm_ensemble$ens_model$finalModel)[-1]
+colAUC(model_preds3, testing$Class)
+CF/sum(CF)
+```
+Note that `glm_ensemble$ens_model` is a regular caret object of class `train`.  The glm-weighted model weights (glm vs rpart) and test-set AUCs are extremely similar to the caretEnsemble greedy optimization.
 
-## Figures
-
-## More Examples
+We can also use more sophisticated ensembles than simple linear weights, but these models are much more succeptible to over-fitting, and generally require large sets of resamples to train on (n=50 or higher for bootstrap samples).  Lets try one anyways:
+```{r, echo=TRUE, results='hide'}
+suppressMessages(library('gbm'))
+gbm_ensemble <- caretStack(
+  model_list, 
+  method='gbm',
+  verbose=FALSE,
+  tuneLength=10,
+  metric='ROC',
+  trControl=trainControl(
+    method='boot',
+    number=10,
+    savePredictions=TRUE,
+    classProbs=TRUE,
+    summaryFunction=twoClassSummary
+  )
+)
+model_preds4 <- model_preds
+model_preds4$ensemble <- predict(gbm_ensemble, newdata=testing, type='prob')$M
+```
+```{r, echo=TRUE}
+colAUC(model_preds4, testing$Class)
+```
+In this case, the sophisticated ensemble is no better than a simple weighted linear combination.  Non-linar ensembles seem to work best when you have 
+1. Lots of data.
+2. Lots of models with similar accuracies.
+3. Your models are very un-correllated: each one seems to capture a different aspect of the data.
