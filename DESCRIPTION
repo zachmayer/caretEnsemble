@@ -29,5 +29,6 @@ Imports:
     caTools,
     pbapply,
     ggplot2,
-    digest
+    digest,
+    grid
 License: MIT + file LICENSE

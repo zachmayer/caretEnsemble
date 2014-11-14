@@ -3,7 +3,7 @@
 \alias{autoplot.caretEnsemble}
 \title{Convenience function for more in-depth diagnostic plots of caretEnsemble objects}
 \usage{
-\method{autoplot}{caretEnsemble}(object, which = c(1:6), mfrow = c(2, 3),
+\method{autoplot}{caretEnsemble}(object, which = c(1:6), mfrow = c(3, 2),
   xvars = NULL, ...)
 }
 \arguments{
@@ -18,7 +18,13 @@
 \item{...}{additional arguments to pass to autoplot}
 }
 \value{
-A grid of diagnostic plots
+A grid of diagnostic plots. Top left is the range of the performance
+metric across each component model along with its standard deviation. Top right
+is the residuals from the ensembled model plotted against fitted values.
+Middle left is a bar graph of the weights of the component models. Middle
+right is the disagreement in the residuals of the component models (unweighted)
+across the fitted values. Bottom left and bottom right are the plots of the
+residuals against two random or user specified variables.
 }
 \description{
 This function provides a more robust series of diagnostic plots

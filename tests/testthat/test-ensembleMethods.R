@@ -408,7 +408,7 @@ test_that("We can ensemble models and handle missingness across predictors", {
 })
 
 ## Plot method
-plot(ens.class$models[[4]])
+# plot(ens.class$models[[4]])
 
 
 

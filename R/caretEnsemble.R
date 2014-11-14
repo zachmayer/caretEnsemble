@@ -53,7 +53,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 
   #Return final model
   out <- list(models=all.models[keep], weights=weights[keep], error=error,
-              type = predobs$type)
+              modelType = predobs$type)
   class(out) <- 'caretEnsemble'
   return(out)
 }
@@ -337,12 +337,15 @@ varImpFrame <- function(x){
 #' @return A numeric of the residuals.
 #' @export
 residuals.caretEnsemble <- function(object, ...){
-  if(object$type == "Regression"){
+  if(missing(object$modelType)){
+    object$modelType <- checkModels_extractTypes(object$models)
+  }
+  if(object$modelType == "Regression"){
     yhat <- predict(object)
     y <- object$models[[1]]$trainingData$.outcome
     resid <- y - yhat
     return(resid)
-  } else if(object$type == "Classification"){
+  } else if(object$modelType == "Classification"){
     yhat <- predict(object)
     y <- as.character(object$models[[1]]$trainingData$.outcome)
     z <- table(y)
@@ -353,22 +356,61 @@ residuals.caretEnsemble <- function(object, ...){
   }
 }
 
-# rstandard.caretEnsemble <- function(x){
-#   if(x$type == "Regression"){
-#     yhat <- predict(x)
-#     y <- x$models[[1]]$trainingData$.outcome
-#     resid <- y - yhat
-#     return(resid)
-#   } else if(x$type == "Classification"){
-#     yhat <- predict(x)
-#     y <- as.character(x$models[[1]]$trainingData$.outcome)
-#     z <- table(y)
-#     prevOutcome <- names(z)[z == max(z)]
-#     y <- ifelse(y == prevOutcome, 0, 1)
-#     resid <- y - yhat
-#     return(resid)
-#   }
-# }
+residuals2.train <- function(object){
+  if(object$modelType == "Regression"){
+    y <- object$trainingData$.outcome
+    resid <- residuals(object)
+    yhat <- predict(object)
+    data <- data.frame(y = y, yhat = yhat, .resid = resid,
+                       method = object$method)
+    return(data)
+  } else if(object$modelType == "Classification"){
+    yhat <- predict(object)
+    if (ncol(yhat) > 1){
+      yhat <- yhat[, 1]
+    }
+    y <- as.character(object$trainingData$.outcome)
+    z <- table(y)
+    prevOutcome <- names(z)[z == max(z)]
+    y <- ifelse(y == prevOutcome, 1, 0)
+    resid <- y - yhat
+    data <- data.frame(y = y, yhat = yhat, .resid = resid,
+                       method = object$method)
+    return(data)
+  }
+}
+
+#' @title Calculate the residuals from all component models of a caretEnsemble.
+#' @description This function calculates raw residuals for both regression and
+#' classification \code{train} objects within a \code{\link{caretEnsemble}}.
+#' @param object a \code{caretEnsemble} to make predictions from.
+#' @param ... other arguments to be passed to residuals
+#' @return A data.frame in the long format with columns for the model method,
+#' the observation id, yhat for the fitted values, resid for the residuals, and
+#' y for the observed value.
+#' @export
+multiResiduals <- function(object, ...){
+  modtype <- checkModels_extractTypes(object$models)
+  preds <- multiPredict(object$models, type = modtype, ...)
+  if(modtype == "Regression"){
+    y <- object$models[[1]]$trainingData$.outcome
+  } else if(modtype == "Classification"){
+    y <- as.character(object$models[[1]]$trainingData$.outcome)
+    z <- table(y)
+    prevOutcome <- names(z)[z == max(z)]
+    y <- ifelse(y == prevOutcome, 0, 1)
+  }
+  resid <- y - preds
+  preds <- as.data.frame(preds)
+  resid <- as.data.frame(resid)
+  resid <- reshape(resid, direction = "long", varying = names(resid),
+                    v.names = "resid", timevar = "method", times = names(resid))
+  preds <- reshape(preds, direction = "long", varying = names(preds),
+                   v.names = "yhat", timevar = "method", times = names(preds))
+  out <- merge(preds, resid)
+  out$y <- out$yhat + out$resid
+  return(out)
+}
 
 
 #' @title Supplement the data fitted to a caret ensemble model with model fit statistics
@@ -440,13 +482,20 @@ plot.caretEnsemble <- function(x, ...){
 #' @param mfrow an integer vector of length 2 specifying the number of rows and columns for plots
 #' @param xvars a vector of the names of x variables to plot against residuals
 #' @param ... additional arguments to pass to autoplot
-#' @return A grid of diagnostic plots
+#' @return A grid of diagnostic plots. Top left is the range of the performance
+#' metric across each component model along with its standard deviation. Top right
+#' is the residuals from the ensembled model plotted against fitted values.
+#' Middle left is a bar graph of the weights of the component models. Middle
+#' right is the disagreement in the residuals of the component models (unweighted)
+#' across the fitted values. Bottom left and bottom right are the plots of the
+#' residuals against two random or user specified variables.
 #' @import ggplot2
+#' @importFrom grid pushViewport
 #' @export
-autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(2, 3),
+autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
                                    xvars = NULL, ...){
   plotdf <- suppressMessages(fortify(object))
-  g1 <- plot(object)
+  g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
   wghtFrame <- as.data.frame(object$weights)
   wghtFrame$method <- row.names(wghtFrame)
   names(wghtFrame) <- c("weights", "method")
@@ -460,21 +509,33 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(2, 3),
   if(missing(xvars)){
     xvars <- names(plotdf)[!names(plotdf) %in% c("(Intercept)", ".outcome", "y",
                                                  ".fitted", ".resid")]
-    xvars <- sample(xvars, 3)
+    xvars <- sample(xvars, 2)
   }
   # TODO: Insert checks for length ov xvars here
-  g4 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
+  residOut <- multiResiduals(object)
+  zed <- ddply(residOut, .(id), summarize,
+               ymin = min(resid),
+               ymax = max(resid),
+               yavg = median(resid),
+               yhat = yhat[1])
+  g4 <- ggplot(zed, aes(x = yhat, ymin = ymin, ymax = ymax, y = yavg)) +
+    geom_linerange(alpha = I(0.5)) + geom_point(size = I(3), alpha = I(0.8)) +
+    theme_bw() + geom_smooth(method = 'lm', se = FALSE,
+                             size = I(1.1), color = I("red"), linetype = 2) +
+    labs(x = "Fitted Values", y = "Range of Resid.",
+         title = "Model Disagreement Across Fitted Values")
+#   g4 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
+#     geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
+#     scale_y_continuous("Residuals") +
+#     labs(title = paste0("Residuals Against ", xvars[1])) + theme_bw()
+  g5 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
     geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
     scale_y_continuous("Residuals") +
     labs(title = paste0("Residuals Against ", xvars[1])) + theme_bw()
-  g5 <- ggplot(plotdf, aes_string(xvars[2], ".resid")) + geom_point() +
-    geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
+  g6 <- ggplot(plotdf, aes_string(xvars[2], ".resid")) + geom_point() +
+    geom_smooth(se = FALSE) + scale_x_continuous(xvars[2]) +
     scale_y_continuous("Residuals") +
     labs(title = paste0("Residuals Against ", xvars[2])) + theme_bw()
-  g6 <- ggplot(plotdf, aes_string(xvars[3], ".resid")) + geom_point() +
-    geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
-    scale_y_continuous("Residuals") +
-    labs(title = paste0("Residuals Against ", xvars[3])) + theme_bw()
   plots <- list(g1, g2, g3, g4, g5, g6)
   grid::grid.newpage()
   if (prod(mfrow) > 1) {
