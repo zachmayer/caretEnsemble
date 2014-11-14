@@ -121,8 +121,9 @@ pip-log.txt
 *.mo
 #Mr Developer
 .mr.developer.cfg
-# Mac crap
+# Mac
 .DS_Store
+
+# R
 .RHistory
 .Rproj.user
-inst/doc
