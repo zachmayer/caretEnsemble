@@ -10,7 +10,7 @@ methodCheck <- function(x){
   warning('NOT IMPLEMENTED')
   return(invisible(NULL))
 }
-trControlCheck <- function(x, n){
+trControlCheck <- function(x, y){
 
   if(!x$savePredictions){
     warning('trControl$savePredictions=FALSE.  Setting to TRUE so we can ensemble the models.')
@@ -28,34 +28,41 @@ trControlCheck <- function(x, n){
       stop("Models that aren't resampled cannot be ensembled.  All good ensemble methods rely on out-of sample data.  If you really need to ensemble without re-sampling, try the median or mean of the model's predictions.")
 
     } else if(x$method=='boot'){
-      r <- createResample(y, times = x$number, list = TRUE)
-      x$index <- r
+      x$index <- createResample(y, times = x$number, list = TRUE)
     } else if(x$method=='cv'){
-      r <- createFolds(y, k = 10, list = TRUE, returnTrain = TRUE)
-      x$index <- r
+      x$index  <- createFolds(y, k = x$number, list = TRUE, returnTrain = TRUE)
     } else if(x$method=='repeatedcv'){
-      r <- createMultiFolds(y, k = 10, times = 5)
-      x$index <- r
+      x$index <- createMultiFolds(y, k = x$number, times = x$repeats)
     } else if(x$method=='LGOCV'){
-      r <- createDataPartition(
+      x$index <- createDataPartition(
         y,
-        times = 1,
+        times = x$number,
         p = 0.5,
         list = TRUE,
         groups = min(5, length(y)))
-      x$index <- r
     } else {
-      stop(paste0('buildModels does not currently know how to handle cross-validation method=', x$method, '. Please specify trControl$index manually'))
+      stop(paste0("buildModels does not currently know how to handle cross-validation method='", x$method, "'. Please specify trControl$index manually"))
     }
-
   }
-
-
-
-
-
-
   return(x)
+}
+extractCaretArgsY <- function(x){
+  if(is.data.frame(x[[1]])){
+    if(is.null(x$y)){
+      stop('train passed x argument but no y.')
+    }
+    return(x$y)
+  }
+  if('formula' %in% class(x[[1]])){
+    flma <- x[[1]]
+    resp <- attr(terms(flma), 'response')
+    if(resp==0){
+      stop('train passed a 1-sided formula.  Please specify a response.')
+    }
+    return(attr(terms(flma), 'term.labels')[resp])
+  }
+  x_class <- paste0("'", paste(class(x[[1]]), collapse="', '"), "'")
+  stop(paste("Don't know how to extract response from object of class", x_class))
 }
 
 #' Create a list of several train models from the caret package
@@ -89,11 +96,16 @@ buildModels <- function(..., trControl = trainControl(), methodList = NULL, tune
   #Check that the methods are valid
   methodCheck(methodList)
 
+  #Capture global arguments for train as a list
+  global_args <- list(...)
+
   #Define the index slot of trControl if it is missing
-  trControl <- trControlCheck(trControl)
+  if(is.null(trControl$index)){
+    y <- extractCaretArgsY(global_args)
+    trControl <- trControlCheck(x=trControl, y=y)
+  }
 
   #Squish trControl back onto the global arguments list
-  global_args <- list(...)
   global_args[['trControl']] <- trControl
 
   #If the tuneList is missing, fit each model with 100% default caret params
