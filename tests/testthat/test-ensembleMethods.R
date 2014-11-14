@@ -229,9 +229,6 @@ test_that("No errors are thrown by a summary", {
   expect_output(summary(studentEns), "AUC")
 })
 
-context("Extract model Results")
-
-extractModFrame
 
 
 
@@ -254,14 +251,36 @@ test_that("Plot objects have proper data"){
 }
 
 context("fortify caretEnsemble")
-fortify.caretEnsemble
+
+fort1 <- fortify(ens.class)
+fort2 <- fortify(ens.reg)
+
+test_that("Fortify produces proper data structures", {
+  expect_is(fort1, "data.frame")
+  expect_is(fort2, "data.frame")
+})
+
+test_that("Fortify produces proper dimensions", {
+  expect_identical(nrow(fort1), 150)
+  expect_identical(nrow(fort2), 150)
+  expect_identical(ncol(fort1), 10)
+  expect_identical(ncol(fort2), 10)
+  expect_true(all(names(fort1) %in% names(fort2)))
+})
+
 
 
 context("autoplot caretEnsemble")
 
+test_that("Autoplot throws errors on train, but not caretEnsemble objects", {
+  identical(tryCatch(autoplot(ens.class)), NULL)
+  identical(tryCatch(autoplot(ens.reg)), NULL)
+  expect_error(autoplot(ens.class$models[[1]]))
+  expect_error(autoplot(ens.reg$models[[1]]))
+})
 
 context("Residual extraction")
-multiResiduals
+
 residTest <- residuals(ens.class)
 residTest2 <- residuals(ens.reg)
 obs1 <- ifelse(Y.class == "No", 0, 1)
@@ -279,7 +298,54 @@ test_that("Residuals provided by residuals are proper for ensemble objects", {
   expect_false(identical(residTest, predTest -obs))
 })
 
-residuals.caretEnsemble
+mr1 <- multiResiduals(ens.class)
+mr2 <- multiResiduals(ens.reg)
+
+test_that("Multiple residuals object is correct dimensions", {
+  expect_identical(names(mr1), names(mr2))
+  expect_identical(names(mr1), c("method", "id", "yhat", "resid", "y"))
+  expect_identical(nrow(mr1), 150 * length(ens.class$models))
+  expect_identical(nrow(mr2), 150 * length(ens.reg$models))
+  expect_identical(ncol(mr1), ncol(mr2))
+
+})
+
+mr1 <- mr1[order(mr1$method, mr1$id),]
+mr2 <- mr2[order(mr2$method, mr2$id),]
+
+# component residuals
+# reg this is easy
+mr2.tmp1 <- residuals(ens.reg$models[[1]])
+attributes(mr2.tmp1) <- NULL
+mr2.tmp2 <- residuals(ens.reg$models[[2]])
+
+## class this is hard
+mr1.tmp1 <- caretEnsemble:::residuals2.train(ens.class$models[[1]])
+mr1.tmp1 <- merge(mr1, mr1.tmp1)
+mr1.tmp2 <- caretEnsemble:::residuals2.train(ens.class$models[[2]])
+mr1.tmp2 <- merge(mr1, mr1.tmp2)
+mr1.tmp3 <- caretEnsemble:::residuals2.train(ens.class$models[[3]])
+mr1.tmp3 <- merge(mr1, mr1.tmp3)
+mr1.tmp4 <- caretEnsemble:::residuals2.train(ens.class$models[[4]])
+mr1.tmp4 <- merge(mr1, mr1.tmp4)
+mr1.tmp5 <- caretEnsemble:::residuals2.train(ens.class$models[[5]])
+mr1.tmp5 <- merge(mr1, mr1.tmp5)
+mr1.tmp6 <- caretEnsemble:::residuals2.train(ens.class$models[[6]])
+mr1.tmp6 <- merge(mr1, mr1.tmp6)
+
+
+
+test_that("Multiple residuals results are correct", {
+  expect_true(identical(round(mr2[mr2$method == "lm", "resid"], 5), round(mr2.tmp1, 5)))
+  expect_true(identical(round(mr2[mr2$method == "knn", "resid"], 5), round(mr2.tmp2, 5)))
+  expect_true(identical(mr1.tmp1$resid, mr1.tmp1$.resid))
+  expect_true(identical(mr1.tmp2$resid, mr1.tmp2$.resid))
+  expect_true(identical(mr1.tmp3$resid, mr1.tmp3$.resid))
+  expect_true(identical(mr1.tmp4$resid, mr1.tmp4$.resid))
+  expect_true(identical(mr1.tmp5$resid, mr1.tmp5$.resid))
+  expect_true(identical(mr1.tmp6$resid, mr1.tmp6$.resid))
+})
+
 
 context("Does prediction method work for classification")
 
@@ -354,6 +420,57 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(length(pred.nest2$predicted)==1000)
   expect_true(length(pred.nest1[is.na(pred.nest1)])>0)
 })
+
+
+context("Extract model results")
+
+modres1 <- extractModRes(ens.class)
+modres2 <- extractModRes(ens.reg)
+
+
+test_that("Model results do not come from train objects", {
+  expect_false(identical(modres1[1, 2]), max(ens.class$models[[1]]$results$Accuracy))
+  expect_false(identical(modres2[1, 2]), max(ens.reg$models[[1]]$results$RMSE))
+  expect_false(identical(modres1[2, 2]), max(ens.class$models[[2]]$results$Accuracy))
+  expect_false(identical(modres2[2, 2]), max(ens.reg$models[[2]]$results$RMSE))
+  expect_false(identical(modres1[3, 2]), max(ens.class$models[[3]]$results$Accuracy))
+  expect_false(identical(modres1[4, 2]), max(ens.class$models[[4]]$results$Accuracy))
+  expect_false(identical(modres1[5, 2]), max(ens.class$models[[5]]$results$Accuracy))
+  expect_false(identical(modres1[6, 2]), max(ens.class$models[[6]]$results$Accuracy))
+})
+
+test_that("Model results do come from proper calls to getMetric", {
+  expect_identical(modres1[1, 2], getAUC(ens.class$models[[1]]))
+  expect_identical(modres1[2, 2], getAUC(ens.class$models[[2]]))
+  expect_identical(modres1[3, 2], getAUC(ens.class$models[[3]]))
+  expect_identical(modres1[4, 2], getAUC(ens.class$models[[4]]))
+  expect_identical(modres1[5, 2], getAUC(ens.class$models[[5]]))
+  expect_identical(modres1[6, 2], getAUC(ens.class$models[[6]]))
+
+})
+
+test_that("Model metric standard deviations are truly best", {
+  expect_identical(modres1[1, 3], getMetricSD(ens.class$models[[1]], "AUC", which = "best"))
+  expect_identical(modres1[2, 3], getMetricSD(ens.class$models[[2]], "AUC", which = "best"))
+  expect_identical(modres1[3, 3], getMetricSD(ens.class$models[[3]], "AUC", which = "best"))
+  expect_identical(modres1[4, 3], getMetricSD(ens.class$models[[4]], "AUC", which = "best"))
+  expect_identical(modres1[5, 3], getMetricSD(ens.class$models[[5]], "AUC", which = "best"))
+  expect_identical(modres1[6, 3], getMetricSD(ens.class$models[[6]], "AUC", which = "best"))
+  expect_identical(modres1[2, 3], getMetricSD(ens.class$models[[2]], "AUC", which = "all"))
+  expect_identical(modres1[5, 3], getMetricSD(ens.class$models[[5]], "AUC", which = "all"))
+  expect_false(identical(modres1[3, 3], getMetricSD(ens.class$models[[3]],
+                                                    "AUC", which = "all")))
+  expect_identical(modres2[1, 3], getMetricSD(ens.reg$models[[1]], "RMSE", which = "best"))
+  expect_identical(modres2[2, 3], getMetricSD(ens.reg$models[[2]], "RMSE", which = "best"))
+  expect_identical(modres2[1, 3], getMetricSD(ens.reg$models[[1]], "RMSE", which = "all"))
+  expect_false(identical(expect_identical(modres2[2, 3],
+                                          getMetricSD(ens.reg$models[[2]],
+                                                      "RMSE", which = "all"))))
+})
+
+context("Extract model frame")
+
+# extractModFrame
 
 
 ## Test generics summary and predict

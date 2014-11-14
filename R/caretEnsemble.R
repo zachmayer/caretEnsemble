@@ -177,6 +177,8 @@ getMetric.train <- function(x, metric= c("AUC", "RMSE")){
 #' Extract the AUC metric from a \code{\link{train}} object.
 #' @return A numeric for the AUC of the best model
 #' @rdname metrics
+#' @note AUC extracted from a train object is for all resamples pooled, not the average
+#' of the AUC for each resample.
 #' @export
 getAUC <- function(x){
   UseMethod("getAUC")
@@ -200,6 +202,8 @@ getAUC.train <- function(x){
 #' Extract the RMSE metric from a model object.
 #' @return A numeric for the RMSE of the best model
 #' @rdname metrics
+#' @note RMSE extracted from a train object is for all resamples pooled, not the average
+#' of the RMSE for each resample.
 #' @export
 getRMSE <- function(x){
   UseMethod("getRMSE")
@@ -225,33 +229,58 @@ getRMSE.train <- function(x){
 #' a model object.
 #' @param x an object with model performanc metrics
 #' @param metric a character, either "RMSE" or "AUC" indicating which metric to extract
+#' @param which a character, either "all" or "best", default is best, see details
 #' @return A numeric for the standard deviation of the selected metric across
 #' tuning parameters and resamples in the original object.
+#' @details Which allows the user to select whether to generate a standard deviation
+#' for the performance metric across all values of the tuning parameters and resamples,
+#' or only for resamples under the best tuning parameter
 #' @rdname metricsSD
 #' @export
-getMetricSD <- function(x, metric){
+getMetricSD <- function(x, metric, which = c("all", "best")){
   UseMethod("getMetricSD")
 }
 
 #' @export
-getMetricSD.train <- function(x, metric = c("RMSE", "AUC")){
+getMetricSD.train <- function(x, metric = c("RMSE", "AUC"), which = c("all", "best")){
   if(missing(metric)){
     metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
-    warning("Metric not specified, so default is being chosen.")
+    message(paste0("Metric not specified, so default is being chosen: ", metric))
+  }
+  if(missing(which)){
+    which <- "best"
+#     message("which not specified so sd only calculated for best values of tuning parmeters")
   }
   metricTest <- ifelse(metric == "AUC", "Classification", "Regression")
   stopifnot(x$modelType == metricTest)
   if(metric == "AUC"){
     z <- table(x$pred$obs)
     prevOutcome <- names(z)[z == max(z)]
-    out <- by(x$pred[, c(prevOutcome, "obs")], x$pred[, "Resample"],
+    out <- by(x$pred[, c(prevOutcome, "obs")], x$pred[, c(names(x$bestTune), "Resample")],
        function(x) colAUC(x[,1], x[,2]))
   } else if(metric == "RMSE"){
-    out <- by(x$pred[, c("pred","obs")], x$pred[, "Resample"],
+    out <- by(x$pred[, c("pred","obs")], x$pred[, c(names(x$bestTune), "Resample")],
               function(x) RMSE(x[,1], x[,2]))
   }
-  out <- sd(as.numeric(out))
+  if(which == "best"){
+    out <- matchBestTune(out, x$bestTune)
+    out <- sd(as.numeric(out))
+  } else{
+    out <- sd(as.numeric(out))
+  }
   return(out)
+}
+
+#' @keywords internal
+matchBestTune <- function(out, bt){
+  nams <- names(attributes(out)$dimnames)
+  nams <- nams[nams %in% names(bt)]
+  tmp <- c()
+  for(i in length(nams)){
+    tmp.t <- out[attributes(out)$dimnames[[nams[[i]]]] == as.character(bt[,nams[i]])]
+    tmp <- c(tmp, tmp.t)
+  }
+  return(tmp)
 }
 
 
@@ -337,7 +366,7 @@ varImpFrame <- function(x){
 #' @return A numeric of the residuals.
 #' @export
 residuals.caretEnsemble <- function(object, ...){
-  if(missing(object$modelType)){
+  if(is.null(object$modelType)){
     object$modelType <- checkModels_extractTypes(object$models)
   }
   if(object$modelType == "Regression"){
@@ -356,6 +385,7 @@ residuals.caretEnsemble <- function(object, ...){
   }
 }
 
+#' @keywords internal
 residuals2.train <- function(object){
   if(object$modelType == "Regression"){
     y <- object$trainingData$.outcome
@@ -365,8 +395,8 @@ residuals2.train <- function(object){
                        method = object$method)
     return(data)
   } else if(object$modelType == "Classification"){
-    yhat <- predict(object)
-    if (ncol(yhat) > 1){
+    yhat <- predict(object, type = "prob")
+    if (!is.null(ncol(yhat))){
       yhat <- yhat[, 1]
     }
     y <- as.character(object$trainingData$.outcome)
@@ -511,6 +541,8 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
     xvars <- names(plotdf)[!names(plotdf) %in% c("(Intercept)", ".outcome", "y",
                                                  ".fitted", ".resid")]
     xvars <- sample(xvars, 2)
+  } else {
+    xvars <- names(plotdf)[xvars]
   }
   # TODO: Insert checks for length ov xvars here
   residOut <- multiResiduals(object)
