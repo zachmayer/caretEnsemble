@@ -35,4 +35,11 @@ Extract the AUC metric from a \code{\link{train}} object.
 
 Extract the RMSE metric from a model object.
 }
+\note{
+AUC extracted from a train object is for all resamples pooled, not the average
+of the AUC for each resample.
+
+RMSE extracted from a train object is for all resamples pooled, not the average
+of the RMSE for each resample.
+}
 
