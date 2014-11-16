@@ -21,6 +21,9 @@ Depends:
 Suggests:
     testthat,
     randomForest,
+    rpart,
+    gbm,
+    kernlab,
     e1071,
     kernlab,
     ipred,

@@ -1,8 +1,11 @@
 # Test caretList
 
 set.seed(442)
-library(caret)
-library(randomForest)
+library('caret')
+library('randomForest')
+library('rpart')
+library('gbm')
+library('kernlab')
 train <- twoClassSim(
   n = 1000, intercept = -8, linearVars = 3,
   noiseVars = 10, corrVars = 4, corrValue = 0.6)
