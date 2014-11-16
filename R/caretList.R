@@ -102,6 +102,10 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @export
 buildModels <- function(..., trControl = trainControl(), methodList = NULL, tuneList = NULL) {
 
+  if(! is.null(methodList) & any(duplicated(methodList))){
+    methodList <- unique(methodList)
+  }
+
   #Decide how we're going to fit models
   if(is.null(tuneList) & is.null(methodList)){
     stop('Please either define a methodList or tuneList')
