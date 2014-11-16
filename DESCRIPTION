@@ -28,5 +28,8 @@ Suggests:
 Imports:
     caTools,
     pbapply,
-    digest
+    ggplot2,
+    digest,
+    plyr,
+    grid
 License: MIT + file LICENSE
