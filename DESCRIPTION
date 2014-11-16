@@ -25,7 +25,6 @@ Suggests:
     gbm,
     kernlab,
     e1071,
-    kernlab,
     ipred,
     pROC
 Imports:
