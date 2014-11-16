@@ -126,6 +126,7 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @param trControl a \code{\link{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.
 #' @param methodList optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.
 #' @param tuneList optional, a NAMED list of the length of \code{methodList} with model-specific arguments to pass to train.  The can be arguments for the train function (e.g. tuneLength=6) or arguments passed through train to the modeling funcion (e.g. verbose=FALSE for a gbm model).  The names in the tuneList must match the methods in methodList, but do not need to be in the same order.  One of methodList or tuneList must be specified.
+#' @param continue_on_model_fail If FALSE, the failure of a single model will stop the entire building process.  If TRUE, model failures will be downgraded to warnings.
 #' @return A list of \code{\link{train}} objects
 #' @import caret
 #' @export
@@ -133,7 +134,8 @@ buildModels <- function(
   ...,
   trControl = trainControl(),
   methodList = NULL,
-  tuneList = NULL) {
+  tuneList = NULL,
+  continue_on_model_fail=FALSE) {
 
   #Checks
   if(is.null(tuneList) & is.null(methodList)){
@@ -148,8 +150,8 @@ buildModels <- function(
   if(!is.null(methodList)){
     methodCheck(methodList)
     tuneList_extra <- lapply(methodList, caretModelSpec)
+    tuneList <- c(tuneList, tuneList_extra)
   }
-  tuneList <- c(tuneList, tuneList_extra)
 
   #Make sure tuneList is valid
   tuneList <- tuneCheck(tuneList)
@@ -167,12 +169,32 @@ buildModels <- function(
   global_args[['trControl']] <- trControl
 
   #Loop through the tuneLists and fit caret models with those specs
-  modelList <- lapply(tuneList, function(m){
-    model_args <- c(global_args, m)
-    model <- do.call(train, model_args)
-    return(model)
-  })
-
+  if(!continue_on_model_fail){
+    modelList <- lapply(tuneList, function(m){
+      model_args <- c(global_args, m)
+      model <- do.call(train, model_args)
+      return(model)
+    })
+  } else{
+    modelList <- lapply(tuneList, function(m){
+      model_args <- c(global_args, m)
+      model <- tryCatch(
+        do.call(train, model_args),
+        error=function(e){
+          warning(e)
+          warning(paste('caret::train failed for model', model_args$method))
+          return(NULL)
+        })
+      return(model)
+    })
+  }
   names(modelList) <- names(tuneList)
+  nulls <- sapply(modelList, is.null)
+  modelList <- modelList[!nulls]
+
+  if(length(modelList)==0){
+    stop('caret:train failed for all models.  Please inspect your data.')
+  }
+
   return(modelList)
 }

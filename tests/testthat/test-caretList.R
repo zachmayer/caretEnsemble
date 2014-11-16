@@ -48,6 +48,41 @@ test_that("caretModelSpec returns valid specs", {
   names(methods) <- NULL
   expect_equal(methods, c('rpart', 'rf', 'knn', 'glm'))
 })
+###############################################
+context("We can work around bad models")
+################################################
+test_that("caretModelSpec returns valid specs", {
+  myList <- list(
+    rpart=caretModelSpec(method='rpart', tuneLength=10),
+
+    #Forgot to specify interaction.depth, shrinkage
+    gbm=caretModelSpec(method='gbm', tuneGrid=data.frame(n.trees=5))
+  )
+  suppressWarnings({
+    expect_error({
+      test1 <- buildModels(
+        x = iris[,1:3],
+        y = iris[,4],
+        tuneList=myList,
+        continue_on_model_fail=TRUE
+      )
+    })
+  })
+  suppressWarnings({
+    test <- buildModels(
+      x = iris[,1:3],
+      y = iris[,4],
+      tuneList=myList,
+      continue_on_model_fail=TRUE
+    )
+  })
+  expect_is(test, "list")
+  expect_is(caretEnsemble(test), "caretEnsemble")
+  expect_equal(length(test), 1)
+  methods <- sapply(test, function(x) x$method)
+  names(methods) <- NULL
+  expect_equal(methods, c('rpart'))
+})
 
 ###############################################
 context("Classification models")

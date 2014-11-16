@@ -4,7 +4,7 @@
 \title{Create a list of several train models from the caret package}
 \usage{
 buildModels(..., trControl = trainControl(), methodList = NULL,
-  tuneList = NULL)
+  tuneList = NULL, continue_on_model_fail = FALSE)
 }
 \arguments{
 \item{...}{arguments to pass to \code{\link{train}}.  These arguments will determine which train method gets dispatched.}
@@ -14,6 +14,8 @@ buildModels(..., trControl = trainControl(), methodList = NULL,
 \item{methodList}{optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.}
 
 \item{tuneList}{optional, a NAMED list of the length of \code{methodList} with model-specific arguments to pass to train.  The can be arguments for the train function (e.g. tuneLength=6) or arguments passed through train to the modeling funcion (e.g. verbose=FALSE for a gbm model).  The names in the tuneList must match the methods in methodList, but do not need to be in the same order.  One of methodList or tuneList must be specified.}
+
+\item{continue_on_model_fail}{If FALSE, the failure of a single model will stop the entire building process.  If TRUE, model failures will be downgraded to warnings.}
 }
 \value{
 A list of \code{\link{train}} objects
