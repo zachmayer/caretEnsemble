@@ -3,25 +3,17 @@
 \alias{buildModels}
 \title{Create a list of several train models from the caret package}
 \usage{
-buildModels(methodList, control, x, y, tuneList = NULL, baseSeed = NULL,
-  tuneLength = NULL, ...)
+buildModels(..., trControl = trainControl(), methodList = NULL,
+  tuneList = NULL)
 }
 \arguments{
-\item{methodList}{a character vector of caret models to ensemble.}
+\item{...}{arguments to pass to \code{\link{train}}.  These arguments will determine which train method gets dispatched.}
 
-\item{control}{a \code{\link{trainControl}} object}
+\item{trControl}{a \code{\link{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.}
 
-\item{x}{a matrix of predictors}
+\item{methodList}{optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.}
 
-\item{y}{the dependent variable being predicted}
-
-\item{tuneList}{optional, a list of the length of \code{methodList} with the tuning parameters for each method}
-
-\item{baseSeed}{optional, to preserve reproducibility, a base seed to be used in the resampling randomization}
-
-\item{tuneLength}{optional, the length of tuning to be done}
-
-\item{...}{additional arguments to pass to \code{\link{train}}}
+\item{tuneList}{optional, a NAMED list of the length of \code{methodList} with model-specific arguments to pass to train.  The can be arguments for the train function (e.g. tuneLength=6) or arguments passed through train to the modeling funcion (e.g. verbose=FALSE for a gbm model).  The names in the tuneList must match the methods in methodList, but do not need to be in the same order.  One of methodList or tuneList must be specified.}
 }
 \value{
 A list of \code{\link{train}} objects

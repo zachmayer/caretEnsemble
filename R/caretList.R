@@ -1,25 +1,36 @@
-#' Extract the tuning parameters from a list provided by the user
-#'
-#' @param x a list of tuning parameters and methods passed by the user
-#' @return A simple list of the tuning parameters
+#' @title Check that the tuning parameters list supplied by the user is valud
+#' @description This function makes sure the tuning parameters passed by the user are valid and have the proper naming, etc.
+#' @param x a list of user-supplied tuning parameters and methods
+#' @return NULL
 tuneCheck <- function(x){
   warning('NOT IMPLEMENTED')
   return(invisible(NULL))
 }
+
+#' @title Check that the methods supplied by the user are valid caret methods
+#' @description This function uses modelLookup from caret to ensure the list of methods supplied by the user are all models caret can fit.
+#' @param x a list of user-supplied tuning parameters and methods
+#' @return NULL
 methodCheck <- function(x){
-  warning('NOT IMPLEMENTED')
+  all_models <- unique(modelLookup()$model)
+  bad_models <- setdiff(x, all_models)
+  if(length(bad_models)>0){
+    msg <- paste0("'", paste(bad_models, collapse="', '"), "'")
+    stop(paste('The following models are not valid caret models:', msg))
+  }
   return(invisible(NULL))
 }
+
+#' @title Check that the trainControl object supplied by the user is valid and has defined re-sampling indexes.
+#' @description This function checks the user-supplied trainControl object and makes sure it has all the required fields.  If the resampling indexes are missing, it adds them to the model.  If savePredictions=FALSE, this function sets it to TRUE.
+#' @param x a trainControl object.
+#' @param y the target for the model.  Used to determine resampling indexes.
+#' @return NULL
 trControlCheck <- function(x, y){
 
   if(!x$savePredictions){
     warning('trControl$savePredictions=FALSE.  Setting to TRUE so we can ensemble the models.')
     x$savePredictions <- TRUE
-  }
-
-  if(!x$classProbs){
-    warning('trControl$classProbs=FALSE.  Setting to TRUE so we can ensemble the models.')
-    x$classProbs <- TRUE
   }
 
   if(is.null(x$index)){
@@ -46,23 +57,35 @@ trControlCheck <- function(x, y){
   }
   return(x)
 }
-extractCaretArgsY <- function(x){
-  if(is.data.frame(x[[1]])){
-    if(is.null(x$y)){
-      stop('train passed x argument but no y.')
-    }
-    return(x$y)
-  }
-  if('formula' %in% class(x[[1]])){
-    flma <- x[[1]]
-    resp <- attr(terms(flma), 'response')
-    if(resp==0){
-      stop('train passed a 1-sided formula.  Please specify a response.')
-    }
-    return(attr(terms(flma), 'term.labels')[resp])
-  }
-  x_class <- paste0("'", paste(class(x[[1]]), collapse="', '"), "'")
-  stop(paste("Don't know how to extract response from object of class", x_class))
+
+#' @title Extracts the target variable from a set of arguments headed to the caret::train function.
+#' @description This function extracts the y variable from a set of arguments headed to a caret::train model.  Since there are 2 methods to call caret::train, this function also has 2 methods.
+#' @param ... a set of arguments, as in the caret::train function
+extractCaretTarget <- function(...){
+  UseMethod("extractCaretTarget")
+}
+
+#' @title Extracts the target variable from a set of arguments headed to the caret::train.default function.
+#' @description This function extracts the y variable from a set of arguments headed to a caret::train.default model.
+#' @param x an object where samples are in rows and features are in columns. This could be a simple matrix, data frame or other type (e.g. sparse matrix). See Details below.
+#' @param y a numeric or factor vector containing the outcome for each sample.
+#' @param ... ignored
+#' @method extractCaretTarget default
+extractCaretTarget.default <- function(x, y, ...){
+  return(y)
+}
+
+
+#' @title Extracts the target variable from a set of arguments headed to the caret::train.formula function.
+#' @description This function extracts the y variable from a set of arguments headed to a caret::train.formula model.
+#' @param form A formula of the form y ~ x1 + x2 + ...
+#' @param data Data frame from which variables specified in formula are preferentially to be taken.
+#' @param ... ignored
+#' @method extractCaretTarget formula
+extractCaretTarget.formula <- function(form, data, ...){
+  y <- model.response(model.frame(form, data))
+  names(y) <- NULL
+  return(y)
 }
 
 #' Create a list of several train models from the caret package
@@ -73,7 +96,7 @@ extractCaretArgsY <- function(x){
 #' @param ... arguments to pass to \code{\link{train}}.  These arguments will determine which train method gets dispatched.
 #' @param trControl a \code{\link{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.
 #' @param methodList optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.
-#' @param tuneList optional, a NAMED list of the length of \code{methodList} with model-specific arguments to pass to train.  The can be arguments for the train function (e.g. tuneLength=6) or arguments passed through train to the modeling funcion (e.g. verbose=FALSE for a \code{\link{gbm}} model).  The names in the tuneList must match the methods in methodList, but do not need to be in the same order.  One of methodList or tuneList must be specified.
+#' @param tuneList optional, a NAMED list of the length of \code{methodList} with model-specific arguments to pass to train.  The can be arguments for the train function (e.g. tuneLength=6) or arguments passed through train to the modeling funcion (e.g. verbose=FALSE for a gbm model).  The names in the tuneList must match the methods in methodList, but do not need to be in the same order.  One of methodList or tuneList must be specified.
 #' @return A list of \code{\link{train}} objects
 #' @import caret
 #' @export
@@ -101,8 +124,8 @@ buildModels <- function(..., trControl = trainControl(), methodList = NULL, tune
 
   #Define the index slot of trControl if it is missing
   if(is.null(trControl$index)){
-    y <- extractCaretArgsY(global_args)
-    trControl <- trControlCheck(x=trControl, y=y)
+    target <- extractCaretTarget(...)
+    trControl <- trControlCheck(x=trControl, y=target)
   }
 
   #Squish trControl back onto the global arguments list
