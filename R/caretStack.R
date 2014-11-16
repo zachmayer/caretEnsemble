@@ -31,6 +31,7 @@ caretStack <- function(all.models, ...){
 #' @param newdata a new dataframe to make predictions on
 #' @param ... arguments to pass to \code{\link{predict.train}}.
 #' @export
+#' @method predict caretStack
 predict.caretStack <- function(object, newdata=NULL, ...){
   #TODO: grab type argument
   #TODO: rename my "type" variable
