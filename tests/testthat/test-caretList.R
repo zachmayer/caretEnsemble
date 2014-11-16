@@ -84,7 +84,7 @@ test_that("longer tests", {
 
 })
 
-context("Test that buildModels preserves user specified functions")
+context("Test that buildModels preserves user specified error functions")
 
 myControl = trainControl(
   method = "cv", number = 3, repeats = 1,
@@ -165,32 +165,58 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   expect_equal(nrow(test2a[[3]]$results), 3)
 })
 
-context("More complex with multidimensional tuneGrid and NULL tuneLengths")
-
 context("User tuneTest parameters are respected and model is ensembled")
 test_that("User tuneTest parameters are respected and model is ensembled", {
-  skip_on_cran()
-  tuneTest2 <- list(
-    glm = list(tuneLength = 1),
-    knn = list(tuneLength = 2),
-    svmRadial = list(
-      tuneGrid = expand.grid(
-        .sigma = c(.005, .05, .5),
-        .C = c(.001, .01, .1))))
+  tuneTest <- list(
+    nnet = list(tuneLength = 3, trace=FALSE, softmax=FALSE)
+    )
   expect_warning({
-    test3a <- buildModels(
+    test <- buildModels(
       x = train[, -23],
       y = train[, "Class"],
       trControl = myControl,
-      tuneList = tuneTest2
+      tuneList = tuneTest
     )
   })
-  myEns3a <- caretEnsemble(test3a)
-  expect_is(myEns3a, "caretEnsemble")
-  expect_is(test3a, "list")
-  expect_equal(nrow(test3a[[1]]$results), 1)
-  expect_equal(nrow(test3a[[2]]$results), 2)
-  expect_equal(nrow(test3a[[3]]$results), 9)
+  ens <- caretEnsemble(test)
+  expect_is(ens, "caretEnsemble")
+  expect_is(test, "list")
+  expect_equal(nrow(test[[1]]$results), 3*3)
+  expect_false(test[[1]]$finalModel$softmax)
+})
+
+context("Formula interface for buildModels works")
+test_that("User tuneTest parameters are respected and model is ensembled", {
+  tuneTest <- list(
+    rpart = list(tuneLength = 2),
+    nnet = list(tuneLength = 2, trace=FALSE),
+    glm = list()
+  )
+  x <- iris[,1:3]
+  y <- iris[,4]
+  expect_warning({
+    set.seed(42)
+    test_default <- buildModels(
+      x = x,
+      y = y,
+      tuneList = tuneTest
+    )
+  })
+  expect_warning({
+    set.seed(42)
+    test_flma <- buildModels(
+      y ~ .,
+      data = data.frame(y=y, x),
+      tuneList = tuneTest
+    )
+  })
+  ens_default <- caretEnsemble(test_default)
+  ens_flma <- caretEnsemble(test_flma)
+  expect_is(ens_default, "caretEnsemble")
+  expect_is(ens_flma, "caretEnsemble")
+
+  expect_equal(ens_default$RMSE, ens_flma$RMSE)
+  expect_equal(ens_default$weights, ens_flma$weights)
 })
 
 ###############################################
