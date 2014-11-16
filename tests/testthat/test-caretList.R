@@ -25,6 +25,29 @@ test_that("caretModelSpec returns valid specs", {
   expect_equal(length(tuneList), 4)
   expect_equal(sum(duplicated(names(tuneList))), 0)
 })
+###############################################
+context("We can fit models with a mix of methodList and tuneList")
+################################################
+test_that("caretModelSpec returns valid specs", {
+  myList <- list(
+    rpart=caretModelSpec(method='rpart', tuneLength=10),
+    rf=caretModelSpec(method='rf', tuneGrid=data.frame(mtry=2))
+  )
+  expect_warning({
+    test <- buildModels(
+      x = iris[,1:3],
+      y = iris[,4],
+      methodList = c("knn", "glm"),
+      tuneList=myList
+    )
+  })
+  expect_is(test, "list")
+  expect_is(caretEnsemble(test), "caretEnsemble")
+  expect_equal(length(test), 4)
+  methods <- sapply(test, function(x) x$method)
+  names(methods) <- NULL
+  expect_equal(methods, c('rpart', 'rf', 'knn', 'glm'))
+})
 
 ###############################################
 context("Classification models")

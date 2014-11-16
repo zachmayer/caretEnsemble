@@ -129,31 +129,35 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @return A list of \code{\link{train}} objects
 #' @import caret
 #' @export
-buildModels <- function(..., trControl = trainControl(), methodList = NULL, tuneList = NULL) {
+buildModels <- function(
+  ...,
+  trControl = trainControl(),
+  methodList = NULL,
+  tuneList = NULL) {
 
-  if(! is.null(methodList) & any(duplicated(methodList))){
-    methodList <- unique(methodList)
-  }
-
-  #Decide how we're going to fit models
+  #Checks
   if(is.null(tuneList) & is.null(methodList)){
     stop('Please either define a methodList or tuneList')
   }
-  if((!is.null(tuneList)) & (!is.null(methodList))){
-    warning('Both tuneList and methodList defined.  Ignoring methodList')
+  if(!is.null(methodList) & any(duplicated(methodList))){
+    warning('Duplicate entries in methodList.  Using unqiue methodList values.')
+    methodList <- unique(methodList)
   }
 
-  #Make sure methodList/tuneList are valid
+  #Make methodList into a tuneList and add onto tuneList
   if(!is.null(methodList)){
     methodCheck(methodList)
-    tuneList <- lapply(methodList, caretModelSpec)
+    tuneList_extra <- lapply(methodList, caretModelSpec)
   }
+  tuneList <- c(tuneList, tuneList_extra)
+
+  #Make sure tuneList is valid
   tuneList <- tuneCheck(tuneList)
 
   #Capture global arguments for train as a list
   global_args <- list(...)
 
-  #Define the index slot of trControl if it is missing
+  #Add indexes to trControl if they are missing
   if(is.null(trControl$index)){
     target <- extractCaretTarget(...)
     trControl <- trControlCheck(x=trControl, y=target)
@@ -162,13 +166,13 @@ buildModels <- function(..., trControl = trainControl(), methodList = NULL, tune
   #Squish trControl back onto the global arguments list
   global_args[['trControl']] <- trControl
 
-  #If the tuneList is missing, fit each model with 100% default caret params
+  #Loop through the tuneLists and fit caret models with those specs
   modelList <- lapply(tuneList, function(m){
     model_args <- c(global_args, m)
     model <- do.call(train, model_args)
     return(model)
   })
 
-  names(modelList) <- methodList
+  names(modelList) <- names(tuneList)
   return(modelList)
 }
