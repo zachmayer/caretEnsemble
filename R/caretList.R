@@ -1,10 +1,40 @@
-#' @title Check that the tuning parameters list supplied by the user is valud
+#' @title Generate a specification for fitting a caret model
+#' @description A caret model specificaiton consists of 2 parts: a model (as a string) and the argments to the train call for fitting that model
+#' @param method the modeling method to pass to caret::train
+#' @param args the arguments to pass to the model
+#' @export
+#' @return a list of lists
+caretModelSpec <- function(method='rf', ...){
+  stopifnot(is.character(method))
+  params=list(...)
+  out <- c(list(method=method), list(...))
+  return(out)
+}
+
+#' @title Check that the tuning parameters list supplied by the user is valid
 #' @description This function makes sure the tuning parameters passed by the user are valid and have the proper naming, etc.
 #' @param x a list of user-supplied tuning parameters and methods
 #' @return NULL
 tuneCheck <- function(x){
-  warning('NOT IMPLEMENTED')
-  return(invisible(NULL))
+
+  #Check model methods
+  stopifnot(is.list(x))
+  methods <- sapply(x, function(a) a$method)
+  methodCheck(methods)
+
+  #Name models
+  if(is.null(names(x))){
+    names(x) <- methods
+  }
+  i <- names(x)==''
+  if(any(i)){
+    names(x)[i] <- methods[i]
+  }
+  names(x) <- make.names(names(x), unique=TRUE)
+
+  #Check params
+  stopifnot(all(sapply(x, is.list)))
+  return(x)
 }
 
 #' @title Check that the methods supplied by the user are valid caret methods
@@ -75,7 +105,6 @@ extractCaretTarget.default <- function(x, y, ...){
   return(y)
 }
 
-
 #' @title Extracts the target variable from a set of arguments headed to the caret::train.formula function.
 #' @description This function extracts the y variable from a set of arguments headed to a caret::train.formula model.
 #' @param form A formula of the form y ~ x1 + x2 + ...
@@ -114,14 +143,12 @@ buildModels <- function(..., trControl = trainControl(), methodList = NULL, tune
     warning('Both tuneList and methodList defined.  Ignoring methodList')
   }
 
-  #Make sure tuneList is valid
-  if(!is.null(tuneList)){
-    methodList <- names(tuneList)
-    tuneCheck(tuneList)
+  #Make sure methodList/tuneList are valid
+  if(!is.null(methodList)){
+    methodCheck(methodList)
+    tuneList <- lapply(methodList, caretModelSpec)
   }
-
-  #Check that the methods are valid
-  methodCheck(methodList)
+  tuneList <- tuneCheck(tuneList)
 
   #Capture global arguments for train as a list
   global_args <- list(...)
@@ -136,20 +163,8 @@ buildModels <- function(..., trControl = trainControl(), methodList = NULL, tune
   global_args[['trControl']] <- trControl
 
   #If the tuneList is missing, fit each model with 100% default caret params
-  modelList <- lapply(methodList, function(i){
-
-    #Start with global args
-    model_args <- global_args
-
-    #Add tuneList args, if needed
-    if(!is.null(tuneList)){
-      model_args <- c(model_args, tuneList[[i]])
-    }
-
-    #Finally, add method.
-    model_args[['method']] <- i
-
-    #We now have a complete args list for train, so we can dispatch with do.cal
+  modelList <- lapply(tuneList, function(m){
+    model_args <- c(global_args, m)
     model <- do.call(train, model_args)
     return(model)
   })

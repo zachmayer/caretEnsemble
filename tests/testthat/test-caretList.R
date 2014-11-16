@@ -11,6 +11,22 @@ test <- twoClassSim(
   noiseVars = 10, corrVars = 4, corrValue = 0.6)
 
 ###############################################
+context("Ancillary caretList functions and errors")
+################################################
+test_that("caretModelSpec returns valid specs", {
+  tuneList <- list(
+    rf1=caretModelSpec(),
+    rf2=caretModelSpec(method='rf', tuneLength=5),
+    caretModelSpec(method='rpart'),
+    caretModelSpec(method='knn', tuneLength=10)
+    )
+  tuneList <- tuneCheck(tuneList)
+  expect_true(is.list(tuneList))
+  expect_equal(length(tuneList), 4)
+  expect_equal(sum(duplicated(names(tuneList))), 0)
+})
+
+###############################################
 context("Classification models")
 ################################################
 
@@ -81,7 +97,6 @@ test_that("longer tests", {
     expect_identical(test2[[1]]$metric, "ROC")
     expect_identical(test3[[1]]$metric, "ROC")
   })
-
 })
 
 context("Test that buildModels preserves user specified error functions")
@@ -136,13 +151,19 @@ test_that("User specified parameters can still be ensembled", {
 context("Users can pass a custom tuneList")
 
 # User specifies methods and tuning parameters specifically using a tuneList
-tuneTest <- list(rpart=list(tuneGrid=data.frame(.cp=c(.01,.001,.1,1))),
-                 knn=list(tuneLength=9),
-                 svmRadial=list(
-                   tuneGrid=data.frame(
-                     .sigma = c(0.1, 0.2, 0.4),
-                     .C=.1
-                     )))
+tuneTest <- list(
+  rpart=caretModelSpec(
+    method='rpart',
+    tuneGrid=data.frame(.cp=c(.01,.001,.1,1))
+    ),
+  knn=caretModelSpec(
+    method='knn',
+    tuneLength=9
+    ),
+  svmRadial=caretModelSpec(
+    method='svmRadial',
+    tuneLength=3
+  ))
 
 # Simple with mix of data.frame and tuneLength
 
@@ -168,7 +189,11 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
 context("User tuneTest parameters are respected and model is ensembled")
 test_that("User tuneTest parameters are respected and model is ensembled", {
   tuneTest <- list(
-    nnet = list(tuneLength = 3, trace=FALSE, softmax=FALSE)
+    nnet = caretModelSpec(
+      method='nnet',
+      tuneLength = 3,
+      trace=FALSE,
+      softmax=FALSE)
     )
   expect_warning({
     test <- buildModels(
@@ -188,9 +213,9 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
 context("Formula interface for buildModels works")
 test_that("User tuneTest parameters are respected and model is ensembled", {
   tuneTest <- list(
-    rpart = list(tuneLength = 2),
-    nnet = list(tuneLength = 2, trace=FALSE),
-    glm = list()
+    rpart = list(method='rpart', tuneLength = 2),
+    nnet = list(method='nnet', tuneLength = 2, trace=FALSE),
+    glm = list(method='glm')
   )
   x <- iris[,1:3]
   y <- iris[,4]
