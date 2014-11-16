@@ -8,7 +8,7 @@ caretModelSpec(method = "rf", ...)
 \arguments{
 \item{method}{the modeling method to pass to caret::train}
 
-\item{args}{the arguments to pass to the model}
+\item{...}{Other arguments that will eventually be passed to caret::train}
 }
 \value{
 a list of lists

@@ -1,7 +1,7 @@
 #' @title Generate a specification for fitting a caret model
 #' @description A caret model specificaiton consists of 2 parts: a model (as a string) and the argments to the train call for fitting that model
 #' @param method the modeling method to pass to caret::train
-#' @param args the arguments to pass to the model
+#' @param ... Other arguments that will eventually be passed to caret::train
 #' @export
 #' @return a list of lists
 caretModelSpec <- function(method='rf', ...){
