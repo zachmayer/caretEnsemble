@@ -1,7 +1,7 @@
 Package: caretEnsemble
 Type: Package
 Title: Framework for combining caret models into ensembles
-Version: 0.0.0.90146
+Version: 0.0.0.90148
 Date: 2013-03-01
 Authors@R: c(person(c("Zach"), "Mayer", role = c("aut", "cre"),
     email = "zach.mayer@gmail.com"),
@@ -21,8 +21,11 @@ Depends:
 Suggests:
     testthat,
     randomForest,
-    e1071,
+    rpart,
+    gbm,
     kernlab,
+    nnet,
+    e1071,
     ipred,
     pROC
 Imports:
@@ -31,5 +34,6 @@ Imports:
     ggplot2,
     digest,
     plyr,
-    grid
+    grid,
+    lattice
 License: MIT + file LICENSE

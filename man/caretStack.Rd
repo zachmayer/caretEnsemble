@@ -20,6 +20,18 @@ using either linear regression, elastic net regression, or greedy optimization.
 \details{
 Check the models, and make a matrix of obs and preds
 }
+\examples{
+library('rpart')
+models <- caretList(
+  x=iris[,1:2],
+  y=iris[,3],
+  methodList=c('rpart', 'glm', 'knn')
+)
+meta_model <- caretStack(models, method='glm')
+meta_model
+summary(meta_model)
+dotplot(meta_model, metric='RMSE')
+}
 \references{
 \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 }
