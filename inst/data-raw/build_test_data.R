@@ -79,7 +79,7 @@ ctrl <- trainControl(method = "cv",
 modeldat2 <- assembleData(fulldat[1:300, ], class = "y", p = 0.5,
                          predvars = names(fulldat)[-1], classification = TRUE)
 
-out <- buildModels(
+out <- caretList(
   x = modeldat2$traindata$preds,
   y = modeldat2$traindata$class,
   trControl = ctrl,

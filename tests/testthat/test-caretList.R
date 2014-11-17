@@ -38,7 +38,7 @@ test_that("caretModelSpec returns valid specs", {
     rf=caretModelSpec(method='rf', tuneGrid=data.frame(mtry=2))
   )
   expect_warning({
-    test <- buildModels(
+    test <- caretList(
       x = iris[,1:3],
       y = iris[,4],
       methodList = c("knn", "glm"),
@@ -67,14 +67,14 @@ myList <- list(
 )
 suppressWarnings({
   expect_error({
-    test1 <- buildModels(
+    test1 <- caretList(
       x = iris[,1:3],
       y = iris[,4],
       tuneList=myList,
       continue_on_model_fail=FALSE
     )
   })
-  test <- buildModels(
+  test <- caretList(
     x = iris[,1:3],
     y = iris[,4],
     tuneList=myList,
@@ -104,7 +104,7 @@ myControl = trainControl(
 # Simple two method list
 # Warning because we're going to auto-set indexes
 expect_warning({
-  test1 <- buildModels(
+  test1 <- caretList(
     x = train[, -23],
     y = train[, "Class"],
     metric = "ROC",
@@ -113,18 +113,18 @@ expect_warning({
   )
 })
 
-context("Test that buildModels makes model lists")
-test_that("buildModels returns a list", {
+context("Test that caretList makes model lists")
+test_that("caretList returns a list", {
   expect_is(test1, "list")
 })
 
-context("Test that buildModels can be ensembled")
-test_that("buildModels objects can be ensembled", {
+context("Test that caretList can be ensembled")
+test_that("caretList objects can be ensembled", {
   expect_is(caretEnsemble(test1), "caretEnsemble")
 })
 
-context("Test that buildModels rejects bogus models")
-test_that("buildModels objects can be ensembled", {
+context("Test that caretList rejects bogus models")
+test_that("caretList objects can be ensembled", {
   expect_is(caretEnsemble(test1), "caretEnsemble")
 })
 
@@ -132,7 +132,7 @@ context("Longer tests")
 test_that("longer tests", {
   skip_on_cran()
   expect_warning({
-    test2 <- buildModels(
+    test2 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
       metric = "ROC",
@@ -142,7 +142,7 @@ test_that("longer tests", {
   })
 
   expect_warning({
-    test3 <- buildModels(
+    test3 <- caretList(
       x = train[, -23],
       y = train[ , "Class"],
       metric = "ROC",
@@ -156,13 +156,13 @@ test_that("longer tests", {
   expect_is(caretEnsemble(test2), "caretEnsemble")
   expect_is(caretEnsemble(test3), "caretEnsemble")
 
-  test_that("buildModels objects preserve user metric", {
+  test_that("caretList objects preserve user metric", {
     expect_identical(test2[[1]]$metric, "ROC")
     expect_identical(test3[[1]]$metric, "ROC")
   })
 })
 
-context("Test that buildModels preserves user specified error functions")
+context("Test that caretList preserves user specified error functions")
 
 myControl = trainControl(
   method = "cv", number = 3, repeats = 1,
@@ -171,7 +171,7 @@ myControl = trainControl(
   returnData = TRUE, verboseIter = FALSE)
 
 expect_warning({
-  test1 <- buildModels(
+  test1 <- caretList(
     x = train[, -23],
     y = train[, "Class"],
     tuneLength = 7,
@@ -182,7 +182,7 @@ expect_warning({
 })
 
 expect_warning({
-  test2 <- buildModels(
+  test2 <- caretList(
     x = train[, -23],
     y = train[, "Class"],
     tuneLength = 4,
@@ -192,12 +192,12 @@ expect_warning({
   )
 })
 
-test_that("buildModels objects preserve user metric", {
+test_that("caretList objects preserve user metric", {
   expect_identical(test1[[1]]$metric, "Kappa")
   expect_identical(test2[[1]]$metric, "Accuracy")
   })
 
-test_that("buildModels objects preserve user tuneLength", {
+test_that("caretList objects preserve user tuneLength", {
   expect_equal(nrow(test1[[1]]$results), 7)
   expect_more_than(nrow(test1[[1]]$results), nrow(test2[[1]]$results))
   expect_equal(nrow(test2[[1]]$results), 4)
@@ -233,7 +233,7 @@ tuneTest <- list(
 test_that("User tuneTest parameters are respected and model is ensembled", {
   skip_on_cran()
   expect_warning({
-    test2a <- buildModels(
+    test2a <- caretList(
       x = train[, -23],
       y = train[, "Class"],
       trControl = myControl,
@@ -259,7 +259,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
       softmax=FALSE)
     )
   expect_warning({
-    test <- buildModels(
+    test <- caretList(
       x = train[, -23],
       y = train[, "Class"],
       trControl = myControl,
@@ -273,7 +273,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   expect_false(test[[1]]$finalModel$softmax)
 })
 
-context("Formula interface for buildModels works")
+context("Formula interface for caretList works")
 test_that("User tuneTest parameters are respected and model is ensembled", {
   tuneTest <- list(
     rpart = list(method='rpart', tuneLength = 2),
@@ -284,7 +284,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   y <- iris[,4]
   expect_warning({
     set.seed(42)
-    test_default <- buildModels(
+    test_default <- caretList(
       x = x,
       y = y,
       tuneList = tuneTest
@@ -292,7 +292,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   })
   expect_warning({
     set.seed(42)
-    test_flma <- buildModels(
+    test_flma <- caretList(
       y ~ .,
       data = data.frame(y=y, x),
       tuneList = tuneTest
@@ -318,7 +318,7 @@ myControl2 = trainControl(
   returnData = TRUE, verboseIter = FALSE)
 
 expect_warning({
-  test1 <- buildModels(
+  test1 <- caretList(
     x = train[, c(-23, -1)],
     y = train[, 1],
     trControl = myControl2,
@@ -327,7 +327,7 @@ expect_warning({
 })
 
 expect_warning({
-  test2 <- buildModels(
+  test2 <- caretList(
     x = train[, c(-23, -1)],
     y = train[, 1],
     trControl = myControl2,
@@ -338,12 +338,12 @@ expect_warning({
 ens1 <- caretEnsemble(test1)
 ens2 <- caretEnsemble(test2)
 
-test_that("buildModels returns a list regression", {
+test_that("caretList returns a list regression", {
   expect_is(test1, "list")
   expect_is(test2, "list")
 })
 
-test_that("buildModels objects can be ensembled regression", {
+test_that("caretList objects can be ensembled regression", {
   expect_is(ens1, "caretEnsemble")
   expect_is(ens2, "caretEnsemble")
 })

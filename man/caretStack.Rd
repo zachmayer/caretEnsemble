@@ -22,7 +22,7 @@ Check the models, and make a matrix of obs and preds
 }
 \examples{
 library('rpart')
-models <- buildModels(
+models <- caretList(
   x=iris[,1:2],
   y=iris[,3],
   methodList=c('rpart', 'glm', 'knn')

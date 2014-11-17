@@ -82,7 +82,7 @@ trControlCheck <- function(x, y){
         list = TRUE,
         groups = min(5, length(y)))
     } else {
-      stop(paste0("buildModels does not currently know how to handle cross-validation method='", x$method, "'. Please specify trControl$index manually"))
+      stop(paste0("caretList does not currently know how to handle cross-validation method='", x$method, "'. Please specify trControl$index manually"))
     }
   }
   return(x)
@@ -130,7 +130,7 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @return A list of \code{\link{train}} objects
 #' @import caret
 #' @export
-buildModels <- function(
+caretList <- function(
   ...,
   trControl = trainControl(),
   methodList = NULL,
