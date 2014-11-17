@@ -79,9 +79,12 @@ ctrl <- trainControl(method = "cv",
 modeldat2 <- assembleData(fulldat[1:300, ], class = "y", p = 0.5,
                          predvars = names(fulldat)[-1], classification = TRUE)
 
-out <- buildModels(methodList = c("knn", "nb", "lda", "nnet"),
-                   control = ctrl, x = modeldat2$traindata$preds,
-                   y = modeldat2$traindata$class, tuneLength = 3)
+out <- caretList(
+  x = modeldat2$traindata$preds,
+  y = modeldat2$traindata$class,
+  trControl = ctrl,
+  tuneLength = 3
+  methodList = c("knn", "nb", "lda", "nnet"))
 
  studentEns <- caretEnsemble(out)
 

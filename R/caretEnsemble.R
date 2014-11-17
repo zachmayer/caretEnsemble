@@ -495,6 +495,7 @@ extractModFrame <- function(model){
 #' @return A plot
 #' @import ggplot2
 #' @export
+#' @method plot caretEnsemble
 plot.caretEnsemble <- function(x, ...){
   dat <- extractModRes(x)
   metricLab <- names(x$error)

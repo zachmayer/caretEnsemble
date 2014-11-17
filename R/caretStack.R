@@ -10,6 +10,17 @@
 #' @return S3 caretStack object
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 #' @export
+#' @examples
+#' library('rpart')
+#' models <- caretList(
+#'   x=iris[,1:2],
+#'   y=iris[,3],
+#'   methodList=c('rpart', 'glm', 'knn')
+#' )
+#' meta_model <- caretStack(models, method='glm')
+#' meta_model
+#' summary(meta_model)
+#' dotplot(meta_model, metric='RMSE')
 caretStack <- function(all.models, ...){
 
   predobs <- makePredObsMatrix(all.models)
@@ -32,6 +43,7 @@ caretStack <- function(all.models, ...){
 #' @param ... arguments to pass to \code{\link{predict.train}}.
 #' @method predict caretStack
 #' @export
+#' @method predict caretStack
 predict.caretStack <- function(object, newdata=NULL, ...){
   #TODO: grab type argument
   #TODO: rename my "type" variable
@@ -41,3 +53,54 @@ predict.caretStack <- function(object, newdata=NULL, ...){
   return(out)
 }
 
+#' @title Summarize a caretStack object
+#' @description This is a function to summarize a caretStack.
+#' @param object An object of class caretStack
+#' @param ... ignored
+#' @export
+#' @method summary caretStack
+summary.caretStack <- function(object, ...){
+  summary(object$ens_model)
+}
+
+#' @title Print a caretStack object
+#' @description This is a function to print a caretStack.
+#' @param x An object of class caretStack
+#' @param ... ignored
+#' @export
+#' @method print caretStack
+print.caretStack <- function(x, ...){
+  n <- length(x$models)
+  cat(paste(
+    'A',
+    x$ens_model$method,
+    'ensemble of 2 base models:',
+    paste(sapply(x$models, function(x) x$method), collapse=', ')))
+  cat('\n\nEnsemble results:\n')
+  print(x$ens_model)
+}
+
+#' @title Plot a caretStack object
+#' @description This is a function to plot a caretStack.
+#' @param x An object of class caretStack
+#' @param ... passed to plot
+#' @export
+#' @method plot caretStack
+plot.caretStack <- function(x, ...){
+  plot(x$ens_model, ...)
+}
+
+#' @title Comparison dotplot for a caretStack object
+#' @description This is a function to make a dotplot from a caretStack.
+#' @param x An object of class caretStack
+#' @param data passed to dotplot
+#' @param ... passed to dotplot
+#' @export
+#' @method dotplot caretStack
+#' @importFrom lattice dotplot
+dotplot.caretStack <- function(x, data=NULL, ...){
+  final <- list(x$ens_model)
+  names(final) <- paste(paste(x$ens_model$method, collapse='_'), 'ENSEMBLE', sep='_')
+  base <- x$models
+  dotplot(resamples(c(final, base)), data=data, ...)
+}
