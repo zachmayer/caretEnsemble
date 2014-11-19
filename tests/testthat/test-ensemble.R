@@ -168,6 +168,12 @@ test_that("Predictions the same for non-missing data under predict", {
 })
 
 test_that("NA preservation and standard errors work right", {
+  load(system.file("testdata/models_class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/models_reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  ens.reg <- caretEnsemble(models_reg, iter=1000)
+  ens.class <- caretEnsemble(models_class, iter=1000)
   pred1 <- predict(ens.reg, keepNA = FALSE)
   pred2 <- predict(ens.reg, keepNA = TRUE)
   expect_is(pred1, "numeric")
@@ -184,7 +190,8 @@ test_that("NA preservation and standard errors work right", {
   pred2 <- predict(ens.reg, keepNA = TRUE, se = TRUE)
   expect_is(pred1, "data.frame")
   expect_is(pred2, "data.frame")
-
+  nestedList <- list(glm1, glm2, glm3, glm4)
+  ensNest <- caretEnsemble(nestedList, iter=2000)
   pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se =TRUE)
   pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se = TRUE)
   pred.nest2 <- predict(ensNest, keepNA = FALSE, newdata = testC[, c(1:17)], se = TRUE)
