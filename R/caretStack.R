@@ -41,9 +41,7 @@ caretStack <- function(all.models, ...){
 #' @param object a  \code{\link{caretStack}} to make predictions from.
 #' @param newdata a new dataframe to make predictions on
 #' @param ... arguments to pass to \code{\link{predict.train}}.
-#' @method predict caretStack
 #' @export
-#' @method predict caretStack
 predict.caretStack <- function(object, newdata=NULL, ...){
   #TODO: grab type argument
   #TODO: rename my "type" variable
@@ -58,7 +56,6 @@ predict.caretStack <- function(object, newdata=NULL, ...){
 #' @param object An object of class caretStack
 #' @param ... ignored
 #' @export
-#' @method summary caretStack
 summary.caretStack <- function(object, ...){
   summary(object$ens_model)
 }
@@ -68,7 +65,6 @@ summary.caretStack <- function(object, ...){
 #' @param x An object of class caretStack
 #' @param ... ignored
 #' @export
-#' @method print caretStack
 print.caretStack <- function(x, ...){
   n <- length(x$models)
   cat(paste(
@@ -85,7 +81,6 @@ print.caretStack <- function(x, ...){
 #' @param x An object of class caretStack
 #' @param ... passed to plot
 #' @export
-#' @method plot caretStack
 plot.caretStack <- function(x, ...){
   plot(x$ens_model, ...)
 }
@@ -96,7 +91,6 @@ plot.caretStack <- function(x, ...){
 #' @param data passed to dotplot
 #' @param ... passed to dotplot
 #' @export
-#' @method dotplot caretStack
 #' @importFrom lattice dotplot
 dotplot.caretStack <- function(x, data=NULL, ...){
   final <- list(x$ens_model)
