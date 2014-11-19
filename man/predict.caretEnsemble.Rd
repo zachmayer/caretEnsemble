@@ -20,6 +20,14 @@ with predictions where possible.}
 \item{...}{arguments (including newdata) to pass to predict.train. These arguments
 must be named}
 }
+\value{
+If keepNA is set to true this will return either a vector of numeric predictions
+or a data.frame of numeric predictions in the first column with model disagreement in
+the second column if \code{se = TRUE}. If keepNA is set to FALSE and missing values
+are present in the new data, then a \code{list} is produced. The list contains
+the data.frame of predictions in the first slot and a matrix of model weights
+for each observation in the second slot.
+}
 \description{
 Make predictions from a caretEnsemble. This function passes the data to each function in
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of

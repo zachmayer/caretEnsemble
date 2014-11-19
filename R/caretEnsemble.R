@@ -69,19 +69,31 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @param se logical, should prediction errors be produced? Default is false.
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments
 #' must be named
-#' @method predict caretEnsemble
+#' @return If keepNA is set to true this will return either a vector of numeric predictions
+#' or a data.frame of numeric predictions in the first column with model disagreement in
+#' the second column if \code{se = TRUE}. If keepNA is set to FALSE and missing values
+#' are present in the new data, then a \code{list} is produced. The list contains
+#' the data.frame of predictions in the first slot and a matrix of model weights
+#' for each observation in the second slot.
 #' @export
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
   # Default se to FALSE
   if(missing(se)){se <- FALSE}
   modtype <- checkModels_extractTypes(object$models)
   preds <- multiPredict(object$models, type = modtype, ...)
+  if(anyNA(preds) == FALSE){
+    keepNA <- TRUE
+  }
   if(keepNA == TRUE){
-    message("Predictions being made only for cases with complete data")
+    if(anyNA(preds) == TRUE){
+      message("Predictions being made only for cases with complete data")
+    }
     out <- as.numeric(preds %*% object$weights)
     se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
   } else if(keepNA == FALSE){
+    if(anyNA(preds) == TRUE){
     message("Predictions being made only from models with available data")
+    }
     conf <- ifelse(is.na(preds), NA, 1)
     conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
