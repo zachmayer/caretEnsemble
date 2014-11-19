@@ -59,7 +59,7 @@ test_that("We can multiPredict", {
   expect_true(all(colnames(out)==c("rf", "glm", "svmRadial", "nnet", "treebag", "knn")))
   out2 <- multiPredict(models_reg, 'Regression', newdata = X.reg)
   expect_true(all(dim(out2)==c(150, 4)))
-  expect_true(all(colnames(out)==c("rf", "lm", "glm", "knn")))
+  expect_true(all(colnames(out2)==c("rf", "lm", "glm", "knn")))
 })
 
 test_that("multiPredict results same regardless of verbose option", {
