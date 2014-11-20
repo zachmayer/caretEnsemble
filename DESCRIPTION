@@ -1,11 +1,7 @@
 Package: caretEnsemble
 Type: Package
 Title: Framework for combining caret models into ensembles
-<<<<<<< HEAD
-Version: 0.0.0.90147
-=======
-Version: 0.0.0.90148
->>>>>>> master
+Version: 0.0.0.90149
 Date: 2013-03-01
 Authors@R: c(person(c("Zach"), "Mayer", role = c("aut", "cre"),
     email = "zach.mayer@gmail.com"),
