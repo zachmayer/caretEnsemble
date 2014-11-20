@@ -97,16 +97,16 @@ knitr::kable(varImp(greedy_ensemble))
 
 The columns each sum up to 100.
 
-## buildModels
+## caretList
 
-buildModels is a shortcut for building lists of models to pass to caretEnsemble.  It is a little less flexible than fitting each model on your own, in that you cannot specify model-specific options or pre-processing, but it lets you easily fit many, many models in one call:
+caretList is a shortcut for building lists of models to pass to caretEnsemble.  It is a little less flexible than fitting each model on your own, in that you cannot specify model-specific options or pre-processing, but it lets you easily fit many, many models in one call:
 ```{r, echo=TRUE}
 x_train <- as.matrix(training[,-61])
 x_test <- as.matrix(testing[,-61])
 y_train <- training[,61]
 y_test <- testing[,61]
 suppressWarnings({
-  model_list2 <- buildModels(
+  model_list2 <- caretList(
   methodList=c('glm', 'rpart'), 
   control=my_control,
   x=x_train, 
@@ -114,7 +114,7 @@ suppressWarnings({
   baseSeed=42
 )})
 ```
-Models fit with buildModels will yield similar results to caret train models fit with their default parameters:
+Models fit with caretList will yield similar results to caret train models fit with their default parameters:
 ```{r, echo=TRUE}
 summary(caretEnsemble(model_list2))
 ```
