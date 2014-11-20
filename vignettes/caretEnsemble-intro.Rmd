@@ -9,9 +9,9 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
-caretEnsemble is a package for making ensembles of caret models.  You should already be somewhat familiar with the caret package before trying out caretEnsemble.
+`caretEnsemble` is a package for making ensembles of `caret` models.  You should already be somewhat familiar with the `caret` package before trying out `caretEnsemble`.
 
-caretEnsemble has 2 primary methods for creating ensembles: **caretEnsemble**, which uses greedy optimization to create a simple linear blend of models and **caretStack** which uses a caret model to combine the outputs from several component caret models.
+`caretEnsemble` has 2 primary methods for creating ensembles: **`caretEnsemble`**, which uses greedy optimization to create a simple linear blend of models and **`caretStack`** which uses a `caret` model to combine the outputs from several component `caret` models.
 
 ## caretEnsemble
 
@@ -57,7 +57,7 @@ model_list <- list(glm=model_glm, rpart=model_rpart)
 xyplot(resamples(model_list))
 ```
     
-As you can see from this plot, these 2 models are pretty un-correlated, and the rpart model is ocassionally anti-predictive, with a few re-samples showing AUCS around 0.3 to 0.4.
+As you can see from this plot, these 2 models are un-correlated, and the rpart model is ocassionally anti-predictive, with a few re-samples showing AUCS around 0.3 to 0.4.
 
 We can confirm the 2 model's correlation with the `modelCor` function from caret:
 ```{r, echo=TRUE}
@@ -114,7 +114,7 @@ suppressWarnings({
   baseSeed=42
 )})
 ```
-Models fit with buildModels will yeild similar results to caret train models fit with their default parameters:
+Models fit with buildModels will yield similar results to caret train models fit with their default parameters:
 ```{r, echo=TRUE}
 summary(caretEnsemble(model_list2))
 ```
@@ -145,10 +145,10 @@ model_preds2$ensemble <- ens_preds2
 ```{r, echo=TRUE}
 colAUC(model_preds2, testing$Class)
 ```
-Whoops! The ensemble slightly overfits the hold-out samples in the training set, with a self-reported AUC of .79, vs .77 on the test set.  In this case, most of the ensembles accuracy actually comes from the `lda` model.
+Whoops! The ensemble slightly overfits the hold-out samples in the training set, with a self-reported AUC of .79, vs .77 on the test set.  In this case, most of the ensemble's accuracy actually comes from the `lda` model.
 
 ## caretStack
-caretStack allows us to move beyond simple blends of models to using "meta-models" to ensemble collections of predictive models. DO NOT use the `trainControl` object you used to fit the training models to fit the ensemble.  The re-sampling indexes will be wrong.  Fortunatly, you don't need to be as fastidious with re-sampling indexes for caretStack, as it only fits one model.
+caretStack allows us to move beyond simple blends of models to using "meta-models" to ensemble collections of predictive models. DO NOT use the `trainControl` object you used to fit the training models to fit the ensemble.  The re-sampling indexes will be wrong.  Fortunately, you don't need to be as fastidious with re-sampling indexes for caretStack, as it only fits one model.
 
 ```{r, echo=TRUE, results='hide'}
 glm_ensemble <- caretStack(
