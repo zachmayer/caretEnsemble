@@ -5,7 +5,8 @@
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 weights to get a single, combined vector of predictions.}
 \usage{
-\method{predict}{caretEnsemble}(object, keepNA = TRUE, se = NULL, ...)
+\method{predict}{caretEnsemble}(object, keepNA = TRUE, se = FALSE,
+  return_weights = FALSE, ...)
 }
 \arguments{
 \item{object}{a \code{\link{caretEnsemble}} to make predictions from.}
@@ -17,16 +18,16 @@ with predictions where possible.}
 
 \item{se}{logical, should prediction errors be produced? Default is false.}
 
+\item{return_weights}{a logical indicating whether prediction weights for each model for
+each observation should be returend}
+
 \item{...}{arguments (including newdata) to pass to predict.train. These arguments
 must be named}
 }
 \value{
-If keepNA is set to true this will return either a vector of numeric predictions
-or a data.frame of numeric predictions in the first column with model disagreement in
-the second column if \code{se = TRUE}. If keepNA is set to FALSE and missing values
-are present in the new data, then a \code{list} is produced. The list contains
-the data.frame of predictions in the first slot and a matrix of model weights
-for each observation in the second slot.
+If \code{return_weights = TRUE} a list is returned with a data.frame
+slot for predictions and a matrix slot for the model weights. If \code{return_weights = FALSE}
+a data.frame is returned for the predictions.
 }
 \description{
 Make predictions from a caretEnsemble. This function passes the data to each function in

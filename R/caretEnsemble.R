@@ -75,26 +75,25 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' slot for predictions and a matrix slot for the model weights. If \code{return_weights = FALSE}
 #' a data.frame is returned for the predictions.
 #' @export
-predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, return_weights = FALSE, ...){
+predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){
     return_weights <- FALSE
     warning("return_weights not set properly, default set to TRUE")
   }
-  if(missing(se)){se <- FALSE}
   modtype <- checkModels_extractTypes(object$models)
   preds <- multiPredict(object$models, type = modtype, ...)
-  if(anyNA(preds) == FALSE){
+  if(!anyNA(preds)){
     keepNA <- TRUE
   }
   if(keepNA == TRUE){
-    if(anyNA(preds) == TRUE){
+    if(anyNA(preds)){
       message("Predictions being made only for cases with complete data")
     }
     est <- as.numeric(preds %*% object$weights)
     se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
   } else if(keepNA == FALSE){
-    if(anyNA(preds) == TRUE){
+    if(anyNA(preds)){
     message("Predictions being made only from models with available data")
     }
     conf <- ifelse(is.na(preds), NA, 1)

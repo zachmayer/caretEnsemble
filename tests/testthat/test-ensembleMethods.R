@@ -624,3 +624,58 @@ test_that("Regression models work with prediction errors", {
   expect_identical(preds6$weight, preds5$weight)
 })
 
+#Reg tests
+load(system.file("testdata/models_reg.rda", package="caretEnsemble", mustWork=TRUE))
+ens.reg <- caretEnsemble(models_reg, iter=1000)
+tests <- expand.grid(keepNA=0:1, se=0:1, return_weights=0:1)
+tests <- data.frame(lapply(tests, as.logical))
+for(i in 1:nrow(tests)){
+  p <- predict(
+    ens.reg,
+    keepNA=tests[i,'keepNa'],
+    se=tests[i,'se'],
+    return_weights=tests[i,'return_weights']
+  )
+
+  if(tests[i,'return_weights']){
+    expect_is(p, 'list')
+    preds <- p$preds
+  } else{
+    preds <- p
+  }
+
+  if(tests[i,'se']){
+    expect_is(preds, 'data.frame')
+  } else{
+    expect_is(preds, 'numeric')
+  }
+
+}
+
+#Class tests
+load(system.file("testdata/models_class.rda", package="caretEnsemble", mustWork=TRUE))
+ens.class <- caretEnsemble(models_class, iter=1000)
+tests <- expand.grid(keepNA=0:1, se=0:1, return_weights=0:1)
+tests <- data.frame(lapply(tests, as.logical))
+for(i in 1:nrow(tests)){
+  p <- predict(
+    ens.class,
+    keepNA=tests[i,'keepNa'],
+    se=tests[i,'se'],
+    return_weights=tests[i,'return_weights']
+  )
+
+  if(tests[i,'return_weights']){
+    expect_is(p, 'list')
+    preds <- p$preds
+  } else{
+    preds <- p
+  }
+
+  if(tests[i,'se']){
+    expect_is(preds, 'data.frame')
+  } else{
+    expect_is(preds, 'numeric')
+  }
+
+}
