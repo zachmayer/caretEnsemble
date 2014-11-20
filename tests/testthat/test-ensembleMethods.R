@@ -412,13 +412,13 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_message(predict(ensNest, newdata=testC[, c(1:17)]))
   expect_message(predict(ensNest, keepNA=TRUE, newdata=testC[1:20, c(1:17)]))
   expect_true(is.numeric(pred.nest1))
-  expect_true(is.list(pred.nest2))
+  expect_is(pred.nest2, "numeric")
   expect_true(is.numeric(pred.nest1a))
   expect_true(length(pred.nestTrain_b)==2000)
   expect_true(length(pred.nest1)==1000)
-  expect_true(length(pred.nestTrain_a$predicted)==2000)
-  expect_true(length(pred.nest2$predicted)==1000)
-  expect_true(length(pred.nest1[is.na(pred.nest1)])>0)
+  expect_true(length(pred.nestTrain_a)==2000)
+  expect_true(length(pred.nest2)==1000)
+  expect_true(anyNA(pred.nest1))
 })
 
 
@@ -508,16 +508,15 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_is(pred.nest1, "data.frame")
   expect_true(is.list(pred.nest2))
   expect_is(pred.nest1a, "data.frame")
-  expect_is(pred.nestTrain_a, "list")
+  expect_is(pred.nestTrain_a, "data.frame")
   expect_identical(names(pred.nest1), c("pred", "se"))
-  expect_identical(names(pred.nest2), c("preds", "weight"))
-  expect_identical(names(pred.nest2$preds), names(pred.nest1))
-  expect_is(pred.nest2$weight, "matrix")
+  expect_identical(names(pred.nest2), names(pred.nest1))
+  expect_null(pred.nest2$weight)
   expect_identical(pred.nest1, pred.nest1a)
   expect_true(length(pred.nest1)==2)
-  expect_true(nrow(pred.nestTrain_a$preds)==2000)
-  expect_true(nrow(pred.nest2$preds)==1000)
-  expect_true(length(pred.nest1[is.na(pred.nest1)])>0)
+  expect_true(nrow(pred.nestTrain_a)==2000)
+  expect_true(nrow(pred.nest2)==1000)
+  expect_true(anyNA(pred.nest1))
 })
 
 
@@ -573,7 +572,7 @@ glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Corr2"], method = 'glm',
 
 nestedList <- list(glm1, glm2, glm3, glm4)
 set.seed(482)
-ensNest <- caretEnsemble(nestedList, iter=2000)
+ensNest <- caretEnsemble(nestedList, iter=100)
 
 pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:15)], se = TRUE)
 pred.nest1a <- predict(ensNest, newdata = testC[, c(1:15)], se=TRUE)
@@ -584,23 +583,44 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_is(pred.nest1, "data.frame")
   expect_true(is.list(pred.nest2))
   expect_is(pred.nest1a, "data.frame")
-  expect_is(pred.nestTrain_a, "list")
+  expect_is(pred.nestTrain_a, "data.frame")
   expect_identical(names(pred.nest1), c("pred", "se"))
-  expect_identical(names(pred.nest2), c("preds", "weight"))
-  expect_identical(names(pred.nest2$preds), names(pred.nest1))
-  expect_is(pred.nest2$weight, "matrix")
+  expect_identical(names(pred.nest2), c("pred", "se"))
+  expect_identical(names(pred.nest2), names(pred.nest1))
   expect_identical(pred.nest1, pred.nest1a)
   expect_true(length(pred.nest1)==2)
-  expect_true(nrow(pred.nestTrain_a$preds)==2000)
-  expect_true(nrow(pred.nest2$preds)==1000)
-  expect_true(length(pred.nest1$pred[is.na(pred.nest1$pred)]) == 0)
 })
 
-## Plot method
-# plot(ens.class$models[[4]])
 
+load(system.file("testdata/models_reg.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/X.reg.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/Y.reg.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+ens.reg <- caretEnsemble(models_reg[2:4], iter=1000)
 
+preds1 <- predict(ens.reg)
+preds2 <- predict(ens.reg, se = TRUE)
+preds3 <- predict(ens.reg, keepNA = FALSE, se = TRUE)
+preds4 <- predict(ens.reg, keepNA = TRUE, se = TRUE)
+preds5 <- predict(ens.reg, keepNA = TRUE, se = TRUE, return_weights = TRUE)
+preds6 <- predict(ens.reg, keepNA = TRUE, se = FALSE, return_weights = TRUE)
+preds7 <- predict(ens.reg, keepNA = FALSE, se = FALSE, return_weights = TRUE)
 
-
-
+test_that("Regression models work with prediction errors", {
+  expect_is(preds1, "numeric")
+  expect_is(preds2, "data.frame")
+  expect_is(preds3, "data.frame")
+  expect_identical(preds2, preds3)
+  expect_identical(preds2, preds4)
+  expect_is(preds5, "list")
+  expect_is(preds6, "list")
+  expect_is(preds7, "list")
+  expect_identical(preds6, preds7)
+  expect_identical(names(preds5$preds), c("pred", "se"))
+  expect_is(preds5$weight, "matrix")
+  expect_is(preds6$weight, "matrix")
+  expect_identical(preds6$weight, preds5$weight)
+})
 

@@ -67,17 +67,20 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' TRUE this does not predict for missing values. When FALSE, missing values are overwritten
 #' with predictions where possible.
 #' @param se logical, should prediction errors be produced? Default is false.
+#' @param return_weights a logical indicating whether prediction weights for each model for
+#' each observation should be returend
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments
 #' must be named
-#' @return If keepNA is set to true this will return either a vector of numeric predictions
-#' or a data.frame of numeric predictions in the first column with model disagreement in
-#' the second column if \code{se = TRUE}. If keepNA is set to FALSE and missing values
-#' are present in the new data, then a \code{list} is produced. The list contains
-#' the data.frame of predictions in the first slot and a matrix of model weights
-#' for each observation in the second slot.
+#' @return If \code{return_weights = TRUE} a list is returned with a data.frame
+#' slot for predictions and a matrix slot for the model weights. If \code{return_weights = FALSE}
+#' a data.frame is returned for the predictions.
 #' @export
-predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
+predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, return_weights = FALSE, ...){
   # Default se to FALSE
+  if(!return_weights %in% c(TRUE, FALSE)){
+    return_weights <- FALSE
+    warning("return_weights not set properly, default set to TRUE")
+  }
   if(missing(se)){se <- FALSE}
   modtype <- checkModels_extractTypes(object$models)
   preds <- multiPredict(object$models, type = modtype, ...)
@@ -88,7 +91,7 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
     if(anyNA(preds) == TRUE){
       message("Predictions being made only for cases with complete data")
     }
-    out <- as.numeric(preds %*% object$weights)
+    est <- as.numeric(preds %*% object$weights)
     se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
   } else if(keepNA == FALSE){
     if(anyNA(preds) == TRUE){
@@ -99,16 +102,35 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
     est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm = TRUE)})
-    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm = TRUE)
-    out <- list(predicted = est, weight = conf)
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights,
+                    normwt = TRUE, na.rm = TRUE)
   }
-  if(se == FALSE){
-    return(out)
-  } else{
-    if(keepNA == FALSE){
-      return(list(preds = data.frame(pred = est, se = se.tmp), weight = conf))
+  if(return_weights == FALSE){
+    if(se == FALSE){
+      return(est)
+    } else {
+      return(data.frame(pred = est, se = se.tmp))
     }
-    return(data.frame(pred = out, se = se.tmp))
+  } else if(return_weights == TRUE) {
+    if(se == FALSE){
+      if(keepNA == FALSE){
+        out <- list(preds = est, weight = conf)
+        return(out)
+      } else if(keepNA == TRUE){
+        wghtMat <- matrix(object$weights, c(1, length(object$weights)),
+                          dimnames = list(NULL, names(object$weights)))
+        return(list(preds = est,
+                    weight = wghtMat))
+      }
+    } else if (se == TRUE){
+      if(keepNA == FALSE){
+        return(list(preds = data.frame(pred = est, se = se.tmp), weight = conf))
+      }
+      wghtMat <- matrix(object$weights, c(1, length(object$weights)),
+                        dimnames = list(NULL, names(object$weights)))
+      return(list(preds = data.frame(pred = est, se = se.tmp),
+                  weight = wghtMat))
+    }
   }
 }
 
