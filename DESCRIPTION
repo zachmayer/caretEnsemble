@@ -22,7 +22,6 @@ Suggests:
     testthat,
     randomForest,
     rpart,
-    gbm,
     kernlab,
     nnet,
     e1071,
@@ -31,8 +30,7 @@ Suggests:
     knitr,
     mlbench,
     MASS,
-    gbm,
-    rpart
+    gbm
 Imports:
     caTools,
     pbapply,
