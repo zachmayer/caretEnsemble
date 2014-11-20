@@ -45,14 +45,32 @@ test_that("We can make the predobs matrix", {
 test_that("We can multiPredict", {
   load(system.file("testdata/models_class.rda",
                    package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/models_reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/X.class.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/Y.class.rda",
                    package="caretEnsemble", mustWork=TRUE))
-  out <- multiPredict(models_class, 'reg', newdata=X.class)
+  load(system.file("testdata/X.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  out <- multiPredict(models_class, 'Classification', newdata=X.class)
   expect_that(out, is_a("matrix"))
   expect_true(all(dim(out)==c(150, 6)))
   expect_true(all(colnames(out)==c("rf", "glm", "svmRadial", "nnet", "treebag", "knn")))
+  out2 <- multiPredict(models_reg, 'Regression', newdata = X.reg)
+  expect_true(all(dim(out2)==c(150, 4)))
+  expect_true(all(colnames(out2)==c("rf", "lm", "glm", "knn")))
+})
+
+test_that("multiPredict results same regardless of verbose option", {
+  expect_is(multiPredict(models_class, 'Classification', newdata = X.class), "matrix")
+  out1 <- multiPredict(models_class, 'Classification', newdata = X.class)
+  out2 <- multiPredict(models_class, 'Classification', verbose =TRUE, newdata = X.class)
+  expect_identical(out1, out2)
+  expect_is(multiPredict(models_reg, 'Regression', newdata = X.reg), "matrix")
+  out1 <- multiPredict(models_reg, 'Regression', newdata =X.reg)
+  out2 <- multiPredict(models_reg, 'Regression', verbose = TRUE, newdata = X.reg)
+  expect_identical(out1, out2)
 })
 
 context("Test weighted standard deviations")
@@ -88,3 +106,5 @@ test_that("wtd.sd handles NA values correctly", {
   w2 <- c(0.1, 0.1, NA, 0.7, NA, NA)
   expect_false(wtd.sd(y, weights = w1, na.rm=TRUE, normwt = TRUE) == wtd.sd(y, weights = w2, na.rm=TRUE, normwt = TRUE))
 })
+
+

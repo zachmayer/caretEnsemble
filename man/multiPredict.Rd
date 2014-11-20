@@ -3,12 +3,15 @@
 \alias{multiPredict}
 \title{Create a matrix of predictions for each of the models in a list}
 \usage{
-multiPredict(list_of_models, type, ...)
+multiPredict(list_of_models, type, verbose = FALSE, ...)
 }
 \arguments{
 \item{list_of_models}{a list of caret models to make predictions for}
 
 \item{type}{Classification or Regression}
+
+\item{verbose}{Logical. If FALSE no progress bar is printed if TRUE a progress
+bar is shown. Default FALSE.}
 
 \item{...}{additional arguments to pass to predict.train. Pass the \code{newdata}
 argument here, DO NOT PASS the "type" argument.  Classification models will

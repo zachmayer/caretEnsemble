@@ -52,7 +52,8 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
   }
 
   #Return final model
-  out <- list(models=all.models[keep], weights=weights[keep], error=error)
+  out <- list(models=all.models[keep], weights=weights[keep], error=error,
+              modelType = predobs$type)
   class(out) <- 'caretEnsemble'
   return(out)
 }
@@ -66,36 +67,69 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' TRUE this does not predict for missing values. When FALSE, missing values are overwritten
 #' with predictions where possible.
 #' @param se logical, should prediction errors be produced? Default is false.
+#' @param return_weights a logical indicating whether prediction weights for each model for
+#' each observation should be returend
 #' @param ... arguments (including newdata) to pass to predict.train. These arguments
 #' must be named
-#' @method predict caretEnsemble
+#' @return If \code{return_weights = TRUE} a list is returned with a data.frame
+#' slot for predictions and a matrix slot for the model weights. If \code{return_weights = FALSE}
+#' a data.frame is returned for the predictions.
 #' @export
-predict.caretEnsemble <- function(object, keepNA = TRUE, se = NULL, ...){
+predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
   # Default se to FALSE
-  if(missing(se)){se <- FALSE}
+  if(!return_weights %in% c(TRUE, FALSE)){
+    return_weights <- FALSE
+    warning("return_weights not set properly, default set to TRUE")
+  }
   modtype <- checkModels_extractTypes(object$models)
   preds <- multiPredict(object$models, type = modtype, ...)
+  if(!anyNA(preds)){
+    keepNA <- TRUE
+  }
   if(keepNA == TRUE){
-    message("Predictions being made only for cases with complete data")
-    out <- as.numeric(preds %*% object$weights)
+    if(anyNA(preds)){
+      message("Predictions being made only for cases with complete data")
+    }
+    est <- as.numeric(preds %*% object$weights)
     se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
   } else if(keepNA == FALSE){
+    if(anyNA(preds)){
     message("Predictions being made only from models with available data")
+    }
     conf <- ifelse(is.na(preds), NA, 1)
     conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
     est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm = TRUE)})
-    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE, na.rm = TRUE)
-    out <- list(predicted = est, weight = conf)
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights,
+                    normwt = TRUE, na.rm = TRUE)
   }
-  if(se == FALSE){
-    return(out)
-  } else{
-    if(keepNA == FALSE){
-      return(list(preds = data.frame(pred = est, se = se.tmp), weight = conf))
+  if(return_weights == FALSE){
+    if(se == FALSE){
+      return(est)
+    } else {
+      return(data.frame(pred = est, se = se.tmp))
     }
-    return(data.frame(pred = out, se = se.tmp))
+  } else if(return_weights == TRUE) {
+    if(se == FALSE){
+      if(keepNA == FALSE){
+        out <- list(preds = est, weight = conf)
+        return(out)
+      } else if(keepNA == TRUE){
+        wghtMat <- matrix(object$weights, c(1, length(object$weights)),
+                          dimnames = list(NULL, names(object$weights)))
+        return(list(preds = est,
+                    weight = wghtMat))
+      }
+    } else if (se == TRUE){
+      if(keepNA == FALSE){
+        return(list(preds = data.frame(pred = est, se = se.tmp), weight = conf))
+      }
+      wghtMat <- matrix(object$weights, c(1, length(object$weights)),
+                        dimnames = list(NULL, names(object$weights)))
+      return(list(preds = data.frame(pred = est, se = se.tmp),
+                  weight = wghtMat))
+    }
   }
 }
 
@@ -130,8 +164,9 @@ extractModRes <- function(ensemble){
   if(class(ensemble) != "caretEnsemble") stop("extractModRes requires a caretEnsemble object")
   methods <- names(ensemble$models)
   if(is.null(methods)){
-    methods <- as.vector(strsplit(paste0("model", 1:length(ensemble$models)), split = " ",
-                                fixed = TRUE), mode = "character")
+#     methods <- as.vector(strsplit(paste0("model", 1:length(ensemble$models)), split = " ",
+#                                 fixed = TRUE), mode = "character")
+    methods <- unlist(lapply(ensemble$models, "[[", 1))
   } #sanitize names
   metric <- names(ensemble$error)
   modRes <- data.frame(method = methods,
@@ -175,6 +210,8 @@ getMetric.train <- function(x, metric= c("AUC", "RMSE")){
 #' Extract the AUC metric from a \code{\link{train}} object.
 #' @return A numeric for the AUC of the best model
 #' @rdname metrics
+#' @note AUC extracted from a train object is for all resamples pooled, not the average
+#' of the AUC for each resample.
 #' @export
 getAUC <- function(x){
   UseMethod("getAUC")
@@ -198,6 +235,8 @@ getAUC.train <- function(x){
 #' Extract the RMSE metric from a model object.
 #' @return A numeric for the RMSE of the best model
 #' @rdname metrics
+#' @note RMSE extracted from a train object is for all resamples pooled, not the average
+#' of the RMSE for each resample.
 #' @export
 getRMSE <- function(x){
   UseMethod("getRMSE")
@@ -223,33 +262,58 @@ getRMSE.train <- function(x){
 #' a model object.
 #' @param x an object with model performanc metrics
 #' @param metric a character, either "RMSE" or "AUC" indicating which metric to extract
+#' @param which a character, either "all" or "best", default is best, see details
 #' @return A numeric for the standard deviation of the selected metric across
 #' tuning parameters and resamples in the original object.
+#' @details Which allows the user to select whether to generate a standard deviation
+#' for the performance metric across all values of the tuning parameters and resamples,
+#' or only for resamples under the best tuning parameter
 #' @rdname metricsSD
 #' @export
-getMetricSD <- function(x, metric){
+getMetricSD <- function(x, metric, which = c("all", "best")){
   UseMethod("getMetricSD")
 }
 
 #' @export
-getMetricSD.train <- function(x, metric = c("RMSE", "AUC")){
+getMetricSD.train <- function(x, metric = c("RMSE", "AUC"), which = c("all", "best")){
   if(missing(metric)){
     metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
-    warning("Metric not specified, so default is being chosen.")
+    message(paste0("Metric not specified, so default is being chosen: ", metric))
+  }
+  if(missing(which)){
+    which <- "best"
+#     message("which not specified so sd only calculated for best values of tuning parmeters")
   }
   metricTest <- ifelse(metric == "AUC", "Classification", "Regression")
   stopifnot(x$modelType == metricTest)
   if(metric == "AUC"){
     z <- table(x$pred$obs)
     prevOutcome <- names(z)[z == max(z)]
-    out <- by(x$pred[, c(prevOutcome, "obs")], x$pred[, "Resample"],
+    out <- by(x$pred[, c(prevOutcome, "obs")], x$pred[, c(names(x$bestTune), "Resample")],
        function(x) colAUC(x[,1], x[,2]))
   } else if(metric == "RMSE"){
-    out <- by(x$pred[, c("pred","obs")], x$pred[, "Resample"],
+    out <- by(x$pred[, c("pred","obs")], x$pred[, c(names(x$bestTune), "Resample")],
               function(x) RMSE(x[,1], x[,2]))
   }
-  out <- sd(as.numeric(out))
+  if(which == "best"){
+    out <- matchBestTune(out, x$bestTune)
+    out <- sd(as.numeric(out))
+  } else{
+    out <- sd(as.numeric(out))
+  }
   return(out)
+}
+
+#' @keywords internal
+matchBestTune <- function(out, bt){
+  nams <- names(attributes(out)$dimnames)
+  nams <- nams[nams %in% names(bt)]
+  tmp <- c()
+  for(i in length(nams)){
+    tmp.t <- out[attributes(out)$dimnames[[nams[[i]]]] == as.character(bt[,nams[i]])]
+    tmp <- c(tmp, tmp.t)
+  }
+  return(tmp)
 }
 
 
@@ -326,4 +390,248 @@ varImpFrame <- function(x){
                  idvar = "var", timevar = "model")
 }
 
-do.call(library, list('methods', 'caret'))
+
+#' @title Calculate the residuals from a caretEnsemble.
+#' @description This function calculates raw residuals for both regression and
+#' classification \code{caretEnsemble} objects.
+#' @param object a \code{caretEnsemble} to make predictions from.
+#' @param ... other arguments to be passed to residuals
+#' @return A numeric of the residuals.
+#' @export
+residuals.caretEnsemble <- function(object, ...){
+  if(is.null(object$modelType)){
+    object$modelType <- checkModels_extractTypes(object$models)
+  }
+  if(object$modelType == "Regression"){
+    yhat <- predict(object)
+    y <- object$models[[1]]$trainingData$.outcome
+    resid <- y - yhat
+    return(resid)
+  } else if(object$modelType == "Classification"){
+    yhat <- predict(object)
+    y <- as.character(object$models[[1]]$trainingData$.outcome)
+    z <- table(y)
+    prevOutcome <- names(z)[z == max(z)]
+    y <- ifelse(y == prevOutcome, 0, 1)
+    resid <- y - yhat
+    return(resid)
+  }
+}
+
+#' @keywords internal
+residuals2.train <- function(object){
+  if(object$modelType == "Regression"){
+    y <- object$trainingData$.outcome
+    resid <- residuals(object)
+    yhat <- predict(object)
+    data <- data.frame(y = y, yhat = yhat, .resid = resid,
+                       method = object$method)
+    return(data)
+  } else if(object$modelType == "Classification"){
+    yhat <- predict(object, type = "prob")
+    if (!is.null(ncol(yhat))){
+      yhat <- yhat[, 1]
+    }
+    y <- as.character(object$trainingData$.outcome)
+    z <- table(y)
+    prevOutcome <- names(z)[z == max(z)]
+    y <- ifelse(y == prevOutcome, 1, 0)
+    resid <- y - yhat
+    data <- data.frame(y = y, yhat = yhat, .resid = resid,
+                       method = object$method)
+    return(data)
+  }
+}
+
+#' @title Calculate the residuals from all component models of a caretEnsemble.
+#' @description This function calculates raw residuals for both regression and
+#' classification \code{train} objects within a \code{\link{caretEnsemble}}.
+#' @param object a \code{caretEnsemble} to make predictions from.
+#' @param ... other arguments to be passed to residuals
+#' @return A data.frame in the long format with columns for the model method,
+#' the observation id, yhat for the fitted values, resid for the residuals, and
+#' y for the observed value.
+#' @export
+multiResiduals <- function(object, ...){
+  modtype <- checkModels_extractTypes(object$models)
+  preds <- multiPredict(object$models, type = modtype, ...)
+  if(modtype == "Regression"){
+    y <- object$models[[1]]$trainingData$.outcome
+  } else if(modtype == "Classification"){
+    y <- as.character(object$models[[1]]$trainingData$.outcome)
+    z <- table(y)
+    prevOutcome <- names(z)[z == max(z)]
+    y <- ifelse(y == prevOutcome, 0, 1)
+  }
+  resid <- y - preds
+  preds <- as.data.frame(preds)
+  resid <- as.data.frame(resid)
+  resid <- reshape(resid, direction = "long", varying = names(resid),
+                    v.names = "resid", timevar = "method", times = names(resid))
+  preds <- reshape(preds, direction = "long", varying = names(preds),
+                   v.names = "yhat", timevar = "method", times = names(preds))
+  out <- merge(preds, resid)
+  out$y <- out$yhat + out$resid
+  return(out)
+}
+
+
+#' @title Supplement the data fitted to a caret ensemble model with model fit statistics
+#' @description This function constructs a dataframe consisting of the outcome,
+#' all of the predictors used in any of the models ensembled in a \code{caretEnsemble}
+#' object, and some model fit statistics.
+#' @param model a \code{caretEnsemble} to extract predictors from
+#' @param data a data set, defaults to the data used to fit the model
+#' @param ... additional arguments to pass to fortify
+#' @return The original data with extra columns for fitted values and residuals
+#' @importFrom digest digest
+#' @export
+fortify.caretEnsemble <- function(model, data = NULL, ...){
+  data <- extractModFrame(model)
+  data$y <- model$models[[1]]$trainingData$.outcome
+  if(class(data$y) != "numeric"){
+    data$y <- as.character(data$y)
+    z <- table(data$y)
+    prevOutcome <- names(z)[z == max(z)]
+    data$y <- ifelse(data$y == prevOutcome, 0, 1)
+    data$y <- as.numeric(data$y)
+  }
+  data$.fitted <- predict(model)
+  data$.resid <- residuals(model)
+  return(data)
+}
+
+#' @title Extract a dataframe of all predictors used in a caretEnsemble object.
+#' @description This function constructs a dataframe consisting of the outcome
+#' and all of the predictors used in any of the models ensembled in a \code{caretEnsemble}
+#' object.
+#' @param model a \code{caretEnsemble} to extract predictors from
+#' @return A data.frame combining all of the variables used across all models.
+#' @importFrom digest digest
+#' @export
+extractModFrame <- function(model){
+  datList <- vector("list", length = length(model$models))
+  for(i in 1: length(model$models)){
+    datList[[i]] <- model$models[[i]]$trainingData
+  }
+  modelFrame <- do.call(cbind, datList)
+  modelFrame <- modelFrame[!duplicated(lapply(modelFrame, digest))]
+  return(modelFrame)
+}
+
+
+#' @title Plot Diagnostics for an caretEnsemble Object
+#' @description This function makes a short plot of the performance of the component
+#' models of a \code{caretEnsemble} object on the AUC or RMSE metric
+#' @param x a \code{caretEnsemble} object
+#' @param ... additional arguments to pass to plot
+#' @return A plot
+#' @import ggplot2
+#' @export
+#' @method plot caretEnsemble
+plot.caretEnsemble <- function(x, ...){
+  dat <- extractModRes(x)
+  metricLab <- names(x$error)
+  ggplot(dat, aes(x = method, y = metric, ymin = metric - metricSD,
+                  ymax = metric + metricSD)) + geom_pointrange() +
+    geom_hline(yintercept = x$error, color = I("red"), size = I(1.1)) +
+    theme_bw() + labs(x = "Individual Model Method", y = metricLab)
+}
+
+#' @title Convenience function for more in-depth diagnostic plots of caretEnsemble objects
+#' @description This function provides a more robust series of diagnostic plots
+#' for a caretEnsemble object.
+#' @param object a \code{caretEnsemble} object
+#' @param which an integer index for which of the plots to print
+#' @param mfrow an integer vector of length 2 specifying the number of rows and columns for plots
+#' @param xvars a vector of the names of x variables to plot against residuals
+#' @param ... additional arguments to pass to autoplot
+#' @return A grid of diagnostic plots. Top left is the range of the performance
+#' metric across each component model along with its standard deviation. Top right
+#' is the residuals from the ensembled model plotted against fitted values.
+#' Middle left is a bar graph of the weights of the component models. Middle
+#' right is the disagreement in the residuals of the component models (unweighted)
+#' across the fitted values. Bottom left and bottom right are the plots of the
+#' residuals against two random or user specified variables.
+#' @import ggplot2
+#' @import grid
+#' @import plyr
+#' @export
+autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
+                                   xvars = NULL, ...){
+  plotdf <- suppressMessages(fortify(object))
+  g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
+  wghtFrame <- as.data.frame(object$weights)
+  wghtFrame$method <- row.names(wghtFrame)
+  names(wghtFrame) <- c("weights", "method")
+  g2 <- ggplot(plotdf, aes(.fitted, .resid)) + geom_point() + geom_smooth(se = FALSE) +
+    geom_hline(linetype = 2, size = 0.2) + scale_x_continuous("Fitted Values") +
+    scale_y_continuous("Residual") + labs(title = "Residuals vs Fitted") +
+    theme_bw()
+  g3 <- ggplot(wghtFrame, aes(method, weights)) +
+    geom_bar(stat = 'identity', fill = I("gray50"), color = I("black")) +
+    labs(title = "Model Weights", x = "Method", y = "Weights") + theme_bw()
+  if(missing(xvars)){
+    xvars <- names(plotdf)[!names(plotdf) %in% c("(Intercept)", ".outcome", "y",
+                                                 ".fitted", ".resid")]
+    xvars <- sample(xvars, 2)
+  } else {
+    xvars <- names(plotdf)[xvars]
+  }
+  # TODO: Insert checks for length ov xvars here
+  residOut <- multiResiduals(object)
+  zed <- ddply(residOut, .(id), summarize,
+               ymin = min(resid),
+               ymax = max(resid),
+               yavg = median(resid),
+               yhat = yhat[1])
+  g4 <- ggplot(zed, aes(x = yhat, ymin = ymin, ymax = ymax, y = yavg)) +
+    geom_linerange(alpha = I(0.5)) + geom_point(size = I(3), alpha = I(0.8)) +
+    theme_bw() + geom_smooth(method = 'lm', se = FALSE,
+                             size = I(1.1), color = I("red"), linetype = 2) +
+    labs(x = "Fitted Values", y = "Range of Resid.",
+         title = "Model Disagreement Across Fitted Values")
+#   g4 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
+#     geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
+#     scale_y_continuous("Residuals") +
+#     labs(title = paste0("Residuals Against ", xvars[1])) + theme_bw()
+  g5 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
+    geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
+    scale_y_continuous("Residuals") +
+    labs(title = paste0("Residuals Against ", xvars[1])) + theme_bw()
+  g6 <- ggplot(plotdf, aes_string(xvars[2], ".resid")) + geom_point() +
+    geom_smooth(se = FALSE) + scale_x_continuous(xvars[2]) +
+    scale_y_continuous("Residuals") +
+    labs(title = paste0("Residuals Against ", xvars[2])) + theme_bw()
+  plots <- list(g1, g2, g3, g4, g5, g6)
+  grid::grid.newpage()
+  if (prod(mfrow) > 1) {
+    mypos <- expand.grid(1:mfrow[1], 1:mfrow[2])
+    mypos <- mypos[with(mypos, order(Var1)), ]
+    pushViewport(viewport(layout = grid.layout(mfrow[1],
+                                               mfrow[2])))
+    formatter <- function(.) {
+    }
+  }
+  else {
+    mypos <- data.frame(matrix(1, length(which), 2))
+    pushViewport(viewport(layout = grid.layout(1, 1)))
+    formatter <- function(.) {
+      .dontcare <- readline("Hit <Return> to see next plot: ")
+      grid.newpage()
+    }
+  }
+  j <- 1
+  for (i in which) {
+    formatter()
+    suppressWarnings(
+      print(plots[[i]], vp = viewport(layout.pos.row = mypos[j,
+                                                             ][1], layout.pos.col = mypos[j, ][2]))
+    )
+    j <- j + 1
+  }
+}
+
+
+utils::globalVariables(c(".fitted", ".resid", "method", "id", "yhat",
+                         "ymax", "yavg", "ymin", "metric", "metricSD"))

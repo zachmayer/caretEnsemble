@@ -125,13 +125,21 @@ makePredObsMatrix <- function(list_of_models){
 #'
 #' @param list_of_models a list of caret models to make predictions for
 #' @param type Classification or Regression
+#' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
+#' bar is shown. Default FALSE.
 #' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
 #' argument here, DO NOT PASS the "type" argument.  Classification models will
 #' return probabilities if possible, and regression models will return "raw".
 #' @export
-multiPredict <- function(list_of_models, type, ...){
-  #TODO: Add progressbar argument
-  preds <- pbapply::pbsapply(list_of_models, function(x){
+#' @importFrom pbapply pbsapply
+#' @importFrom pbapply pboptions
+multiPredict <- function(list_of_models, type, verbose = FALSE, ...){
+  if(verbose == TRUE){
+    pboptions(type = "txt", char = "*")
+  } else if(verbose == FALSE){
+    pboptions(type = "none")
+  }
+  preds <- pbsapply(list_of_models, function(x){
     if (type=='Classification' & x$control$classProbs){
       predict(x, type='prob', ...)[,2]
     } else {
