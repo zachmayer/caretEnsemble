@@ -566,7 +566,11 @@ plot.caretEnsemble <- function(x, ...){
 #' @export
 #' @examples
 #' set.seed(42)
-#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'rpart'))
+#' models <- caretList(
+#'  iris[1:50,1:2],
+#'  iris[1:50,3],
+#'  trControl=trainControl(method='cv'),
+#'  methodList=c('glm', 'rpart'))
 #' ens <- caretEnsemble(models)
 #' autoplot(ens)
 autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
