@@ -126,13 +126,14 @@ plot.caretStack <- function(x, ...){
 }
 
 #' @title Comparison dotplot for a caretStack object
-#' @description This is a function to make a dotplot from a caretStack.  It uses dotplot from the caret package on all the models in the ensemble, plus the final ensemble model.
+#' @description This is a function to make a dotplot from a caretStack.  It uses dotplot from the caret package on all the models in the ensemble, plus the final ensemble model.  At the moment, this function only works if the ensembling model has the same number of resamples as the component models.
 #' @param x An object of class caretStack
 #' @param data passed to dotplot
 #' @param ... passed to dotplot
-#' @export
 #' @importFrom lattice dotplot
+#' @export
 #' @examples
+#' set.seed(42)
 #' library('rpart')
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
@@ -140,7 +141,7 @@ plot.caretStack <- function(x, ...){
 #'   trControl=trainControl(method='cv'),
 #'   methodList=c('rpart', 'glm')
 #' )
-#' meta_model <- caretStack(models, method='lm')
+#' meta_model <- caretStack(models, method='lm', trControl=trainControl(method='cv'))
 #' dotplot(meta_model)
 dotplot.caretStack <- function(x, data=NULL, ...){
   final <- list(x$ens_model)
