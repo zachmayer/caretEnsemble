@@ -71,7 +71,7 @@ rm(list=ls())
 library(EWStools)
 data(EWStestData)
 
-
+set.seed(3425)
 ctrl <- trainControl(method = "cv",
                      number = 3, classProbs = TRUE, savePredictions = TRUE,
                      summaryFunction = twoClassSummary)
@@ -83,8 +83,10 @@ out <- caretList(
   x = modeldat2$traindata$preds,
   y = modeldat2$traindata$class,
   trControl = ctrl,
-  tuneLength = 3
+  tuneLength = 3,
   methodList = c("knn", "nb", "lda", "nnet"))
 
  studentEns <- caretEnsemble(out)
+
+# save(modeldat2, studentEns, file = "stuGradMod.rda", compress = "xz")
 
