@@ -13,14 +13,12 @@
 #' @examples
 #' library('rpart')
 #' models <- caretList(
-#'   x=iris[,1:2],
-#'   y=iris[,3],
+#'   x=iris[1:50,1:2],
+#'   y=iris[1:50,3],
+#'   trControl=trainControl(method='cv'),
 #'   methodList=c('rpart', 'glm')
 #' )
-#' meta_model <- caretStack(models, method='glm')
-#' meta_model
-#' summary(meta_model)
-#' dotplot(meta_model, metric='RMSE')
+#' caretStack(models, method='glm')
 caretStack <- function(all.models, ...){
 
   predobs <- makePredObsMatrix(all.models)
@@ -48,6 +46,7 @@ caretStack <- function(all.models, ...){
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
 #'   y=iris[1:100,3],
+#'   trControl=trainControl(method='cv'),
 #'   methodList=c('rpart', 'glm')
 #' )
 #' meta_model <- caretStack(models, method='lm')
@@ -71,6 +70,7 @@ predict.caretStack <- function(object, newdata=NULL, ...){
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
 #'   y=iris[1:100,3],
+#'   trControl=trainControl(method='cv'),
 #'   methodList=c('rpart', 'glm')
 #' )
 #' meta_model <- caretStack(models, method='lm')
@@ -89,6 +89,7 @@ summary.caretStack <- function(object, ...){
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
 #'   y=iris[1:100,3],
+#'   trControl=trainControl(method='cv'),
 #'   methodList=c('rpart', 'glm')
 #' )
 #' meta_model <- caretStack(models, method='lm')
@@ -115,6 +116,7 @@ print.caretStack <- function(x, ...){
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
 #'   y=iris[1:100,3],
+#'   trControl=trainControl(method='cv'),
 #'   methodList=c('rpart', 'glm')
 #' )
 #' meta_model <- caretStack(models, method='rpart', tuneLength=2)
@@ -135,6 +137,7 @@ plot.caretStack <- function(x, ...){
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
 #'   y=iris[1:100,3],
+#'   trControl=trainControl(method='cv'),
 #'   methodList=c('rpart', 'glm')
 #' )
 #' meta_model <- caretStack(models, method='lm')
