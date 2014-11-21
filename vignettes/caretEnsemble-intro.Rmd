@@ -172,4 +172,4 @@ In this case, the sophisticated ensemble is no better than a simple weighted lin
 
 1. Lots of data.
 2. Lots of models with similar accuracies.
-3. Your models are very un-correllated: each one seems to capture a different aspect of the data.
+3. Your models are un-correllated: each one seems to capture a different aspect of the data, and different models perform best on different subsets of the data.
