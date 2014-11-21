@@ -35,5 +35,6 @@ Imports:
     digest,
     plyr,
     grid,
-    lattice
+    lattice,
+    gridExtra
 License: MIT + file LICENSE
