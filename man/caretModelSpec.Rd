@@ -16,4 +16,7 @@ a list of lists
 \description{
 A caret model specificaiton consists of 2 parts: a model (as a string) and the argments to the train call for fitting that model
 }
+\examples{
+caretModelSpec('rf', tuneLength=5, preProcess='ica')
+}
 
