@@ -13,4 +13,10 @@
 \description{
 Summarize the results of caretEnsemble for the user.
 }
+\examples{
+set.seed(42)
+models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
+ens <- caretEnsemble(models)
+summary(ens)
+}
 

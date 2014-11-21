@@ -30,4 +30,10 @@ residuals against two random or user specified variables.
 This function provides a more robust series of diagnostic plots
 for a caretEnsemble object.
 }
+\examples{
+set.seed(42)
+models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'rpart'))
+ens <- caretEnsemble(models)
+autoplot(ens)
+}
 
