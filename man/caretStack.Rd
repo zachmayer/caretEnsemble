@@ -25,7 +25,7 @@ library('rpart')
 models <- caretList(
   x=iris[,1:2],
   y=iris[,3],
-  methodList=c('rpart', 'glm', 'knn')
+  methodList=c('rpart', 'glm')
 )
 meta_model <- caretStack(models, method='glm')
 meta_model
