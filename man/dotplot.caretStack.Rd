@@ -13,6 +13,16 @@
 \item{...}{passed to dotplot}
 }
 \description{
-This is a function to make a dotplot from a caretStack.
+This is a function to make a dotplot from a caretStack.  It uses dotplot from the caret package on all the models in the ensemble, plus the final ensemble model.
+}
+\examples{
+library('rpart')
+models <- caretList(
+  x=iris[1:100,1:2],
+  y=iris[1:100,3],
+  methodList=c('rpart', 'glm')
+)
+meta_model <- caretStack(models, method='lm')
+dotplot(meta_model)
 }
 

@@ -13,4 +13,14 @@
 \description{
 This is a function to print a caretStack.
 }
+\examples{
+library('rpart')
+models <- caretList(
+  x=iris[1:100,1:2],
+  y=iris[1:100,3],
+  methodList=c('rpart', 'glm')
+)
+meta_model <- caretStack(models, method='lm')
+print(meta_model)
+}
 

@@ -43,6 +43,15 @@ caretStack <- function(all.models, ...){
 #' @param ... arguments to pass to \code{\link{predict.train}}.
 #' @export
 #' @method predict caretStack
+#' @examples
+#' library('rpart')
+#' models <- caretList(
+#'   x=iris[1:100,1:2],
+#'   y=iris[1:100,3],
+#'   methodList=c('rpart', 'glm')
+#' )
+#' meta_model <- caretStack(models, method='lm')
+#' RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
 predict.caretStack <- function(object, newdata=NULL, ...){
   #TODO: grab type argument
   #TODO: rename my "type" variable
@@ -57,6 +66,15 @@ predict.caretStack <- function(object, newdata=NULL, ...){
 #' @param object An object of class caretStack
 #' @param ... ignored
 #' @export
+#' @examples
+#' library('rpart')
+#' models <- caretList(
+#'   x=iris[1:100,1:2],
+#'   y=iris[1:100,3],
+#'   methodList=c('rpart', 'glm')
+#' )
+#' meta_model <- caretStack(models, method='lm')
+#' summary(meta_model)
 summary.caretStack <- function(object, ...){
   summary(object$ens_model)
 }
@@ -66,6 +84,15 @@ summary.caretStack <- function(object, ...){
 #' @param x An object of class caretStack
 #' @param ... ignored
 #' @export
+#' @examples
+#' library('rpart')
+#' models <- caretList(
+#'   x=iris[1:100,1:2],
+#'   y=iris[1:100,3],
+#'   methodList=c('rpart', 'glm')
+#' )
+#' meta_model <- caretStack(models, method='lm')
+#' print(meta_model)
 print.caretStack <- function(x, ...){
   n <- length(x$models)
   cat(paste(
@@ -82,17 +109,35 @@ print.caretStack <- function(x, ...){
 #' @param x An object of class caretStack
 #' @param ... passed to plot
 #' @export
+#' @examples
+#' library('rpart')
+#' models <- caretList(
+#'   x=iris[1:100,1:2],
+#'   y=iris[1:100,3],
+#'   methodList=c('rpart', 'glm')
+#' )
+#' meta_model <- caretStack(models, method='rpart', tuneLength=2)
+#' plot(meta_model)
 plot.caretStack <- function(x, ...){
   plot(x$ens_model, ...)
 }
 
 #' @title Comparison dotplot for a caretStack object
-#' @description This is a function to make a dotplot from a caretStack.
+#' @description This is a function to make a dotplot from a caretStack.  It uses dotplot from the caret package on all the models in the ensemble, plus the final ensemble model.
 #' @param x An object of class caretStack
 #' @param data passed to dotplot
 #' @param ... passed to dotplot
 #' @export
 #' @importFrom lattice dotplot
+#' @examples
+#' library('rpart')
+#' models <- caretList(
+#'   x=iris[1:100,1:2],
+#'   y=iris[1:100,3],
+#'   methodList=c('rpart', 'glm')
+#' )
+#' meta_model <- caretStack(models, method='lm')
+#' dotplot(meta_model)
 dotplot.caretStack <- function(x, data=NULL, ...){
   final <- list(x$ens_model)
   names(final) <- paste(paste(x$ens_model$method, collapse='_'), 'ENSEMBLE', sep='_')
