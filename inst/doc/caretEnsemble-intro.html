@@ -65,10 +65,19 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <p><code>caretList</code> is a flexible function for fitting many different caret models, with the same resampling parameters, to the same dataset. It returns a convenient <code>list</code> of caret objects which can later be passed to <code>caretEnsemble</code> and <code>caretStack</code>. <code>caretList</code> has almost exactly the same arguments as <code>train</code> (from the caret package), with the exception that the <code>trControl</code> argument comes last. It can handle both the formula interface and the explicit <code>x</code>, <code>y</code> interface to train. As in caret, the formula interface introduces some overhead and the <code>x</code>, <code>y</code> interface is preferred.</p>
 <p><code>caretEnsemble</code> has 2 arguments that can be used to specify which models to fit: <code>methodList</code> and <code>tuneList</code>. <code>methodList</code> is a simple character vector of methods that will be fit with the default <code>train</code> parameters, while <code>tuneList</code> can be used to customize the call to each component model and will be discussed in more detail later. First, lets build an example dataset (adapted from the caret vignette):</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Adapted from the caret vignette</span>
-<span class="kw">library</span>(<span class="st">'caret'</span>)
-<span class="kw">library</span>(<span class="st">'mlbench'</span>)
-<span class="kw">library</span>(<span class="st">'pROC'</span>)
-<span class="kw">data</span>(Sonar)
+<span class="kw">library</span>(<span class="st">'caret'</span>)</code></pre>
+<pre><code>## Loading required package: lattice
+## Loading required package: ggplot2</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">'mlbench'</span>)
+<span class="kw">library</span>(<span class="st">'pROC'</span>)</code></pre>
+<pre><code>## Type 'citation(&quot;pROC&quot;)' for a citation.
+## 
+## Attaching package: 'pROC'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     cov, smooth, var</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(Sonar)
 <span class="kw">set.seed</span>(<span class="dv">107</span>)
 inTrain &lt;-<span class="st"> </span><span class="kw">createDataPartition</span>(<span class="dt">y =</span> Sonar$Class, <span class="dt">p =</span> .<span class="dv">75</span>, <span class="dt">list =</span> <span class="ot">FALSE</span>)
 training &lt;-<span class="st"> </span>Sonar[ inTrain,]
@@ -129,8 +138,10 @@ model_list &lt;-<span class="st"> </span><span class="kw">caretList</span>(
 </table>
 <p>If you desire more control over the model fit, use the <code>caretModelSpec</code> to contruct a list of model specifications for the <code>tuneList</code> argument. This argumenent can be used to fit several different variants of the same model, and can also be used to pass arguments through <code>train</code> down to the component functions (e.g. <code>trace=FALSE</code> for <code>nnet</code>):</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">'mlbench'</span>)
-<span class="kw">library</span>(<span class="st">'randomForest'</span>)
-<span class="kw">library</span>(<span class="st">'nnet'</span>)
+<span class="kw">library</span>(<span class="st">'randomForest'</span>)</code></pre>
+<pre><code>## randomForest 4.6-10
+## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">'nnet'</span>)
 model_list_big &lt;-<span class="st"> </span><span class="kw">caretList</span>(
   Class~., <span class="dt">data=</span>training,
   <span class="dt">trControl=</span>my_control,
@@ -584,8 +595,19 @@ CF &lt;-<span class="st"> </span><span class="kw">coef</span>(glm_ensemble$ens_m
 ## 0.3535492 0.6464508</code></pre>
 <p>Note that <code>glm_ensemble$ens_model</code> is a regular caret object of class <code>train</code>. The glm-weighted model weights (glm vs rpart) and test-set AUCs are extremely similar to the caretEnsemble greedy optimization.</p>
 <p>We can also use more sophisticated ensembles than simple linear weights, but these models are much more succeptible to over-fitting, and generally require large sets of resamples to train on (n=50 or higher for bootstrap samples). Lets try one anyways:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">'gbm'</span>)
-gbm_ensemble &lt;-<span class="st"> </span><span class="kw">caretStack</span>(
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">'gbm'</span>)</code></pre>
+<pre><code>## Loading required package: survival
+## Loading required package: splines
+## 
+## Attaching package: 'survival'
+## 
+## The following object is masked from 'package:caret':
+## 
+##     cluster
+## 
+## Loading required package: parallel
+## Loaded gbm 2.1</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">gbm_ensemble &lt;-<span class="st"> </span><span class="kw">caretStack</span>(
   model_list, 
   <span class="dt">method=</span><span class="st">'gbm'</span>,
   <span class="dt">verbose=</span><span class="ot">FALSE</span>,
@@ -598,12 +620,13 @@ gbm_ensemble &lt;-<span class="st"> </span><span class="kw">caretStack</span>(
     <span class="dt">classProbs=</span><span class="ot">TRUE</span>,
     <span class="dt">summaryFunction=</span>twoClassSummary
   )
-)
-model_preds3 &lt;-<span class="st"> </span>model_preds
+)</code></pre>
+<pre><code>## Loading required package: plyr</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">model_preds3 &lt;-<span class="st"> </span>model_preds
 model_preds3$ensemble &lt;-<span class="st"> </span><span class="kw">predict</span>(gbm_ensemble, <span class="dt">newdata=</span>testing, <span class="dt">type=</span><span class="st">'prob'</span>)$M
 <span class="kw">colAUC</span>(model_preds3, testing$Class)</code></pre>
 <pre><code>##               glm     rpart  ensemble
-## M vs. R 0.6496914 0.6566358 0.6851852</code></pre>
+## M vs. R 0.6496914 0.6566358 0.6944444</code></pre>
 <p>In this case, the sophisticated ensemble is no better than a simple weighted linear combination. Non-linar ensembles seem to work best when you have:</p>
 <ol style="list-style-type: decimal">
 <li>Lots of data.</li>
