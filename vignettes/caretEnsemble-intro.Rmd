@@ -168,7 +168,7 @@ model_preds3$ensemble <- predict(gbm_ensemble, newdata=testing, type='prob')$M
 colAUC(model_preds3, testing$Class)
 ```
 
-In this case, the sophisticated ensemble is no better than a simple weighted linear combination.  Non-linar ensembles seem to work best when you have:
+In this case, the sophisticated ensemble is no better than a simple weighted linear combination.  Non-linear ensembles seem to work best when you have:
 
 1. Lots of data.
 2. Lots of models with similar accuracies.
