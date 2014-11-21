@@ -5,7 +5,6 @@
 #' @description Check that a list of models are all train objects and are ready to be ensembled together
 #'
 #' @param list_of_models a list of caret models to check
-#' @export
 checkModels_extractTypes <- function(list_of_models){
   #TODO: Add helpful error messages
   #Check that we have a list of train models
@@ -52,7 +51,6 @@ checkModels_extractTypes <- function(list_of_models){
 #' @title Extract the best predictions from a list of train objects
 #' @description Extract predictions for the best tune from a list of caret models
 #' @param list_of_models a list of caret models to extract predictions from
-#' @export
 extractBestPreds <- function(list_of_models){
   #TODO: add an optional progress bar?
   #Extract resampled predictions from each model
@@ -80,8 +78,6 @@ extractBestPreds <- function(list_of_models){
 #' @description Check that a list of predictions from caret models are all valid
 #'
 #' @param list_of_models a list of caret models to check
-#' @export
-#'
 checkPreds <- function(list_of_models){
   stop('NOT IMPLEMENTED')
 }
@@ -91,7 +87,6 @@ checkPreds <- function(list_of_models){
 #' helper function
 #'
 #' @param list_of_models a list of caret models to extract predictions from
-#' @export
 makePredObsMatrix <- function(list_of_models){
 
   #Check models and extract type (class or reg)
@@ -151,7 +146,6 @@ multiPredict <- function(list_of_models, type, verbose = FALSE, ...){
   return(preds)
 }
 
-
 #' @title Calculate a weighted standard deviation
 #' @description Used to weight deviations among ensembled model preditions
 #'
@@ -159,7 +153,6 @@ multiPredict <- function(list_of_models, type, verbose = FALSE, ...){
 #' @param weights a vector of weights equal to length of x
 #' @param normwt  a logical indicating whether the weights should be normalized to 1
 #' @param na.rm a logical indicating how to handle missing values, default = FALSE
-#' @export
 wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = FALSE) {
   if (!length(weights)) {
     if (na.rm)

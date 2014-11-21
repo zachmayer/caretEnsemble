@@ -75,6 +75,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' slot for predictions and a matrix slot for the model weights. If \code{return_weights = FALSE}
 #' a data.frame is returned for the predictions.
 #' @export
+#' @method predict caretEnsemble
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){
@@ -159,7 +160,6 @@ summary.caretEnsemble <- function(object, ...){
 
 #' Extract the model accuracy metrics of the individual models in an ensemble object.
 #' @param ensemble a caretEnsemble to make predictions from.
-#' @export
 extractModRes <- function(ensemble){
   if(class(ensemble) != "caretEnsemble") stop("extractModRes requires a caretEnsemble object")
   methods <- names(ensemble$models)
@@ -192,7 +192,6 @@ getMetric <- function(x, metric){
 
 #' Extract a model accuracy metric from a \code{\link{train}} object.
 #' @rdname metrics
-#' @export
 getMetric.train <- function(x, metric= c("AUC", "RMSE")){
   if(missing(metric)){
     metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
@@ -212,12 +211,10 @@ getMetric.train <- function(x, metric= c("AUC", "RMSE")){
 #' @rdname metrics
 #' @note AUC extracted from a train object is for all resamples pooled, not the average
 #' of the AUC for each resample.
-#' @export
 getAUC <- function(x){
   UseMethod("getAUC")
 }
 
-#' @export
 #' @importFrom caTools colAUC
 getAUC.train <- function(x){
   if(x$modelType != "Classification"){
@@ -237,12 +234,10 @@ getAUC.train <- function(x){
 #' @rdname metrics
 #' @note RMSE extracted from a train object is for all resamples pooled, not the average
 #' of the RMSE for each resample.
-#' @export
 getRMSE <- function(x){
   UseMethod("getRMSE")
 }
 
-#' @export
 getRMSE.train <- function(x){
   #TODO: decide about NAs
   if(x$modelType != "Regression"){
@@ -257,7 +252,6 @@ getRMSE.train <- function(x){
   return(as.numeric(out))
 }
 
-
 #' Extract the standard deviation from resamples for an accuracy metric from
 #' a model object.
 #' @param x an object with model performanc metrics
@@ -269,12 +263,10 @@ getRMSE.train <- function(x){
 #' for the performance metric across all values of the tuning parameters and resamples,
 #' or only for resamples under the best tuning parameter
 #' @rdname metricsSD
-#' @export
 getMetricSD <- function(x, metric, which = c("all", "best")){
   UseMethod("getMetricSD")
 }
 
-#' @export
 getMetricSD.train <- function(x, metric = c("RMSE", "AUC"), which = c("all", "best")){
   if(missing(metric)){
     metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
@@ -315,7 +307,6 @@ matchBestTune <- function(out, bt){
   }
   return(tmp)
 }
-
 
 #' @title Calculate the variable importance of variables in a caretEnsemble.
 #' @description This function wraps the \code{\link{varImp}} function in the
@@ -389,7 +380,6 @@ varImpFrame <- function(x){
   dat <- reshape(dat, direction = "wide", v.names="Overall",
                  idvar = "var", timevar = "model")
 }
-
 
 #' @title Calculate the residuals from a caretEnsemble.
 #' @description This function calculates raw residuals for both regression and
@@ -475,7 +465,6 @@ multiResiduals <- function(object, ...){
   return(out)
 }
 
-
 #' @title Supplement the data fitted to a caret ensemble model with model fit statistics
 #' @description This function constructs a dataframe consisting of the outcome,
 #' all of the predictors used in any of the models ensembled in a \code{caretEnsemble}
@@ -508,7 +497,6 @@ fortify.caretEnsemble <- function(model, data = NULL, ...){
 #' @param model a \code{caretEnsemble} to extract predictors from
 #' @return A data.frame combining all of the variables used across all models.
 #' @importFrom digest digest
-#' @export
 extractModFrame <- function(model){
   datList <- vector("list", length = length(model$models))
   for(i in 1: length(model$models)){
@@ -518,7 +506,6 @@ extractModFrame <- function(model){
   modelFrame <- modelFrame[!duplicated(lapply(modelFrame, digest))]
   return(modelFrame)
 }
-
 
 #' @title Plot Diagnostics for an caretEnsemble Object
 #' @description This function makes a short plot of the performance of the component
@@ -631,7 +618,6 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
     j <- j + 1
   }
 }
-
 
 utils::globalVariables(c(".fitted", ".resid", "method", "id", "yhat",
                          "ymax", "yavg", "ymin", "metric", "metricSD"))

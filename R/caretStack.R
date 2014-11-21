@@ -109,6 +109,7 @@ print.caretStack <- function(x, ...){
 #' @param x An object of class caretStack
 #' @param ... passed to plot
 #' @export
+#' @method plot caretStack
 #' @examples
 #' library('rpart')
 #' models <- caretList(
