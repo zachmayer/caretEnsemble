@@ -563,6 +563,7 @@ plot.caretEnsemble <- function(x, ...){
 #' @import ggplot2
 #' @import grid
 #' @import plyr
+#' @importFrom gridExtra grid.arrange
 #' @export
 #' @examples
 #' set.seed(42)
@@ -594,7 +595,7 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
   } else {
     xvars <- names(plotdf)[xvars]
   }
-  # TODO: Insert checks for length ov xvars here
+  # TODO: Insert checks for length of xvars here
   residOut <- multiResiduals(object)
   zed <- ddply(residOut, .(id), summarize,
                ymin = min(resid),
@@ -607,10 +608,10 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
                              size = I(1.1), color = I("red"), linetype = 2) +
     labs(x = "Fitted Values", y = "Range of Resid.",
          title = "Model Disagreement Across Fitted Values")
-#   g4 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
-#     geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
-#     scale_y_continuous("Residuals") +
-#     labs(title = paste0("Residuals Against ", xvars[1])) + theme_bw()
+  #   g4 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
+  #     geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
+  #     scale_y_continuous("Residuals") +
+  #     labs(title = paste0("Residuals Against ", xvars[1])) + theme_bw()
   g5 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
     geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
     scale_y_continuous("Residuals") +
@@ -619,33 +620,7 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
     geom_smooth(se = FALSE) + scale_x_continuous(xvars[2]) +
     scale_y_continuous("Residuals") +
     labs(title = paste0("Residuals Against ", xvars[2])) + theme_bw()
-  plots <- list(g1, g2, g3, g4, g5, g6)
-  grid::grid.newpage()
-  if (prod(mfrow) > 1) {
-    mypos <- expand.grid(1:mfrow[1], 1:mfrow[2])
-    mypos <- mypos[with(mypos, order(Var1)), ]
-    pushViewport(viewport(layout = grid.layout(mfrow[1],
-                                               mfrow[2])))
-    formatter <- function(.) {
-    }
-  }
-  else {
-    mypos <- data.frame(matrix(1, length(which), 2))
-    pushViewport(viewport(layout = grid.layout(1, 1)))
-    formatter <- function(.) {
-      .dontcare <- readline("Hit <Return> to see next plot: ")
-      grid.newpage()
-    }
-  }
-  j <- 1
-  for (i in which) {
-    formatter()
-    suppressWarnings(
-      print(plots[[i]], vp = viewport(layout.pos.row = mypos[j,
-                                                             ][1], layout.pos.col = mypos[j, ][2]))
-    )
-    j <- j + 1
-  }
+  grid.arrange(g1, g2, g3, g4, g5, g6, newpage=FALSE)
 }
 
 utils::globalVariables(c(".fitted", ".resid", "method", "id", "yhat",
