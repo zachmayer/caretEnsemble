@@ -58,6 +58,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
   return(out)
 }
 
+
 #' Make predictions from a caretEnsemble. This function passes the data to each function in
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
