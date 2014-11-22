@@ -24,4 +24,7 @@ A list of \code{\link{train}} objects
 Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
 function.
 }
+\examples{
+caretList(Sepal.Length ~ Sepal.Width, iris, methodList=c('glm', 'lm'))
+}
 

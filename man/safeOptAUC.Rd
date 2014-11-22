@@ -24,4 +24,9 @@ This optimizer uses a stopping criterion that if the optimized model
 has an AUC that is worse than any individual model, it continues optimizing
 until this is no longer the case.
 }
+\examples{
+x <- matrix(runif(10), ncol=2)
+y <- sample(c('Y', 'N'), 5, replace=TRUE)
+safeOptAUC(x, y)
+}
 
