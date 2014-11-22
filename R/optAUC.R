@@ -5,6 +5,10 @@
 #' @param iter an integer for the number of iterations
 #' @return A numeric of the weights for each model
 #' @export
+#' @examples
+#' x <- matrix(runif(10), ncol=2)
+#' y <- sample(c('Y', 'N'), 5, replace=TRUE)
+#' greedOptAUC(x, y)
 greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
   if(is.character(Y)){
     Y <- factor(Y)
@@ -39,6 +43,10 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
 #' has an AUC that is worse than any individual model, it continues optimizing
 #' until this is no longer the case.
 #' @export
+#' @examples
+#' x <- matrix(runif(10), ncol=2)
+#' y <- sample(c('Y', 'N'), 5, replace=TRUE)
+#' safeOptAUC(x, y)
 safeOptAUC <- function(X, Y, iter = 100L) {
   if(is.character(Y) | is.factor(Y)){
     Y <- as.numeric(factor(Y))

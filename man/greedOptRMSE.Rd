@@ -18,4 +18,9 @@ A numeric of the weights for each model
 \description{
 This algorithm optimizes the RMSE for regression models
 }
+\examples{
+x <- matrix(runif(10), ncol=2)
+y <- runif(5)
+greedOptRMSE(x, y)
+}
 

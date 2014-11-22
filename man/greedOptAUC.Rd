@@ -18,4 +18,9 @@ A numeric of the weights for each model
 \description{
 This algorithm optimizes the area under the curve for classifcation models
 }
+\examples{
+x <- matrix(runif(10), ncol=2)
+y <- sample(c('Y', 'N'), 5, replace=TRUE)
+greedOptAUC(x, y)
+}
 
