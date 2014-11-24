@@ -1,9 +1,9 @@
 #' Greedy optimization of the area under the curve
-#' @description This algorithm optimizes the area under the curve for classifcation models
+#' @description This algorithm optimizes the area under the curve for classification models
 #' @param X the matrix of predictors
 #' @param Y the dependent variable
 #' @param iter an integer for the number of iterations
-#' @return A numeric of the weights for each model
+#' @return A numeric of the weights for each model.
 #' @export
 greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
   if(is.character(Y)){
@@ -15,6 +15,7 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
   weights     <- rep(0L, N)
   pred        <- 0 * X
   sum.weights <- 0L
+  stopper     <- max(caTools::colAUC(X, Y))
 
   while(sum.weights < iter) {
 
@@ -24,6 +25,13 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
     best          <- which.max(errors)
     weights[best] <- weights[best] + 1L
     pred          <- pred[, best] * sum.weights
+    maxtest       <- max(errors)
+  }
+  if(stopper > maxtest){
+    testresult <- round(maxtest/stopper, 5) * 100
+    wstr <- paste0("Optimized weights not better than best model. Ensembled result is ",
+                   testresult, "%", " of best model AUC. Try more iterations.")
+    message(wstr)
   }
   return(weights)
 }
@@ -37,7 +45,8 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
 #' @return A numeric of the weights for each model
 #' @details This optimizer uses a stopping criterion that if the optimized model
 #' has an AUC that is worse than any individual model, it continues optimizing
-#' until this is no longer the case.
+#' until this is no longer the case. If it fails to surpass any component model
+#' it issues a warning and weights the best model 1 and all other models 0.
 #' @export
 safeOptAUC <- function(X, Y, iter = 100L) {
   if(is.character(Y) | is.factor(Y)){
@@ -61,5 +70,16 @@ safeOptAUC <- function(X, Y, iter = 100L) {
     pred          <- pred[, best] * sum.weights
     maxtest       <- max(errors) # check we are better than no weights
   }
-  return(weights)
+  if(stopper > maxtest){
+    testresult <- round(maxtest/stopper, 5) * 100
+    wstr <- paste0("Optimized weights not better than best model. Ensembled result is ",
+                      testresult, "%", " of best model AUC. Returning best model. Try more iterations.")
+    warning(wstr, call.=FALSE)
+    #TODO: Replace weights with best model weight  weights <-
+    weights     <- rep(0L, N)
+    weights[which.max(caTools::colAUC(X, Y))] <- 1
+    return(weights)
+  } else {
+    return(weights)
+  }
 }

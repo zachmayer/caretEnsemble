@@ -13,9 +13,9 @@ greedOptAUC(X, Y, iter = 100L)
 \item{iter}{an integer for the number of iterations}
 }
 \value{
-A numeric of the weights for each model
+A numeric of the weights for each model.
 }
 \description{
-This algorithm optimizes the area under the curve for classifcation models
+This algorithm optimizes the area under the curve for classification models
 }
 
