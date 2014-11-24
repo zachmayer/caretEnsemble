@@ -23,4 +23,9 @@ If the optimization fails to produce an error term better than the best
 component model, a message is returned and the best optimization after iterations
 is returned.
 }
+\examples{
+x <- matrix(runif(10), ncol=2)
+y <- runif(5)
+greedOptRMSE(x, y)
+}
 

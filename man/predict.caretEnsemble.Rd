@@ -34,4 +34,10 @@ Make predictions from a caretEnsemble. This function passes the data to each fun
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 weights to get a single, combined vector of predictions.
 }
+\examples{
+set.seed(42)
+models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
+ens <- caretEnsemble(models)
+cor(predict(ens, newdata=iris[51:150,1:2]), iris[51:150,3])
+}
 

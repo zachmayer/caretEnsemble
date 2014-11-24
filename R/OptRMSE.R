@@ -8,6 +8,10 @@
 #' component model, a message is returned and the best optimization after iterations
 #' is returned.
 #' @export
+#' @examples
+#' x <- matrix(runif(10), ncol=2)
+#' y <- runif(5)
+#' greedOptRMSE(x, y)
 greedOptRMSE <- function(X, Y, iter = 100L){
   N           <- ncol(X)
   weights     <- rep(0L, N)

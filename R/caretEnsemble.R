@@ -19,6 +19,11 @@
 #' @return a \code{\link{caretEnsemble}} object
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 #' @export
+#' @examples
+#' set.seed(42)
+#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
+#' ens <- caretEnsemble(models)
+#' summary(ens)
 caretEnsemble <- function(all.models, optFUN=NULL, ...){
   #Check the models, and make a matrix of obs and preds
   predobs <- makePredObsMatrix(all.models)
@@ -75,6 +80,12 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' slot for predictions and a matrix slot for the model weights. If \code{return_weights = FALSE}
 #' a data.frame is returned for the predictions.
 #' @export
+#' @method predict caretEnsemble
+#' @examples
+#' set.seed(42)
+#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
+#' ens <- caretEnsemble(models)
+#' cor(predict(ens, newdata=iris[51:150,1:2]), iris[51:150,3])
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){
@@ -137,6 +148,11 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
 #' @param object a \code{\link{caretEnsemble}} to make predictions from.
 #' @param ... optional additional parameters.
 #' @export
+#' @examples
+#' set.seed(42)
+#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
+#' ens <- caretEnsemble(models)
+#' summary(ens)
 summary.caretEnsemble <- function(object, ...){
   types <- names(object$models)
   if(is.null(types)){
@@ -159,7 +175,6 @@ summary.caretEnsemble <- function(object, ...){
 
 #' Extract the model accuracy metrics of the individual models in an ensemble object.
 #' @param ensemble a caretEnsemble to make predictions from.
-#' @export
 extractModRes <- function(ensemble){
   if(class(ensemble) != "caretEnsemble") stop("extractModRes requires a caretEnsemble object")
   methods <- names(ensemble$models)
@@ -192,7 +207,6 @@ getMetric <- function(x, metric){
 
 #' Extract a model accuracy metric from a \code{\link{train}} object.
 #' @rdname metrics
-#' @export
 getMetric.train <- function(x, metric= c("AUC", "RMSE")){
   if(missing(metric)){
     metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
@@ -212,12 +226,10 @@ getMetric.train <- function(x, metric= c("AUC", "RMSE")){
 #' @rdname metrics
 #' @note AUC extracted from a train object is for all resamples pooled, not the average
 #' of the AUC for each resample.
-#' @export
 getAUC <- function(x){
   UseMethod("getAUC")
 }
 
-#' @export
 #' @importFrom caTools colAUC
 getAUC.train <- function(x){
   if(x$modelType != "Classification"){
@@ -237,12 +249,10 @@ getAUC.train <- function(x){
 #' @rdname metrics
 #' @note RMSE extracted from a train object is for all resamples pooled, not the average
 #' of the RMSE for each resample.
-#' @export
 getRMSE <- function(x){
   UseMethod("getRMSE")
 }
 
-#' @export
 getRMSE.train <- function(x){
   #TODO: decide about NAs
   if(x$modelType != "Regression"){
@@ -257,7 +267,6 @@ getRMSE.train <- function(x){
   return(as.numeric(out))
 }
 
-
 #' Extract the standard deviation from resamples for an accuracy metric from
 #' a model object.
 #' @param x an object with model performanc metrics
@@ -269,12 +278,10 @@ getRMSE.train <- function(x){
 #' for the performance metric across all values of the tuning parameters and resamples,
 #' or only for resamples under the best tuning parameter
 #' @rdname metricsSD
-#' @export
 getMetricSD <- function(x, metric, which = c("all", "best")){
   UseMethod("getMetricSD")
 }
 
-#' @export
 getMetricSD.train <- function(x, metric = c("RMSE", "AUC"), which = c("all", "best")){
   if(missing(metric)){
     metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
@@ -315,7 +322,6 @@ matchBestTune <- function(out, bt){
   }
   return(tmp)
 }
-
 
 #' @title Calculate the variable importance of variables in a caretEnsemble.
 #' @description This function wraps the \code{\link{varImp}} function in the
@@ -389,7 +395,6 @@ varImpFrame <- function(x){
   dat <- reshape(dat, direction = "wide", v.names="Overall",
                  idvar = "var", timevar = "model")
 }
-
 
 #' @title Calculate the residuals from a caretEnsemble.
 #' @description This function calculates raw residuals for both regression and
@@ -475,7 +480,6 @@ multiResiduals <- function(object, ...){
   return(out)
 }
 
-
 #' @title Supplement the data fitted to a caret ensemble model with model fit statistics
 #' @description This function constructs a dataframe consisting of the outcome,
 #' all of the predictors used in any of the models ensembled in a \code{caretEnsemble}
@@ -508,7 +512,6 @@ fortify.caretEnsemble <- function(model, data = NULL, ...){
 #' @param model a \code{caretEnsemble} to extract predictors from
 #' @return A data.frame combining all of the variables used across all models.
 #' @importFrom digest digest
-#' @export
 extractModFrame <- function(model){
   datList <- vector("list", length = length(model$models))
   for(i in 1: length(model$models)){
@@ -519,7 +522,6 @@ extractModFrame <- function(model){
   return(modelFrame)
 }
 
-
 #' @title Plot Diagnostics for an caretEnsemble Object
 #' @description This function makes a short plot of the performance of the component
 #' models of a \code{caretEnsemble} object on the AUC or RMSE metric
@@ -529,6 +531,11 @@ extractModFrame <- function(model){
 #' @import ggplot2
 #' @export
 #' @method plot caretEnsemble
+#' @examples
+#' set.seed(42)
+#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'rpart'))
+#' ens <- caretEnsemble(models)
+#' plot(ens)
 plot.caretEnsemble <- function(x, ...){
   dat <- extractModRes(x)
   metricLab <- names(x$error)
@@ -556,7 +563,17 @@ plot.caretEnsemble <- function(x, ...){
 #' @import ggplot2
 #' @import grid
 #' @import plyr
+#' @importFrom gridExtra grid.arrange
 #' @export
+#' @examples
+#' set.seed(42)
+#' models <- caretList(
+#'  iris[1:50,1:2],
+#'  iris[1:50,3],
+#'  trControl=trainControl(method='cv'),
+#'  methodList=c('glm', 'rpart'))
+#' ens <- caretEnsemble(models)
+#' autoplot(ens)
 autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
                                    xvars = NULL, ...){
   plotdf <- suppressMessages(fortify(object))
@@ -578,7 +595,7 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
   } else {
     xvars <- names(plotdf)[xvars]
   }
-  # TODO: Insert checks for length ov xvars here
+  # TODO: Insert checks for length of xvars here
   residOut <- multiResiduals(object)
   zed <- ddply(residOut, .(id), summarize,
                ymin = min(resid),
@@ -591,10 +608,10 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
                              size = I(1.1), color = I("red"), linetype = 2) +
     labs(x = "Fitted Values", y = "Range of Resid.",
          title = "Model Disagreement Across Fitted Values")
-#   g4 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
-#     geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
-#     scale_y_continuous("Residuals") +
-#     labs(title = paste0("Residuals Against ", xvars[1])) + theme_bw()
+  #   g4 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
+  #     geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
+  #     scale_y_continuous("Residuals") +
+  #     labs(title = paste0("Residuals Against ", xvars[1])) + theme_bw()
   g5 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
     geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
     scale_y_continuous("Residuals") +
@@ -603,35 +620,8 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
     geom_smooth(se = FALSE) + scale_x_continuous(xvars[2]) +
     scale_y_continuous("Residuals") +
     labs(title = paste0("Residuals Against ", xvars[2])) + theme_bw()
-  plots <- list(g1, g2, g3, g4, g5, g6)
-  grid::grid.newpage()
-  if (prod(mfrow) > 1) {
-    mypos <- expand.grid(1:mfrow[1], 1:mfrow[2])
-    mypos <- mypos[with(mypos, order(Var1)), ]
-    pushViewport(viewport(layout = grid.layout(mfrow[1],
-                                               mfrow[2])))
-    formatter <- function(.) {
-    }
-  }
-  else {
-    mypos <- data.frame(matrix(1, length(which), 2))
-    pushViewport(viewport(layout = grid.layout(1, 1)))
-    formatter <- function(.) {
-      .dontcare <- readline("Hit <Return> to see next plot: ")
-      grid.newpage()
-    }
-  }
-  j <- 1
-  for (i in which) {
-    formatter()
-    suppressWarnings(
-      print(plots[[i]], vp = viewport(layout.pos.row = mypos[j,
-                                                             ][1], layout.pos.col = mypos[j, ][2]))
-    )
-    j <- j + 1
-  }
+  grid.arrange(g1, g2, g3, g4, g5, g6, newpage=FALSE)
 }
-
 
 utils::globalVariables(c(".fitted", ".resid", "method", "id", "yhat",
                          "ymax", "yavg", "ymin", "metric", "metricSD"))

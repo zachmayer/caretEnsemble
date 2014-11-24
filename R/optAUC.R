@@ -8,6 +8,10 @@
 #' component model, a message is returned and the best optimization after N iterations
 #' is returned.
 #' @export
+#' @examples
+#' x <- matrix(runif(10), ncol=2)
+#' y <- sample(c('Y', 'N'), 5, replace=TRUE)
+#' greedOptAUC(x, y)
 greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
   if(is.character(Y)){
     Y <- factor(Y)
@@ -51,6 +55,10 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
 #' until this is no longer the case. If it fails to surpass any component model
 #' it issues a warning and weights the best model 1 and all other models 0.
 #' @export
+#' @examples
+#' x <- matrix(runif(10), ncol=2)
+#' y <- sample(c('Y', 'N'), 5, replace=TRUE)
+#' safeOptAUC(x, y)
 safeOptAUC <- function(X, Y, iter = 100L) {
   if(is.character(Y) | is.factor(Y)){
     Y <- as.numeric(factor(Y))

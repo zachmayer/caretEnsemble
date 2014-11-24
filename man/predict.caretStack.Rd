@@ -17,4 +17,15 @@ Make predictions from a caretStack. This function passes the data to each functi
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 weights to get a single, combined vector of predictions.
 }
+\examples{
+library('rpart')
+models <- caretList(
+  x=iris[1:100,1:2],
+  y=iris[1:100,3],
+  trControl=trainControl(method='cv'),
+  methodList=c('rpart', 'glm')
+)
+meta_model <- caretStack(models, method='lm')
+RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
+}
 

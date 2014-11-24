@@ -23,4 +23,9 @@ If the optimization fails to produce an error term better than the best
 component model, a message is returned and the best optimization after N iterations
 is returned.
 }
+\examples{
+x <- matrix(runif(10), ncol=2)
+y <- sample(c('Y', 'N'), 5, replace=TRUE)
+greedOptAUC(x, y)
+}
 

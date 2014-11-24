@@ -25,4 +25,9 @@ has an AUC that is worse than any individual model, it continues optimizing
 until this is no longer the case. If it fails to surpass any component model
 it issues a warning and weights the best model 1 and all other models 0.
 }
+\examples{
+x <- matrix(runif(10), ncol=2)
+y <- sample(c('Y', 'N'), 5, replace=TRUE)
+safeOptAUC(x, y)
+}
 
