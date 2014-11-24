@@ -4,6 +4,9 @@
 #' @param Y the dependent variable
 #' @param iter an integer for the number of iterations
 #' @return A numeric of the weights for each model.
+#' @details If the optimization fails to produce an error term better than the best
+#' component model, a message is returned and the best optimization after N iterations
+#' is returned.
 #' @export
 greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
   if(is.character(Y)){

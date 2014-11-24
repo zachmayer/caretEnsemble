@@ -131,3 +131,32 @@ test_that("Correct results propogate to full caretEnsemble object", {
   expect_equivalent(ens2$weights, c(0.04, 0.88, 0.08))
   expect_equivalent(length(ens2$weights), 3)
 })
+
+context("RMSE")
+
+set.seed(87495)
+
+load(system.file("testdata/models_reg.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/X.reg.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/Y.reg.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+
+predobs <- makePredObsMatrix(models_reg)
+
+test_that("Test that optFUN does not take random values", {
+  expect_error(caretEnsemble(models_reg, optFUN = randomRMSE))
+  expect_error(caretEnsemble(models_reg, optFUN = noRMSE))
+})
+
+test_that("Optimizers respect iterations", {
+  wghts1 <- greedOptRMSE(predobs$preds, predobs$obs, iter = 3000)
+  wghts2 <- greedOptRMSE(predobs$preds, predobs$obs, iter = 20)
+  wghts3 <- greedOptRMSE(predobs$preds, predobs$obs, iter = 2)
+  expect_false(identical(wghts1, wghts2))
+  expect_false(identical(wghts2, wghts3))
+  expect_identical(caretEnsemble(models_reg), caretEnsemble(models_reg, iter = 100))
+  expect_false(identical(caretEnsemble(models_reg), caretEnsemble(models_reg, iter = 10)))
+})
+
