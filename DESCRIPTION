@@ -30,7 +30,8 @@ Suggests:
     knitr,
     mlbench,
     MASS,
-    gbm
+    gbm,
+    klaR
 Imports:
     caTools,
     pbapply,

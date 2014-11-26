@@ -69,7 +69,7 @@ out <- caretList(
   y = factor(c(modeldat2$traindata$class,modeldat2$testdata$class)),
   trControl = ctrl,
   tuneLength = 3,
-  methodList = c("knn", "nb", "gbm", "nnet"))
+  methodList = c("knn", "nb", "lda", "nnet"))
 
 studentEns1 <- caretEnsemble(out, optFUN = safeOptAUC, iter = 200)
 studentEns2 <- caretEnsemble(out, optFUN = greedOptAUC, iter = 200)
@@ -102,7 +102,7 @@ out <- caretList(
   y = modeldat2$traindata$class,
   trControl = ctrl,
   tuneLength = 3,
-  methodList = c("knn", "nb", "rf", "nnet"))
+  methodList = c("knn", "nb", "lda", "nnet"))
 
 predobs <- caretEnsemble:::makePredObsMatrix(out)
 
