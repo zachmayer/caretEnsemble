@@ -69,7 +69,7 @@ out <- caretList(
   y = factor(c(modeldat2$traindata$class,modeldat2$testdata$class)),
   trControl = ctrl,
   tuneLength = 3,
-  methodList = c("knn", "nb", "lda", "nnet"))
+  methodList = c("knn", "nb", "gbm", "nnet"))
 
 studentEns1 <- caretEnsemble(out, optFUN = safeOptAUC, iter = 200)
 studentEns2 <- caretEnsemble(out, optFUN = greedOptAUC, iter = 200)
@@ -102,9 +102,9 @@ out <- caretList(
   y = modeldat2$traindata$class,
   trControl = ctrl,
   tuneLength = 3,
-  methodList = c("knn", "nb", "lda", "nnet"))
+  methodList = c("knn", "nb", "rf", "nnet"))
 
-predobs <- makePredObsMatrix(out)
+predobs <- caretEnsemble:::makePredObsMatrix(out)
 
 wghts1 <- safeOptAUC(predobs$preds, predobs$obs)
 wghts2 <- greedOptAUC(predobs$preds, predobs$obs)
@@ -143,7 +143,7 @@ load(system.file("testdata/X.reg.rda",
 load(system.file("testdata/Y.reg.rda",
                  package="caretEnsemble", mustWork=TRUE))
 
-predobs <- makePredObsMatrix(models_reg)
+predobs <- caretEnsemble:::makePredObsMatrix(models_reg)
 
 test_that("Test that optFUN does not take random values", {
   expect_error(caretEnsemble(models_reg, optFUN = randomRMSE))
