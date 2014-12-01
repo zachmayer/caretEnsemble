@@ -40,6 +40,6 @@ AUC extracted from a train object is for all resamples pooled, not the average
 of the AUC for each resample.
 
 RMSE extracted from a train object is for all resamples pooled, not the average
-of the RMSE for each resample.
+of the RMSE for each resample. All missing values are ignored.
 }
 

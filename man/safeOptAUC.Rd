@@ -30,9 +30,4 @@ x <- matrix(runif(10), ncol=2)
 y <- sample(c('Y', 'N'), 5, replace=TRUE)
 safeOptAUC(x, y)
 }
-\examples{
-x <- matrix(runif(10), ncol=2)
-y <- sample(c('Y', 'N'), 5, replace=TRUE)
-safeOptAUC(x, y)
-}
 

@@ -17,13 +17,13 @@ greedOptRMSE <- function(X, Y, iter = 100L){
   weights     <- rep(0L, N)
   pred        <- 0 * X
   sum.weights <- 0L
-  stopper     <- min(sqrt(colSums((X - Y) ^ 2L, na.rm=TRUE)))
+  stopper     <- min(sqrt(colMeans((X - Y) ^ 2L, na.rm=TRUE)))
 
   while(sum.weights < iter) {
 
     sum.weights   <- sum.weights + 1L
     pred          <- (pred + X) * (1L / sum.weights)
-    errors        <- sqrt(colSums((pred - Y) ^ 2L, na.rm=TRUE))
+    errors        <- sqrt(colMeans((pred - Y) ^ 2L, na.rm=TRUE))
     best          <- which.min(errors)
     weights[best] <- weights[best] + 1L
     pred          <- pred[, best] * sum.weights
