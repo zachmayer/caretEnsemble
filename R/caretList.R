@@ -4,6 +4,8 @@
 #' @param ... Other arguments that will eventually be passed to caret::train
 #' @export
 #' @return a list of lists
+#' @examples
+#' caretModelSpec('rf', tuneLength=5, preProcess='ica')
 caretModelSpec <- function(method='rf', ...){
   stopifnot(is.character(method))
   params=list(...)
@@ -130,6 +132,8 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @return A list of \code{\link{train}} objects
 #' @import caret
 #' @export
+#' @examples
+#' caretList(Sepal.Length ~ Sepal.Width, iris, methodList=c('glm', 'lm'))
 caretList <- function(
   ...,
   trControl = trainControl(),

@@ -24,6 +24,6 @@ a model object.
 \details{
 Which allows the user to select whether to generate a standard deviation
 for the performance metric across all values of the tuning parameters and resamples,
-or only for resamples under the best tuning parameter
+or only for resamples under the best tuning parameter. Missing values are ignored.
 }
 

@@ -13,9 +13,19 @@ greedOptAUC(X, Y, iter = 100L)
 \item{iter}{an integer for the number of iterations}
 }
 \value{
-A numeric of the weights for each model
+A numeric of the weights for each model.
 }
 \description{
-This algorithm optimizes the area under the curve for classifcation models
+This algorithm optimizes the area under the curve for classification models
+}
+\details{
+If the optimization fails to produce an error term better than the best
+component model, a message is returned and the best optimization after N iterations
+is returned.
+}
+\examples{
+x <- matrix(runif(10), ncol=2)
+y <- sample(c('Y', 'N'), 5, replace=TRUE)
+greedOptAUC(x, y)
 }
 
