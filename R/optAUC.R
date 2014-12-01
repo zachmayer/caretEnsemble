@@ -7,6 +7,7 @@
 #' @details If the optimization fails to produce an error term better than the best
 #' component model, a message is returned and the best optimization after N iterations
 #' is returned.
+#' @importFrom caTools colAUC
 #' @export
 #' @examples
 #' x <- matrix(runif(10), ncol=2)
@@ -22,13 +23,13 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
   weights     <- rep(0L, N)
   pred        <- 0 * X
   sum.weights <- 0L
-  stopper     <- max(caTools::colAUC(X, Y))
+  stopper     <- max(colAUC(X, Y))
 
   while(sum.weights < iter) {
 
     sum.weights   <- sum.weights + 1L
     pred          <-(pred + X) * (1L / sum.weights)
-    errors        <- caTools::colAUC(pred, Y)
+    errors        <- colAUC(pred, Y)
     best          <- which.max(errors)
     weights[best] <- weights[best] + 1L
     pred          <- pred[, best] * sum.weights
@@ -54,6 +55,7 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
 #' has an AUC that is worse than any individual model, it continues optimizing
 #' until this is no longer the case. If it fails to surpass any component model
 #' it issues a warning and weights the best model 1 and all other models 0.
+#' @importFrom caTools colAUC
 #' @export
 #' @examples
 #' x <- matrix(runif(10), ncol=2)
@@ -68,14 +70,14 @@ safeOptAUC <- function(X, Y, iter = 100L) {
   weights     <- rep(0L, N)
   pred        <- 0 * X
   sum.weights <- 0L
-  stopper     <- max(caTools::colAUC(X, Y))
+  stopper     <- max(colAUC(X, Y))
   maxtest     <- 1
 
   while((sum.weights < iter) & (maxtest >= stopper)) {
 
     sum.weights   <- sum.weights + 1L
     pred          <-(pred + X) * (1L / sum.weights)
-    errors        <- caTools::colAUC(pred, Y)
+    errors        <- colAUC(pred, Y)
     best          <- which.max(errors)
     weights[best] <- weights[best] + 1L
     pred          <- pred[, best] * sum.weights
