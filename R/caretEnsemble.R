@@ -12,7 +12,9 @@
 #' RMSE is used to ensemble regression models, and AUC is used to ensemble
 #' Classification models.  This function does not currently support multi-class
 #' problems
-#'
+#' @note Currently when missing values are present in the training data, weights
+#' are calculated using only observations which are complete across all models
+#' in the library.
 #' @param all.models a list of caret models to ensemble.
 #' @param optFUN the optimization function to use
 #' @param ... additional arguments to pass to the optimization function
@@ -48,7 +50,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 
   #Determine RMSE
   if (predobs$type == "Regression"){
-    error <- RMSE(predobs$preds %*% weights, predobs$obs)
+    error <- RMSE(predobs$preds %*% weights, predobs$obs, na.rm=TRUE)
     names(error) <- 'RMSE'
   } else {
     metric <- 'AUC'
@@ -248,7 +250,7 @@ getAUC.train <- function(x){
 #' @return A numeric for the RMSE of the best model
 #' @rdname metrics
 #' @note RMSE extracted from a train object is for all resamples pooled, not the average
-#' of the RMSE for each resample.
+#' of the RMSE for each resample. All missing values are ignored.
 getRMSE <- function(x){
   UseMethod("getRMSE")
 }
@@ -263,7 +265,7 @@ getRMSE.train <- function(x){
   dat <- merge(x$pred, bestPerf)
   z <- table(dat$obs)
   prevOutcome <- names(z)[z == max(z)]
-  out <- RMSE(dat$pred, dat$obs)
+  out <- RMSE(dat$pred, dat$obs, na.rm=TRUE)
   return(as.numeric(out))
 }
 
@@ -276,7 +278,7 @@ getRMSE.train <- function(x){
 #' tuning parameters and resamples in the original object.
 #' @details Which allows the user to select whether to generate a standard deviation
 #' for the performance metric across all values of the tuning parameters and resamples,
-#' or only for resamples under the best tuning parameter
+#' or only for resamples under the best tuning parameter. Missing values are ignored.
 #' @rdname metricsSD
 getMetricSD <- function(x, metric, which = c("all", "best")){
   UseMethod("getMetricSD")
@@ -289,7 +291,7 @@ getMetricSD.train <- function(x, metric = c("RMSE", "AUC"), which = c("all", "be
   }
   if(missing(which)){
     which <- "best"
-#     message("which not specified so sd only calculated for best values of tuning parmeters")
+#     message("which not specified so sd only calculated for best values of tuning parameters")
   }
   metricTest <- ifelse(metric == "AUC", "Classification", "Regression")
   stopifnot(x$modelType == metricTest)
@@ -300,7 +302,7 @@ getMetricSD.train <- function(x, metric = c("RMSE", "AUC"), which = c("all", "be
        function(x) colAUC(x[,1], x[,2]))
   } else if(metric == "RMSE"){
     out <- by(x$pred[, c("pred","obs")], x$pred[, c(names(x$bestTune), "Resample")],
-              function(x) RMSE(x[,1], x[,2]))
+              function(x) RMSE(x[,1], x[,2], na.rm=TRUE))
   }
   if(which == "best"){
     out <- matchBestTune(out, x$bestTune)

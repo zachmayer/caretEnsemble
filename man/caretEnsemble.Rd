@@ -30,6 +30,11 @@ RMSE is used to ensemble regression models, and AUC is used to ensemble
 Classification models.  This function does not currently support multi-class
 problems
 }
+\note{
+Currently when missing values are present in the training data, weights
+are calculated using only observations which are complete across all models
+in the library.
+}
 \examples{
 set.seed(42)
 models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
