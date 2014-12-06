@@ -55,17 +55,19 @@ extractBestPreds <- function(list_of_models){
   #TODO: add an optional progress bar?
   #Extract resampled predictions from each model
   modelLibrary <- lapply(list_of_models, function(x) {x$pred})
-
+  
   #Extract the best tuning parameters from each model
   tunes <- lapply(list_of_models, function(x) {x$bestTune})
-
+  
   #Subset the resampled predictions to the model with the best tune and sort
   newModels <- lapply(1:length(modelLibrary), function(x) NA)
   for (i in 1:length(modelLibrary)){
     out <- modelLibrary[[i]]
     tune <- tunes[[i]]
     for (name in names(tune)){
-      out <- out[out[,name]==tune[,name],]
+      indxLogic <- out[,name]==tune[,name]
+      indxLogic[is.na(indxLogic)] <- FALSE
+      out <- out[indxLogic,]
     }
     out <- out[order(out$Resample, out$rowIndex),]
     newModels[[i]] <- out
