@@ -54,7 +54,7 @@ test_that("caretModelSpec returns valid specs", {
   expect_equal(methods, c('rpart', 'rf', 'knn', 'glm'))
 })
 
-###############################################
+################################################
 context("We can work around bad models")
 ################################################
 myList <- list(
@@ -89,6 +89,60 @@ expect_equal(length(test), 1)
 methods <- sapply(test, function(x) x$method)
 names(methods) <- NULL
 expect_equal(methods, c('rpart'))
+
+################################################
+context("We can handle different CV methods")
+################################################
+
+for(m in c(
+  'boot',
+  'adaptive_boot',
+  'cv',
+  'adaptive_cv',
+  'LGOCV',
+  'adaptive_LGOCV')
+){
+  test_name <- paste0('CV works with method=', m)
+  test_that(test_name, {
+
+    myControl = trainControl(
+      method = m,
+      number = 7,
+      repeats = 1,
+      p = 0.75,
+      savePrediction = TRUE,
+      returnResamp = "final",
+      returnData = FALSE,
+      verboseIter = FALSE)
+
+    suppressWarnings({
+      suppressMessages({
+        models <- caretList(
+          x = iris[,1:3],
+          y = iris[,4],
+          trControl = myControl,
+          tuneLength=2,
+          methodList = c('rpart', 'rf')
+        )
+      })
+    })
+    sink <- sapply(models, expect_is, class='train')
+
+    suppressWarnings({
+      suppressMessages({
+        ens <- caretEnsemble(models, iter=10)
+      })
+    })
+
+    expect_is(ens, 'caretEnsemble')
+
+    suppressMessages({
+      ens <- caretStack(models, method='glm', trControl=trainControl(number=2))
+    })
+
+    expect_is(ens, 'caretStack')
+  })
+}
 
 ###############################################
 context("Classification models")
