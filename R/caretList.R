@@ -70,13 +70,13 @@ trControlCheck <- function(x, y){
     if(x$method=='none'){
       stop("Models that aren't resampled cannot be ensembled.  All good ensemble methods rely on out-of sample data.  If you really need to ensemble without re-sampling, try the median or mean of the model's predictions.")
 
-    } else if(x$method=='boot'){
+    } else if(x$method=='boot' | x$method=='adaptive_boot'){
       x$index <- createResample(y, times = x$number, list = TRUE)
-    } else if(x$method=='cv'){
+    } else if(x$method=='cv' | x$method=='adaptive_cv'){
       x$index  <- createFolds(y, k = x$number, list = TRUE, returnTrain = TRUE)
     } else if(x$method=='repeatedcv'){
       x$index <- createMultiFolds(y, k = x$number, times = x$repeats)
-    } else if(x$method=='LGOCV'){
+    } else if(x$method=='LGOCV' | x$method=='adaptive_LGOCV'){
       x$index <- createDataPartition(
         y,
         times = x$number,
