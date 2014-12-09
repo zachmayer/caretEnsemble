@@ -13,7 +13,7 @@ caretList(..., trControl = trainControl(), methodList = NULL,
 
 \item{methodList}{optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.}
 
-\item{tuneList}{optional, a NAMED list of the length of \code{methodList} with model-specific arguments to pass to train.  The can be arguments for the train function (e.g. tuneLength=6) or arguments passed through train to the modeling funcion (e.g. verbose=FALSE for a gbm model).  The names in the tuneList must match the methods in methodList, but do not need to be in the same order.  One of methodList or tuneList must be specified.}
+\item{tuneList}{optional, a NAMED list of caretModelSpec objects. This much more flexible than methodList and allows the specificaiton of model-specific parameters (e.g. passing trace=FALSE to nnet)}
 
 \item{continue_on_model_fail}{If FALSE, the failure of a single model will stop the entire building process.  If TRUE, model failures will be downgraded to warnings.}
 }
@@ -26,5 +26,6 @@ function.
 }
 \examples{
 caretList(Sepal.Length ~ Sepal.Width, iris, methodList=c('glm', 'lm'))
+caretList(Sepal.Length ~ Sepal.Width, iris, methodList=c('glm'), tuneList=list(nnet=caretModelSpec(method='nnet', trace=FALSE, tuneLength=1)))
 }
 
