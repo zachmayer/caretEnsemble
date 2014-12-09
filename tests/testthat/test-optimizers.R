@@ -55,8 +55,7 @@ test_that("safe and greedy optimizers get same result in the limit", {
 
 context("Test more difficult cases")
 
-load(system.file("testdata/studentEns.rda", package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/modeldat2.rda", package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/stuGradMod.rda", package="caretEnsemble", mustWork=TRUE))
 
 set.seed(3425)
 
