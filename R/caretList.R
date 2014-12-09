@@ -199,6 +199,7 @@ caretList <- function(
   if(length(modelList)==0){
     stop('caret:train failed for all models.  Please inspect your data.')
   }
+  class(modelList) <- 'caretList'
 
   return(modelList)
 }
@@ -243,7 +244,7 @@ checkModels_extractTypes <- function(list_of_models){
   #TODO: Add helpful error messages
 
   #Check that we have a list of train models
-  stopifnot(class(list_of_models)=='list')
+  stopifnot(is(list_of_models, 'caretList'))
   stopifnot(all(sapply(list_of_models, is, 'train')))
 
   #Check that models have the same type
