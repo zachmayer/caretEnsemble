@@ -16,13 +16,18 @@ load(system.file("testdata/X.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/Y.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/stuGradMod.rda",
+load(system.file("testdata/studentEns.rda",
+                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/modeldat2.rda",
                  package="caretEnsemble", mustWork=TRUE))
 
 set.seed(2239)
 ens.class <- caretEnsemble(models_class, iter=1000)
+
 # varImp struggles with the rf in our test suite, why?
-ens.reg <- caretEnsemble(models_reg[2:4], iter=1000)
+models_subset <- models_reg[2:4]
+class(models_subset) <- 'caretList'
+ens.reg <- caretEnsemble(models_subset, iter=1000)
 
 test_that("We can get variable importance in classification models", {
   expect_is(varImp(ens.class), "data.frame")
@@ -87,45 +92,45 @@ test_that("Metric is used correctly", {
 })
 
 test_that("Metrics are accurate for AUC", {
-  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[1]]), 0.9257279, tol = 0.0001)
-  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[2]]), 0.942959, tol = 0.0001)
-  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[3]]), 0.9178055, tol = 0.0001)
-  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[4]]), 0.9378095, tol = 0.0001)
-  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[5]]), 0.9120618, tol = 0.0001)
-  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[6]]), 0.9250347, tol = 0.0001)
+  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[1]]), 0.9257279, tol = 0.001)
+  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[2]]), 0.942959, tol = 0.001)
+  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[3]]), 0.9197861, tol = 0.001)
+  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[4]]), 0.9378095, tol = 0.001)
+  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[5]]), 0.9078035, tol = 0.001)
+  expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[6]]), 0.9250347, tol = 0.001)
 })
 
 test_that("caretEnsemble:::getAUC and caretEnsemble:::getMetric are identical", {
   expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[6]]),
-               caretEnsemble:::getMetric.train(ens.class$models[[6]], metric = "AUC"), tol = 0.0001)
+               caretEnsemble:::getMetric.train(ens.class$models[[6]], metric = "AUC"), tol = 0.001)
   expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[5]]),
-               caretEnsemble:::getMetric.train(ens.class$models[[5]], metric = "AUC"), tol = 0.0001)
+               caretEnsemble:::getMetric.train(ens.class$models[[5]], metric = "AUC"), tol = 0.001)
   expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[4]]),
-               caretEnsemble:::getMetric.train(ens.class$models[[4]], metric = "AUC"), tol = 0.00001)
+               caretEnsemble:::getMetric.train(ens.class$models[[4]], metric = "AUC"), tol = 0.01)
   expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[3]]),
-               caretEnsemble:::getMetric.train(ens.class$models[[3]], metric = "AUC"), tol = 0.00001)
+               caretEnsemble:::getMetric.train(ens.class$models[[3]], metric = "AUC"), tol = 0.01)
   expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[2]]),
-               caretEnsemble:::getMetric.train(ens.class$models[[2]], metric = "AUC"), tol = 0.00001)
+               caretEnsemble:::getMetric.train(ens.class$models[[2]], metric = "AUC"), tol = 0.01)
   expect_equal(caretEnsemble:::getAUC.train(ens.class$models[[1]]),
-               caretEnsemble:::getMetric.train(ens.class$models[[1]], metric = "AUC"), tol = 0.00001)
+               caretEnsemble:::getMetric.train(ens.class$models[[1]], metric = "AUC"), tol = 0.01)
 })
 
 test_that("Metrics are accurate for RMSE", {
-  expect_equal(caretEnsemble:::getRMSE.train(models_reg[[1]]), 0.3348216, tol = 0.0001)
-  expect_equal(caretEnsemble:::getRMSE.train(models_reg[[2]]), 0.324923, tol = 0.0001)
-  expect_equal(caretEnsemble:::getRMSE.train(models_reg[[3]]), 0.324923, tol = 0.0001)
-  expect_equal(caretEnsemble:::getRMSE.train(models_reg[[4]]), 0.3532128, tol = 0.0001)
+  expect_equal(caretEnsemble:::getRMSE.train(models_reg[[1]]), 0.3334612, tol = 0.001)
+  expect_equal(caretEnsemble:::getRMSE.train(models_reg[[2]]), 0.324923, tol = 0.001)
+  expect_equal(caretEnsemble:::getRMSE.train(models_reg[[3]]), 0.324923, tol = 0.001)
+  expect_equal(caretEnsemble:::getRMSE.train(models_reg[[4]]), 0.3532128, tol = 0.001)
 })
 
 test_that("caretEnsemble:::getMetric and caretEnsemble:::getRMSE are identical", {
   expect_equal(caretEnsemble:::getRMSE.train(models_reg[[1]]),
-               caretEnsemble:::getMetric.train(models_reg[[1]], metric = "RMSE"), tol = 0.00001)
+               caretEnsemble:::getMetric.train(models_reg[[1]], metric = "RMSE"), tol = 0.01)
   expect_equal(caretEnsemble:::getRMSE.train(models_reg[[2]]),
-               caretEnsemble:::getMetric.train(models_reg[[2]], metric = "RMSE"), tol = 0.00001)
+               caretEnsemble:::getMetric.train(models_reg[[2]], metric = "RMSE"), tol = 0.01)
   expect_equal(caretEnsemble:::getRMSE.train(models_reg[[3]]),
-               caretEnsemble:::getMetric.train(models_reg[[3]], metric = "RMSE"), tol = 0.00001)
+               caretEnsemble:::getMetric.train(models_reg[[3]], metric = "RMSE"), tol = 0.01)
   expect_equal(caretEnsemble:::getRMSE.train(models_reg[[4]]),
-               caretEnsemble:::getMetric.train(models_reg[[4]], metric = "RMSE"), tol = 0.00001)
+               caretEnsemble:::getMetric.train(models_reg[[4]], metric = "RMSE"), tol = 0.01)
 })
 
 test_that("caretEnsemble:::getMetric.train fails when wrong metric is specificed", {
@@ -159,10 +164,10 @@ test_that("caretEnsemble:::getMetricSD fails when wrong metric is specificed", {
 })
 
 test_that("caretEnsemble:::getMetricSD works for RMSE", {
-  expect_equal(caretEnsemble:::getMetricSD.train(models_reg[[1]]), 0.05901624, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetricSD.train(models_reg[[2]]), 0.05517874, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetricSD.train(models_reg[[3]]), 0.05517874, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetricSD.train(models_reg[[4]]), 0.07023269, tol = 0.00001)
+  expect_equal(caretEnsemble:::getMetricSD.train(models_reg[[1]]), 0.06087639, tol = 0.01)
+  expect_equal(caretEnsemble:::getMetricSD.train(models_reg[[2]]), 0.05517874, tol = 0.01)
+  expect_equal(caretEnsemble:::getMetricSD.train(models_reg[[3]]), 0.05517874, tol = 0.01)
+  expect_equal(caretEnsemble:::getMetricSD.train(models_reg[[4]]), 0.07023269, tol = 0.01)
   expect_equal(caretEnsemble:::getMetricSD.train(models_reg[[4]]),
                caretEnsemble:::getMetricSD.train(models_reg[[4]], metric = "RMSE"))
   expect_equal(caretEnsemble:::getMetricSD.train(models_reg[[3]]),
@@ -174,10 +179,10 @@ test_that("caretEnsemble:::getMetricSD works for RMSE", {
 })
 
 test_that("caretEnsemble:::getMetricSD works for AUC", {
-  expect_equal(caretEnsemble:::getMetricSD.train(models_class[[1]]), 0.06244405, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetricSD.train(models_class[[2]]), 0.05196865, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetricSD.train(models_class[[3]]), 0.06356099, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetricSD.train(models_class[[4]]), 0.0761574, tol = 0.00001)
+  expect_equal(caretEnsemble:::getMetricSD.train(models_class[[1]]), 0.05815688, tol = 0.01)
+  expect_equal(caretEnsemble:::getMetricSD.train(models_class[[2]]), 0.05196865, tol = 0.01)
+  expect_equal(caretEnsemble:::getMetricSD.train(models_class[[3]]), 0.06356099, tol = 0.01)
+  expect_equal(caretEnsemble:::getMetricSD.train(models_class[[4]]), 0.0460095, tol = 0.01)
   expect_equal(caretEnsemble:::getMetricSD.train(models_class[[4]]),
                caretEnsemble:::getMetricSD.train(models_class[[4]], metric = "AUC"))
   expect_equal(caretEnsemble:::getMetricSD.train(models_class[[3]]),
@@ -191,12 +196,9 @@ test_that("caretEnsemble:::getMetricSD works for AUC", {
 context("Metrics in student examples")
 
 test_that("metrics work for AUC in imbalanced example", {
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[1]]), 0.8538603, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[2]]), 0.9238445, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[3]]), 0.9243697, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[4]]), 0.9624475, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[4]]),
-               caretEnsemble:::getMetric.train(studentEns$models[[4]], metric = "AUC"))
+  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[1]]), 0.9340861, tol = 0.01)
+  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[2]]), 0.873687, tol = 0.01)
+  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[3]]), 0.8839286, tol = 0.01)
   expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[3]]),
                caretEnsemble:::getMetric.train(studentEns$models[[3]], metric = "AUC"))
   expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[2]]),
@@ -206,12 +208,9 @@ test_that("metrics work for AUC in imbalanced example", {
 })
 
 test_that("metric deviations work for AUC in imbalanced example", {
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[1]]), 0.1021798, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[2]]), 0.04485517, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[3]]), 0.05124492, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[4]]), 0.09869388, tol = 0.00001)
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[4]]),
-               caretEnsemble:::getMetricSD.train(studentEns$models[[4]], metric = "AUC"))
+  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[1]]), 0.06090988, tol = 0.01)
+  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[2]]), 0.03840437, tol = 0.01)
+  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[3]]), 0.0144596, tol = 0.01)
   expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[3]]),
                caretEnsemble:::getMetricSD.train(studentEns$models[[3]], metric = "AUC"))
   expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[2]]),
@@ -398,6 +397,7 @@ glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
 
 
 nestedList <- list(glm1, glm2, glm3, glm4)
+class(nestedList) <- 'caretList'
 set.seed(482)
 ensNest <- caretEnsemble(nestedList, iter=2000)
 pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
@@ -571,6 +571,7 @@ glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Corr2"], method = 'glm',
 
 
 nestedList <- list(glm1, glm2, glm3, glm4)
+class(nestedList) <- 'caretList'
 set.seed(482)
 
 predobs <- caretEnsemble:::makePredObsMatrix(nestedList)
@@ -602,7 +603,10 @@ load(system.file("testdata/X.reg.rda",
                  package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/Y.reg.rda",
                  package="caretEnsemble", mustWork=TRUE))
-ens.reg <- caretEnsemble(models_reg[2:4], iter=1000)
+
+models_subset <- models_reg[2:4]
+class(models_subset) <- 'caretList'
+ens.reg <- caretEnsemble(models_subset, iter=1000)
 
 preds1 <- predict(ens.reg)
 preds2 <- predict(ens.reg, se = TRUE)
