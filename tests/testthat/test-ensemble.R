@@ -32,6 +32,7 @@ test_that("We can ensemble classification models", {
   expect_true(length(pred.class)==150)
 })
 
+#From zach @ jared: What is a "Nested Model?"
 context("Does ensembling work with nested models")
 
 data(iris)
@@ -57,6 +58,7 @@ set.seed(482)
 glm4 <- train(x = X.reg[, c(-1, -4, -6)], y = Y.reg, method = 'glm', trControl = myControl)
 
 nestedList <- list(glm1, glm2, glm3, glm4)
+class(nestedList) <- 'caretList'
 
 test_that("We can ensemble models of different predictors", {
 ensNest <- caretEnsemble(nestedList, iter=1000)
@@ -119,6 +121,8 @@ glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
 
 
 nestedList <- list(glm1, glm2, glm3, glm4)
+class(nestedList) <- 'caretList'
+
 set.seed(482)
 ensNest <- caretEnsemble(nestedList, iter=2000)
 pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
@@ -189,6 +193,7 @@ test_that("NA preservation and standard errors work right", {
   expect_is(pred1, "data.frame")
   expect_is(pred2, "data.frame")
   nestedList <- list(glm1, glm2, glm3, glm4)
+  class(nestedList) <- 'caretList'
   ensNest <- caretEnsemble(nestedList, iter=2000)
   pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se =TRUE)
   pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se = TRUE)
@@ -215,6 +220,7 @@ test_that("Messages appear in predict only when missing values are there", {
 
 test_that("Predict respects user return_weights options", {
   nestedList <- list(glm1, glm2, glm3, glm4)
+  class(nestedList) <- 'caretList'
   set.seed(482)
   ensNest <- caretEnsemble(nestedList, iter=2000)
   pred.nest1 <- predict(ensNest, keepNA = FALSE, newdata = testC[, c(1:17)], se = TRUE)

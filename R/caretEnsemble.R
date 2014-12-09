@@ -62,7 +62,9 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
   }
 
   #Return final model
-  out <- list(models=all.models[keep], weights=weights[keep], error=error,
+  models <- all.models[keep]
+  class(models) <- 'caretList'
+  out <- list(models=models, weights=weights[keep], error=error,
               modelType = predobs$type)
   class(out) <- 'caretEnsemble'
   return(out)
