@@ -25,8 +25,8 @@ test_that("We can make the predobs matrix", {
   expect_true(all(dim(out$preds)==c(150, 4)))
 })
 
-test_that("We can multiPredict", {
-  out <- multiPredict(models_reg, 'reg', newdata=X.reg)
+test_that("We can predict", {
+  out <- predict(models_reg, 'reg', newdata=X.reg)
   expect_that(out, is_a("matrix"))
   expect_true(all(dim(out)==c(150, 4)))
   expect_true(all(colnames(out)==c("rf", "lm", "glm", "knn")))
@@ -42,7 +42,7 @@ test_that("We can make the predobs matrix", {
 
 })
 
-test_that("We can multiPredict", {
+test_that("We can predict", {
   load(system.file("testdata/models_class.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_reg.rda",
@@ -53,23 +53,23 @@ test_that("We can multiPredict", {
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/X.reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
-  out <- multiPredict(models_class, 'Classification', newdata=X.class)
+  out <- predict(models_class, 'Classification', newdata=X.class)
   expect_that(out, is_a("matrix"))
   expect_true(all(dim(out)==c(150, 6)))
   expect_true(all(colnames(out)==c("rf", "glm", "svmRadial", "nnet", "treebag", "knn")))
-  out2 <- multiPredict(models_reg, 'Regression', newdata = X.reg)
+  out2 <- predict(models_reg, 'Regression', newdata = X.reg)
   expect_true(all(dim(out2)==c(150, 4)))
   expect_true(all(colnames(out2)==c("rf", "lm", "glm", "knn")))
 })
 
-test_that("multiPredict results same regardless of verbose option", {
-  expect_is(multiPredict(models_class, 'Classification', newdata = X.class), "matrix")
-  out1 <- multiPredict(models_class, 'Classification', newdata = X.class)
-  out2 <- multiPredict(models_class, 'Classification', verbose =TRUE, newdata = X.class)
+test_that("predict results same regardless of verbose option", {
+  expect_is(predict(models_class, 'Classification', newdata = X.class), "matrix")
+  out1 <- predict(models_class, 'Classification', newdata = X.class)
+  out2 <- predict(models_class, 'Classification', verbose =TRUE, newdata = X.class)
   expect_identical(out1, out2)
-  expect_is(multiPredict(models_reg, 'Regression', newdata = X.reg), "matrix")
-  out1 <- multiPredict(models_reg, 'Regression', newdata =X.reg)
-  out2 <- multiPredict(models_reg, 'Regression', verbose = TRUE, newdata = X.reg)
+  expect_is(predict(models_reg, 'Regression', newdata = X.reg), "matrix")
+  out1 <- predict(models_reg, 'Regression', newdata =X.reg)
+  out2 <- predict(models_reg, 'Regression', verbose = TRUE, newdata = X.reg)
   expect_identical(out1, out2)
 })
 
