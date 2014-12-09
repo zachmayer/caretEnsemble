@@ -54,8 +54,9 @@ caretStack <- function(all.models, ...){
 predict.caretStack <- function(object, newdata=NULL, ...){
   #TODO: grab type argument
   #TODO: rename my "type" variable
+  stopifnot(is(object$models, 'caretList'))
   type <- checkModels_extractTypes(object$models)
-  preds <- multiPredict(object$models, newdata=newdata, type)
+  preds <- predict(object$models, newdata=newdata, type)
   out <- predict(object$ens_model, newdata=preds, ...)
   return(out)
 }
