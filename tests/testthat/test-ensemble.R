@@ -16,8 +16,6 @@ load(system.file("testdata/X.class.rda",
 load(system.file("testdata/Y.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 
-
-
 test_that("We can ensemble regression models", {
   ens.reg <- caretEnsemble(models_reg, iter=1000)
   expect_that(ens.reg, is_a("caretEnsemble"))
@@ -39,7 +37,6 @@ context("Does ensembling work with nested models")
 data(iris)
 Y.reg <- iris[, 1]
 X.reg <- model.matrix(~ ., iris[, -1])
-
 
 mseeds <- vector(mode = "list", length = 12)
 for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)

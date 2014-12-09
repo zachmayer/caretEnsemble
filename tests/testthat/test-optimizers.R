@@ -55,8 +55,8 @@ test_that("safe and greedy optimizers get same result in the limit", {
 
 context("Test more difficult cases")
 
-load(system.file("testdata/stuGradMod.rda",
-                 package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/studentEns.rda", package="caretEnsemble", mustWork=TRUE))
+load(system.file("testdata/modeldat2.rda", package="caretEnsemble", mustWork=TRUE))
 
 set.seed(3425)
 
@@ -69,7 +69,9 @@ out <- caretList(
   y = factor(c(modeldat2$traindata$class,modeldat2$testdata$class)),
   trControl = ctrl,
   tuneLength = 3,
-  methodList = c("knn", "nb", "lda", "nnet"))
+  methodList = c("knn", "nb", "lda"),
+  tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
+)
 
 studentEns1 <- caretEnsemble(out, optFUN = safeOptAUC, iter = 200)
 studentEns2 <- caretEnsemble(out, optFUN = greedOptAUC, iter = 200)
@@ -102,7 +104,9 @@ out <- caretList(
   y = modeldat2$traindata$class,
   trControl = ctrl,
   tuneLength = 3,
-  methodList = c("knn", "nb", "lda", "nnet"))
+  methodList = c("knn", "nb", "lda"),
+  tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
+)
 
 predobs <- caretEnsemble:::makePredObsMatrix(out)
 
@@ -143,7 +147,7 @@ load(system.file("testdata/X.reg.rda",
 load(system.file("testdata/Y.reg.rda",
                  package="caretEnsemble", mustWork=TRUE))
 
-predobs <- caretEnsemble:::makePredObsMatrix(models_reg)
+predobs <- makePredObsMatrix(models_reg)
 
 test_that("Test that optFUN does not take random values", {
   expect_error(caretEnsemble(models_reg, optFUN = randomRMSE))
