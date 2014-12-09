@@ -203,10 +203,42 @@ caretList <- function(
   return(modelList)
 }
 
+#' @title Create a matrix of predictions for each of the models in a caretList
+#' @description Make a matrix of predictions from a list of caret models
+#'
+#' @param list_of_models an object of class caretList
+#' @param type Classification or Regression
+#' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
+#' bar is shown. Default FALSE.
+#' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
+#' argument here, DO NOT PASS the "type" argument.  Classification models will
+#' return probabilities if possible, and regression models will return "raw".
+#' @importFrom pbapply pbsapply
+#' @importFrom pbapply pboptions
+#' @export
+#' @method predict caretList
+predict.caretList <- function(list_of_models, type, verbose = FALSE, ...){
+  if(verbose == TRUE){
+    pboptions(type = "txt", char = "*")
+  } else if(verbose == FALSE){
+    pboptions(type = "none")
+  }
+  preds <- pbsapply(list_of_models, function(x){
+    if (type=='Classification' & x$control$classProbs){
+      predict(x, type='prob', ...)[,2]
+    } else {
+      predict(x, type='raw', ...)
+    }
+  })
+  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
+
+  return(preds)
+}
+
 #' @title Check train models and extract their types
 #' @description Check that a list of models are all train objects and are ready to be ensembled together
 #'
-#' @param list_of_models an object of class caretEnsemble
+#' @param list_of_models an object of class caretList
 checkModels_extractTypes <- function(list_of_models){
   #TODO: Add helpful error messages
 
@@ -252,7 +284,7 @@ checkModels_extractTypes <- function(list_of_models){
 
 #' @title Extract the best predictions from a list of train objects
 #' @description Extract predictions for the best tune from a list of caret models
-#' @param list_of_models a list of caret models to extract predictions from
+#' @param  list_of_models an object of class caretList
 extractBestPreds <- function(list_of_models){
   #TODO: add an optional progress bar?
   #Extract resampled predictions from each model
@@ -290,7 +322,7 @@ checkPreds <- function(list_of_models){
 #' @description Extract obs from one models, and a matrix of predictions from all other models, a
 #' helper function
 #'
-#' @param list_of_models a list of caret models to extract predictions from
+#' @param  list_of_models an object of class caretList
 makePredObsMatrix <- function(list_of_models){
 
   #Check models and extract type (class or reg)
@@ -317,35 +349,4 @@ makePredObsMatrix <- function(list_of_models){
   #Name the predicteds and return
   colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
   return(list(obs=obs, preds=preds, type=type))
-}
-
-#' @title Create a matrix of predictions for each of the models in a list
-#' @description Make a matrix of predictions from a list of caret models
-#'
-#' @param list_of_models a list of caret models to make predictions for
-#' @param type Classification or Regression
-#' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
-#' bar is shown. Default FALSE.
-#' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
-#' argument here, DO NOT PASS the "type" argument.  Classification models will
-#' return probabilities if possible, and regression models will return "raw".
-#' @export
-#' @importFrom pbapply pbsapply
-#' @importFrom pbapply pboptions
-multiPredict <- function(list_of_models, type, verbose = FALSE, ...){
-  if(verbose == TRUE){
-    pboptions(type = "txt", char = "*")
-  } else if(verbose == FALSE){
-    pboptions(type = "none")
-  }
-  preds <- pbsapply(list_of_models, function(x){
-    if (type=='Classification' & x$control$classProbs){
-      predict(x, type='prob', ...)[,2]
-    } else {
-      predict(x, type='raw', ...)
-    }
-  })
-  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
-
-  return(preds)
 }

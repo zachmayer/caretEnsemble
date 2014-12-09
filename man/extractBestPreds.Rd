@@ -6,7 +6,7 @@
 extractBestPreds(list_of_models)
 }
 \arguments{
-\item{list_of_models}{a list of caret models to extract predictions from}
+\item{list_of_models}{an object of class caretList}
 }
 \description{
 Extract predictions for the best tune from a list of caret models
