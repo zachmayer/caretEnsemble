@@ -216,8 +216,8 @@ glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
               trControl = myControl, metric = "ROC")
 
 
-
 nestedList <- list(glm1, glm2, glm3, glm4)
+class(nestedList) <- 'caretList'
 set.seed(482)
 
 predobs <- caretEnsemble:::makePredObsMatrix(nestedList)
@@ -290,6 +290,8 @@ glm4 <- train(x = trainC[, c(1, 9:16)], y = trainC[, "Corr2"], method = 'glm',
               trControl = myControl, metric = "RMSE")
 
 nestedList <- list(glm1, glm2, glm3, glm4)
+class(nestedList) <- 'caretList'
+
 set.seed(482)
 predobs <- caretEnsemble:::makePredObsMatrix(nestedList)
 weights <- greedOptRMSE(predobs$preds, predobs$obs)
