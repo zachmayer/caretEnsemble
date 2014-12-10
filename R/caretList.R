@@ -134,7 +134,12 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @export
 #' @examples
 #' caretList(Sepal.Length ~ Sepal.Width, iris, methodList=c('glm', 'lm'))
-#' caretList(Sepal.Length ~ Sepal.Width, iris, methodList=c('glm'), tuneList=list(nnet=caretModelSpec(method='nnet', trace=FALSE, tuneLength=1)))
+#' caretList(
+#'   Sepal.Length ~ Sepal.Width,
+#'   iris, methodList=c('glm'),
+#'   tuneList=list(
+#'     nnet=caretModelSpec(method='nnet', trace=FALSE, tuneLength=1)
+#'   ))
 caretList <- function(
   ...,
   trControl = trainControl(),
