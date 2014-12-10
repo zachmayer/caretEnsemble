@@ -299,7 +299,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
 
   myEns2a <- caretEnsemble(test2a)
   expect_is(myEns2a, "caretEnsemble")
-  expect_is(test2a, "list")
+  expect_is(test2a, "caretList")
   expect_equal(nrow(test2a[[1]]$results), 4)
   expect_equal(nrow(test2a[[2]]$results), 9)
   expect_equal(nrow(test2a[[3]]$results), 3)
