@@ -1,4 +1,9 @@
 ## ----, echo=TRUE, results='hide'-----------------------------------------
+suppressMessages(library('caret'))
+suppressMessages(library('mlbench'))
+suppressMessages(library('pROC'))
+
+## ----, echo=TRUE, results='hide'-----------------------------------------
 #Adapted from the caret vignette
 library('caret')
 library('mlbench')
@@ -32,6 +37,11 @@ print(p)
 
 ## ----, echo=FALSE, results='asis'----------------------------------------
 knitr::kable(p)
+
+## ----, echo=FALSE, results='hide', warning=FALSE-------------------------
+suppressMessages(library('mlbench'))
+suppressMessages(library('randomForest'))
+suppressMessages(library('nnet'))
 
 ## ----, echo=TRUE, results='hide', warning=FALSE--------------------------
 library('mlbench')
@@ -92,6 +102,10 @@ model_preds2$ensemble <- predict(glm_ensemble, newdata=testing, type='prob')$M
 CF <- coef(glm_ensemble$ens_model$finalModel)[-1]
 colAUC(model_preds2, testing$Class)
 CF/sum(CF)
+
+## ----, echo=FALSE, results='hide'----------------------------------------
+suppressMessages(library('gbm'))
+suppressMessages(library('plyr'))
 
 ## ----, echo=TRUE---------------------------------------------------------
 library('gbm')
