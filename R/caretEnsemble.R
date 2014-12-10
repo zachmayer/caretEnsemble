@@ -469,7 +469,7 @@ residuals2.train <- function(object){
 multiResiduals <- function(object, ...){
   stopifnot(is(object$models, 'caretList'))
   modtype <- checkModels_extractTypes(object$models)
-  preds <- predict(object$models, type = modtype, ...)
+  preds <- predict(object$models, ...)
   if(modtype == "Regression"){
     y <- object$models[[1]]$trainingData$.outcome
   } else if(modtype == "Classification"){
