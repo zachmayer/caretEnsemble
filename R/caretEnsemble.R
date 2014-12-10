@@ -102,7 +102,7 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
     warning("return_weights not set properly, default set to TRUE")
   }
   modtype <- checkModels_extractTypes(object$models)
-  preds <- predict(object$models, type = modtype, ...)
+  preds <- predict(object$models,  ...)
   if(!anyNA(preds)){
     keepNA <- TRUE
   }
