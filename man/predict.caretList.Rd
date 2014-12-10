@@ -3,19 +3,17 @@
 \alias{predict.caretList}
 \title{Create a matrix of predictions for each of the models in a caretList}
 \usage{
-\method{predict}{caretList}(list_of_models, type, verbose = FALSE, ...)
+\method{predict}{caretList}(object, ..., verbose = FALSE)
 }
 \arguments{
-\item{list_of_models}{an object of class caretList}
-
-\item{type}{Classification or Regression}
-
-\item{verbose}{Logical. If FALSE no progress bar is printed if TRUE a progress
-bar is shown. Default FALSE.}
+\item{object}{an object of class caretList}
 
 \item{...}{additional arguments to pass to predict.train. Pass the \code{newdata}
 argument here, DO NOT PASS the "type" argument.  Classification models will
 return probabilities if possible, and regression models will return "raw".}
+
+\item{verbose}{Logical. If FALSE no progress bar is printed if TRUE a progress
+bar is shown. Default FALSE.}
 }
 \description{
 Make a matrix of predictions from a list of caret models

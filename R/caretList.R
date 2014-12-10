@@ -208,8 +208,7 @@ caretList <- function(
 #' @title Create a matrix of predictions for each of the models in a caretList
 #' @description Make a matrix of predictions from a list of caret models
 #'
-#' @param list_of_models an object of class caretList
-#' @param type Classification or Regression
+#' @param object an object of class caretList
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
 #' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
@@ -219,20 +218,25 @@ caretList <- function(
 #' @importFrom pbapply pboptions
 #' @export
 #' @method predict caretList
-predict.caretList <- function(list_of_models, type, verbose = FALSE, ...){
+predict.caretList <- function(object, ..., verbose = FALSE){
+
+  type <- sapply(object, function(x) x$modelType)
+  type <- unique(type)
+  stopifnot(length(type)==1)
+
   if(verbose == TRUE){
     pboptions(type = "txt", char = "*")
   } else if(verbose == FALSE){
     pboptions(type = "none")
   }
-  preds <- pbsapply(list_of_models, function(x){
+  preds <- pbsapply(object, function(x){
     if (type=='Classification' & x$control$classProbs){
       predict(x, type='prob', ...)[,2]
     } else {
       predict(x, type='raw', ...)
     }
   })
-  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
+  colnames(preds) <- make.names(sapply(object, function(x) x$method), unique=TRUE)
 
   return(preds)
 }
