@@ -55,7 +55,7 @@ model_list <- caretList(
   )
 ```
 (As with `train`, the formula interface is convienent but introduces move overhead.  For large datasets the explicitly passing `x` and `y` is preferred).
-We can use the `predict.list` function to extract predicitons from this object for new data:
+We can use the `predict` function to extract predicitons from this object for new data:
 ```{r, echo=TRUE, results='hide'}
 p <- as.data.frame(predict(model_list, newdata=head(testing)))
 print(p)
