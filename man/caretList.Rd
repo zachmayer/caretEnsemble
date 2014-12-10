@@ -25,12 +25,20 @@ Build a list of train objects suitable for ensembling using the \code{\link{care
 function.
 }
 \examples{
-caretList(Sepal.Length ~ Sepal.Width, iris, methodList=c('glm', 'lm'))
+myControl <- trainControl(method='cv', number=5)
 caretList(
   Sepal.Length ~ Sepal.Width,
-  iris, methodList=c('glm'),
+  head(iris, 50),
+  methodList=c('glm', 'lm'),
+  trControl=myControl
+  )
+caretList(
+  Sepal.Length ~ Sepal.Width,
+  head(iris, 50), methodList=c('lm'),
   tuneList=list(
     nnet=caretModelSpec(method='nnet', trace=FALSE, tuneLength=1)
-  ))
+ ),
+  trControl=myControl
+  )
 }
 
