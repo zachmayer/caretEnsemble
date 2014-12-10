@@ -220,20 +220,23 @@ caretList <- function(
 #' @method predict caretList
 predict.caretList <- function(object, ..., verbose = FALSE){
 
-  type <- sapply(object, function(x) x$modelType)
-  type <- unique(type)
-  stopifnot(length(type)==1)
-
   if(verbose == TRUE){
     pboptions(type = "txt", char = "*")
   } else if(verbose == FALSE){
     pboptions(type = "none")
   }
   preds <- pbsapply(object, function(x){
-    if (type=='Classification' & x$control$classProbs){
-      predict(x, type='prob', ...)[,2]
-    } else {
+    type <- x$modelType
+    if (type=='Classification'){
+      if(x$control$classProbs){
+        predict(x, type='prob', ...)[,2]
+      } else{
+        predict(x, type='raw', ...)
+      }
+    } else if(type=='Regression'){
       predict(x, type='raw', ...)
+    } else{
+      stop(paste('Unknown model type:', type))
     }
   })
   colnames(preds) <- make.names(sapply(object, function(x) x$method), unique=TRUE)
