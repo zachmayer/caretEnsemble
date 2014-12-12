@@ -136,6 +136,23 @@ test_that("Checks generate errors", {
 
   m <- extractBestPreds(x)
   expect_error(check_bestpreds_preds(m))
+
+  set.seed(42)
+  myControl2 <- trainControl(
+    method='cv',
+    number=10,
+    savePredictions=TRUE,
+    classProbs=TRUE,
+    summaryFunction=twoClassSummary
+    )
+  x <- caretList(
+    iris[1:100,-5],
+    factor(ifelse(iris[1:100, 'Species'] == 'setosa', 'Yes', 'No')),
+    methodList=c('lda', 'rf'),
+    trControl=myControl2
+  )
+  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, head(iris, 100), method='rpart')
+  expect_error(check_caretList_model_types(x))
 })
 
 

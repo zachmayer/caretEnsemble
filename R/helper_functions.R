@@ -73,9 +73,17 @@ check_caretList_model_types <- function(list_of_models){
   #TODO: ALLOW NON PROB MODELS!
   if (type=='Classification'){
     probModels <- sapply(list_of_models, function(x) modelLookup(x$method)[1,'probModel'])
-    stopifnot(all(probModels))
+    if(!all(probModels)) stop('All models for classification must be able to generate class probabilities.')
     classProbs <- sapply(list_of_models, function(x) x$control$classProbs)
-    stopifnot(all(classProbs))
+    if(!all(classProbs)){
+      bad_models <- names(list_of_models)[!classProbs]
+      bad_models <- paste(bad_models, collapse=', ')
+      stop(
+        paste0(
+          'The following models were fit by caret::train with no class probabilities: ',
+          bad_models,
+          '.\nPlease re-fit them with trainControl(classProbs=TRUE)'))
+    }
   }
   return(invisible(NULL))
 }
