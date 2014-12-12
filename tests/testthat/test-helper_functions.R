@@ -2,8 +2,9 @@
 #TODO: add tests for every helper function
 
 context("Do the helper functions work for regression objects?")
-library(caret)
-library(randomForest)
+library('caret')
+library('randomForest')
+library('rpart')
 
 load(system.file("testdata/models_reg.rda",
                  package="caretEnsemble", mustWork=TRUE))
@@ -93,7 +94,6 @@ test_that("wtd.sd applies weights correctly", {
   expect_equal(wtd.sd(y, weights = w1*100), wtd.sd(y, weights = w1*100, normwt=TRUE))
 })
 
-
 test_that("wtd.sd handles NA values correctly", {
   y <- c(10, 10, 10, 20, NA, NA)
   w1 <- c(0.1, 0.1, 0.1, 0.7, NA, NA)
@@ -105,6 +105,35 @@ test_that("wtd.sd handles NA values correctly", {
   expect_true(!is.na(wtd.sd(y, weights = w1, na.rm=TRUE)))
   w2 <- c(0.1, 0.1, NA, 0.7, NA, NA)
   expect_false(wtd.sd(y, weights = w1, na.rm=TRUE, normwt = TRUE) == wtd.sd(y, weights = w2, na.rm=TRUE, normwt = TRUE))
+})
+
+test_that("Checks generate errors", {
+  set.seed(42)
+  myControl <- trainControl(method='cv', number=5)
+  x <- caretList(
+    Sepal.Length ~ Sepal.Width,
+    head(iris, 50),
+    methodList=c('glm', 'lm'),
+    trControl=myControl
+  )
+  modelLibrary <- extractBestPreds(x)
+  modelLibrary$nn <- modelLibrary$lm[sample(1:nrow(modelLibrary$lm), nrow(modelLibrary$lm)),]
+
+  expect_error(check_bestpreds_resamples(modelLibrary))
+  expect_error(check_bestpreds_indexes(modelLibrary))
+  expect_error(check_bestpreds_obs(modelLibrary))
+  expect_error(check_bestpreds_preds(modelLibrary))
+
+  x$rpart <- train(Sepal.Length ~ Sepal.Width, head(iris, 50), method='rpart')
+  expect_error(check_bestpreds_resamples(modelLibrary))
+  expect_error(check_bestpreds_indexes(modelLibrary))
+  expect_error(check_bestpreds_obs(modelLibrary))
+  expect_error(check_bestpreds_preds(modelLibrary))
+
+  expect_error(check_caretList_classes(x$glm$finalModel))
+  x$rpart <- train(Species ~ Sepal.Width, head(iris, 100), method='rpart')
+  check_caretList_classes(x)
+  expect_error(check_caretList_model_types(x))
 })
 
 
