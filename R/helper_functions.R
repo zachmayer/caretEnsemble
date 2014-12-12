@@ -130,7 +130,21 @@ check_bestpreds_obs <- function(modelLibrary){
 #'
 #' @param modelLibrary a list of predictins from caret models
 check_bestpreds_preds <- function(modelLibrary){
-  warning('NOT IMPLEMENTED')
+  #TODO: ID which model(s) have bad preds
+  #TODO: Regression models should be numeric, classification models should have numeric class probs
+  pred <- lapply(modelLibrary, function(x) x[['pred']])
+  names(pred) <- names(modelLibrary)
+  classes <- unique(sapply(pred, class))
+  check <- length(classes)
+  if(check != 1){
+    stop(
+      paste0(
+        'Component models do not all have the same type of predicitons.  Predictions are a mix of ',
+        paste(classes, collapse=', '),
+        '.')
+    )
+  }
+  return(invisible(NULL))
 }
 
 #####################################################
