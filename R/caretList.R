@@ -271,13 +271,14 @@ checkModels_extractTypes <- function(list_of_models){
   #Check that models have the same type
   types <- sapply(list_of_models, function(x) x$modelType)
   type <- types[1]
-  stopifnot(all(types==type)) #Maybe in the future we can combine reg and class models
+  stopifnot(all(types==type)) #TODO: Maybe in the future we can combine reg and class models
 
   #Check that the model type is VALID
   stopifnot(all(types %in% c('Classification', 'Regression')))
 
   #Warn that we haven't yet implemented multiclass models
   # add a check that if this is null you didn't set savePredictions in the trainControl
+  #TODO: add support for non-prob models (e.g. rFerns)
   if (type=='Classification' & length(unique(list_of_models[[1]]$pred$obs))!=2){
     if(is.null(unique(list_of_models[[1]]$pred$obs))){
       stop('No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.')
@@ -286,7 +287,8 @@ checkModels_extractTypes <- function(list_of_models){
     }
   }
 
-  #Check that classification models saved probabilities TODO: ALLOW NON PROB MODELS!
+  #Check that classification models saved probabilities
+  #TODO: ALLOW NON PROB MODELS!
   if (type=='Classification'){
     probModels <- sapply(list_of_models, function(x) modelLookup(x$method)[1,'probModel'])
     stopifnot(all(probModels))
