@@ -25,11 +25,12 @@ set.seed(482)
 nn1 <- train(x = X.reg, y = Y.reg, method = 'knn', trControl = myControl)
 
 models_reg <- list(rf1, lm1, glm1, nn1)
+class(models_reg) <- 'caretList'
 
-devtools::use_data(models_reg, Y.reg, X.reg)
+devtools::use_data(models_reg, Y.reg, X.reg, overwrite=TRUE)
 
 rm(i, glm1, lm1, nn1, rf1)
-rm(list = ls())
+rm(list = ls(all=TRUE))
 
 
 data(iris)
@@ -53,15 +54,16 @@ glm1 <- train(x = X.class[, c(-1, -6)], y = Y.class, method = 'glm', trControl =
 set.seed(482)
 svm1 <- train(x = X.class, y = Y.class, method = 'svmRadial', trControl = myControl)
 set.seed(482)
-nnet1 <- train(x = X.class, y = Y.class, method = 'nnet', trControl = myControl)
+nnet1 <- train(x = X.class, y = Y.class, method = 'nnet', trControl = myControl, trace=FALSE)
 set.seed(482)
 bag1 <- train(x = X.class, y = Y.class, method = 'treebag', trControl = myControl)
 set.seed(482)
 nn1 <- train(x = X.class, y = Y.class, method = 'knn', trControl = myControl)
 
 models_class <- list(rf1, glm1, svm1, nnet1, bag1, nn1)
+class(models_class) <- 'caretList'
 
-devtools::use_data(models_class, Y.class, X.class)
+devtools::use_data(models_class, Y.class, X.class, overwrite=TRUE)
 
 rm(list=ls())
 
@@ -84,9 +86,10 @@ out <- caretList(
   y = modeldat2$traindata$class,
   trControl = ctrl,
   tuneLength = 3,
-  methodList = c("knn", "nb", "lda", "nnet"))
+  methodList = c("knn", "nb", "lda"),
+  tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
+  )
 
  studentEns <- caretEnsemble(out)
 
-# save(modeldat2, studentEns, file = "stuGradMod.rda", compress = "xz")
-
+devtools::use_data(modeldat2, studentEns, overwrite=TRUE)

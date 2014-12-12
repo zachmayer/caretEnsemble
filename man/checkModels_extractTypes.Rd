@@ -6,7 +6,7 @@
 checkModels_extractTypes(list_of_models)
 }
 \arguments{
-\item{list_of_models}{a list of caret models to check}
+\item{list_of_models}{an object of class caretList}
 }
 \description{
 Check that a list of models are all train objects and are ready to be ensembled together

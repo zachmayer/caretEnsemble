@@ -18,7 +18,11 @@ vignette: >
 `caretList` is a flexible function for fitting many different caret models, with the same resampling parameters, to the same dataset.  It returns a convenient `list` of caret objects which can later be passed to `caretEnsemble` and `caretStack`.  `caretList` has almost exactly the same arguments as `train` (from the caret package), with the exception that the `trControl` argument comes last.  It can handle both the formula interface and the explicit `x`, `y` interface to train.  As in caret, the formula interface introduces some overhead and the `x`, `y` interface is preferred.
 
 `caretEnsemble` has 2 arguments that can be used to specify which models to fit: `methodList` and `tuneList`.  `methodList` is a simple character vector of methods that will be fit with the default `train` parameters, while `tuneList` can be used to customize the call to each component model and will be discussed in more detail later.  First, lets build an example dataset (adapted from the caret vignette):
-
+```{r, echo=TRUE, results='hide'}
+suppressMessages(library('caret'))
+suppressMessages(library('mlbench'))
+suppressMessages(library('pROC'))
+```
 ```{r, echo=TRUE, results='hide'}
 #Adapted from the caret vignette
 library('caret')
@@ -51,7 +55,7 @@ model_list <- caretList(
   )
 ```
 (As with `train`, the formula interface is convienent but introduces move overhead.  For large datasets the explicitly passing `x` and `y` is preferred).
-We can use the `predict.list` function to extract predicitons from this object for new data:
+We can use the `predict` function to extract predicitons from this object for new data:
 ```{r, echo=TRUE, results='hide'}
 p <- as.data.frame(predict(model_list, newdata=head(testing)))
 print(p)
@@ -61,6 +65,11 @@ knitr::kable(p)
 ```
 
 If you desire more control over the model fit, use the `caretModelSpec` to contruct a list of model specifications for the `tuneList` argument. This argumenent can be used to fit several different variants of the same model, and can also be used to pass arguments through `train` down to the component functions (e.g. `trace=FALSE` for `nnet`):
+```{r, echo=FALSE, results='hide', warning=FALSE}
+suppressMessages(library('mlbench'))
+suppressMessages(library('randomForest'))
+suppressMessages(library('nnet'))
+```
 ```{r, echo=TRUE, results='hide', warning=FALSE}
 library('mlbench')
 library('randomForest')
@@ -119,6 +128,7 @@ varImp(greedy_ensemble)
 ```{r, echo=FALSE, results='asis'}
 knitr::kable(varImp(greedy_ensemble))
 ```
+
 (The columns each sum up to 100.)
 
 ## caretStack
@@ -147,6 +157,10 @@ CF/sum(CF)
 Note that `glm_ensemble$ens_model` is a regular caret object of class `train`.  The glm-weighted model weights (glm vs rpart) and test-set AUCs are extremely similar to the caretEnsemble greedy optimization.
 
 We can also use more sophisticated ensembles than simple linear weights, but these models are much more succeptible to over-fitting, and generally require large sets of resamples to train on (n=50 or higher for bootstrap samples).  Lets try one anyways:
+```{r, echo=FALSE, results='hide'}
+suppressMessages(library('gbm'))
+suppressMessages(library('plyr'))
+```
 ```{r, echo=TRUE}
 library('gbm')
 gbm_ensemble <- caretStack(
