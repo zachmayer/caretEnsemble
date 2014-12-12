@@ -70,13 +70,13 @@ trControlCheck <- function(x, y){
     if(x$method=='none'){
       stop("Models that aren't resampled cannot be ensembled.  All good ensemble methods rely on out-of sample data.  If you really need to ensemble without re-sampling, try the median or mean of the model's predictions.")
 
-    } else if(x$method=='boot'){
+    } else if(x$method=='boot' | x$method=='adaptive_boot'){
       x$index <- createResample(y, times = x$number, list = TRUE)
-    } else if(x$method=='cv'){
+    } else if(x$method=='cv' | x$method=='adaptive_cv'){
       x$index  <- createFolds(y, k = x$number, list = TRUE, returnTrain = TRUE)
     } else if(x$method=='repeatedcv'){
       x$index <- createMultiFolds(y, k = x$number, times = x$repeats)
-    } else if(x$method=='LGOCV'){
+    } else if(x$method=='LGOCV' | x$method=='adaptive_LGOCV'){
       x$index <- createDataPartition(
         y,
         times = x$number,
@@ -127,13 +127,27 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @param ... arguments to pass to \code{\link{train}}.  These arguments will determine which train method gets dispatched.
 #' @param trControl a \code{\link{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.
 #' @param methodList optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.
-#' @param tuneList optional, a NAMED list of the length of \code{methodList} with model-specific arguments to pass to train.  The can be arguments for the train function (e.g. tuneLength=6) or arguments passed through train to the modeling funcion (e.g. verbose=FALSE for a gbm model).  The names in the tuneList must match the methods in methodList, but do not need to be in the same order.  One of methodList or tuneList must be specified.
+#' @param tuneList optional, a NAMED list of caretModelSpec objects. This much more flexible than methodList and allows the specificaiton of model-specific parameters (e.g. passing trace=FALSE to nnet)
 #' @param continue_on_model_fail If FALSE, the failure of a single model will stop the entire building process.  If TRUE, model failures will be downgraded to warnings.
 #' @return A list of \code{\link{train}} objects
 #' @import caret
 #' @export
 #' @examples
-#' caretList(Sepal.Length ~ Sepal.Width, iris, methodList=c('glm', 'lm'))
+#' myControl <- trainControl(method='cv', number=5)
+#' caretList(
+#'   Sepal.Length ~ Sepal.Width,
+#'   head(iris, 50),
+#'   methodList=c('glm', 'lm'),
+#'   trControl=myControl
+#'   )
+#' caretList(
+#'   Sepal.Length ~ Sepal.Width,
+#'   head(iris, 50), methodList=c('lm'),
+#'   tuneList=list(
+#'     nnet=caretModelSpec(method='nnet', trace=FALSE, tuneLength=1)
+#'  ),
+#'   trControl=myControl
+#'   )
 caretList <- function(
   ...,
   trControl = trainControl(),
@@ -199,6 +213,162 @@ caretList <- function(
   if(length(modelList)==0){
     stop('caret:train failed for all models.  Please inspect your data.')
   }
+  class(modelList) <- 'caretList'
 
   return(modelList)
+}
+
+#' @title Create a matrix of predictions for each of the models in a caretList
+#' @description Make a matrix of predictions from a list of caret models
+#'
+#' @param object an object of class caretList
+#' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
+#' bar is shown. Default FALSE.
+#' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
+#' argument here, DO NOT PASS the "type" argument.  Classification models will
+#' return probabilities if possible, and regression models will return "raw".
+#' @importFrom pbapply pbsapply
+#' @importFrom pbapply pboptions
+#' @export
+#' @method predict caretList
+predict.caretList <- function(object, ..., verbose = FALSE){
+
+  if(verbose == TRUE){
+    pboptions(type = "txt", char = "*")
+  } else if(verbose == FALSE){
+    pboptions(type = "none")
+  }
+  preds <- pbsapply(object, function(x){
+    type <- x$modelType
+    if (type=='Classification'){
+      if(x$control$classProbs){
+        predict(x, type='prob', ...)[,2]
+      } else{
+        predict(x, type='raw', ...)
+      }
+    } else if(type=='Regression'){
+      predict(x, type='raw', ...)
+    } else{
+      stop(paste('Unknown model type:', type))
+    }
+  })
+  colnames(preds) <- make.names(sapply(object, function(x) x$method), unique=TRUE)
+
+  return(preds)
+}
+
+#' @title Check train models and extract their types
+#' @description Check that a list of models are all train objects and are ready to be ensembled together
+#'
+#' @param list_of_models an object of class caretList
+checkModels_extractTypes <- function(list_of_models){
+  #TODO: Add helpful error messages
+
+  #Check that we have a list of train models
+  stopifnot(is(list_of_models, 'caretList'))
+  stopifnot(all(sapply(list_of_models, is, 'train')))
+
+  #Check that models have the same type
+  types <- sapply(list_of_models, function(x) x$modelType)
+  type <- types[1]
+  stopifnot(all(types==type)) #Maybe in the future we can combine reg and class models
+
+  #Check that the model type is VALID
+  stopifnot(all(types %in% c('Classification', 'Regression')))
+
+  #Warn that we haven't yet implemented multiclass models
+  # add a check that if this is null you didn't set savePredictions in the trainControl
+  if (type=='Classification' & length(unique(list_of_models[[1]]$pred$obs))!=2){
+    if(is.null(unique(list_of_models[[1]]$pred$obs))){
+      stop('No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.')
+    } else {
+      stop('Not yet implemented for multiclass problems')
+    }
+  }
+
+  #Check that classification models saved probabilities TODO: ALLOW NON PROB MODELS!
+  if (type=='Classification'){
+    probModels <- sapply(list_of_models, function(x) modelLookup(x$method)[1,'probModel'])
+    stopifnot(all(probModels))
+    classProbs <- sapply(list_of_models, function(x) x$control$classProbs)
+    stopifnot(all(classProbs))
+  }
+
+  #Check that all models saved their predictions so we can ensemble them
+  stopifnot(all(sapply(list_of_models, function(x) x$control$savePredictions)))
+
+  #Check that every model used the same resampling indexes
+  indexes <- lapply(list_of_models, function(x) x$control$index)
+  stopifnot(length(unique(indexes))==1)
+
+  return(type)
+}
+
+#' @title Extract the best predictions from a list of train objects
+#' @description Extract predictions for the best tune from a list of caret models
+#' @param  list_of_models an object of class caretList
+extractBestPreds <- function(list_of_models){
+  #TODO: add an optional progress bar?
+  #Extract resampled predictions from each model
+  modelLibrary <- lapply(list_of_models, function(x) {x$pred})
+
+  #Extract the best tuning parameters from each model
+  tunes <- lapply(list_of_models, function(x) {x$bestTune})
+
+  #Subset the resampled predictions to the model with the best tune and sort
+  newModels <- lapply(1:length(modelLibrary), function(x) NA)
+  for (i in 1:length(modelLibrary)){
+    out <- modelLibrary[[i]]
+    tune <- tunes[[i]]
+    for (name in names(tune)){
+      indxLogic <- out[,name]==tune[,name]
+      indxLogic[is.na(indxLogic)] <- FALSE
+      out <- out[indxLogic,]
+    }
+    out <- out[order(out$Resample, out$rowIndex),]
+    newModels[[i]] <- out
+  }
+  rm(modelLibrary)
+  return(newModels)
+}
+
+#' @title Check predictions
+#' @description Check that a list of predictions from caret models are all valid
+#'
+#' @param list_of_models a list of caret models to check
+checkPreds <- function(list_of_models){
+  stop('NOT IMPLEMENTED')
+}
+
+#' @title Make a prediction matrix from a list of models
+#' @description Extract obs from one models, and a matrix of predictions from all other models, a
+#' helper function
+#'
+#' @param  list_of_models an object of class caretList
+makePredObsMatrix <- function(list_of_models){
+
+  #Check models and extract type (class or reg)
+  type <- checkModels_extractTypes(list_of_models)
+
+  #Make a list of models
+  modelLibrary <- extractBestPreds(list_of_models)
+
+  #Insert checks here: observeds are all equal, row indexes are equal, Resamples are equal
+
+  #Extract observations from the frist model in the list
+  obs <- modelLibrary[[1]]$obs
+  if (type=='Classification'){
+    positive <- as.character(unique(modelLibrary[[1]]$obs)[2]) #IMPROVE THIS!
+  }
+
+  #Extract predicteds
+  if (type=='Regression'){
+    preds <- sapply(modelLibrary, function(x) as.numeric(x$pred))
+  } else if (type=='Classification'){
+    preds <- sapply(modelLibrary, function(x) as.numeric(x[,positive]))
+  }
+
+  #Name the predicteds and return
+  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
+  return(list(obs=obs, preds=preds, type=type))
 }

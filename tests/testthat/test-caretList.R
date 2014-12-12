@@ -30,6 +30,7 @@ test_that("caretModelSpec returns valid specs", {
   expect_equal(length(tuneList), 4)
   expect_equal(sum(duplicated(names(tuneList))), 0)
 })
+
 ###############################################
 context("We can fit models with a mix of methodList and tuneList")
 ################################################
@@ -46,7 +47,7 @@ test_that("caretModelSpec returns valid specs", {
       tuneList=myList
     )
   })
-  expect_is(test, "list")
+  expect_is(test, "caretList")
   expect_is(caretEnsemble(test), "caretEnsemble")
   expect_equal(length(test), 4)
   methods <- sapply(test, function(x) x$method)
@@ -54,7 +55,7 @@ test_that("caretModelSpec returns valid specs", {
   expect_equal(methods, c('rpart', 'rf', 'knn', 'glm'))
 })
 
-###############################################
+################################################
 context("We can work around bad models")
 ################################################
 myList <- list(
@@ -83,12 +84,66 @@ suppressWarnings({
   )
 })
 
-expect_is(test, "list")
+expect_is(test, "caretList")
 expect_is(caretEnsemble(test), "caretEnsemble")
 expect_equal(length(test), 1)
 methods <- sapply(test, function(x) x$method)
 names(methods) <- NULL
 expect_equal(methods, c('rpart'))
+
+################################################
+context("We can handle different CV methods")
+################################################
+
+for(m in c(
+  'boot',
+  'adaptive_boot',
+  'cv',
+  'adaptive_cv',
+  'LGOCV',
+  'adaptive_LGOCV')
+){
+  test_name <- paste0('CV works with method=', m)
+  test_that(test_name, {
+
+    myControl = trainControl(
+      method = m,
+      number = 7,
+      repeats = 1,
+      p = 0.75,
+      savePrediction = TRUE,
+      returnResamp = "final",
+      returnData = FALSE,
+      verboseIter = FALSE)
+
+    suppressWarnings({
+      suppressMessages({
+        models <- caretList(
+          x = iris[,1:3],
+          y = iris[,4],
+          trControl = myControl,
+          tuneLength=2,
+          methodList = c('rpart', 'rf')
+        )
+      })
+    })
+    sink <- sapply(models, expect_is, class='train')
+
+    suppressWarnings({
+      suppressMessages({
+        ens <- caretEnsemble(models, iter=10)
+      })
+    })
+
+    expect_is(ens, 'caretEnsemble')
+
+    suppressMessages({
+      ens <- caretStack(models, method='glm', trControl=trainControl(number=2))
+    })
+
+    expect_is(ens, 'caretStack')
+  })
+}
 
 ###############################################
 context("Classification models")
@@ -116,7 +171,7 @@ expect_warning({
 
 context("Test that caretList makes model lists")
 test_that("caretList returns a list", {
-  expect_is(test1, "list")
+  expect_is(test1, "caretList")
 })
 
 context("Test that caretList can be ensembled")
@@ -152,8 +207,8 @@ test_that("longer tests", {
     )
   })
 
-  expect_is(test2, "list")
-  expect_is(test3, "list")
+  expect_is(test2, "caretList")
+  expect_is(test3, "caretList")
   expect_is(caretEnsemble(test2), "caretEnsemble")
   expect_is(caretEnsemble(test3), "caretEnsemble")
 
@@ -244,7 +299,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
 
   myEns2a <- caretEnsemble(test2a)
   expect_is(myEns2a, "caretEnsemble")
-  expect_is(test2a, "list")
+  expect_is(test2a, "caretList")
   expect_equal(nrow(test2a[[1]]$results), 4)
   expect_equal(nrow(test2a[[2]]$results), 9)
   expect_equal(nrow(test2a[[3]]$results), 3)
@@ -269,7 +324,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   })
   ens <- caretEnsemble(test)
   expect_is(ens, "caretEnsemble")
-  expect_is(test, "list")
+  expect_is(test, "caretList")
   expect_equal(nrow(test[[1]]$results), 3*3)
   expect_false(test[[1]]$finalModel$softmax)
 })
@@ -339,9 +394,9 @@ expect_warning({
 ens1 <- caretEnsemble(test1)
 ens2 <- caretEnsemble(test2)
 
-test_that("caretList returns a list regression", {
-  expect_is(test1, "list")
-  expect_is(test2, "list")
+test_that("caretList returns a caretList regression", {
+  expect_is(test1, "caretList")
+  expect_is(test2, "caretList")
 })
 
 test_that("caretList objects can be ensembled regression", {

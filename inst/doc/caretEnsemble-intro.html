@@ -10,7 +10,7 @@
 
 <meta name="author" content="Zach Mayer" />
 
-<meta name="date" content="2014-11-21" />
+<meta name="date" content="2014-12-09" />
 
 <title>A brief introduction to caretEnsemble</title>
 
@@ -54,7 +54,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <div id="header">
 <h1 class="title">A brief introduction to caretEnsemble</h1>
 <h4 class="author"><em>Zach Mayer</em></h4>
-<h4 class="date"><em>2014-11-21</em></h4>
+<h4 class="date"><em>2014-12-09</em></h4>
 </div>
 
 
@@ -64,6 +64,9 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h2>caretList</h2>
 <p><code>caretList</code> is a flexible function for fitting many different caret models, with the same resampling parameters, to the same dataset. It returns a convenient <code>list</code> of caret objects which can later be passed to <code>caretEnsemble</code> and <code>caretStack</code>. <code>caretList</code> has almost exactly the same arguments as <code>train</code> (from the caret package), with the exception that the <code>trControl</code> argument comes last. It can handle both the formula interface and the explicit <code>x</code>, <code>y</code> interface to train. As in caret, the formula interface introduces some overhead and the <code>x</code>, <code>y</code> interface is preferred.</p>
 <p><code>caretEnsemble</code> has 2 arguments that can be used to specify which models to fit: <code>methodList</code> and <code>tuneList</code>. <code>methodList</code> is a simple character vector of methods that will be fit with the default <code>train</code> parameters, while <code>tuneList</code> can be used to customize the call to each component model and will be discussed in more detail later. First, lets build an example dataset (adapted from the caret vignette):</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressMessages</span>(<span class="kw">library</span>(<span class="st">'caret'</span>))
+<span class="kw">suppressMessages</span>(<span class="kw">library</span>(<span class="st">'mlbench'</span>))
+<span class="kw">suppressMessages</span>(<span class="kw">library</span>(<span class="st">'pROC'</span>))</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Adapted from the caret vignette</span>
 <span class="kw">library</span>(<span class="st">'caret'</span>)
 <span class="kw">library</span>(<span class="st">'mlbench'</span>)
@@ -90,40 +93,40 @@ model_list &lt;-<span class="st"> </span><span class="kw">caretList</span>(
   <span class="dt">trControl=</span>my_control,
   <span class="dt">methodList=</span><span class="kw">c</span>(<span class="st">'glm'</span>, <span class="st">'rpart'</span>)
   )</code></pre>
-<p>(As with <code>train</code>, the formula interface is convienent but introduces move overhead. For large datasets the explicitly passing <code>x</code> and <code>y</code> is preferred). We can use the <code>predict.list</code> function to extract predicitons from this object for new data:</p>
+<p>(As with <code>train</code>, the formula interface is convienent but introduces move overhead. For large datasets the explicitly passing <code>x</code> and <code>y</code> is preferred). We can use the <code>predict</code> function to extract predicitons from this object for new data:</p>
 <pre class="sourceCode r"><code class="sourceCode r">p &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(<span class="kw">predict</span>(model_list, <span class="dt">newdata=</span><span class="kw">head</span>(testing)))
 <span class="kw">print</span>(p)</code></pre>
 <table>
 <thead>
 <tr class="header">
-<th align="left">glm</th>
-<th align="left">rpart</th>
+<th align="right">glm</th>
+<th align="right">rpart</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">M</td>
-<td align="left">R</td>
+<td align="right">0.0000000</td>
+<td align="right">0.7794118</td>
 </tr>
 <tr class="even">
-<td align="left">M</td>
-<td align="left">M</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0882353</td>
 </tr>
 <tr class="odd">
-<td align="left">M</td>
-<td align="left">M</td>
+<td align="right">0.0000000</td>
+<td align="right">0.0882353</td>
 </tr>
 <tr class="even">
-<td align="left">M</td>
-<td align="left">M</td>
+<td align="right">0.0000675</td>
+<td align="right">0.0882353</td>
 </tr>
 <tr class="odd">
-<td align="left">M</td>
-<td align="left">R</td>
+<td align="right">0.0000000</td>
+<td align="right">0.6666667</td>
 </tr>
 <tr class="even">
-<td align="left">R</td>
-<td align="left">R</td>
+<td align="right">0.7654240</td>
+<td align="right">0.7794118</td>
 </tr>
 </tbody>
 </table>
@@ -549,14 +552,9 @@ model_preds$ensemble &lt;-<span class="st"> </span>ens_preds
 <td align="right">0.000000</td>
 <td align="right">0.0000000</td>
 </tr>
-<tr class="odd">
-<td align="left">(The column</td>
-<td align="right">s each sum u</td>
-<td align="right">p to 100.)</td>
-<td align="right"></td>
-</tr>
 </tbody>
 </table>
+<p>(The columns each sum up to 100.)</p>
 </div>
 <div id="caretstack" class="section level2">
 <h2>caretStack</h2>

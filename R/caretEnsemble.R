@@ -15,7 +15,7 @@
 #' @note Currently when missing values are present in the training data, weights
 #' are calculated using only observations which are complete across all models
 #' in the library.
-#' @param all.models a list of caret models to ensemble.
+#' @param all.models an object of class caretList
 #' @param optFUN the optimization function to use
 #' @param ... additional arguments to pass to the optimization function
 #' @return a \code{\link{caretEnsemble}} object
@@ -27,6 +27,9 @@
 #' ens <- caretEnsemble(models)
 #' summary(ens)
 caretEnsemble <- function(all.models, optFUN=NULL, ...){
+
+  stopifnot(is(all.models, 'caretList'))
+
   #Check the models, and make a matrix of obs and preds
   predobs <- makePredObsMatrix(all.models)
 
@@ -59,7 +62,9 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
   }
 
   #Return final model
-  out <- list(models=all.models[keep], weights=weights[keep], error=error,
+  models <- all.models[keep]
+  class(models) <- 'caretList'
+  out <- list(models=models, weights=weights[keep], error=error,
               modelType = predobs$type)
   class(out) <- 'caretEnsemble'
   return(out)
@@ -89,13 +94,15 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' ens <- caretEnsemble(models)
 #' cor(predict(ens, newdata=iris[51:150,1:2]), iris[51:150,3])
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
+  stopifnot(is(object$models, 'caretList'))
+
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){
     return_weights <- FALSE
     warning("return_weights not set properly, default set to TRUE")
   }
   modtype <- checkModels_extractTypes(object$models)
-  preds <- multiPredict(object$models, type = modtype, ...)
+  preds <- predict(object$models,  ...)
   if(!anyNA(preds)){
     keepNA <- TRUE
   }
@@ -460,8 +467,9 @@ residuals2.train <- function(object){
 #' y for the observed value.
 #' @export
 multiResiduals <- function(object, ...){
+  stopifnot(is(object$models, 'caretList'))
   modtype <- checkModels_extractTypes(object$models)
-  preds <- multiPredict(object$models, type = modtype, ...)
+  preds <- predict(object$models, ...)
   if(modtype == "Regression"){
     y <- object$models[[1]]$trainingData$.outcome
   } else if(modtype == "Classification"){

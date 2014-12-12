@@ -6,7 +6,7 @@
 caretEnsemble(all.models, optFUN = NULL, ...)
 }
 \arguments{
-\item{all.models}{a list of caret models to ensemble.}
+\item{all.models}{an object of class caretList}
 
 \item{optFUN}{the optimization function to use}
 
