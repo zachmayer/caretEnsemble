@@ -35,15 +35,21 @@ wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = FALSE) {
 # caretList check functions
 #####################################################
 #' @title Checks caretList model classes
-#' @description This function checks that the models in a caretList are all of class train and have the same model type (classification or regression).  It also checks that classification models have saved probabilities.
+#' @description This function checks caretList classes
 #'
 #' @param list_of_models a list of caret models to check
-checkModelClasses <- function(list_of_models){
+check_caretList_classes <- function(list_of_models){
 
   #Check that we have a list of train models
   stopifnot(is(list_of_models, 'caretList'))
   stopifnot(all(sapply(list_of_models, is, 'train')))
+  return(invisible(NULL))
+}
 
+#' @title Checks that caretList models are all of the same type.
+#'
+#' @param list_of_models a list of caret models to check
+check_caretList_model_types <- function(list_of_models){
   #Check that models have the same type
   types <- sapply(list_of_models, function(x) x$modelType)
   type <- types[1]
@@ -71,55 +77,57 @@ checkModelClasses <- function(list_of_models){
     classProbs <- sapply(list_of_models, function(x) x$control$classProbs)
     stopifnot(all(classProbs))
   }
-
-
-}
-
-#' @title Check row indexes
-#' @description Check that the row indexes from a caretList are valid
-#'
-#' @param list_of_models a list of caret models to check
-checkRowIndexes <- function(list_of_models){
-  warning('NOT IMPLEMENTED')
-}
-
-#' @title Check predictions
-#' @description Check that a list of predictions from a caretList are valid
-#'
-#' @param list_of_models a list of caret models to check
-checkPreds <- function(list_of_models){
-  warning('NOT IMPLEMENTED')
-}
-
-#' @title Check observeds
-#' @description Check that a list of observed values from a caretList are valid
-#'
-#' @param list_of_models a list of caret models to check
-checkObs <- function(list_of_models){
-  warning('NOT IMPLEMENTED')
+  return(invisible(NULL))
 }
 
 #' @title Check resamples
 #' @description Check that the resamples from a caretList are valid
 #'
-#' @param list_of_models a caretList object
-checkResamples <- function(list_of_models){
-  warning('NOT IMPLEMENTED')
+#' @param modelLibrary a list of predictins from caret models
+check_bestpreds_resamples <- function(modelLibrary){
+  #TODO: ID which model(s) have bad row indexes
+  resamples <- lapply(modelLibrary, function(x) x[['Resample']])
+  check <- length(unique(resamples))
+  if(check != 1){
+    stop('Component models do not have the same re-sampling strategies')
+  }
+  return(invisible(NULL))
 }
 
-#' @title Run a series of checks on a caretList object
-#' @description Basically, this function validates that a caretList object is in good shape and is ready to be ensembled by caretList or caretEnsemble.
+#' @title Check row indexes
+#' @description Check that the row indexes from a caretList are valid
 #'
-#' @param list_of_models a list of caret models to check
-#' @return NULL
-#' @export
-checkCaretList <- function(list_of_models){
-  checkModelClasses(list_of_models)
-  checkRowIndexes(list_of_models)
-  checkPreds(list_of_models)
-  checkObs(list_of_models)
-  checkResamples(list_of_models)
+#' @param modelLibrary a list of predictins from caret models
+check_bestpreds_indexes <- function(modelLibrary){
+  #TODO: ID which model(s) have bad row indexes
+  rows <- lapply(modelLibrary, function(x) x[['rowIndex']])
+  check <- length(unique(rows))
+  if(check != 1){
+    stop('Re-sampled predictions from each component model do not use the same rowIndexs from the origial dataset')
+  }
   return(invisible(NULL))
+}
+
+#' @title Check observeds
+#' @description Check that a list of observed values from a caretList are valid
+#'
+#' @param modelLibrary a list of predictins from caret models
+check_bestpreds_obs <- function(modelLibrary){
+  #TODO: ID which model(s) have bad row indexes
+  obs <- lapply(modelLibrary, function(x) x[['obs']])
+  check <- length(unique(obs))
+  if(check != 1){
+    stop('Observed values for each component model are not the same.  Please re-train the models with the same Y variable')
+  }
+  return(invisible(NULL))
+}
+
+#' @title Check predictions
+#' @description Check that a list of predictions from a caretList are valid
+#'
+#' @param modelLibrary a list of predictins from caret models
+check_bestpreds_preds <- function(modelLibrary){
+  warning('NOT IMPLEMENTED')
 }
 
 #####################################################
@@ -135,6 +143,7 @@ extractModelTypes <- function(list_of_models){
   type <- types[1]
 
   #TODO: Maybe in the future we can combine reg and class models
+  #Also, this check is redundant, but I think that's ok
   stopifnot(all(types==type))
   stopifnot(all(types %in% c('Classification', 'Regression')))
   return(type)
@@ -144,6 +153,8 @@ extractModelTypes <- function(list_of_models){
 #' @description Extract predictions for the best tune from a list of caret models
 #' @param  list_of_models an object of class caretList
 extractBestPreds <- function(list_of_models){
+
+  #TODO: use data.table for faster sorting?
   #TODO: add an optional progress bar?
   #Extract resampled predictions from each model
   modelLibrary <- lapply(list_of_models, function(x) {x$pred})
@@ -165,6 +176,7 @@ extractBestPreds <- function(list_of_models){
     newModels[[i]] <- out
   }
   rm(modelLibrary)
+  names(newModels) <- names(list_of_models)
   return(newModels)
 }
 
@@ -175,14 +187,24 @@ extractBestPreds <- function(list_of_models){
 #' @param  list_of_models an object of class caretList
 makePredObsMatrix <- function(list_of_models){
 
-  #Check the component models
-  checkCaretList(list_of_models)
-
-  #Extract model type (class or reg)
-  type <- extractModelTypes(list_of_models)
+  #caretList Checks
+  check_caretList_classes(list_of_models)
+  check_caretList_model_types(list_of_models)
 
   #Make a list of models
   modelLibrary <- extractBestPreds(list_of_models)
+
+  #Model library checks
+  check_bestpreds_resamples(modelLibrary)
+  check_bestpreds_indexes(modelLibrary)
+  check_bestpreds_obs(modelLibrary)
+  check_bestpreds_preds(modelLibrary)
+
+  #Model Library Checks
+  checkBestModels(modelLibrary)
+
+  #Extract model type (class or reg)
+  type <- extractModelTypes(list_of_models)
 
   #Extract observations from the frist model in the list
   obs <- modelLibrary[[1]]$obs
