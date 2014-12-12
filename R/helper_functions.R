@@ -217,9 +217,6 @@ makePredObsMatrix <- function(list_of_models){
   check_bestpreds_obs(modelLibrary)
   check_bestpreds_preds(modelLibrary)
 
-  #Model Library Checks
-  checkBestModels(modelLibrary)
-
   #Extract model type (class or reg)
   type <- extractModelTypes(list_of_models)
 
