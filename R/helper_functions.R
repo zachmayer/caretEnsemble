@@ -87,6 +87,7 @@ check_caretList_model_types <- function(list_of_models){
 check_bestpreds_resamples <- function(modelLibrary){
   #TODO: ID which model(s) have bad row indexes
   resamples <- lapply(modelLibrary, function(x) x[['Resample']])
+  names(resamples) <- names(modelLibrary)
   check <- length(unique(resamples))
   if(check != 1){
     stop('Component models do not have the same re-sampling strategies')
@@ -101,6 +102,7 @@ check_bestpreds_resamples <- function(modelLibrary){
 check_bestpreds_indexes <- function(modelLibrary){
   #TODO: ID which model(s) have bad row indexes
   rows <- lapply(modelLibrary, function(x) x[['rowIndex']])
+  names(rows) <- names(modelLibrary)
   check <- length(unique(rows))
   if(check != 1){
     stop('Re-sampled predictions from each component model do not use the same rowIndexs from the origial dataset')
@@ -115,6 +117,7 @@ check_bestpreds_indexes <- function(modelLibrary){
 check_bestpreds_obs <- function(modelLibrary){
   #TODO: ID which model(s) have bad row indexes
   obs <- lapply(modelLibrary, function(x) x[['obs']])
+  names(obs) <- names(modelLibrary)
   check <- length(unique(obs))
   if(check != 1){
     stop('Observed values for each component model are not the same.  Please re-train the models with the same Y variable')
