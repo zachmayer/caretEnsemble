@@ -29,6 +29,46 @@ wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = FALSE) {
   return(out)
 }
 
+#' @title Checks caretList model classes
+#' @description This function checks that the models in a caretList are all of class train and have the same model type.
+#'
+#' @param list_of_models a list of caret models to check
+checkModelClasses <- function(list_of_models){
+  warning('NOT IMPLEMENTED')
+}
+
+#' @title Check row indexes
+#' @description Check that the row indexes from a caretList are valid
+#'
+#' @param list_of_models a list of caret models to check
+checkRowIndexes <- function(list_of_models){
+  warning('NOT IMPLEMENTED')
+}
+
+#' @title Check predictions
+#' @description Check that a list of predictions from a caretList are valid
+#'
+#' @param list_of_models a list of caret models to check
+checkPreds <- function(list_of_models){
+  warning('NOT IMPLEMENTED')
+}
+
+#' @title Check observeds
+#' @description Check that a list of observed values from a caretList are valid
+#'
+#' @param list_of_models a list of caret models to check
+checkObs <- function(list_of_models){
+  warning('NOT IMPLEMENTED')
+}
+
+#' @title Check resamples
+#' @description Check that the resamples from a caretList are valid
+#'
+#' @param list_of_models a caretList object
+checkResamples <- function(list_of_models){
+  warning('NOT IMPLEMENTED')
+}
+
 #' @title Check train models and extract their types
 #' @description Check that a list of models are all train objects and are ready to be ensembled together
 #'
@@ -78,6 +118,21 @@ checkModels_extractTypes <- function(list_of_models){
   return(type)
 }
 
+#' @title Run a series of checks on a caretList object
+#' @description Basically, this function validates that a caretList object is in good shape and is ready to be ensembled by caretList or caretEnsemble.
+#'
+#' @param list_of_models a list of caret models to check
+#' @return NULL
+#' @export
+checkCaretList <- function(list_of_models){
+  checkModelClasses(list_of_models)
+  checkRowIndexes(list_of_models)
+  checkPreds(list_of_models)
+  checkObs(list_of_models)
+  checkResamples(list_of_models)
+  return(invisible(NULL))
+}
+
 #' @title Extract the best predictions from a list of train objects
 #' @description Extract predictions for the best tune from a list of caret models
 #' @param  list_of_models an object of class caretList
@@ -106,14 +161,6 @@ extractBestPreds <- function(list_of_models){
   return(newModels)
 }
 
-#' @title Check predictions
-#' @description Check that a list of predictions from caret models are all valid
-#'
-#' @param list_of_models a list of caret models to check
-checkPreds <- function(list_of_models){
-  stop('NOT IMPLEMENTED')
-}
-
 #' @title Make a prediction matrix from a list of models
 #' @description Extract obs from one models, and a matrix of predictions from all other models, a
 #' helper function
@@ -121,13 +168,14 @@ checkPreds <- function(list_of_models){
 #' @param  list_of_models an object of class caretList
 makePredObsMatrix <- function(list_of_models){
 
-  #Check models and extract type (class or reg)
+  #Check the component models
+  checkCaretList(list_of_models)
+
+  #Extract model type (class or reg)
   type <- checkModels_extractTypes(list_of_models)
 
   #Make a list of models
   modelLibrary <- extractBestPreds(list_of_models)
-
-  #Insert checks here: observeds are all equal, row indexes are equal, Resamples are equal
 
   #Extract observations from the frist model in the list
   obs <- modelLibrary[[1]]$obs
