@@ -9,6 +9,6 @@ checkPreds(list_of_models)
 \item{list_of_models}{a list of caret models to check}
 }
 \description{
-Check that a list of predictions from caret models are all valid
+Check that a list of predictions from a caretList are valid
 }
 

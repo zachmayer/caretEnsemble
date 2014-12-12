@@ -35,7 +35,7 @@ wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = FALSE) {
 # caretList check functions
 #####################################################
 #' @title Checks caretList model classes
-#' @description This function checks that the models in a caretList are all of class train and have the same model type.
+#' @description This function checks that the models in a caretList are all of class train and have the same model type (classification or regression).  It also checks that classification models have saved probabilities.
 #'
 #' @param list_of_models a list of caret models to check
 checkModelClasses <- function(list_of_models){
@@ -72,12 +72,6 @@ checkModelClasses <- function(list_of_models){
     stopifnot(all(classProbs))
   }
 
-  #Check that all models saved their predictions so we can ensemble them
-  stopifnot(all(sapply(list_of_models, function(x) x$control$savePredictions)))
-
-  #Check that every model used the same resampling indexes
-  indexes <- lapply(list_of_models, function(x) x$control$index)
-  stopifnot(length(unique(indexes))==1)
 
 }
 
