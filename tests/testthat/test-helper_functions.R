@@ -109,10 +109,10 @@ test_that("wtd.sd handles NA values correctly", {
 
 test_that("Checks generate errors", {
   set.seed(42)
-  myControl <- trainControl(method='cv', number=5)
+  myControl <- trainControl(method='cv', number=5, savePredictions=TRUE)
   x <- caretList(
     Sepal.Length ~ Sepal.Width,
-    head(iris, 50),
+    head(iris, 100),
     methodList=c('glm', 'lm'),
     trControl=myControl
   )
@@ -122,18 +122,20 @@ test_that("Checks generate errors", {
   expect_error(check_bestpreds_resamples(modelLibrary))
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
-  expect_error(check_bestpreds_preds(modelLibrary))
 
-  x$rpart <- train(Sepal.Length ~ Sepal.Width, head(iris, 50), method='rpart')
+  x$rpart <- train(Sepal.Length ~ Sepal.Width, head(iris, 100), method='rpart')
   expect_error(check_bestpreds_resamples(modelLibrary))
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
-  expect_error(check_bestpreds_preds(modelLibrary))
 
   expect_error(check_caretList_classes(x$glm$finalModel))
-  x$rpart <- train(Species ~ Sepal.Width, head(iris, 100), method='rpart')
+
+  x$rpart <- train(Species ~ Sepal.Width, head(iris, 100), method='rpart', trControl=myControl)
   check_caretList_classes(x)
   expect_error(check_caretList_model_types(x))
+
+  m <- extractBestPreds(x)
+  expect_error(check_bestpreds_preds(m))
 })
 
 
