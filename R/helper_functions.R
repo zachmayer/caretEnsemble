@@ -1,4 +1,6 @@
-
+#####################################################
+# Misc. Functions
+#####################################################
 #' @title Calculate a weighted standard deviation
 #' @description Used to weight deviations among ensembled model preditions
 #'
@@ -29,52 +31,14 @@ wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = FALSE) {
   return(out)
 }
 
+#####################################################
+# caretList check functions
+#####################################################
 #' @title Checks caretList model classes
 #' @description This function checks that the models in a caretList are all of class train and have the same model type.
 #'
 #' @param list_of_models a list of caret models to check
 checkModelClasses <- function(list_of_models){
-  warning('NOT IMPLEMENTED')
-}
-
-#' @title Check row indexes
-#' @description Check that the row indexes from a caretList are valid
-#'
-#' @param list_of_models a list of caret models to check
-checkRowIndexes <- function(list_of_models){
-  warning('NOT IMPLEMENTED')
-}
-
-#' @title Check predictions
-#' @description Check that a list of predictions from a caretList are valid
-#'
-#' @param list_of_models a list of caret models to check
-checkPreds <- function(list_of_models){
-  warning('NOT IMPLEMENTED')
-}
-
-#' @title Check observeds
-#' @description Check that a list of observed values from a caretList are valid
-#'
-#' @param list_of_models a list of caret models to check
-checkObs <- function(list_of_models){
-  warning('NOT IMPLEMENTED')
-}
-
-#' @title Check resamples
-#' @description Check that the resamples from a caretList are valid
-#'
-#' @param list_of_models a caretList object
-checkResamples <- function(list_of_models){
-  warning('NOT IMPLEMENTED')
-}
-
-#' @title Check train models and extract their types
-#' @description Check that a list of models are all train objects and are ready to be ensembled together
-#'
-#' @param list_of_models an object of class caretList
-checkModels_extractTypes <- function(list_of_models){
-  #TODO: Add helpful error messages
 
   #Check that we have a list of train models
   stopifnot(is(list_of_models, 'caretList'))
@@ -115,7 +79,38 @@ checkModels_extractTypes <- function(list_of_models){
   indexes <- lapply(list_of_models, function(x) x$control$index)
   stopifnot(length(unique(indexes))==1)
 
-  return(type)
+}
+
+#' @title Check row indexes
+#' @description Check that the row indexes from a caretList are valid
+#'
+#' @param list_of_models a list of caret models to check
+checkRowIndexes <- function(list_of_models){
+  warning('NOT IMPLEMENTED')
+}
+
+#' @title Check predictions
+#' @description Check that a list of predictions from a caretList are valid
+#'
+#' @param list_of_models a list of caret models to check
+checkPreds <- function(list_of_models){
+  warning('NOT IMPLEMENTED')
+}
+
+#' @title Check observeds
+#' @description Check that a list of observed values from a caretList are valid
+#'
+#' @param list_of_models a list of caret models to check
+checkObs <- function(list_of_models){
+  warning('NOT IMPLEMENTED')
+}
+
+#' @title Check resamples
+#' @description Check that the resamples from a caretList are valid
+#'
+#' @param list_of_models a caretList object
+checkResamples <- function(list_of_models){
+  warning('NOT IMPLEMENTED')
 }
 
 #' @title Run a series of checks on a caretList object
@@ -131,6 +126,24 @@ checkCaretList <- function(list_of_models){
   checkObs(list_of_models)
   checkResamples(list_of_models)
   return(invisible(NULL))
+}
+
+#####################################################
+# Extraction functions
+#####################################################
+#' @title Extracts the model types from a list of train model
+#' @description Extracts the model types from a list of train model
+#'
+#' @param list_of_models an object of class caretList
+extractModelTypes <- function(list_of_models){
+
+  types <- sapply(list_of_models, function(x) x$modelType)
+  type <- types[1]
+
+  #TODO: Maybe in the future we can combine reg and class models
+  stopifnot(all(types==type))
+  stopifnot(all(types %in% c('Classification', 'Regression')))
+  return(type)
 }
 
 #' @title Extract the best predictions from a list of train objects
@@ -172,7 +185,7 @@ makePredObsMatrix <- function(list_of_models){
   checkCaretList(list_of_models)
 
   #Extract model type (class or reg)
-  type <- checkModels_extractTypes(list_of_models)
+  type <- extractModelTypes(list_of_models)
 
   #Make a list of models
   modelLibrary <- extractBestPreds(list_of_models)
