@@ -101,7 +101,7 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
     return_weights <- FALSE
     warning("return_weights not set properly, default set to TRUE")
   }
-  modtype <- checkModels_extractTypes(object$models)
+  modtype <- extractModelTypes(object$models)
   preds <- predict(object$models,  ...)
   if(!anyNA(preds)){
     keepNA <- TRUE
@@ -414,7 +414,7 @@ varImpFrame <- function(x){
 #' @export
 residuals.caretEnsemble <- function(object, ...){
   if(is.null(object$modelType)){
-    object$modelType <- checkModels_extractTypes(object$models)
+    object$modelType <- extractModelTypes(object$models)
   }
   if(object$modelType == "Regression"){
     yhat <- predict(object)
@@ -468,7 +468,7 @@ residuals2.train <- function(object){
 #' @export
 multiResiduals <- function(object, ...){
   stopifnot(is(object$models, 'caretList'))
-  modtype <- checkModels_extractTypes(object$models)
+  modtype <- extractModelTypes(object$models)
   preds <- predict(object$models, ...)
   if(modtype == "Regression"){
     y <- object$models[[1]]$trainingData$.outcome

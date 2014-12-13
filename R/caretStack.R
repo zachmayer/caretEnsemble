@@ -53,7 +53,7 @@ caretStack <- function(all.models, ...){
 #' RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
 predict.caretStack <- function(object, newdata=NULL, ...){
   stopifnot(is(object$models, 'caretList'))
-  type <- checkModels_extractTypes(object$models)
+  type <- extractModelTypes(object$models)
   preds <- predict(object$models, newdata=newdata)
   out <- predict(object$ens_model, newdata=preds, ...)
   return(out)
