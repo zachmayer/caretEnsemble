@@ -93,15 +93,18 @@ test_that("safe and greedy optimizers get same result in the limit", {
 
 context("Warnings and fallbacks in degenerate cases")
 
-set.seed(4876)
+set.seed(3579)
+
 
 ctrl <- trainControl(method = "cv",
                      number = 5, classProbs = TRUE, savePredictions = TRUE,
                      summaryFunction = twoClassSummary)
 
+sampVec <-sample(1:151, 120)
+
 out <- caretList(
-  x = modeldat2$traindata$preds,
-  y = modeldat2$traindata$class,
+  x = modeldat2$traindata$preds[sampVec,],
+  y = modeldat2$traindata$class[sampVec],
   trControl = ctrl,
   tuneLength = 3,
   methodList = c("knn", "nb", "lda"),
