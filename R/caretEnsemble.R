@@ -99,7 +99,7 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){
     return_weights <- FALSE
-    warning("return_weights not set properly, default set to TRUE")
+    warning("return_weights not set properly, default set to FALSE")
   }
   modtype <- extractModelTypes(object$models)
   preds <- predict(object$models,  ...)
