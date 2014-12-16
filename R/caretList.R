@@ -8,7 +8,6 @@
 #' caretModelSpec('rf', tuneLength=5, preProcess='ica')
 caretModelSpec <- function(method='rf', ...){
   stopifnot(is.character(method))
-  params=list(...)
   out <- c(list(method=method), list(...))
   return(out)
 }
