@@ -7,6 +7,10 @@
 #' @details If the optimization fails to produce an error term better than the best
 #' component model, a message is returned and the best optimization after N iterations
 #' is returned.
+#' @note The optimizer ignores missing values and calculates the weights with the
+#' observations and predictions available for each model separately. If each of the
+#' models has a different pattern of missingness in the predictors, then the resulting
+#' ensemble weights may be biased.
 #' @importFrom caTools colAUC
 #' @export
 #' @examples
@@ -18,7 +22,6 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
     Y <- factor(Y)
   }
   stopifnot(is.factor(Y))
-
   N           <- ncol(X)
   weights     <- rep(0L, N)
   pred        <- 0 * X
@@ -80,8 +83,8 @@ safeOptAUC <- function(X, Y, iter = 100L) {
     best          <- which.max(errors)
     weights[best] <- weights[best] + 1L
     pred          <- pred[, best] * sum.weights
-    maxtest       <- max(errors) # check we are better than no weights
   }
+  maxtest       <- colAUC(X %*% weights, Y)
   if(stopper > maxtest){
     testresult <- round(maxtest/stopper, 5) * 100
     wstr <- paste0("Optimized weights not better than best model. Ensembled result is ",

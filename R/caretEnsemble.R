@@ -33,6 +33,15 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
   #Check the models, and make a matrix of obs and preds
   predobs <- makePredObsMatrix(all.models)
 
+  # Check that missingness is consistent across models in library
+  if(anyNA(predobs$preds)){
+    message("Missing values found in predictions.")
+    nacheck <-apply(predobs$preds, 2, function(x) length(which(is.na(x))))
+    if(abs(max(nacheck) - min(nacheck)) > 0.01){
+      message("Missingness is not consistent across models. ")
+    }
+  }
+
   #If the optimization function is NULL, choose default
   if (is.null(optFUN)){
     if (predobs$type=='Classification') {
@@ -51,15 +60,32 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
   #Remove 0-weighted models
   keep <- which(weights != 0)
 
-  #Determine RMSE
-  if (predobs$type == "Regression"){
-    error <- RMSE(predobs$preds %*% weights, predobs$obs, na.rm=TRUE)
-    names(error) <- 'RMSE'
-  } else {
-    metric <- 'AUC'
-    error <- caTools::colAUC(predobs$preds %*% weights, predobs$obs)
-    names(error) <- 'AUC'
+  # Make sure NAs in 0 weighted models do not cause problems
+  if(anyNA(predobs$preds)){
+    if(length(keep) == 1){
+      weightedPreds <- predobs$preds[, keep] * weights[keep]
+    } else if(length(keep > 1)){
+      weightedPreds <- predobs$preds[, keep] %*% weights[keep]
+    }
+    if (predobs$type == "Regression"){
+      error <- RMSE(weightedPreds, predobs$obs, na.rm=TRUE)
+      names(error) <- 'RMSE'
+    } else {
+      metric <- 'AUC'
+      error <- caTools::colAUC(weightedPreds, predobs$obs)
+      names(error) <- 'AUC'
+    }
+  } else{
+    if (predobs$type == "Regression"){
+      error <- RMSE(predobs$preds %*% weights, predobs$obs, na.rm=TRUE)
+      names(error) <- 'RMSE'
+    } else {
+      metric <- 'AUC'
+      error <- caTools::colAUC(predobs$preds %*% weights, predobs$obs)
+      names(error) <- 'AUC'
+    }
   }
+
 
   #Return final model
   models <- all.models[keep]
