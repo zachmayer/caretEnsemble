@@ -38,10 +38,10 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 
   # Check that missingness is consistent across models in library
   if(anyNA(predobs$preds)){
-    message("Missing values found in predictions.")
+    warning("Missing values found in predictions. Check library models.")
     nacheck <-apply(predobs$preds, 2, function(x) length(which(is.na(x))))
     if(abs(max(nacheck) - min(nacheck)) > 0.01){
-      message("Missingness is not consistent across models. ")
+      warning("Missingness is not consistent across models. Final model weights may be biased.")
     }
   }
 

@@ -115,10 +115,6 @@ glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
 set.seed(482)
 glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
               trControl = myControl)
-# set.seed(482)
-# glm5 <- train(x = trainC[, c(12:17)], y = trainC[, "Class"], method = 'glm',
-#               trControl = myControl)
-
 
 nestedList <- list(glm1, glm2, glm3, glm4)
 class(nestedList) <- 'caretList'
@@ -130,6 +126,11 @@ pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)])
 pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)])
 pred.nestTrain_a <- predict(ensNest, keepNA = FALSE)
 pred.nestTrain_b <- predict(ensNest, keepNA = TRUE)
+
+test_that("Warnings issued for missing data correctly", {
+  expect_warning(caretEnsemble(nestedList, iter=20), "Missing values found")
+  expect_warning(caretEnsemble(nestedList, iter=20), "not consistent across")
+})
 
 test_that("We can ensemble models and handle missingness across predictors", {
   expect_that(ensNest, is_a("caretEnsemble"))
