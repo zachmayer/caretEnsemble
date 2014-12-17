@@ -7,10 +7,6 @@
 #' @details If the optimization fails to produce an error term better than the best
 #' component model, a message is returned and the best optimization after N iterations
 #' is returned.
-#' @note The optimizer ignores missing values and calculates the weights with the
-#' observations and predictions available for each model separately. If each of the
-#' models has a different pattern of missingness in the predictors, then the resulting
-#' ensemble weights may be biased.
 #' @importFrom caTools colAUC
 #' @export
 #' @examples
