@@ -6,17 +6,17 @@ Title: Framework for fitting multiple [caret models](https://github.com/topepo/c
 
 caretEnsemble was inspired by [medley](https://github.com/mewo2/medley), which in turn was inspired by Caruana et. al.'s (2004) paper [Ensemble Selection from Libraries of Models.](http://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
 
-Install the latest stable version from CRAN as follows:
+To install the latest stable version from CRAN:
 ```{R}
 install.packages('caretEnsemble')
 ```
 
-Install the latest development version as follows:
+To install the latest development version from github:
 ```{R}
 devtools::install_github('zachmayer/caretEnsemble')
 ```
 
-There are also several tags in github you can install using devtools.  For example, to install the original draft of the API, use:
+There are also several tagged versions of caretEnsemble on github you can install via devtools.  For example, to install the original draft of the API:
 ```{R}
 devtools::install_github('zachmayer/caretEnsemble@0.0')
 ```
