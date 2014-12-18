@@ -14,9 +14,7 @@ Description: 3 primary functions: caretList, caretEnsemble,
     caret::train models to the same dataset.  caretEnsemble will make a linear
     combination of these models using greedy forward selection, and caretList
     will make linear or non-linear combinations of these models using a caret
-    model as a meta-model.  Custom caret models are not yet supported.
-    Multi-class classification and combinations mixing classification and
-    regression models in one ensemble are also not yet supported.
+    model as a meta-model.
 Depends:
     R (>= 3.1.0),
     caret
