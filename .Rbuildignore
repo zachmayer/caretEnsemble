@@ -5,3 +5,4 @@ todo.txt
 ^data-raw$
 ^\.travis\.yml$
 ^NEWS\.md$
+^cran-comments\.md$
