@@ -1,12 +1,14 @@
 Package: caretEnsemble
 Type: Package
 Title: Framework for combining caret models into ensembles
-Version: 0.0.0.90153
-Date: 2013-03-01
+Version: 1.0.0
+Date: 2014-12-18
 Authors@R: c(person(c("Zach"), "Mayer", role = c("aut", "cre"),
     email = "zach.mayer@gmail.com"),
     person(c("Jared", "E."), "Knowles", role=c("aut"),
     email="jknowles@gmail.com"))
+URL: https://github.com/zachmayer/caretEnsemble
+BugReports: https://github.com/zachmayer/caretEnsemble/issues
 Description: This package consists primarily of one function: caretEnsemble.
     This function takes a collection of caret models and finds a good linear
     combination of those models, using either linear regression or iterative
@@ -16,7 +18,7 @@ Description: This package consists primarily of one function: caretEnsemble.
     allow you to combine multi-class classification models, or form combined
     ensembles of classification and regression models.\
 Depends:
-    R (>= 2.14.0),
+    R (>= 3.0.0),
     caret
 Suggests:
     testthat,

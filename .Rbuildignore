@@ -4,3 +4,4 @@ todo.txt
 .git
 ^data-raw$
 ^\.travis\.yml$
+^NEWS\.md$

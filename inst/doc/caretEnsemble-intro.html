@@ -10,7 +10,7 @@
 
 <meta name="author" content="Zach Mayer" />
 
-<meta name="date" content="2014-12-12" />
+<meta name="date" content="2014-12-18" />
 
 <title>A brief introduction to caretEnsemble</title>
 
@@ -54,7 +54,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <div id="header">
 <h1 class="title">A brief introduction to caretEnsemble</h1>
 <h4 class="author"><em>Zach Mayer</em></h4>
-<h4 class="date"><em>2014-12-12</em></h4>
+<h4 class="date"><em>2014-12-18</em></h4>
 </div>
 
 
@@ -64,9 +64,6 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <h2>caretList</h2>
 <p><code>caretList</code> is a flexible function for fitting many different caret models, with the same resampling parameters, to the same dataset. It returns a convenient <code>list</code> of caret objects which can later be passed to <code>caretEnsemble</code> and <code>caretStack</code>. <code>caretList</code> has almost exactly the same arguments as <code>train</code> (from the caret package), with the exception that the <code>trControl</code> argument comes last. It can handle both the formula interface and the explicit <code>x</code>, <code>y</code> interface to train. As in caret, the formula interface introduces some overhead and the <code>x</code>, <code>y</code> interface is preferred.</p>
 <p><code>caretEnsemble</code> has 2 arguments that can be used to specify which models to fit: <code>methodList</code> and <code>tuneList</code>. <code>methodList</code> is a simple character vector of methods that will be fit with the default <code>train</code> parameters, while <code>tuneList</code> can be used to customize the call to each component model and will be discussed in more detail later. First, lets build an example dataset (adapted from the caret vignette):</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressMessages</span>(<span class="kw">library</span>(<span class="st">'caret'</span>))
-<span class="kw">suppressMessages</span>(<span class="kw">library</span>(<span class="st">'mlbench'</span>))
-<span class="kw">suppressMessages</span>(<span class="kw">library</span>(<span class="st">'pROC'</span>))</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Adapted from the caret vignette</span>
 <span class="kw">library</span>(<span class="st">'caret'</span>)
 <span class="kw">library</span>(<span class="st">'mlbench'</span>)
