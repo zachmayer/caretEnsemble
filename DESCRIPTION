@@ -9,7 +9,7 @@ Authors@R: c(person(c("Zachary", "A."), "Mayer", role = c("aut", "cre"),
     email="jknowles@gmail.com"))
 URL: https://github.com/zachmayer/caretEnsemble
 BugReports: https://github.com/zachmayer/caretEnsemble/issues
-Description: This package is built around 3 functions: caretList, caretEnsemble,
+Description: 3 primary functions: caretList, caretEnsemble,
     and caretStack.  caretList is a convenience function for fitting multiple
     caret::train models to the same dataset.  caretEnsemble will make a linear
     combination of these models using greedy forward selection, and caretList
