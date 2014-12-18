@@ -130,7 +130,6 @@ plot.caretStack <- function(x, ...){
 #' @param data passed to dotplot
 #' @param ... passed to dotplot
 #' @importFrom lattice dotplot
-#' @export
 #' @examples
 #' set.seed(42)
 #' library('rpart')
