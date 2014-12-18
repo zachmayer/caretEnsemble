@@ -440,7 +440,6 @@ varImpFrame <- function(x){
 #' @param object a \code{caretEnsemble} to make predictions from.
 #' @param ... other arguments to be passed to residuals
 #' @return A numeric of the residuals.
-#' @export
 residuals.caretEnsemble <- function(object, ...){
   if(is.null(object$modelType)){
     object$modelType <- extractModelTypes(object$models)
@@ -494,7 +493,6 @@ residuals2.train <- function(object){
 #' @return A data.frame in the long format with columns for the model method,
 #' the observation id, yhat for the fitted values, resid for the residuals, and
 #' y for the observed value.
-#' @export
 multiResiduals <- function(object, ...){
   stopifnot(is(object$models, 'caretList'))
   modtype <- extractModelTypes(object$models)
@@ -528,7 +526,6 @@ multiResiduals <- function(object, ...){
 #' @param ... additional arguments to pass to fortify
 #' @return The original data with extra columns for fitted values and residuals
 #' @importFrom digest digest
-#' @export
 fortify.caretEnsemble <- function(model, data = NULL, ...){
   data <- extractModFrame(model)
   data$y <- model$models[[1]]$trainingData$.outcome
