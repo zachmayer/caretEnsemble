@@ -33,7 +33,10 @@ problems
 \note{
 Currently when missing values are present in the training data, weights
 are calculated using only observations which are complete across all models
-in the library.
+in the library.The optimizer ignores missing values and calculates the weights with the
+observations and predictions available for each model separately. If each of the
+models has a different pattern of missingness in the predictors, then the resulting
+ensemble weights may be biased and the function issues a message.
 }
 \examples{
 set.seed(42)

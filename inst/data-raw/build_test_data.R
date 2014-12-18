@@ -70,26 +70,26 @@ rm(list=ls())
 ## Uglier data with class imbalance
 
 # devtools::install_github("jknowles/EWStools") # to get the data
-library(EWStools)
-data(EWStestData)
-
-set.seed(3425)
-ctrl <- trainControl(method = "cv",
-                     number = 3, classProbs = TRUE, savePredictions = TRUE,
-                     summaryFunction = twoClassSummary)
-
-modeldat2 <- assembleData(fulldat[1:300, ], class = "y", p = 0.5,
-                         predvars = names(fulldat)[-1], classification = TRUE)
-
-out <- caretList(
-  x = modeldat2$traindata$preds,
-  y = modeldat2$traindata$class,
-  trControl = ctrl,
-  tuneLength = 3,
-  methodList = c("knn", "nb", "lda"),
-  tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
-  )
-
- studentEns <- caretEnsemble(out)
-
-devtools::use_data(modeldat2, studentEns, overwrite=TRUE)
+# library(EWStools)
+# data(EWStestData)
+#
+# set.seed(3425)
+# ctrl <- trainControl(method = "cv",
+#                      number = 3, classProbs = TRUE, savePredictions = TRUE,
+#                      summaryFunction = twoClassSummary)
+#
+# modeldat2 <- assembleData(fulldat[1:300, ], class = "y", p = 0.5,
+#                          predvars = names(fulldat)[-1], classification = TRUE)
+#
+# out <- caretList(
+#   x = modeldat2$traindata$preds,
+#   y = modeldat2$traindata$class,
+#   trControl = ctrl,
+#   tuneLength = 3,
+#   methodList = c("knn", "nb", "lda"),
+#   tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
+#   )
+#
+#  studentEns <- caretEnsemble(out)
+#
+# devtools::use_data(modeldat2, studentEns, overwrite=TRUE)

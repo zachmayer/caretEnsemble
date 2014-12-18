@@ -18,9 +18,7 @@ greedOptRMSE <- function(X, Y, iter = 100L){
   pred        <- 0 * X
   sum.weights <- 0L
   stopper     <- min(sqrt(colSums((X - Y) ^ 2L, na.rm=TRUE)))
-
   while(sum.weights < iter) {
-
     sum.weights   <- sum.weights + 1L
     pred          <- (pred + X) * (1L / sum.weights)
     errors        <- sqrt(colSums((pred - Y) ^ 2L, na.rm=TRUE))
@@ -29,6 +27,8 @@ greedOptRMSE <- function(X, Y, iter = 100L){
     pred          <- pred[, best] * sum.weights
     maxtest       <- min(errors)
   }
+  weights2 <- weights/sum(weights)
+  maxtest       <- sqrt(sum((X %*% weights2 - Y) ^ 2L, na.rm=TRUE))
   if(stopper < maxtest){
     testresult <- round(maxtest/stopper, 5) * 100
     wstr <- paste0("Optimized weights not better than best model. Ensembled result is ",

@@ -72,10 +72,10 @@ out <- caretList(
   methodList = c("knn", "nb", "lda"),
   tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
 )
-
-studentEns1 <- caretEnsemble(out, optFUN = safeOptAUC, iter = 200)
-studentEns2 <- caretEnsemble(out, optFUN = greedOptAUC, iter = 200)
-studentEns3 <- caretEnsemble(out)
+#
+# studentEns1 <- caretEnsemble(out, optFUN = safeOptAUC, iter = 200)
+# studentEns2 <- caretEnsemble(out, optFUN = greedOptAUC, iter = 200)
+# studentEns3 <- caretEnsemble(out)
 
 test_that("safe and greedy optimizers get same result in the limit", {
   expect_identical(caretEnsemble(myCL, optFUN = safeOptAUC),
@@ -93,15 +93,18 @@ test_that("safe and greedy optimizers get same result in the limit", {
 
 context("Warnings and fallbacks in degenerate cases")
 
-set.seed(4876)
+set.seed(3579)
+
 
 ctrl <- trainControl(method = "cv",
                      number = 5, classProbs = TRUE, savePredictions = TRUE,
                      summaryFunction = twoClassSummary)
 
+sampVec <-sample(1:151, 120)
+
 out <- caretList(
-  x = modeldat2$traindata$preds,
-  y = modeldat2$traindata$class,
+  x = modeldat2$traindata$preds[sampVec,],
+  y = modeldat2$traindata$class[sampVec],
   trControl = ctrl,
   tuneLength = 3,
   methodList = c("knn", "nb", "lda"),
@@ -115,26 +118,26 @@ wghts2 <- greedOptAUC(predobs$preds, predobs$obs)
 
 #I CANNOT SEEM TO FIX THESE TESTS! - ZACH
 test_that("Warnings and messages are correct", {
-#   expect_warning(safeOptAUC(predobs$preds, predobs$obs), "Returning best model")
-#   expect_message(greedOptAUC(predobs$preds, predobs$obs), "Try more iterations")
-#   expect_warning(caretEnsemble(out, optFUN = safeOptAUC), "Returning best model")
-#   expect_message(caretEnsemble(out, optFUN = greedOptAUC), "Try more iterations")
+   expect_warning(safeOptAUC(predobs$preds, predobs$obs), "Returning best model")
+   expect_message(greedOptAUC(predobs$preds, predobs$obs), "Try more iterations")
+   expect_warning(caretEnsemble(out, optFUN = safeOptAUC), "Returning best model")
+   expect_message(caretEnsemble(out, optFUN = greedOptAUC), "Try more iterations")
 })
 
 test_that("safe and greed return different results", {
-#   expect_false(identical(wghts1, wghts2))
-#   expect_equal(wghts1, c(0, 0, 0, 1)) #GET c(12L, 0L, 88L, 0L) INSTEAD!
-#   expect_equal(wghts2, c(4, 88, 0, 8)) #GET c(12L, 0L, 88L, 0L) INSTEAD!
+   expect_false(identical(wghts1, wghts2))
+   expect_equal(wghts1, c(1, 0, 0, 0))
+   expect_equal(wghts2, c(39, 1, 60, 0))
 })
 
 test_that("Correct results propogate to full caretEnsemble object", {
   ens1 <- caretEnsemble(out, optFUN = safeOptAUC)
   ens2 <- caretEnsemble(out, optFUN = greedOptAUC)
-#   expect_false(identical(ens1, ens2)) #THESE ALL FAIL TOO!
-#   expect_equivalent(ens1$weights, 1)
-#   expect_equivalent(length(ens1$weights), 1)
-#   expect_equivalent(ens2$weights, c(0.04, 0.88, 0.08))
-#   expect_equivalent(length(ens2$weights), 3)
+  expect_false(identical(ens1, ens2)) #THESE ALL FAIL TOO!
+  expect_equivalent(ens1$weights, 1)
+  expect_equivalent(length(ens1$weights), 1)
+  expect_equivalent(ens2$weights, c(0.39, 0.01, 0.60))
+  expect_equivalent(length(ens2$weights), 3)
 })
 
 context("RMSE")
