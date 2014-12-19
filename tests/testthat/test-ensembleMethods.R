@@ -229,8 +229,6 @@ test_that("No errors are thrown by a summary", {
 })
 
 
-
-
 context("Plot.caretEnsemble")
 
 test_that("Plot objects are ggplot", {
@@ -266,6 +264,7 @@ test_that("fortify caretEnsemble", {
 
 context("autoplot caretEnsemble")
 test_that("Autoplot throws errors on train, but not caretEnsemble objects", {
+  skip_on_cran()
   identical(tryCatch(autoplot(ens.class)), NULL)
   identical(tryCatch(autoplot(ens.reg)), NULL)
   expect_error(autoplot(ens.class$models[[1]]))
