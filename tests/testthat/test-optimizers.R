@@ -66,8 +66,13 @@ test_that("Test more difficult cases", {
 
 context("Warnings and fallbacks in degenerate cases")
 test_that("Warnings and fallbacks in degenerate cases", {
-  set.seed(3579)
+
   skip_on_cran()
+
+  set.seed(3579)
+  load(system.file("testdata/studentEns.rda", package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/modeldat2.rda", package="caretEnsemble", mustWork=TRUE))
+
   ctrl <- trainControl(method = "cv",
                        number = 5, classProbs = TRUE, savePredictions = TRUE,
                        summaryFunction = twoClassSummary)

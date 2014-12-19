@@ -280,9 +280,6 @@ test_that("Residual extraction", {
   predTest2 <- predict(ens.reg)
   identical(residTest, obs1 - predTest)
   identical(residTest2, obs2 - predTest2)
-})
-
-test_that("Residuals provided by residuals are proper for ensemble objects", {
   expect_identical(residTest, obs1 - predTest)
   expect_identical(residTest2, obs2 - predTest2)
   expect_false(identical(residTest2, predTest2 -obs2))
