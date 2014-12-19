@@ -67,6 +67,16 @@ devtools::use_data(models_class, Y.class, X.class, overwrite=TRUE)
 
 rm(list=ls())
 
+#caretList train/test data
+set.seed(442)
+train <- twoClassSim(
+  n = 1000, intercept = -8, linearVars = 3,
+  noiseVars = 10, corrVars = 4, corrValue = 0.6)
+test <- twoClassSim(
+  n = 1500, intercept = -7, linearVars = 3,
+  noiseVars = 10, corrVars = 4, corrValue = 0.6)
+devtools::use_data(train, test, overwrite=TRUE)
+
 ## Uglier data with class imbalance
 
 # devtools::install_github("jknowles/EWStools") # to get the data
