@@ -156,9 +156,10 @@ test_that('CV methods work', {
 })
 
 ###############################################
-context("Longer tests for classificaiton models")
-###############################################
-test_that("longer tests", {
+context("Classification models")
+################################################
+
+test_that("Classification models", {
   rm(list=ls(all=TRUE))
   gc(reset=TRUE)
   load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
@@ -170,37 +171,23 @@ test_that("longer tests", {
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
 
-  skip_on_cran()
+  # Simple two method list
+  # Warning because we're going to auto-set indexes
   expect_warning({
-    test2 <- caretList(
+    test1 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
       metric = "ROC",
       trControl = myControl,
-      methodList = c("knn", "glm", "rpart")
+      methodList = c("knn", "glm")
     )
   })
 
-  expect_warning({
-    test3 <- caretList(
-      x = train[, -23],
-      y = train[ , "Class"],
-      metric = "ROC",
-      trControl = myControl,
-      methodList = c("svmLinear", "knn", "glm")
-    )
-  })
-
-  expect_is(test2, "caretList")
-  expect_is(test3, "caretList")
-  expect_is(caretEnsemble(test2), "caretEnsemble")
-  expect_is(caretEnsemble(test3), "caretEnsemble")
-
-  test_that("caretList objects preserve user metric", {
-    expect_identical(test2[[1]]$metric, "ROC")
-    expect_identical(test3[[1]]$metric, "ROC")
-  })
+  expect_is(test1, "caretList")
+  expect_is(caretEnsemble(test1), "caretEnsemble")
+  expect_is(caretEnsemble(test1), "caretEnsemble")
 })
+
 
 ###############################################
 context("Test that caretList preserves user specified error functions")
