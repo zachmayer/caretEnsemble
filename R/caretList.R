@@ -127,7 +127,6 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @param trControl a \code{\link{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.
 #' @param methodList optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.
 #' @param tuneList optional, a NAMED list of caretModelSpec objects. This much more flexible than methodList and allows the specificaiton of model-specific parameters (e.g. passing trace=FALSE to nnet)
-#' @param continue_on_model_fail If FALSE, the failure of a single model will stop the entire building process.  If TRUE, model failures will be downgraded to warnings.
 #' @return A list of \code{\link{train}} objects
 #' @import caret
 #' @export
@@ -151,8 +150,7 @@ caretList <- function(
   ...,
   trControl = trainControl(),
   methodList = NULL,
-  tuneList = NULL,
-  continue_on_model_fail=FALSE) {
+  tuneList = NULL) {
 
   #Checks
   if(is.null(tuneList) & is.null(methodList)){
@@ -186,25 +184,11 @@ caretList <- function(
   global_args[['trControl']] <- trControl
 
   #Loop through the tuneLists and fit caret models with those specs
-  if(!continue_on_model_fail){
-    modelList <- lapply(tuneList, function(m){
-      model_args <- c(global_args, m)
-      model <- do.call(train, model_args)
-      return(model)
-    })
-  } else{
-    modelList <- lapply(tuneList, function(m){
-      model_args <- c(global_args, m)
-      model <- tryCatch(
-        do.call(train, model_args),
-        error=function(e){
-          warning(e)
-          warning(paste('caret::train failed for model', model_args$method))
-          return(NULL)
-        })
-      return(model)
-    })
-  }
+  modelList <- lapply(tuneList, function(m){
+    model_args <- c(global_args, m)
+    model <- do.call(train, model_args)
+    return(model)
+  })
   names(modelList) <- names(tuneList)
   nulls <- sapply(modelList, is.null)
   modelList <- modelList[!nulls]
