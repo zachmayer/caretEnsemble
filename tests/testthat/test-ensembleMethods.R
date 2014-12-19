@@ -234,6 +234,7 @@ test_that("No errors are thrown by a summary", {
 context("Plot.caretEnsemble")
 
 test_that("Plot objects are ggplot", {
+  skip_on_cran()
   expect_is(plot(ens.class), "ggplot")
   expect_is(plot(ens.reg), "ggplot")
   expect_is(plot(ens.reg$models[[2]]), "trellis")
@@ -241,6 +242,7 @@ test_that("Plot objects are ggplot", {
 
 
 test_that("Plot objects have proper data", {
+  skip_on_cran()
   tp <- plot(ens.class)
   tp2 <- plot(ens.reg)
   expect_equal(nrow(tp$data), 5)
@@ -250,7 +252,6 @@ test_that("Plot objects have proper data", {
 })
 
 context("fortify caretEnsemble")
-
 fort1 <- fortify(ens.class)
 fort2 <- fortify(ens.reg)
 
@@ -338,67 +339,68 @@ test_that("Multiple residuals results are correct", {
 })
 
 
+#TODO: THIS TEST IS OUT OF PLACE! IT SEEMS REDUNDANT!
 context("Does prediction method work for classification")
+test_that("Does prediction method work for classification", {
+  skip_on_cran()
+  mseeds <- vector(mode = "list", length = 12)
+  for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
+  mseeds[[12]] <- sample.int(1000, 1)
+  myControl = trainControl(method = "cv", number = 10, repeats = 1,
+                           p = 0.75, savePrediction = TRUE,
+                           classProbs = TRUE, returnResamp = "final",
+                           returnData = TRUE, seeds = mseeds)
 
-mseeds <- vector(mode = "list", length = 12)
-for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
-mseeds[[12]] <- sample.int(1000, 1)
-myControl = trainControl(method = "cv", number = 10, repeats = 1,
-                         p = 0.75, savePrediction = TRUE,
-                         classProbs = TRUE, returnResamp = "final",
-                         returnData = TRUE, seeds = mseeds)
+  trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
+                        corrType = "AR1", corrValue = 0.6, mislabel = 0)
 
-trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
-                      corrType = "AR1", corrValue = 0.6, mislabel = 0)
+  testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
+                       corrType = "AR1", corrValue = 0.6, mislabel = 0)
 
-testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
-                     corrType = "AR1", corrValue = 0.6, mislabel = 0)
-
-MCAR.df <- function(df, p){
-  MCARx <- function(x, p){
-    z <- rbinom(length(x), 1, prob=p)
-    x[z==1] <- NA
-    return(x)
+  MCAR.df <- function(df, p){
+    MCARx <- function(x, p){
+      z <- rbinom(length(x), 1, prob=p)
+      x[z==1] <- NA
+      return(x)
+    }
+    if(length(p) == 1){
+      df <- apply(df, 2, MCARx, p)
+    } else if(length(p) > 1) {
+      df <- apply(df, 2, MCARx, sample(p, 1))
+    }
+    df <- as.data.frame(df)
+    return(df)
   }
-  if(length(p) == 1){
-    df <- apply(df, 2, MCARx, p)
-  } else if(length(p) > 1) {
-    df <- apply(df, 2, MCARx, sample(p, 1))
-  }
-  df <- as.data.frame(df)
-  return(df)
-}
 
-set.seed(3256)
-trainC[, c(1:17)] <- MCAR.df(trainC[, c(1:17)], 0.15)
-testC[, c(1:17)] <- MCAR.df(testC[, c(1:17)], 0.05)
+  set.seed(3256)
+  trainC[, c(1:17)] <- MCAR.df(trainC[, c(1:17)], 0.15)
+  testC[, c(1:17)] <- MCAR.df(testC[, c(1:17)], 0.05)
 
-set.seed(482)
-glm1 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
-              trControl = myControl)
-set.seed(482)
-glm2 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
-              trControl = myControl, preProcess = "medianImpute")
-set.seed(482)
-glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
-              trControl = myControl)
-set.seed(482)
-glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
-              trControl = myControl)
+  set.seed(482)
+  glm1 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl)
+  set.seed(482)
+  glm2 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl, preProcess = "medianImpute")
+  set.seed(482)
+  glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl)
+  set.seed(482)
+  glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl)
 
 
 
-nestedList <- list(glm1, glm2, glm3, glm4)
-class(nestedList) <- 'caretList'
-set.seed(482)
-ensNest <- caretEnsemble(nestedList, iter=2000)
-pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
-pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)])
-pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)])
-pred.nestTrain_a <- predict(ensNest, keepNA = FALSE)
-pred.nestTrain_b <- predict(ensNest, keepNA = TRUE)
+  nestedList <- list(glm1, glm2, glm3, glm4)
+  class(nestedList) <- 'caretList'
+  set.seed(482)
+  ensNest <- caretEnsemble(nestedList, iter=2000)
+  pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
+  pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)])
+  pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)])
+  pred.nestTrain_a <- predict(ensNest, keepNA = FALSE)
+  pred.nestTrain_b <- predict(ensNest, keepNA = TRUE)
 
-test_that("We can ensemble models and handle missingness across predictors", {
   expect_that(ensNest, is_a("caretEnsemble"))
   pred.nest1 <- predict(ensNest,  newdata=testC[, c(1:17)])
   expect_message(predict(ensNest, newdata=testC[, c(1:17)]))
@@ -411,11 +413,13 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(length(pred.nestTrain_a)==2000)
   expect_true(length(pred.nest2)==1000)
   expect_true(anyNA(pred.nest1))
+
+  modF3 <- caretEnsemble:::extractModFrame(ensNest)
 })
 
 
-context("Extract model results")
 
+context("Extract model results")
 modres1 <- caretEnsemble:::extractModRes(ens.class)
 modres2 <- caretEnsemble:::extractModRes(ens.reg)
 
@@ -473,7 +477,6 @@ context("Extract model frame")
 
 modF <- caretEnsemble:::extractModFrame(ens.class)
 modF2 <- caretEnsemble:::extractModFrame(ens.reg)
-modF3 <- caretEnsemble:::extractModFrame(ensNest)
 ## Test generics summary and predict
 
 test_that("Model frame is bigger for ensemble than for component models", {
