@@ -105,16 +105,6 @@ test_that('CV methods work', {
   rm(list=ls(all=TRUE))
   gc(reset=TRUE)
 
-  myControl = trainControl(
-    method = 'cv',
-    number = 7,
-    repeats = 1,
-    p = 0.75,
-    savePrediction = TRUE,
-    returnResamp = "final",
-    returnData = FALSE,
-    verboseIter = FALSE)
-
   for(m in c(
     'boot',
     'adaptive_boot',
@@ -124,7 +114,15 @@ test_that('CV methods work', {
     'adaptive_LGOCV')
   ){
 
-    myControl$method <- m
+    myControl = trainControl(
+      method = m,
+      number = 7,
+      repeats = 1,
+      p = 0.75,
+      savePrediction = TRUE,
+      returnResamp = "final",
+      returnData = FALSE,
+      verboseIter = FALSE)
 
     suppressWarnings({
       suppressMessages({
