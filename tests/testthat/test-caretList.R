@@ -96,37 +96,63 @@ test_that("We can work around bad models", {
   expect_equal(methods, c('rpart'))
 })
 
-###############################################
-context("Classification models")
+################################################
+context("We can handle different CV methods")
 ################################################
 
-test_that("Classification models", {
+test_that('CV methods work', {
+  skip_on_cran()
   rm(list=ls(all=TRUE))
   gc(reset=TRUE)
-  load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
-  load(system.file("testdata/test.rda", package="caretEnsemble", mustWork=TRUE))
+
   myControl = trainControl(
-    method = "cv", number = 3, repeats = 1,
-    p = 0.75, savePrediction = TRUE,
-    summaryFunction = twoClassSummary,
-    classProbs = TRUE, returnResamp = "final",
-    returnData = TRUE, verboseIter = FALSE)
+    method = 'cv',
+    number = 7,
+    repeats = 1,
+    p = 0.75,
+    savePrediction = TRUE,
+    returnResamp = "final",
+    returnData = FALSE,
+    verboseIter = FALSE)
 
-  # Simple two method list
-  # Warning because we're going to auto-set indexes
-  expect_warning({
-    test1 <- caretList(
-      x = train[, -23],
-      y = train[, "Class"],
-      metric = "ROC",
-      trControl = myControl,
-      methodList = c("knn", "glm")
-    )
-  })
+  for(m in c(
+    'boot',
+    'adaptive_boot',
+    'cv',
+    'adaptive_cv',
+    'LGOCV',
+    'adaptive_LGOCV')
+  ){
 
-  expect_is(test1, "caretList")
-  expect_is(caretEnsemble(test1), "caretEnsemble")
-  expect_is(caretEnsemble(test1), "caretEnsemble")
+    myControl$method <- m
+
+    suppressWarnings({
+      suppressMessages({
+        models <- caretList(
+          x = iris[,1:3],
+          y = iris[,4],
+          trControl = myControl,
+          tuneLength=2,
+          methodList = c('rpart', 'rf')
+        )
+      })
+    })
+    sink <- sapply(models, expect_is, class='train')
+
+    suppressWarnings({
+      suppressMessages({
+        ens <- caretEnsemble(models, iter=10)
+      })
+    })
+
+    expect_is(ens, 'caretEnsemble')
+
+    suppressMessages({
+      ens <- caretStack(models, method='glm', trControl=trainControl(number=2))
+    })
+
+    expect_is(ens, 'caretStack')
+  }
 })
 
 ###############################################
