@@ -54,49 +54,6 @@ test_that("caretModelSpec returns valid specs", {
 })
 
 ################################################
-context("We can work around bad models")
-################################################
-
-test_that("We can work around bad models", {
-  skip_on_cran()
-  rm(list=ls(all=TRUE))
-  gc(reset=TRUE)
-
-  myList <- list(
-    rpart=caretModelSpec(method='rpart', tuneLength=3),
-
-    #Forgot to specify interaction.depth, shrinkage
-    gbm=caretModelSpec(method='gbm', tuneGrid=data.frame(
-      n.trees=-100,
-      interaction.depth=-100,
-      shrinkage=-100))
-  )
-  suppressWarnings({
-    expect_error({
-      test1 <- caretList(
-        x = iris[,1:3],
-        y = iris[,4],
-        tuneList=myList,
-        continue_on_model_fail=FALSE
-      )
-    })
-    test <- caretList(
-      x = iris[,1:3],
-      y = iris[,4],
-      tuneList=myList,
-      continue_on_model_fail=TRUE
-    )
-  })
-
-  expect_is(test, "caretList")
-  expect_is(caretEnsemble(test), "caretEnsemble")
-  expect_equal(length(test), 1)
-  methods <- sapply(test, function(x) x$method)
-  names(methods) <- NULL
-  expect_equal(methods, c('rpart'))
-})
-
-################################################
 context("We can handle different CV methods")
 ################################################
 
