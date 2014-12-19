@@ -236,6 +236,58 @@ test_that("longer tests", {
 })
 
 ###############################################
+context("Test that caretList preserves user specified error functions")
+###############################################
+test_that("Test that caretList preserves user specified error functions", {
+  skip_on_cran()
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
+
+  load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/test.rda", package="caretEnsemble", mustWork=TRUE))
+  myControl = trainControl(
+    method = "cv", number = 3, repeats = 1,
+    p = 0.75, savePrediction = TRUE,
+    classProbs = TRUE, returnResamp = "final",
+    returnData = TRUE, verboseIter = FALSE)
+
+  expect_warning({
+    test1 <- caretList(
+      x = train[, -23],
+      y = train[, "Class"],
+      tuneLength = 7,
+      metric = "Kappa",
+      trControl = myControl,
+      methodList = c("knn", "rpart", "glm")
+    )
+  })
+
+  expect_warning({
+    test2 <- caretList(
+      x = train[, -23],
+      y = train[, "Class"],
+      tuneLength = 4,
+      metric = "Accuracy",
+      trControl = myControl,
+      methodList = c("knn", "rpart", "glm")
+    )
+  })
+
+  expect_identical(test1[[1]]$metric, "Kappa")
+  expect_identical(test2[[1]]$metric, "Accuracy")
+
+  expect_equal(nrow(test1[[1]]$results), 7)
+  expect_more_than(nrow(test1[[1]]$results), nrow(test2[[1]]$results))
+  expect_equal(nrow(test2[[1]]$results), 4)
+
+  myEns2 <- caretEnsemble(test2)
+  myEns1 <- caretEnsemble(test1)
+
+  expect_is(myEns2, "caretEnsemble")
+  expect_is(myEns1, "caretEnsemble")
+})
+
+###############################################
 context("Users can pass a custom tuneList")
 ###############################################
 test_that("Users can pass a custom tuneList", {
