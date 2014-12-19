@@ -188,57 +188,51 @@ test_that("Classification models", {
   expect_is(caretEnsemble(test1), "caretEnsemble")
 })
 
-
 ###############################################
-context("Test that caretList preserves user specified error functions")
+context("Longer tests for classificaiton models")
 ###############################################
-test_that("Test that caretList preserves user specified error functions", {
-  skip_on_cran()
+test_that("longer tests", {
   rm(list=ls(all=TRUE))
   gc(reset=TRUE)
-
   load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/test.rda", package="caretEnsemble", mustWork=TRUE))
   myControl = trainControl(
     method = "cv", number = 3, repeats = 1,
     p = 0.75, savePrediction = TRUE,
+    summaryFunction = twoClassSummary,
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
 
-  expect_warning({
-    test1 <- caretList(
-      x = train[, -23],
-      y = train[, "Class"],
-      tuneLength = 7,
-      metric = "Kappa",
-      trControl = myControl,
-      methodList = c("knn", "rpart", "glm")
-    )
-  })
-
+  skip_on_cran()
   expect_warning({
     test2 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
-      tuneLength = 4,
-      metric = "Accuracy",
+      metric = "ROC",
       trControl = myControl,
-      methodList = c("knn", "rpart", "glm")
+      methodList = c("knn", "glm", "rpart")
     )
   })
 
-  expect_identical(test1[[1]]$metric, "Kappa")
-  expect_identical(test2[[1]]$metric, "Accuracy")
+  expect_warning({
+    test3 <- caretList(
+      x = train[, -23],
+      y = train[ , "Class"],
+      metric = "ROC",
+      trControl = myControl,
+      methodList = c("svmLinear", "knn", "glm")
+    )
+  })
 
-  expect_equal(nrow(test1[[1]]$results), 7)
-  expect_more_than(nrow(test1[[1]]$results), nrow(test2[[1]]$results))
-  expect_equal(nrow(test2[[1]]$results), 4)
+  expect_is(test2, "caretList")
+  expect_is(test3, "caretList")
+  expect_is(caretEnsemble(test2), "caretEnsemble")
+  expect_is(caretEnsemble(test3), "caretEnsemble")
 
-  myEns2 <- caretEnsemble(test2)
-  myEns1 <- caretEnsemble(test1)
-
-  expect_is(myEns2, "caretEnsemble")
-  expect_is(myEns1, "caretEnsemble")
+  test_that("caretList objects preserve user metric", {
+    expect_identical(test2[[1]]$metric, "ROC")
+    expect_identical(test3[[1]]$metric, "ROC")
+  })
 })
 
 ###############################################
