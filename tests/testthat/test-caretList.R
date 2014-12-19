@@ -96,64 +96,6 @@ test_that("We can work around bad models", {
   expect_equal(methods, c('rpart'))
 })
 
-################################################
-context("We can handle different CV methods")
-################################################
-
-test_that('CV methods work', {
-  skip_on_cran()
-  rm(list=ls(all=TRUE))
-  gc(reset=TRUE)
-
-  myControl = trainControl(
-    method = m,
-    number = 7,
-    repeats = 1,
-    p = 0.75,
-    savePrediction = TRUE,
-    returnResamp = "final",
-    returnData = FALSE,
-    verboseIter = FALSE)
-
-  for(m in c(
-    'boot',
-    'adaptive_boot',
-    'cv',
-    'adaptive_cv',
-    'LGOCV',
-    'adaptive_LGOCV')
-  ){
-
-    myControl$method <- m
-
-    suppressWarnings({
-      suppressMessages({
-        models <- caretList(
-          x = iris[,1:3],
-          y = iris[,4],
-          trControl = myControl,
-          tuneLength=2,
-          methodList = c('rpart', 'rf')
-        )
-      })
-    })
-    sink <- sapply(models, expect_is, class='train')
-
-    suppressWarnings({
-      suppressMessages({
-        ens <- caretEnsemble(models, iter=10)
-      })
-    })
-
-    expect_is(ens, 'caretEnsemble')
-
-    suppressMessages({
-      ens <- caretStack(models, method='glm', trControl=trainControl(number=2))
-    })
-
-    expect_is(ens, 'caretStack')
-  }
-})
 
 ###############################################
 context("Classification models")
