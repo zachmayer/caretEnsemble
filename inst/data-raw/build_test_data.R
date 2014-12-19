@@ -77,6 +77,30 @@ test <- twoClassSim(
   noiseVars = 10, corrVars = 4, corrValue = 0.6)
 devtools::use_data(train, test, overwrite=TRUE)
 
+myList <- list(
+  rf1=caretModelSpec(),
+  rf2=caretModelSpec(method='rf', tuneLength=5),
+  caretModelSpec(method='rpart'),
+  caretModelSpec(method='knn', tuneLength=10),
+  caretModelSpec(method = "glm")
+)
+
+myControl = trainControl(
+  method = "cv", number = 3, repeats = 1,
+  p = 0.75, savePrediction = TRUE,
+  summaryFunction = twoClassSummary,
+  classProbs = TRUE, returnResamp = "final",
+  returnData = TRUE, verboseIter = FALSE)
+
+myCL <- caretList(
+  x = train[, -23],
+  y = train[, "Class"],
+  metric = "ROC",
+  trControl = myControl,
+  tuneList = myList)
+devtools::use_data(myList, myControl, myCL, overwrite=TRUE)
+
+
 ## Uglier data with class imbalance
 
 # devtools::install_github("jknowles/EWStools") # to get the data
