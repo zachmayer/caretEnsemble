@@ -16,8 +16,6 @@ load(system.file("testdata/X.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/Y.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/studentEns.rda",
-                 package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/modeldat2.rda",
                  package="caretEnsemble", mustWork=TRUE))
 
@@ -193,39 +191,12 @@ test_that("caretEnsemble:::getMetricSD works for AUC", {
                caretEnsemble:::getMetricSD.train(models_class[[1]], metric = "AUC"))
 })
 
-context("Metrics in student examples")
-
-test_that("metrics work for AUC in imbalanced example", {
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[1]]), 0.9340861, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[2]]), 0.873687, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[3]]), 0.8839286, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[3]]),
-               caretEnsemble:::getMetric.train(studentEns$models[[3]], metric = "AUC"))
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[2]]),
-               caretEnsemble:::getMetric.train(studentEns$models[[2]], metric = "AUC"))
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[1]]),
-               caretEnsemble:::getMetric.train(studentEns$models[[1]], metric = "AUC"))
-})
-
-test_that("metric deviations work for AUC in imbalanced example", {
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[1]]), 0.06090988, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[2]]), 0.03840437, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[3]]), 0.0144596, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[3]]),
-               caretEnsemble:::getMetricSD.train(studentEns$models[[3]], metric = "AUC"))
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[2]]),
-               caretEnsemble:::getMetricSD.train(studentEns$models[[2]], metric = "AUC"))
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[1]]),
-               caretEnsemble:::getMetricSD.train(studentEns$models[[1]], metric = "AUC"))
-})
-
 context("Does summary method work as expected")
 
 
 test_that("No errors are thrown by a summary", {
   expect_output(summary(ens.class), "AUC")
   expect_output(summary(ens.reg), "RMSE")
-  expect_output(summary(studentEns), "AUC")
 })
 
 

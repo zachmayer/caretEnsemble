@@ -32,7 +32,6 @@ test_that("safe and greedy optimizers get same result in the limit", {
 context("Test more difficult cases")
 test_that("Test more difficult cases", {
   skip_on_cran()
-  load(system.file("testdata/studentEns.rda", package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/modeldat2.rda", package="caretEnsemble", mustWork=TRUE))
 
   set.seed(3425)
@@ -49,10 +48,6 @@ test_that("Test more difficult cases", {
     methodList = c("knn", "nb", "lda"),
     tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
   )
-  #
-  # studentEns1 <- caretEnsemble(out, optFUN = safeOptAUC, iter = 200)
-  # studentEns2 <- caretEnsemble(out, optFUN = greedOptAUC, iter = 200)
-  # studentEns3 <- caretEnsemble(out)
 
   expect_identical(caretEnsemble(myCL, optFUN = safeOptAUC),
                    caretEnsemble(myCL, optFUN = greedOptAUC))
@@ -70,7 +65,6 @@ test_that("Warnings and fallbacks in degenerate cases", {
   skip_on_cran()
 
   set.seed(3579)
-  load(system.file("testdata/studentEns.rda", package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/modeldat2.rda", package="caretEnsemble", mustWork=TRUE))
 
   ctrl <- trainControl(method = "cv",
