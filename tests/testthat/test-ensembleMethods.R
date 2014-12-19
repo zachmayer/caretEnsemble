@@ -414,10 +414,38 @@ test_that("Does prediction method work for classification", {
   expect_true(length(pred.nest2)==1000)
   expect_true(anyNA(pred.nest1))
 
+  #BELOW THIS LINE is code that depends on ensNest from other tests
+  #------------------------------------------------------------------------
   modF3 <- caretEnsemble:::extractModFrame(ensNest)
+
+  modres3 <- caretEnsemble:::extractModRes(ensNest)
+  expect_equal(modres3[1, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[1]], "AUC", which = "best"))
+  expect_equal(modres3[2, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[2]], "AUC", which = "best"))
+  expect_equal(modres3[3, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[3]], "AUC", which = "best"))
+  expect_equal(modres3[4, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[4]], "AUC", which = "best"))
+
+  expect_true(ncol(modF3) > ncol(ensNest$models[[3]]$trainingData))
+  expect_true(ncol(modF3) > ncol(ensNest$models[[4]]$trainingData))
+  expect_true(nrow(modF3) == nrow(ensNest$models[[3]]$trainingData))
+  expect_true(nrow(modF3) == nrow(ensNest$models[[4]]$trainingData))
+
+  pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se = TRUE)
+  pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
+  pred.nest2 <- predict(ensNest, keepNA = FALSE, newdata = testC[, c(1:17)], se = TRUE)
+  pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
+  expect_is(pred.nest1, "data.frame")
+  expect_true(is.list(pred.nest2))
+  expect_is(pred.nest1a, "data.frame")
+  expect_is(pred.nestTrain_a, "data.frame")
+  expect_identical(names(pred.nest1), c("pred", "se"))
+  expect_identical(names(pred.nest2), names(pred.nest1))
+  expect_null(pred.nest2$weight)
+  expect_identical(pred.nest1, pred.nest1a)
+  expect_true(length(pred.nest1)==2)
+  expect_true(nrow(pred.nestTrain_a)==2000)
+  expect_true(nrow(pred.nest2)==1000)
+  expect_true(anyNA(pred.nest1))
 })
-
-
 
 context("Extract model results")
 modres1 <- caretEnsemble:::extractModRes(ens.class)
@@ -461,16 +489,6 @@ test_that("Model metric standard deviations are truly best", {
                                                     "RMSE", which = "all")))
 })
 
-modres3 <- caretEnsemble:::extractModRes(ensNest)
-
-test_that("Model metrics extracted correctly from nested models", {
-  expect_equal(modres3[1, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[1]], "AUC", which = "best"))
-  expect_equal(modres3[2, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[2]], "AUC", which = "best"))
-  expect_equal(modres3[3, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[3]], "AUC", which = "best"))
-  expect_equal(modres3[4, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[4]], "AUC", which = "best"))
-})
-
-
 context("Extract model frame")
 
 # caretEnsemble:::extractModFrame
@@ -482,38 +500,9 @@ modF2 <- caretEnsemble:::extractModFrame(ens.reg)
 test_that("Model frame is bigger for ensemble than for component models", {
   expect_true(ncol(modF) > ncol(ens.class$models[[2]]$trainingData))
   expect_true(ncol(modF2) > ncol(ens.reg$models[[1]]$trainingData))
-  expect_true(ncol(modF3) > ncol(ensNest$models[[3]]$trainingData))
-  expect_true(ncol(modF3) > ncol(ensNest$models[[4]]$trainingData))
   expect_true(nrow(modF) == nrow(ens.class$models[[2]]$trainingData))
   expect_true(nrow(modF2) == nrow(ens.reg$models[[1]]$trainingData))
-  expect_true(nrow(modF3) == nrow(ensNest$models[[3]]$trainingData))
-  expect_true(nrow(modF3) == nrow(ensNest$models[[4]]$trainingData))
 })
-
-
-context("Test generic predict with errors")
-
-pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se = TRUE)
-pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
-pred.nest2 <- predict(ensNest, keepNA = FALSE, newdata = testC[, c(1:17)], se = TRUE)
-pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
-
-
-test_that("We can ensemble models and handle missingness across predictors", {
-  expect_is(pred.nest1, "data.frame")
-  expect_true(is.list(pred.nest2))
-  expect_is(pred.nest1a, "data.frame")
-  expect_is(pred.nestTrain_a, "data.frame")
-  expect_identical(names(pred.nest1), c("pred", "se"))
-  expect_identical(names(pred.nest2), names(pred.nest1))
-  expect_null(pred.nest2$weight)
-  expect_identical(pred.nest1, pred.nest1a)
-  expect_true(length(pred.nest1)==2)
-  expect_true(nrow(pred.nestTrain_a)==2000)
-  expect_true(nrow(pred.nest2)==1000)
-  expect_true(anyNA(pred.nest1))
-})
-
 
 context("Does prediction method work for regression")
 
