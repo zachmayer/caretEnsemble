@@ -71,22 +71,20 @@ test_that("We can work around bad models", {
       interaction.depth=-100,
       shrinkage=-100))
   )
-  suppressWarnings({
-    expect_error({
-      test1 <- caretList(
-        x = iris[,1:3],
-        y = iris[,4],
-        tuneList=myList,
-        continue_on_model_fail=FALSE
-      )
-    })
-    test <- caretList(
+  expect_error({
+    test1 <- caretList(
       x = iris[,1:3],
       y = iris[,4],
       tuneList=myList,
-      continue_on_model_fail=TRUE
+      continue_on_model_fail=FALSE
     )
   })
+  test <- caretList(
+    x = iris[,1:3],
+    y = iris[,4],
+    tuneList=myList,
+    continue_on_model_fail=TRUE
+  )
 
   expect_is(test, "caretList")
   expect_is(caretEnsemble(test), "caretEnsemble")
