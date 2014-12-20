@@ -55,26 +55,20 @@ test_that("We get warnings when scale is set to FALSE and weight is TRUE", {
                  "Weighting of unscaled")
 })
 
-ncol1 <- 6
-ncol2 <- 4
-nrow1 <- 6
-nrow2 <- 6
-
 test_that("We get the right dimensions back", {
-  expect_equal(ncol(varImp(ens.class)), ncol1)
-  expect_equal(ncol(varImp(ens.class, weight = FALSE)), ncol1-1)
-  expect_equal(ncol(varImp(ens.class, weight = TRUE)), ncol1)
-  expect_equal(ncol(varImp(ens.reg)), ncol2)
-  expect_equal(ncol(varImp(ens.reg, weight = FALSE)), ncol2-1)
-  expect_equal(ncol(varImp(ens.reg, weight = TRUE)), ncol2)
-  expect_equal(nrow(varImp(ens.class)), nrow1)
-  expect_equal(nrow(varImp(ens.class, weight = FALSE)), nrow1)
-  expect_equal(nrow(varImp(ens.class, weight = TRUE)), nrow1)
-  expect_equal(nrow(varImp(ens.reg)), nrow2)
-  expect_equal(nrow(varImp(ens.reg, weight = FALSE)), nrow2)
-  expect_equal(nrow(varImp(ens.reg, weight = TRUE)), nrow2)
+  expect_equal(ncol(varImp(ens.class)), 7)
+  expect_equal(ncol(varImp(ens.class, weight = FALSE)), 6)
+  expect_equal(ncol(varImp(ens.class, weight = TRUE)), 7)
+  expect_equal(ncol(varImp(ens.reg)), 4)
+  expect_equal(ncol(varImp(ens.reg, weight = FALSE)), 3)
+  expect_equal(ncol(varImp(ens.reg, weight = TRUE)), 4)
+  expect_equal(nrow(varImp(ens.class)), 6)
+  expect_equal(nrow(varImp(ens.class, weight = FALSE)), 6)
+  expect_equal(nrow(varImp(ens.class, weight = TRUE)), 6)
+  expect_equal(nrow(varImp(ens.reg)), 6)
+  expect_equal(nrow(varImp(ens.reg, weight = FALSE)), 6)
+  expect_equal(nrow(varImp(ens.reg, weight = TRUE)), 6)
 })
-
 
 context("Do metric extraction functions work as expected")
 
