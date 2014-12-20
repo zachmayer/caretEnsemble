@@ -16,8 +16,6 @@ load(system.file("testdata/X.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/Y.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/modeldat2.rda",
-                 package="caretEnsemble", mustWork=TRUE))
 
 set.seed(2239)
 ens.class <- caretEnsemble(models_class, iter=1000)

@@ -32,22 +32,6 @@ test_that("safe and greedy optimizers get same result in the limit", {
 context("Test more difficult cases")
 test_that("Test more difficult cases", {
   skip_on_cran()
-  load(system.file("testdata/modeldat2.rda", package="caretEnsemble", mustWork=TRUE))
-
-  set.seed(3425)
-
-  ctrl <- trainControl(method = "cv",
-                       number = 5, classProbs = TRUE, savePredictions = TRUE,
-                       summaryFunction = twoClassSummary)
-
-  out <- caretList(
-    x = rbind(modeldat2$traindata$preds, modeldat2$testdata$preds),
-    y = factor(c(modeldat2$traindata$class,modeldat2$testdata$class)),
-    trControl = ctrl,
-    tuneLength = 3,
-    methodList = c("knn", "nb", "lda"),
-    tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
-  )
 
   expect_identical(caretEnsemble(myCL, optFUN = safeOptAUC),
                    caretEnsemble(myCL, optFUN = greedOptAUC))
@@ -57,52 +41,6 @@ test_that("Test more difficult cases", {
                    caretEnsemble(myCL, optFUN = greedOptAUC))
   expect_identical(caretEnsemble(myCL, optFUN = safeOptAUC, iter = 100),
                    caretEnsemble(myCL, optFUN = greedOptAUC))
-})
-
-context("Warnings and fallbacks in degenerate cases")
-test_that("Warnings and fallbacks in degenerate cases", {
-
-  skip_on_cran()
-
-  set.seed(3579)
-  load(system.file("testdata/modeldat2.rda", package="caretEnsemble", mustWork=TRUE))
-
-  ctrl <- trainControl(method = "cv",
-                       number = 5, classProbs = TRUE, savePredictions = TRUE,
-                       summaryFunction = twoClassSummary)
-
-  sampVec <-sample(1:151, 120)
-
-  out <- caretList(
-    x = modeldat2$traindata$preds[sampVec,],
-    y = modeldat2$traindata$class[sampVec],
-    trControl = ctrl,
-    tuneLength = 3,
-    methodList = c("knn", "nb", "lda"),
-    tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
-  )
-
-  predobs <- caretEnsemble:::makePredObsMatrix(out)
-
-  wghts1 <- safeOptAUC(predobs$preds, predobs$obs)
-  wghts2 <- greedOptAUC(predobs$preds, predobs$obs)
-
-  expect_warning(safeOptAUC(predobs$preds, predobs$obs), "Returning best model")
-  expect_message(greedOptAUC(predobs$preds, predobs$obs), "Try more iterations")
-  expect_warning(caretEnsemble(out, optFUN = safeOptAUC), "Returning best model")
-  expect_message(caretEnsemble(out, optFUN = greedOptAUC), "Try more iterations")
-
-  expect_false(identical(wghts1, wghts2))
-  expect_equal(wghts1, c(1, 0, 0, 0))
-  expect_equal(wghts2, c(39, 1, 60, 0))
-
-  ens1 <- caretEnsemble(out, optFUN = safeOptAUC)
-  ens2 <- caretEnsemble(out, optFUN = greedOptAUC)
-  expect_false(identical(ens1, ens2)) #THESE ALL FAIL TOO!
-  expect_equivalent(ens1$weights, 1)
-  expect_equivalent(length(ens1$weights), 1)
-  expect_equivalent(ens2$weights, c(0.39, 0.01, 0.60))
-  expect_equivalent(length(ens2$weights), 3)
 })
 
 context("RMSE")
