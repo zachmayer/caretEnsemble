@@ -1,4 +1,4 @@
-## ----, echo=TRUE, results='hide'-----------------------------------------
+## ----, echo=FALSE, results='hide'----------------------------------------
 suppressMessages(library('caret'))
 suppressMessages(library('mlbench'))
 suppressMessages(library('pROC'))

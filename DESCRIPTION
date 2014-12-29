@@ -1,22 +1,24 @@
 Package: caretEnsemble
 Type: Package
 Title: Framework for combining caret models into ensembles
-Version: 0.0.0.90152
-Date: 2013-03-01
-Authors@R: c(person(c("Zach"), "Mayer", role = c("aut", "cre"),
+Version: 1.0.0
+Date: 2014-12-18
+Authors@R: c(person(c("Zachary", "A."), "Mayer", role = c("aut", "cre"),
     email = "zach.mayer@gmail.com"),
     person(c("Jared", "E."), "Knowles", role=c("aut"),
     email="jknowles@gmail.com"))
-Description: This package consists primarily of one function: caretEnsemble.
-    This function takes a collection of caret models and finds a good linear
-    combination of those models, using either linear regression or iterative
-    greedy selection. It returns an object of the caretEnsemlbe S3 class, which
-    contains the models and has a predict class.  Currently, this framework
-    supports regression models and 2-class classification models.  It DOES NOT
-    allow you to combine multi-class classification models, or form combined
-    ensembles of classification and regression models.\
+URL: https://github.com/zachmayer/caretEnsemble
+BugReports: https://github.com/zachmayer/caretEnsemble/issues
+Description: This package is built around 3 functions: caretList, caretEnsemble,
+    and caretStack.  caretList is a convenience function for fitting multiple
+    caret::train models to the same dataset.  caretEnsemble will make a linear
+    combination of these models using greedy forward selection, and caretList
+    will make linear or non-linear combinations of these models using a caret
+    model as a meta-model.  Custom caret models are not yet supported.
+    Multi-class classification and combinations mixing classification and
+    regression models in one ensemble are also not yet supported.
 Depends:
-    R (>= 2.14.0),
+    R (>= 3.1.0),
     caret
 Suggests:
     testthat,

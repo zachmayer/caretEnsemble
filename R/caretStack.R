@@ -130,8 +130,8 @@ plot.caretStack <- function(x, ...){
 #' @param data passed to dotplot
 #' @param ... passed to dotplot
 #' @importFrom lattice dotplot
-#' @export
 #' @examples
+#' \dontrun{
 #' set.seed(42)
 #' library('rpart')
 #' models <- caretList(
@@ -141,7 +141,8 @@ plot.caretStack <- function(x, ...){
 #'   methodList=c('rpart', 'glm')
 #' )
 #' meta_model <- caretStack(models, method='lm', trControl=trainControl(method='cv'))
-#' dotplot(meta_model)
+#' dotplot.caretStack(meta_model)
+#' }
 dotplot.caretStack <- function(x, data=NULL, ...){
   final <- list(x$ens_model)
   names(final) <- paste(paste(x$ens_model$method, collapse='_'), 'ENSEMBLE', sep='_')

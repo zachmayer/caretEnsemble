@@ -18,7 +18,6 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
     Y <- factor(Y)
   }
   stopifnot(is.factor(Y))
-
   N           <- ncol(X)
   weights     <- rep(0L, N)
   pred        <- 0 * X
@@ -26,15 +25,14 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
   stopper     <- max(colAUC(X, Y))
 
   while(sum.weights < iter) {
-
     sum.weights   <- sum.weights + 1L
     pred          <-(pred + X) * (1L / sum.weights)
     errors        <- colAUC(pred, Y)
     best          <- which.max(errors)
     weights[best] <- weights[best] + 1L
     pred          <- pred[, best] * sum.weights
-    maxtest       <- max(errors)
   }
+  maxtest       <- colAUC(X %*% weights, Y)
   if(stopper > maxtest){
     testresult <- round(maxtest/stopper, 5) * 100
     wstr <- paste0("Optimized weights not better than best model. Ensembled result is ",
@@ -81,8 +79,8 @@ safeOptAUC <- function(X, Y, iter = 100L) {
     best          <- which.max(errors)
     weights[best] <- weights[best] + 1L
     pred          <- pred[, best] * sum.weights
-    maxtest       <- max(errors) # check we are better than no weights
   }
+  maxtest       <- colAUC(X %*% weights, Y)
   if(stopper > maxtest){
     testresult <- round(maxtest/stopper, 5) * 100
     wstr <- paste0("Optimized weights not better than best model. Ensembled result is ",
