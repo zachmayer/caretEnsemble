@@ -132,6 +132,7 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @import caret
 #' @export
 #' @examples
+#' \dontrun{
 #' myControl <- trainControl(method='cv', number=5)
 #' caretList(
 #'   Sepal.Length ~ Sepal.Width,
@@ -147,6 +148,7 @@ extractCaretTarget.formula <- function(form, data, ...){
 #'  ),
 #'   trControl=myControl
 #'   )
+#'   }
 caretList <- function(
   ...,
   trControl = trainControl(),

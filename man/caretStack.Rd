@@ -22,6 +22,7 @@ using either linear regression, elastic net regression, or greedy optimization.
 Check the models, and make a matrix of obs and preds
 }
 \examples{
+\dontrun{
 library('rpart')
 models <- caretList(
   x=iris[1:50,1:2],
@@ -30,6 +31,7 @@ models <- caretList(
   methodList=c('rpart', 'glm')
 )
 caretStack(models, method='glm')
+}
 }
 \references{
 \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}

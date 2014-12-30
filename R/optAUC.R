@@ -12,7 +12,7 @@
 #' @examples
 #' x <- matrix(runif(10), ncol=2)
 #' y <- sample(c('Y', 'N'), 5, replace=TRUE)
-#' greedOptAUC(x, y)
+#' greedOptAUC(x, y, iter = 2L)
 greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
   if(is.character(Y)){
     Y <- factor(Y)
@@ -58,7 +58,7 @@ greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
 #' @examples
 #' x <- matrix(runif(10), ncol=2)
 #' y <- sample(c('Y', 'N'), 5, replace=TRUE)
-#' safeOptAUC(x, y)
+#' safeOptAUC(x, y, iter = 2L)
 safeOptAUC <- function(X, Y, iter = 100L) {
   if(is.character(Y) | is.factor(Y)){
     Y <- as.numeric(factor(Y))
