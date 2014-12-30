@@ -27,6 +27,6 @@ is returned.
 \examples{
 x <- matrix(runif(10), ncol=2)
 y <- runif(5)
-greedOptRMSE(x, y)
+greedOptRMSE(x, y, iter = 2L)
 }
 
