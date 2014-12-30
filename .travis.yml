@@ -1,12 +1,17 @@
 # Sample .travis.yml for R projects from https://github.com/craigcitro/r-travis
+# https://github.com/craigcitro/r-travis/wiki
 
 language: c
 
 env:
    global:
+     - WARNINGS_ARE_ERRORS=1
      - R_BUILD_ARGS=" "
      - R_CHECK_ARGS="--as-cran"
      - BOOTSTRAP_LATEX="1"
+   matrix:
+     - NOT_CRAN="true"
+     - NOT_CRAN="false"
 
 before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
