@@ -67,29 +67,41 @@ devtools::use_data(models_class, Y.class, X.class, overwrite=TRUE)
 
 rm(list=ls())
 
-## Uglier data with class imbalance
+#caretList train/test data
+set.seed(442)
+train <- twoClassSim(
+  n = 1000, intercept = -8, linearVars = 3,
+  noiseVars = 10, corrVars = 4, corrValue = 0.6)
+test <- twoClassSim(
+  n = 1500, intercept = -7, linearVars = 3,
+  noiseVars = 10, corrVars = 4, corrValue = 0.6)
+devtools::use_data(train, test, overwrite=TRUE)
 
-# devtools::install_github("jknowles/EWStools") # to get the data
-# library(EWStools)
-# data(EWStestData)
-#
-# set.seed(3425)
-# ctrl <- trainControl(method = "cv",
-#                      number = 3, classProbs = TRUE, savePredictions = TRUE,
-#                      summaryFunction = twoClassSummary)
-#
-# modeldat2 <- assembleData(fulldat[1:300, ], class = "y", p = 0.5,
-#                          predvars = names(fulldat)[-1], classification = TRUE)
-#
-# out <- caretList(
-#   x = modeldat2$traindata$preds,
-#   y = modeldat2$traindata$class,
-#   trControl = ctrl,
-#   tuneLength = 3,
-#   methodList = c("knn", "nb", "lda"),
-#   tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
-#   )
-#
-#  studentEns <- caretEnsemble(out)
-#
-# devtools::use_data(modeldat2, studentEns, overwrite=TRUE)
+myList <- list(
+  rf1=caretModelSpec(),
+  rf2=caretModelSpec(method='rf', tuneLength=5),
+  caretModelSpec(method='rpart'),
+  caretModelSpec(method='knn', tuneLength=10),
+  caretModelSpec(method = "glm")
+)
+
+myControl = trainControl(
+  method = "cv",
+  number = 3,
+  repeats = 1,
+  p = 0.75,
+  savePrediction = TRUE,
+  summaryFunction = twoClassSummary,
+  classProbs = TRUE,
+  returnResamp = "none",
+  returnData = FALSE,
+  verboseIter = FALSE)
+
+myCL <- caretList(
+  x = train[1:250, -23],
+  y = train[1:250, "Class"],
+  metric = "ROC",
+  trControl = myControl,
+  tuneList = myList)
+print(object.size(myCL), units='Mb')
+devtools::use_data(myList, myControl, myCL, overwrite=TRUE)

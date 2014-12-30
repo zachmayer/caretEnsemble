@@ -1,6 +1,4 @@
 # Test caretList
-
-set.seed(442)
 library('caret')
 library('randomForest')
 library('rpart')
@@ -8,17 +6,13 @@ library('gbm')
 library('kernlab')
 library('nnet')
 library('ipred')
-train <- twoClassSim(
-  n = 1000, intercept = -8, linearVars = 3,
-  noiseVars = 10, corrVars = 4, corrValue = 0.6)
-test <- twoClassSim(
-  n = 1500, intercept = -7, linearVars = 3,
-  noiseVars = 10, corrVars = 4, corrValue = 0.6)
 
 ###############################################
 context("Ancillary caretList functions and errors")
 ################################################
 test_that("caretModelSpec returns valid specs", {
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
   tuneList <- list(
     rf1=caretModelSpec(),
     rf2=caretModelSpec(method='rf', tuneLength=5),
@@ -35,6 +29,10 @@ test_that("caretModelSpec returns valid specs", {
 context("We can fit models with a mix of methodList and tuneList")
 ################################################
 test_that("caretModelSpec returns valid specs", {
+  skip_on_cran()
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
+
   myList <- list(
     rpart=caretModelSpec(method='rpart', tuneLength=10),
     rf=caretModelSpec(method='rf', tuneGrid=data.frame(mtry=2))
@@ -56,55 +54,22 @@ test_that("caretModelSpec returns valid specs", {
 })
 
 ################################################
-context("We can work around bad models")
-################################################
-myList <- list(
-  rpart=caretModelSpec(method='rpart', tuneLength=3),
-
-  #Forgot to specify interaction.depth, shrinkage
-  gbm=caretModelSpec(method='gbm', tuneGrid=data.frame(
-    n.trees=-100,
-    interaction.depth=-100,
-    shrinkage=-100))
-)
-suppressWarnings({
-  expect_error({
-    test1 <- caretList(
-      x = iris[,1:3],
-      y = iris[,4],
-      tuneList=myList,
-      continue_on_model_fail=FALSE
-    )
-  })
-  test <- caretList(
-    x = iris[,1:3],
-    y = iris[,4],
-    tuneList=myList,
-    continue_on_model_fail=TRUE
-  )
-})
-
-expect_is(test, "caretList")
-expect_is(caretEnsemble(test), "caretEnsemble")
-expect_equal(length(test), 1)
-methods <- sapply(test, function(x) x$method)
-names(methods) <- NULL
-expect_equal(methods, c('rpart'))
-
-################################################
 context("We can handle different CV methods")
 ################################################
 
-for(m in c(
-  'boot',
-  'adaptive_boot',
-  'cv',
-  'adaptive_cv',
-  'LGOCV',
-  'adaptive_LGOCV')
-){
-  test_name <- paste0('CV works with method=', m)
-  test_that(test_name, {
+test_that('CV methods work', {
+  skip_on_cran()
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
+
+  for(m in c(
+    'boot',
+    'adaptive_boot',
+    'cv',
+    'adaptive_cv',
+    'LGOCV',
+    'adaptive_LGOCV')
+  ){
 
     myControl = trainControl(
       method = m,
@@ -142,50 +107,57 @@ for(m in c(
     })
 
     expect_is(ens, 'caretStack')
-  })
-}
+  }
+})
 
 ###############################################
 context("Classification models")
 ################################################
 
-# Specify controls
-myControl = trainControl(
-  method = "cv", number = 3, repeats = 1,
-  p = 0.75, savePrediction = TRUE,
-  summaryFunction = twoClassSummary,
-  classProbs = TRUE, returnResamp = "final",
-  returnData = TRUE, verboseIter = FALSE)
+test_that("Classification models", {
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
+  load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/test.rda", package="caretEnsemble", mustWork=TRUE))
+  myControl = trainControl(
+    method = "cv", number = 3, repeats = 1,
+    p = 0.75, savePrediction = TRUE,
+    summaryFunction = twoClassSummary,
+    classProbs = TRUE, returnResamp = "final",
+    returnData = TRUE, verboseIter = FALSE)
 
-# Simple two method list
-# Warning because we're going to auto-set indexes
-expect_warning({
-  test1 <- caretList(
-    x = train[, -23],
-    y = train[, "Class"],
-    metric = "ROC",
-    trControl = myControl,
-    methodList = c("knn", "glm")
-  )
-})
+  # Simple two method list
+  # Warning because we're going to auto-set indexes
+  expect_warning({
+    test1 <- caretList(
+      x = train[, -23],
+      y = train[, "Class"],
+      metric = "ROC",
+      trControl = myControl,
+      methodList = c("knn", "glm")
+    )
+  })
 
-context("Test that caretList makes model lists")
-test_that("caretList returns a list", {
   expect_is(test1, "caretList")
-})
-
-context("Test that caretList can be ensembled")
-test_that("caretList objects can be ensembled", {
+  expect_is(caretEnsemble(test1), "caretEnsemble")
   expect_is(caretEnsemble(test1), "caretEnsemble")
 })
 
-context("Test that caretList rejects bogus models")
-test_that("caretList objects can be ensembled", {
-  expect_is(caretEnsemble(test1), "caretEnsemble")
-})
-
-context("Longer tests")
+###############################################
+context("Longer tests for classificaiton models")
+###############################################
 test_that("longer tests", {
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
+  load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/test.rda", package="caretEnsemble", mustWork=TRUE))
+  myControl = trainControl(
+    method = "cv", number = 3, repeats = 1,
+    p = 0.75, savePrediction = TRUE,
+    summaryFunction = twoClassSummary,
+    classProbs = TRUE, returnResamp = "final",
+    returnData = TRUE, verboseIter = FALSE)
+
   skip_on_cran()
   expect_warning({
     test2 <- caretList(
@@ -218,76 +190,90 @@ test_that("longer tests", {
   })
 })
 
+###############################################
 context("Test that caretList preserves user specified error functions")
+###############################################
+test_that("Test that caretList preserves user specified error functions", {
+  skip_on_cran()
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
 
-myControl = trainControl(
-  method = "cv", number = 3, repeats = 1,
-  p = 0.75, savePrediction = TRUE,
-  classProbs = TRUE, returnResamp = "final",
-  returnData = TRUE, verboseIter = FALSE)
+  load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/test.rda", package="caretEnsemble", mustWork=TRUE))
+  myControl = trainControl(
+    method = "cv", number = 3, repeats = 1,
+    p = 0.75, savePrediction = TRUE,
+    classProbs = TRUE, returnResamp = "final",
+    returnData = TRUE, verboseIter = FALSE)
 
-expect_warning({
-  test1 <- caretList(
-    x = train[, -23],
-    y = train[, "Class"],
-    tuneLength = 7,
-    metric = "Kappa",
-    trControl = myControl,
-    methodList = c("knn", "rpart", "glm")
+  expect_warning({
+    test1 <- caretList(
+      x = train[, -23],
+      y = train[, "Class"],
+      tuneLength = 7,
+      metric = "Kappa",
+      trControl = myControl,
+      methodList = c("knn", "rpart", "glm")
     )
-})
-
-expect_warning({
-  test2 <- caretList(
-    x = train[, -23],
-    y = train[, "Class"],
-    tuneLength = 4,
-    metric = "Accuracy",
-    trControl = myControl,
-    methodList = c("knn", "rpart", "glm")
-  )
-})
-
-test_that("caretList objects preserve user metric", {
-  expect_identical(test1[[1]]$metric, "Kappa")
-  expect_identical(test2[[1]]$metric, "Accuracy")
   })
 
-test_that("caretList objects preserve user tuneLength", {
+  expect_warning({
+    test2 <- caretList(
+      x = train[, -23],
+      y = train[, "Class"],
+      tuneLength = 4,
+      metric = "Accuracy",
+      trControl = myControl,
+      methodList = c("knn", "rpart", "glm")
+    )
+  })
+
+  expect_identical(test1[[1]]$metric, "Kappa")
+  expect_identical(test2[[1]]$metric, "Accuracy")
+
   expect_equal(nrow(test1[[1]]$results), 7)
   expect_more_than(nrow(test1[[1]]$results), nrow(test2[[1]]$results))
   expect_equal(nrow(test2[[1]]$results), 4)
-})
 
-myEns2 <- caretEnsemble(test2)
-myEns1 <- caretEnsemble(test1)
+  myEns2 <- caretEnsemble(test2)
+  myEns1 <- caretEnsemble(test1)
 
-test_that("User specified parameters can still be ensembled", {
   expect_is(myEns2, "caretEnsemble")
   expect_is(myEns1, "caretEnsemble")
 })
 
+###############################################
 context("Users can pass a custom tuneList")
-
-# User specifies methods and tuning parameters specifically using a tuneList
-tuneTest <- list(
-  rpart=caretModelSpec(
-    method='rpart',
-    tuneGrid=data.frame(.cp=c(.01,.001,.1,1))
-    ),
-  knn=caretModelSpec(
-    method='knn',
-    tuneLength=9
-    ),
-  svmRadial=caretModelSpec(
-    method='svmRadial',
-    tuneLength=3
-  ))
-
-# Simple with mix of data.frame and tuneLength
-
-test_that("User tuneTest parameters are respected and model is ensembled", {
+###############################################
+test_that("Users can pass a custom tuneList", {
   skip_on_cran()
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
+
+  load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/test.rda", package="caretEnsemble", mustWork=TRUE))
+  myControl = trainControl(
+    method = "cv", number = 3, repeats = 1,
+    p = 0.75, savePrediction = TRUE,
+    classProbs = TRUE, returnResamp = "final",
+    returnData = TRUE, verboseIter = FALSE)
+
+  # User specifies methods and tuning parameters specifically using a tuneList
+  tuneTest <- list(
+    rpart=caretModelSpec(
+      method='rpart',
+      tuneGrid=data.frame(.cp=c(.01,.001,.1,1))
+    ),
+    knn=caretModelSpec(
+      method='knn',
+      tuneLength=9
+    ),
+    svmRadial=caretModelSpec(
+      method='svmRadial',
+      tuneLength=3
+    ))
+
+  # Simple with mix of data.frame and tuneLength
   expect_warning({
     test2a <- caretList(
       x = train[, -23],
@@ -305,8 +291,22 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   expect_equal(nrow(test2a[[3]]$results), 3)
 })
 
+###############################################
 context("User tuneTest parameters are respected and model is ensembled")
+###############################################
 test_that("User tuneTest parameters are respected and model is ensembled", {
+  skip_on_cran()
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
+
+  load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/test.rda", package="caretEnsemble", mustWork=TRUE))
+  myControl = trainControl(
+    method = "cv", number = 3, repeats = 1,
+    p = 0.75, savePrediction = TRUE,
+    classProbs = TRUE, returnResamp = "final",
+    returnData = TRUE, verboseIter = FALSE)
+
   tuneTest <- list(
     nnet = caretModelSpec(
       method='nnet',
@@ -329,8 +329,22 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   expect_false(test[[1]]$finalModel$softmax)
 })
 
+###############################################
 context("Formula interface for caretList works")
+###############################################
 test_that("User tuneTest parameters are respected and model is ensembled", {
+  skip_on_cran()
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
+
+  load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/test.rda", package="caretEnsemble", mustWork=TRUE))
+  myControl = trainControl(
+    method = "cv", number = 3, repeats = 1,
+    p = 0.75, savePrediction = TRUE,
+    classProbs = TRUE, returnResamp = "final",
+    returnData = TRUE, verboseIter = FALSE)
+
   tuneTest <- list(
     rpart = list(method='rpart', tuneLength = 2),
     nnet = list(method='nnet', tuneLength = 2, trace=FALSE),
@@ -367,39 +381,42 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
 context("Regression models")
 ###############################################
 
-myControl2 = trainControl(
-  method = "cv", number = 3, repeats = 1,
-  p = 0.75, savePrediction = TRUE,
-  returnResamp = "final",
-  returnData = TRUE, verboseIter = FALSE)
+test_that("Regression models", {
+  rm(list=ls(all=TRUE))
+  gc(reset=TRUE)
 
-expect_warning({
-  test1 <- caretList(
-    x = train[, c(-23, -1)],
-    y = train[, 1],
-    trControl = myControl2,
-    methodList = c("glm", "lm")
-  )
-})
+  load(system.file("testdata/train.rda", package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/test.rda", package="caretEnsemble", mustWork=TRUE))
+  myControl = trainControl(
+    method = "cv", number = 3, repeats = 1,
+    p = 0.75, savePrediction = TRUE,
+    returnResamp = "final",
+    returnData = TRUE, verboseIter = FALSE)
 
-expect_warning({
-  test2 <- caretList(
-    x = train[, c(-23, -1)],
-    y = train[, 1],
-    trControl = myControl2,
-    methodList = c("glm", "ppr", "lm")
-  )
-})
+  expect_warning({
+    test1 <- caretList(
+      x = train[, c(-23, -1)],
+      y = train[, 1],
+      trControl = myControl,
+      methodList = c("glm", "lm")
+    )
+  })
 
-ens1 <- caretEnsemble(test1)
-ens2 <- caretEnsemble(test2)
+  expect_warning({
+    test2 <- caretList(
+      x = train[, c(-23, -1)],
+      y = train[, 1],
+      trControl = myControl,
+      methodList = c("glm", "ppr", "lm")
+    )
+  })
 
-test_that("caretList returns a caretList regression", {
+  ens1 <- caretEnsemble(test1)
+  ens2 <- caretEnsemble(test2)
+
   expect_is(test1, "caretList")
   expect_is(test2, "caretList")
-})
 
-test_that("caretList objects can be ensembled regression", {
   expect_is(ens1, "caretEnsemble")
   expect_is(ens2, "caretEnsemble")
 })

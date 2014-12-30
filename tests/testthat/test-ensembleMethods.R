@@ -16,10 +16,6 @@ load(system.file("testdata/X.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/Y.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/studentEns.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/modeldat2.rda",
-                 package="caretEnsemble", mustWork=TRUE))
 
 set.seed(2239)
 ens.class <- caretEnsemble(models_class, iter=1000)
@@ -59,26 +55,20 @@ test_that("We get warnings when scale is set to FALSE and weight is TRUE", {
                  "Weighting of unscaled")
 })
 
-ncol1 <- 6
-ncol2 <- 4
-nrow1 <- 6
-nrow2 <- 6
-
 test_that("We get the right dimensions back", {
-  expect_equal(ncol(varImp(ens.class)), ncol1)
-  expect_equal(ncol(varImp(ens.class, weight = FALSE)), ncol1-1)
-  expect_equal(ncol(varImp(ens.class, weight = TRUE)), ncol1)
-  expect_equal(ncol(varImp(ens.reg)), ncol2)
-  expect_equal(ncol(varImp(ens.reg, weight = FALSE)), ncol2-1)
-  expect_equal(ncol(varImp(ens.reg, weight = TRUE)), ncol2)
-  expect_equal(nrow(varImp(ens.class)), nrow1)
-  expect_equal(nrow(varImp(ens.class, weight = FALSE)), nrow1)
-  expect_equal(nrow(varImp(ens.class, weight = TRUE)), nrow1)
-  expect_equal(nrow(varImp(ens.reg)), nrow2)
-  expect_equal(nrow(varImp(ens.reg, weight = FALSE)), nrow2)
-  expect_equal(nrow(varImp(ens.reg, weight = TRUE)), nrow2)
+  expect_equal(ncol(varImp(ens.class)), 7)
+  expect_equal(ncol(varImp(ens.class, weight = FALSE)), 6)
+  expect_equal(ncol(varImp(ens.class, weight = TRUE)), 7)
+  expect_equal(ncol(varImp(ens.reg)), 4)
+  expect_equal(ncol(varImp(ens.reg, weight = FALSE)), 3)
+  expect_equal(ncol(varImp(ens.reg, weight = TRUE)), 4)
+  expect_equal(nrow(varImp(ens.class)), 6)
+  expect_equal(nrow(varImp(ens.class, weight = FALSE)), 6)
+  expect_equal(nrow(varImp(ens.class, weight = TRUE)), 6)
+  expect_equal(nrow(varImp(ens.reg)), 6)
+  expect_equal(nrow(varImp(ens.reg, weight = FALSE)), 6)
+  expect_equal(nrow(varImp(ens.reg, weight = TRUE)), 6)
 })
-
 
 context("Do metric extraction functions work as expected")
 
@@ -193,47 +183,19 @@ test_that("caretEnsemble:::getMetricSD works for AUC", {
                caretEnsemble:::getMetricSD.train(models_class[[1]], metric = "AUC"))
 })
 
-context("Metrics in student examples")
-
-test_that("metrics work for AUC in imbalanced example", {
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[1]]), 0.9340861, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[2]]), 0.873687, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[3]]), 0.8839286, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[3]]),
-               caretEnsemble:::getMetric.train(studentEns$models[[3]], metric = "AUC"))
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[2]]),
-               caretEnsemble:::getMetric.train(studentEns$models[[2]], metric = "AUC"))
-  expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[1]]),
-               caretEnsemble:::getMetric.train(studentEns$models[[1]], metric = "AUC"))
-})
-
-test_that("metric deviations work for AUC in imbalanced example", {
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[1]]), 0.06090988, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[2]]), 0.03840437, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[3]]), 0.0144596, tol = 0.01)
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[3]]),
-               caretEnsemble:::getMetricSD.train(studentEns$models[[3]], metric = "AUC"))
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[2]]),
-               caretEnsemble:::getMetricSD.train(studentEns$models[[2]], metric = "AUC"))
-  expect_equal(caretEnsemble:::getMetricSD.train(studentEns$models[[1]]),
-               caretEnsemble:::getMetricSD.train(studentEns$models[[1]], metric = "AUC"))
-})
-
 context("Does summary method work as expected")
 
 
 test_that("No errors are thrown by a summary", {
   expect_output(summary(ens.class), "AUC")
   expect_output(summary(ens.reg), "RMSE")
-  expect_output(summary(studentEns), "AUC")
 })
-
-
 
 
 context("Plot.caretEnsemble")
 
 test_that("Plot objects are ggplot", {
+  skip_on_cran()
   expect_is(plot(ens.class), "ggplot")
   expect_is(plot(ens.reg), "ggplot")
   expect_is(plot(ens.reg$models[[2]]), "trellis")
@@ -241,6 +203,7 @@ test_that("Plot objects are ggplot", {
 
 
 test_that("Plot objects have proper data", {
+  skip_on_cran()
   tp <- plot(ens.class)
   tp2 <- plot(ens.reg)
   expect_equal(nrow(tp$data), 5)
@@ -250,16 +213,11 @@ test_that("Plot objects have proper data", {
 })
 
 context("fortify caretEnsemble")
-
-fort1 <- fortify(ens.class)
-fort2 <- fortify(ens.reg)
-
-test_that("Fortify produces proper data structures", {
+test_that("fortify caretEnsemble", {
+  fort1 <- fortify(ens.class)
+  fort2 <- fortify(ens.reg)
   expect_is(fort1, "data.frame")
   expect_is(fort2, "data.frame")
-})
-
-test_that("Fortify produces proper dimensions", {
   expect_equal(nrow(fort1), 150)
   expect_equal(nrow(fort2), 150)
   expect_equal(ncol(fort1), 10)
@@ -267,30 +225,24 @@ test_that("Fortify produces proper dimensions", {
   expect_true(all(names(fort1) %in% names(fort2)))
 })
 
-
-
 context("autoplot caretEnsemble")
-
 test_that("Autoplot throws errors on train, but not caretEnsemble objects", {
+  skip_on_cran()
   identical(tryCatch(autoplot(ens.class)), NULL)
   identical(tryCatch(autoplot(ens.reg)), NULL)
   expect_error(autoplot(ens.class$models[[1]]))
   expect_error(autoplot(ens.reg$models[[1]]))
 })
 
-context("Residual extraction")
-
-residTest <- residuals(ens.class)
-residTest2 <- residuals(ens.reg)
-obs1 <- ifelse(Y.class == "No", 0, 1)
-obs2 <- Y.reg
-predTest <- predict(ens.class)
-predTest2 <- predict(ens.reg)
-identical(residTest, obs1 - predTest)
-identical(residTest2, obs2 - predTest2)
-
-
-test_that("Residuals provided by residuals are proper for ensemble objects", {
+test_that("Residual extraction", {
+  residTest <- residuals(ens.class)
+  residTest2 <- residuals(ens.reg)
+  obs1 <- ifelse(Y.class == "No", 0, 1)
+  obs2 <- Y.reg
+  predTest <- predict(ens.class)
+  predTest2 <- predict(ens.reg)
+  identical(residTest, obs1 - predTest)
+  identical(residTest2, obs2 - predTest2)
   expect_identical(residTest, obs1 - predTest)
   expect_identical(residTest2, obs2 - predTest2)
   expect_false(identical(residTest2, predTest2 -obs2))
@@ -301,104 +253,103 @@ mr1 <- multiResiduals(ens.class)
 mr2 <- multiResiduals(ens.reg)
 
 test_that("Multiple residuals object is correct dimensions", {
+  skip_on_cran()
+
   expect_identical(names(mr1), names(mr2))
   expect_identical(names(mr1), c("method", "id", "yhat", "resid", "y"))
   expect_equal(nrow(mr1), 150 * length(ens.class$models))
   expect_equal(nrow(mr2), 150 * length(ens.reg$models))
   expect_equal(ncol(mr1), ncol(mr2))
 
-})
+  mr1 <- mr1[order(mr1$method, mr1$id),]
+  mr2 <- mr2[order(mr2$method, mr2$id),]
 
-mr1 <- mr1[order(mr1$method, mr1$id),]
-mr2 <- mr2[order(mr2$method, mr2$id),]
+  # component residuals
+  # reg this is easy
+  mr2.tmp1 <- residuals(ens.reg$models[[1]])
+  attributes(mr2.tmp1) <- NULL
+  mr2.tmp2 <- residuals(ens.reg$models[[2]])
 
-# component residuals
-# reg this is easy
-mr2.tmp1 <- residuals(ens.reg$models[[1]])
-attributes(mr2.tmp1) <- NULL
-mr2.tmp2 <- residuals(ens.reg$models[[2]])
+  ## class this is hard
+  ## This test needs to be robust to different lengths of ens.class$models
 
-## class this is hard
-## This test needs to be robust to different lengths of ens.class$models
+  tmpMR <- vector("list", length(ens.class$models))
+  testVec <- rep(NA, length(ens.class$models))
 
-tmpMR <- vector("list", length(ens.class$models))
-testVec <- rep(NA, length(ens.class$models))
+  for(i in 1:length(ens.class$models)){
+    tmp <- caretEnsemble:::residuals2.train(ens.class$models[[i]])
+    tmpMR[[i]] <- merge(mr1, tmp)
+    testVec[i] <- identical(tmpMR[[i]]$resid, tmpMR[[i]]$.resid)
+  }
 
-for(i in 1:length(ens.class$models)){
-  tmp <- caretEnsemble:::residuals2.train(ens.class$models[[i]])
-  tmpMR[[i]] <- merge(mr1, tmp)
-  testVec[i] <- identical(tmpMR[[i]]$resid, tmpMR[[i]]$.resid)
-}
-
-
-test_that("Multiple residuals results are correct", {
   expect_true(identical(round(mr2[mr2$method == "lm", "resid"], 5), round(mr2.tmp1, 5)))
   expect_true(identical(round(mr2[mr2$method == "knn", "resid"], 5), round(mr2.tmp2, 5)))
   expect_true(all(testVec))
+
 })
 
-
+#TODO: THIS TEST IS OUT OF PLACE! IT SEEMS REDUNDANT!
 context("Does prediction method work for classification")
+test_that("Does prediction method work for classification", {
+  skip_on_cran()
+  mseeds <- vector(mode = "list", length = 12)
+  for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
+  mseeds[[12]] <- sample.int(1000, 1)
+  myControl = trainControl(method = "cv", number = 10, repeats = 1,
+                           p = 0.75, savePrediction = TRUE,
+                           classProbs = TRUE, returnResamp = "final",
+                           returnData = TRUE, seeds = mseeds)
 
-mseeds <- vector(mode = "list", length = 12)
-for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
-mseeds[[12]] <- sample.int(1000, 1)
-myControl = trainControl(method = "cv", number = 10, repeats = 1,
-                         p = 0.75, savePrediction = TRUE,
-                         classProbs = TRUE, returnResamp = "final",
-                         returnData = TRUE, seeds = mseeds)
+  trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
+                        corrType = "AR1", corrValue = 0.6, mislabel = 0)
 
-trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
-                      corrType = "AR1", corrValue = 0.6, mislabel = 0)
+  testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
+                       corrType = "AR1", corrValue = 0.6, mislabel = 0)
 
-testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
-                     corrType = "AR1", corrValue = 0.6, mislabel = 0)
-
-MCAR.df <- function(df, p){
-  MCARx <- function(x, p){
-    z <- rbinom(length(x), 1, prob=p)
-    x[z==1] <- NA
-    return(x)
+  MCAR.df <- function(df, p){
+    MCARx <- function(x, p){
+      z <- rbinom(length(x), 1, prob=p)
+      x[z==1] <- NA
+      return(x)
+    }
+    if(length(p) == 1){
+      df <- apply(df, 2, MCARx, p)
+    } else if(length(p) > 1) {
+      df <- apply(df, 2, MCARx, sample(p, 1))
+    }
+    df <- as.data.frame(df)
+    return(df)
   }
-  if(length(p) == 1){
-    df <- apply(df, 2, MCARx, p)
-  } else if(length(p) > 1) {
-    df <- apply(df, 2, MCARx, sample(p, 1))
-  }
-  df <- as.data.frame(df)
-  return(df)
-}
 
-set.seed(3256)
-trainC[, c(1:17)] <- MCAR.df(trainC[, c(1:17)], 0.15)
-testC[, c(1:17)] <- MCAR.df(testC[, c(1:17)], 0.05)
+  set.seed(3256)
+  trainC[, c(1:17)] <- MCAR.df(trainC[, c(1:17)], 0.15)
+  testC[, c(1:17)] <- MCAR.df(testC[, c(1:17)], 0.05)
 
-set.seed(482)
-glm1 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
-              trControl = myControl)
-set.seed(482)
-glm2 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
-              trControl = myControl, preProcess = "medianImpute")
-set.seed(482)
-glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
-              trControl = myControl)
-set.seed(482)
-glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
-              trControl = myControl)
+  set.seed(482)
+  glm1 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl)
+  set.seed(482)
+  glm2 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl, preProcess = "medianImpute")
+  set.seed(482)
+  glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl)
+  set.seed(482)
+  glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl)
 
 
 
-nestedList <- list(glm1, glm2, glm3, glm4)
-class(nestedList) <- 'caretList'
-set.seed(482)
-ensNest <- caretEnsemble(nestedList, iter=2000)
-pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
-pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)])
-pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)])
-pred.nestTrain_a <- predict(ensNest, keepNA = FALSE)
-pred.nestTrain_b <- predict(ensNest, keepNA = TRUE)
+  nestedList <- list(glm1, glm2, glm3, glm4)
+  class(nestedList) <- 'caretList'
+  set.seed(482)
+  ensNest <- caretEnsemble(nestedList, iter=2000)
+  pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
+  pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)])
+  pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)])
+  pred.nestTrain_a <- predict(ensNest, keepNA = FALSE)
+  pred.nestTrain_b <- predict(ensNest, keepNA = TRUE)
 
-test_that("We can ensemble models and handle missingness across predictors", {
   expect_that(ensNest, is_a("caretEnsemble"))
   pred.nest1 <- predict(ensNest,  newdata=testC[, c(1:17)])
   expect_message(predict(ensNest, newdata=testC[, c(1:17)]))
@@ -411,11 +362,41 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(length(pred.nestTrain_a)==2000)
   expect_true(length(pred.nest2)==1000)
   expect_true(anyNA(pred.nest1))
+
+  #BELOW THIS LINE is code that depends on ensNest from other tests
+  #------------------------------------------------------------------------
+  modF3 <- caretEnsemble:::extractModFrame(ensNest)
+
+  modres3 <- caretEnsemble:::extractModRes(ensNest)
+  expect_equal(modres3[1, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[1]], "AUC", which = "best"))
+  expect_equal(modres3[2, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[2]], "AUC", which = "best"))
+  expect_equal(modres3[3, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[3]], "AUC", which = "best"))
+  expect_equal(modres3[4, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[4]], "AUC", which = "best"))
+
+  expect_true(ncol(modF3) > ncol(ensNest$models[[3]]$trainingData))
+  expect_true(ncol(modF3) > ncol(ensNest$models[[4]]$trainingData))
+  expect_true(nrow(modF3) == nrow(ensNest$models[[3]]$trainingData))
+  expect_true(nrow(modF3) == nrow(ensNest$models[[4]]$trainingData))
+
+  pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se = TRUE)
+  pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
+  pred.nest2 <- predict(ensNest, keepNA = FALSE, newdata = testC[, c(1:17)], se = TRUE)
+  pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
+  expect_is(pred.nest1, "data.frame")
+  expect_true(is.list(pred.nest2))
+  expect_is(pred.nest1a, "data.frame")
+  expect_is(pred.nestTrain_a, "data.frame")
+  expect_identical(names(pred.nest1), c("pred", "se"))
+  expect_identical(names(pred.nest2), names(pred.nest1))
+  expect_null(pred.nest2$weight)
+  expect_identical(pred.nest1, pred.nest1a)
+  expect_true(length(pred.nest1)==2)
+  expect_true(nrow(pred.nestTrain_a)==2000)
+  expect_true(nrow(pred.nest2)==1000)
+  expect_true(anyNA(pred.nest1))
 })
 
-
 context("Extract model results")
-
 modres1 <- caretEnsemble:::extractModRes(ens.class)
 modres2 <- caretEnsemble:::extractModRes(ens.reg)
 
@@ -457,126 +438,85 @@ test_that("Model metric standard deviations are truly best", {
                                                     "RMSE", which = "all")))
 })
 
-modres3 <- caretEnsemble:::extractModRes(ensNest)
-
-test_that("Model metrics extracted correctly from nested models", {
-  expect_equal(modres3[1, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[1]], "AUC", which = "best"))
-  expect_equal(modres3[2, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[2]], "AUC", which = "best"))
-  expect_equal(modres3[3, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[3]], "AUC", which = "best"))
-  expect_equal(modres3[4, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[4]], "AUC", which = "best"))
-})
-
-
 context("Extract model frame")
 
 # caretEnsemble:::extractModFrame
 
 modF <- caretEnsemble:::extractModFrame(ens.class)
 modF2 <- caretEnsemble:::extractModFrame(ens.reg)
-modF3 <- caretEnsemble:::extractModFrame(ensNest)
 ## Test generics summary and predict
 
 test_that("Model frame is bigger for ensemble than for component models", {
   expect_true(ncol(modF) > ncol(ens.class$models[[2]]$trainingData))
   expect_true(ncol(modF2) > ncol(ens.reg$models[[1]]$trainingData))
-  expect_true(ncol(modF3) > ncol(ensNest$models[[3]]$trainingData))
-  expect_true(ncol(modF3) > ncol(ensNest$models[[4]]$trainingData))
   expect_true(nrow(modF) == nrow(ens.class$models[[2]]$trainingData))
   expect_true(nrow(modF2) == nrow(ens.reg$models[[1]]$trainingData))
-  expect_true(nrow(modF3) == nrow(ensNest$models[[3]]$trainingData))
-  expect_true(nrow(modF3) == nrow(ensNest$models[[4]]$trainingData))
 })
-
-
-context("Test generic predict with errors")
-
-pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se = TRUE)
-pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
-pred.nest2 <- predict(ensNest, keepNA = FALSE, newdata = testC[, c(1:17)], se = TRUE)
-pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
-
-
-test_that("We can ensemble models and handle missingness across predictors", {
-  expect_is(pred.nest1, "data.frame")
-  expect_true(is.list(pred.nest2))
-  expect_is(pred.nest1a, "data.frame")
-  expect_is(pred.nestTrain_a, "data.frame")
-  expect_identical(names(pred.nest1), c("pred", "se"))
-  expect_identical(names(pred.nest2), names(pred.nest1))
-  expect_null(pred.nest2$weight)
-  expect_identical(pred.nest1, pred.nest1a)
-  expect_true(length(pred.nest1)==2)
-  expect_true(nrow(pred.nestTrain_a)==2000)
-  expect_true(nrow(pred.nest2)==1000)
-  expect_true(anyNA(pred.nest1))
-})
-
 
 context("Does prediction method work for regression")
+test_that("Does prediction method work for regression", {
 
-mseeds <- vector(mode = "list", length = 12)
-for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
-mseeds[[12]] <- sample.int(1000, 1)
-myControl = trainControl(method = "cv", number = 10, repeats = 1,
-                         p = 0.75, savePrediction = TRUE,
-                         returnResamp = "final",
-                         returnData = TRUE, seeds = mseeds)
+  mseeds <- vector(mode = "list", length = 12)
+  for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
+  mseeds[[12]] <- sample.int(1000, 1)
+  myControl = trainControl(method = "cv", number = 10, repeats = 1,
+                           p = 0.75, savePrediction = TRUE,
+                           returnResamp = "final",
+                           returnData = TRUE, seeds = mseeds)
 
-trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
-                      corrType = "AR1", corrValue = 0.6, mislabel = 0)
+  trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
+                        corrType = "AR1", corrValue = 0.6, mislabel = 0)
 
-testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
-                     corrType = "AR1", corrValue = 0.6, mislabel = 0)
+  testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
+                       corrType = "AR1", corrValue = 0.6, mislabel = 0)
 
-MCAR.df <- function(df, p){
-  MCARx <- function(x, p){
-    z <- rbinom(length(x), 1, prob=p)
-    x[z==1] <- NA
-    return(x)
+  MCAR.df <- function(df, p){
+    MCARx <- function(x, p){
+      z <- rbinom(length(x), 1, prob=p)
+      x[z==1] <- NA
+      return(x)
+    }
+    if(length(p) == 1){
+      df <- apply(df, 2, MCARx, p)
+    } else if(length(p) > 1) {
+      df <- apply(df, 2, MCARx, sample(p, 1))
+    }
+    df <- as.data.frame(df)
+    return(df)
   }
-  if(length(p) == 1){
-    df <- apply(df, 2, MCARx, p)
-  } else if(length(p) > 1) {
-    df <- apply(df, 2, MCARx, sample(p, 1))
-  }
-  df <- as.data.frame(df)
-  return(df)
-}
 
-set.seed(3256)
-trainC[, c(1:15)] <- MCAR.df(trainC[, c(1:15)], 0.15)
-testC[, c(1:15)] <- MCAR.df(testC[, c(1:15)], 0.05)
+  set.seed(3256)
+  trainC[, c(1:15)] <- MCAR.df(trainC[, c(1:15)], 0.15)
+  testC[, c(1:15)] <- MCAR.df(testC[, c(1:15)], 0.05)
 
-set.seed(482)
-glm1 <- train(x = trainC[, c(1:15)], y = trainC[, "Corr2"], method = 'glm',
-              trControl = myControl, metric = "RMSE")
-set.seed(482)
-glm2 <- train(x = trainC[, c(1:15)], y = trainC[, "Corr2"], method = 'glm',
-              trControl = myControl, preProcess = "medianImpute", metric = "RMSE")
-set.seed(482)
-glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Corr2"], method = 'glm',
-              trControl = myControl, metric = "RMSE")
-set.seed(482)
-glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Corr2"], method = 'glm',
-              trControl = myControl, metric = "RMSE")
+  set.seed(482)
+  glm1 <- train(x = trainC[, c(1:15)], y = trainC[, "Corr2"], method = 'glm',
+                trControl = myControl, metric = "RMSE")
+  set.seed(482)
+  glm2 <- train(x = trainC[, c(1:15)], y = trainC[, "Corr2"], method = 'glm',
+                trControl = myControl, preProcess = "medianImpute", metric = "RMSE")
+  set.seed(482)
+  glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Corr2"], method = 'glm',
+                trControl = myControl, metric = "RMSE")
+  set.seed(482)
+  glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Corr2"], method = 'glm',
+                trControl = myControl, metric = "RMSE")
 
 
 
-nestedList <- list(glm1, glm2, glm3, glm4)
-class(nestedList) <- 'caretList'
-set.seed(482)
+  nestedList <- list(glm1, glm2, glm3, glm4)
+  class(nestedList) <- 'caretList'
+  set.seed(482)
 
-predobs <- caretEnsemble:::makePredObsMatrix(nestedList)
-greedOptRMSE(predobs$preds, predobs$obs)
+  predobs <- caretEnsemble:::makePredObsMatrix(nestedList)
+  greedOptRMSE(predobs$preds, predobs$obs)
 
-ensNest <- caretEnsemble(nestedList, optFUN = greedOptRMSE, iter=100)
+  ensNest <- caretEnsemble(nestedList, optFUN = greedOptRMSE, iter=100)
 
-pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se = TRUE)
-pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
-pred.nest2 <- predict(ensNest, keepNA = FALSE, newdata = testC[, c(1:17)], se = TRUE)
-pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
-
-test_that("We can ensemble models and handle missingness across predictors", {
+  pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)], se = TRUE)
+  pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)], se=TRUE)
+  pred.nest2 <- predict(ensNest, keepNA = FALSE, newdata = testC[, c(1:17)], se = TRUE)
+  pred.nestTrain_a <- predict(ensNest, keepNA = FALSE, se =TRUE)
   expect_is(pred.nest1, "data.frame")
   expect_true(is.list(pred.nest2))
   expect_is(pred.nest1a, "data.frame")
@@ -588,27 +528,29 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(length(pred.nest1)==2)
 })
 
+test_that('Ensemble prediction I guess?', {
 
-load(system.file("testdata/models_reg.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/X.reg.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/Y.reg.rda",
-                 package="caretEnsemble", mustWork=TRUE))
+  skip_on_cran()
 
-models_subset <- models_reg[2:4]
-class(models_subset) <- 'caretList'
-ens.reg <- caretEnsemble(models_subset, iter=1000)
+  load(system.file("testdata/models_reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/X.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/Y.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
 
-preds1 <- predict(ens.reg)
-preds2 <- predict(ens.reg, se = TRUE)
-preds3 <- predict(ens.reg, keepNA = FALSE, se = TRUE)
-preds4 <- predict(ens.reg, keepNA = TRUE, se = TRUE)
-preds5 <- predict(ens.reg, keepNA = TRUE, se = TRUE, return_weights = TRUE)
-preds6 <- predict(ens.reg, keepNA = TRUE, se = FALSE, return_weights = TRUE)
-preds7 <- predict(ens.reg, keepNA = FALSE, se = FALSE, return_weights = TRUE)
+  models_subset <- models_reg[2:4]
+  class(models_subset) <- 'caretList'
+  ens.reg <- caretEnsemble(models_subset, iter=1000)
 
-test_that("Regression models work with prediction errors", {
+  preds1 <- predict(ens.reg)
+  preds2 <- predict(ens.reg, se = TRUE)
+  preds3 <- predict(ens.reg, keepNA = FALSE, se = TRUE)
+  preds4 <- predict(ens.reg, keepNA = TRUE, se = TRUE)
+  preds5 <- predict(ens.reg, keepNA = TRUE, se = TRUE, return_weights = TRUE)
+  preds6 <- predict(ens.reg, keepNA = TRUE, se = FALSE, return_weights = TRUE)
+  preds7 <- predict(ens.reg, keepNA = FALSE, se = FALSE, return_weights = TRUE)
+
   expect_is(preds1, "numeric")
   expect_is(preds2, "data.frame")
   expect_is(preds3, "data.frame")
@@ -622,60 +564,60 @@ test_that("Regression models work with prediction errors", {
   expect_is(preds5$weight, "matrix")
   expect_is(preds6$weight, "matrix")
   expect_identical(preds6$weight, preds5$weight)
+
+  #Reg tests
+  load(system.file("testdata/models_reg.rda", package="caretEnsemble", mustWork=TRUE))
+  ens.reg <- caretEnsemble(models_reg, iter=1000)
+  tests <- expand.grid(keepNA=0:1, se=0:1, return_weights=0:1)
+  tests <- data.frame(lapply(tests, as.logical))
+  for(i in 1:nrow(tests)){
+    p <- predict(
+      ens.reg,
+      keepNA=tests[i,'keepNa'],
+      se=tests[i,'se'],
+      return_weights=tests[i,'return_weights']
+    )
+
+    if(tests[i,'return_weights']){
+      expect_is(p, 'list')
+      preds <- p$preds
+    } else{
+      preds <- p
+    }
+
+    if(tests[i,'se']){
+      expect_is(preds, 'data.frame')
+    } else{
+      expect_is(preds, 'numeric')
+    }
+
+  }
+
+  #Class tests
+  load(system.file("testdata/models_class.rda", package="caretEnsemble", mustWork=TRUE))
+  ens.class <- caretEnsemble(models_class, iter=1000)
+  tests <- expand.grid(keepNA=0:1, se=0:1, return_weights=0:1)
+  tests <- data.frame(lapply(tests, as.logical))
+  for(i in 1:nrow(tests)){
+    p <- predict(
+      ens.class,
+      keepNA=tests[i,'keepNa'],
+      se=tests[i,'se'],
+      return_weights=tests[i,'return_weights']
+    )
+
+    if(tests[i,'return_weights']){
+      expect_is(p, 'list')
+      preds <- p$preds
+    } else{
+      preds <- p
+    }
+
+    if(tests[i,'se']){
+      expect_is(preds, 'data.frame')
+    } else{
+      expect_is(preds, 'numeric')
+    }
+
+  }
 })
-
-#Reg tests
-load(system.file("testdata/models_reg.rda", package="caretEnsemble", mustWork=TRUE))
-ens.reg <- caretEnsemble(models_reg, iter=1000)
-tests <- expand.grid(keepNA=0:1, se=0:1, return_weights=0:1)
-tests <- data.frame(lapply(tests, as.logical))
-for(i in 1:nrow(tests)){
-  p <- predict(
-    ens.reg,
-    keepNA=tests[i,'keepNa'],
-    se=tests[i,'se'],
-    return_weights=tests[i,'return_weights']
-  )
-
-  if(tests[i,'return_weights']){
-    expect_is(p, 'list')
-    preds <- p$preds
-  } else{
-    preds <- p
-  }
-
-  if(tests[i,'se']){
-    expect_is(preds, 'data.frame')
-  } else{
-    expect_is(preds, 'numeric')
-  }
-
-}
-
-#Class tests
-load(system.file("testdata/models_class.rda", package="caretEnsemble", mustWork=TRUE))
-ens.class <- caretEnsemble(models_class, iter=1000)
-tests <- expand.grid(keepNA=0:1, se=0:1, return_weights=0:1)
-tests <- data.frame(lapply(tests, as.logical))
-for(i in 1:nrow(tests)){
-  p <- predict(
-    ens.class,
-    keepNA=tests[i,'keepNa'],
-    se=tests[i,'se'],
-    return_weights=tests[i,'return_weights']
-  )
-
-  if(tests[i,'return_weights']){
-    expect_is(p, 'list')
-    preds <- p$preds
-  } else{
-    preds <- p
-  }
-
-  if(tests[i,'se']){
-    expect_is(preds, 'data.frame')
-  } else{
-    expect_is(preds, 'numeric')
-  }
-
-}
