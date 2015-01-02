@@ -15,6 +15,7 @@
 This is a function to print a caretStack.
 }
 \examples{
+\dontrun{
 library('rpart')
 models <- caretList(
   x=iris[1:100,1:2],
@@ -24,5 +25,6 @@ models <- caretList(
 )
 meta_model <- caretStack(models, method='lm')
 print(meta_model)
+}
 }
 

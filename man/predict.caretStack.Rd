@@ -19,6 +19,7 @@ turn to make a matrix of predictions, and then multiplies that matrix by the vec
 weights to get a single, combined vector of predictions.
 }
 \examples{
+\dontrun{
 library('rpart')
 models <- caretList(
   x=iris[1:100,1:2],
@@ -28,5 +29,6 @@ models <- caretList(
 )
 meta_model <- caretStack(models, method='lm')
 RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
+}
 }
 
