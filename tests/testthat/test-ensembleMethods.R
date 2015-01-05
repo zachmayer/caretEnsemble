@@ -4,41 +4,38 @@ library(caret)
 library(randomForest)
 
 
-load(system.file("testdata/models_reg.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/X.reg.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/Y.reg.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/models_class.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/X.class.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/Y.class.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/studentEns.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/modeldat2.rda",
-                 package="caretEnsemble", mustWork=TRUE))
-
-set.seed(2239)
-ens.class <- caretEnsemble(models_class, iter=1000)
-
-# varImp struggles with the rf in our test suite, why?
-models_subset <- models_reg[2:4]
-class(models_subset) <- 'caretList'
-ens.reg <- caretEnsemble(models_subset, iter=1000)
-
 test_that("We can get variable importance in classification models", {
+
+
+  load(system.file("testdata/models_reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/X.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/Y.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/models_class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/X.class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/Y.class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/studentEns.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/modeldat2.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  set.seed(2239)
+  ens.class <- caretEnsemble(models_class, iter=100)
+  # varImp struggles with the rf in our test suite, why?
+  models_subset <- models_reg[2:4]
+  class(models_subset) <- 'caretList'
+  ens.reg <- caretEnsemble(models_subset, iter=100)
   expect_is(varImp(ens.class), "data.frame")
-#   expect_is(varImp(ens.class, scale = FALSE), "data.frame")
   expect_is(varImp(ens.class, weight = TRUE), "data.frame")
   expect_is(varImp(ens.class, scale = TRUE, weight = TRUE), "data.frame")
 })
 
 test_that("We can get variable importance in regression models", {
   expect_is(varImp(ens.reg), "data.frame")
-#   expect_is(varImp(ens.reg, scale = FALSE), "data.frame")
   expect_is(varImp(ens.reg, weight = TRUE), "data.frame")
   expect_is(varImp(ens.reg, scale = TRUE, weight = TRUE), "data.frame")
 })
