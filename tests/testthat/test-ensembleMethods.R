@@ -469,6 +469,7 @@ test_that("We can ensemble models and handle missingness across predictors", {
   nestedList <- list(glm1, glm2, glm3, glm4)
   class(nestedList) <- 'caretList'
   set.seed(482)
+  ensNest <- caretEnsemble(nestedList, iter=2000)
   predobs <- caretEnsemble:::makePredObsMatrix(nestedList)
   greedOptRMSE(predobs$preds, predobs$obs)
   EnsNest <- caretEnsemble(nestedList, optFUN = greedOptRMSE, iter=100)
