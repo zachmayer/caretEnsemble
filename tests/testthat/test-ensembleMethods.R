@@ -4,6 +4,7 @@ library(caret)
 library(randomForest)
 
 test_that("We can get variable importance in ensembles", {
+  skip_on_cran()
   load(system.file("testdata/models_reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_class.rda",
@@ -25,6 +26,7 @@ test_that("We can get variable importance in ensembles", {
 
 
 test_that("We get warnings when scale is set to FALSE and weight is TRUE", {
+  skip_on_cran()
   load(system.file("testdata/models_reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_class.rda",
@@ -49,12 +51,12 @@ test_that("We get warnings when scale is set to FALSE and weight is TRUE", {
                  "Weighting of unscaled")
 })
 
-ncol1 <- 6
-ncol2 <- 4
-nrow1 <- 6
-nrow2 <- 6
-
 test_that("We get the right dimensions back", {
+  skip_on_cran()
+  ncol1 <- 6
+  ncol2 <- 4
+  nrow1 <- 6
+  nrow2 <- 6
   load(system.file("testdata/models_reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_class.rda",
@@ -239,10 +241,6 @@ test_that("No errors are thrown by a generics for ensembles", {
 
 context("Residual extraction")
 
-
-
-
-
 test_that("Residuals provided by residuals are proper for ensemble objects", {
      load(system.file("testdata/studentEns.rda",
                      package="caretEnsemble", mustWork=TRUE))
@@ -269,24 +267,24 @@ test_that("Residuals provided by residuals are proper for ensemble objects", {
     obs2 <- Y.reg
     predTest <- predict(ens.class)
     predTest2 <- predict(ens.reg)
-  expect_identical(residTest, obs1 - predTest)
-  expect_identical(residTest2, obs2 - predTest2)
-  expect_false(identical(residTest2, predTest2 -obs2))
-  expect_false(identical(residTest, predTest -obs1))
-  mr1 <- multiResiduals(ens.class)
-  mr2 <- multiResiduals(ens.reg)
-  expect_identical(names(mr1), names(mr2))
-  expect_identical(names(mr1), c("method", "id", "yhat", "resid", "y"))
-  expect_equal(nrow(mr1), 150 * length(ens.class$models))
-  expect_equal(nrow(mr2), 150 * length(ens.reg$models))
-  expect_equal(ncol(mr1), ncol(mr2))
-  mr1 <- mr1[order(mr1$method, mr1$id),]
-  mr2 <- mr2[order(mr2$method, mr2$id),]
-  mr2.tmp1 <- residuals(ens.reg$models[[1]])
-  attributes(mr2.tmp1) <- NULL
-  mr2.tmp2 <- residuals(ens.reg$models[[2]])
-  tmpMR <- vector("list", length(ens.class$models))
-  testVec <- rep(NA, length(ens.class$models))
+    expect_identical(residTest, obs1 - predTest)
+    expect_identical(residTest2, obs2 - predTest2)
+    expect_false(identical(residTest2, predTest2 -obs2))
+    expect_false(identical(residTest, predTest -obs1))
+    mr1 <- multiResiduals(ens.class)
+    mr2 <- multiResiduals(ens.reg)
+    expect_identical(names(mr1), names(mr2))
+    expect_identical(names(mr1), c("method", "id", "yhat", "resid", "y"))
+    expect_equal(nrow(mr1), 150 * length(ens.class$models))
+    expect_equal(nrow(mr2), 150 * length(ens.reg$models))
+    expect_equal(ncol(mr1), ncol(mr2))
+    mr1 <- mr1[order(mr1$method, mr1$id),]
+    mr2 <- mr2[order(mr2$method, mr2$id),]
+    mr2.tmp1 <- residuals(ens.reg$models[[1]])
+    attributes(mr2.tmp1) <- NULL
+    mr2.tmp2 <- residuals(ens.reg$models[[2]])
+    tmpMR <- vector("list", length(ens.class$models))
+    testVec <- rep(NA, length(ens.class$models))
     for(i in 1:length(ens.class$models)){
       tmp <- caretEnsemble:::residuals2.train(ens.class$models[[i]])
       tmpMR[[i]] <- merge(mr1, tmp)
@@ -301,6 +299,7 @@ test_that("Residuals provided by residuals are proper for ensemble objects", {
 context("Does prediction method work for classification")
 
 test_that("We can ensemble models and handle missingness across predictors", {
+  skip_on_cran()
   mseeds <- vector(mode = "list", length = 12)
   for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
   mseeds[[12]] <- sample.int(1000, 1)
@@ -424,6 +423,7 @@ test_that("We can ensemble models and handle missingness across predictors", {
 context("Does prediction method work for regression")
 
 test_that("We can ensemble models and handle missingness across predictors", {
+  skip_on_cran()
   mseeds <- vector(mode = "list", length = 12)
   for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
   mseeds[[12]] <- sample.int(1000, 1)

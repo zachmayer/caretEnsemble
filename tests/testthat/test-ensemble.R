@@ -32,6 +32,7 @@ test_that("We can ensemble regression models", {
 context("Does ensembling work with models with differing predictors")
 
 test_that("We can ensemble models of different predictors", {
+  skip_on_cran()
   data(iris)
   Y.reg <- iris[, 1]
   X.reg <- model.matrix(~ ., iris[, -1])
@@ -64,6 +65,7 @@ context("Does ensembling work with missingness")
 
 
 test_that("Warnings issued for missing data correctly", {
+  skip_on_cran()
   mseeds <- vector(mode = "list", length = 12)
   for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
   mseeds[[12]] <- sample.int(1000, 1)
@@ -156,6 +158,7 @@ test_that("Predictions the same for non-missing data under predict", {
 })
 
 test_that("NA preservation and standard errors work right", {
+  skip_on_cran()
   mseeds <- vector(mode = "list", length = 12)
   for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
   mseeds[[12]] <- sample.int(1000, 1)
@@ -296,5 +299,4 @@ test_that("NA preservation and standard errors work right", {
   expect_identical(dim(pred.nest3$weight), c(1L, 4L))
   expect_identical(dim(pred.nest4$weight), c(1L, 4L))
   expect_identical(dim(pred.nest5$weight), c(2000L, 4L))
-  #TODO: Fix names on the weight matrix returned here
 })
