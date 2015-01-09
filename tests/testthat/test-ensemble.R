@@ -64,7 +64,6 @@ context("Does ensembling work with missingness")
 
 
 test_that("Warnings issued for missing data correctly", {
-
   mseeds <- vector(mode = "list", length = 12)
   for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
   mseeds[[12]] <- sample.int(1000, 1)
@@ -78,7 +77,6 @@ test_that("Warnings issued for missing data correctly", {
 
   testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
                        corrType = "AR1", corrValue = 0.6, mislabel = 0)
-
   MCAR.df <- function(df, p){
     MCARx <- function(x, p){
       z <- rbinom(length(x), 1, prob=p)
@@ -93,11 +91,9 @@ test_that("Warnings issued for missing data correctly", {
     df <- as.data.frame(df)
     return(df)
   }
-
   set.seed(3256)
   trainC[, c(1:17)] <- MCAR.df(trainC[, c(1:17)], 0.15)
   testC[, c(1:17)] <- MCAR.df(testC[, c(1:17)], 0.05)
-
   set.seed(482)
   glm1 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
                 trControl = myControl)
@@ -113,7 +109,6 @@ test_that("Warnings issued for missing data correctly", {
 
   nestedList <- list(glm1, glm2, glm3, glm4)
   class(nestedList) <- 'caretList'
-
   set.seed(482)
   ensNest <- caretEnsemble(nestedList, iter=2000)
   pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
@@ -161,6 +156,53 @@ test_that("Predictions the same for non-missing data under predict", {
 })
 
 test_that("NA preservation and standard errors work right", {
+  mseeds <- vector(mode = "list", length = 12)
+  for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
+  mseeds[[12]] <- sample.int(1000, 1)
+  myControl = trainControl(method = "cv", number = 10, repeats = 1,
+                           p = 0.75, savePrediction = TRUE,
+                           classProbs = TRUE, returnResamp = "final",
+                           returnData = TRUE, seeds = mseeds)
+
+  trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
+                        corrType = "AR1", corrValue = 0.6, mislabel = 0)
+
+  testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
+                       corrType = "AR1", corrValue = 0.6, mislabel = 0)
+  MCAR.df <- function(df, p){
+    MCARx <- function(x, p){
+      z <- rbinom(length(x), 1, prob=p)
+      x[z==1] <- NA
+      return(x)
+    }
+    if(length(p) == 1){
+      df <- apply(df, 2, MCARx, p)
+    } else if(length(p) > 1) {
+      df <- apply(df, 2, MCARx, sample(p, 1))
+    }
+    df <- as.data.frame(df)
+    return(df)
+  }
+
+  set.seed(3256)
+  trainC[, c(1:17)] <- MCAR.df(trainC[, c(1:17)], 0.15)
+  testC[, c(1:17)] <- MCAR.df(testC[, c(1:17)], 0.05)
+  set.seed(482)
+  glm1 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl)
+  set.seed(482)
+  glm2 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl, preProcess = "medianImpute")
+  set.seed(482)
+  glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl)
+  set.seed(482)
+  glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
+                trControl = myControl)
+  nestedList <- list(glm1, glm2, glm3, glm4)
+  class(nestedList) <- 'caretList'
+  set.seed(482)
+  ensNest <- caretEnsemble(nestedList, iter=200)
   load(system.file("testdata/models_class.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_reg.rda",
