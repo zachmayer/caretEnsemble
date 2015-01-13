@@ -145,7 +145,7 @@ test_that("Checks generate errors", {
     savePredictions=TRUE,
     classProbs=TRUE,
     summaryFunction=twoClassSummary
-    )
+  )
   x <- caretList(
     iris[1:100,-5],
     factor(ifelse(iris[1:100, 'Species'] == 'setosa', 'Yes', 'No')),

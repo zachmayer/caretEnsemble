@@ -3,7 +3,6 @@ context("Does ensembling and prediction work?")
 library(caret)
 library(randomForest)
 
-
 test_that("We can ensemble regression models", {
   load(system.file("testdata/models_reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
@@ -62,7 +61,6 @@ test_that("We can ensemble models of different predictors", {
 })
 
 context("Does ensembling work with missingness")
-
 
 test_that("Warnings issued for missing data correctly", {
   skip_on_cran()
