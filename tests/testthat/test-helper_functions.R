@@ -108,6 +108,7 @@ test_that("wtd.sd handles NA values correctly", {
 })
 
 test_that("Checks generate errors", {
+  skip_on_cran()
   set.seed(42)
   myControl <- trainControl(method='cv', number=5, savePredictions=TRUE)
   x <- caretList(
@@ -154,5 +155,3 @@ test_that("Checks generate errors", {
   x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, head(iris, 100), method='rpart')
   expect_error(check_caretList_model_types(x))
 })
-
-
