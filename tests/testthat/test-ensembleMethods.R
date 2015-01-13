@@ -510,7 +510,6 @@ test_that("Prediction options are respected in regression and classification", {
     } else{
       expect_is(preds, 'numeric')
     }
-
   }
 
   #Class tests
