@@ -19,9 +19,11 @@ This function makes a short plot of the performance of the component
 models of a \code{caretEnsemble} object on the AUC or RMSE metric
 }
 \examples{
+\dontrun{
 set.seed(42)
 models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'rpart'))
 ens <- caretEnsemble(models)
 plot(ens)
+}
 }
 

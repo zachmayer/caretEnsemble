@@ -241,4 +241,3 @@ predict.caretList <- function(object, ..., verbose = FALSE){
 
   return(preds)
 }
-
