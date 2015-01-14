@@ -32,7 +32,7 @@ context("Test optimizer passing to caretEnsemble correctly")
 
 test_that("Test that optFUN does not take random values", {
   skip_on_cran()
-  myCL <- caretList( #This takes 20 seconds, out of the 60 we have to test
+  myCL <- caretList(
     x = train[, -23],
     y = train[, "Class"],
     metric = "ROC",
@@ -57,6 +57,14 @@ ctrl <- trainControl(
 
 test_that("safe and greedy optimizers get same result in the limit", {
   skip_on_cran()
+
+  myCL <- caretList(
+    x = train[, -23],
+    y = train[, "Class"],
+    metric = "ROC",
+    trControl = myControl,
+    tuneList = myList)
+
   out <- caretList(
     x = rbind(modeldat2$traindata$preds, modeldat2$testdata$preds),
     y = factor(c(modeldat2$traindata$class,modeldat2$testdata$class)),
