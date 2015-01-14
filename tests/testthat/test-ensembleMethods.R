@@ -23,8 +23,6 @@ test_that("We can get variable importance in ensembles", {
   expect_is(varImp(ens.reg, scale = TRUE, weight = TRUE), "data.frame")
 })
 
-
-
 test_that("We get warnings when scale is set to FALSE and weight is TRUE", {
   skip_on_cran()
   load(system.file("testdata/models_reg.rda",
@@ -81,10 +79,10 @@ test_that("We get the right dimensions back", {
   expect_equal(nrow(varImp(ens.reg, weight = TRUE)), nrow2)
 })
 
-
 context("Do metric extraction functions work as expected")
 
 test_that("Metric is used correctly", {
+  skip_on_cran()
   load(system.file("testdata/models_reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_class.rda",
@@ -175,6 +173,7 @@ test_that("Metric is used correctly", {
 context("Metrics in student examples")
 
 test_that("metrics work for AUC in imbalanced example", {
+  skip_on_cran()
   load(system.file("testdata/studentEns.rda",
                    package="caretEnsemble", mustWork=TRUE))
   expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[1]]), 0.9340861, tol = 0.01)
@@ -200,6 +199,7 @@ test_that("metrics work for AUC in imbalanced example", {
 context("Testing caretEnsemble generics")
 
 test_that("No errors are thrown by a generics for ensembles", {
+  skip_on_cran()
   load(system.file("testdata/studentEns.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_reg.rda",
@@ -242,59 +242,59 @@ test_that("No errors are thrown by a generics for ensembles", {
 context("Residual extraction")
 
 test_that("Residuals provided by residuals are proper for ensemble objects", {
-     load(system.file("testdata/studentEns.rda",
-                     package="caretEnsemble", mustWork=TRUE))
-    load(system.file("testdata/models_reg.rda",
-                     package="caretEnsemble", mustWork=TRUE))
-    load(system.file("testdata/models_class.rda",
-                     package="caretEnsemble", mustWork=TRUE))
-    load(system.file("testdata/X.reg.rda",
-                     package="caretEnsemble", mustWork=TRUE))
-    load(system.file("testdata/Y.reg.rda",
-                     package="caretEnsemble", mustWork=TRUE))
-    load(system.file("testdata/X.class.rda",
-                     package="caretEnsemble", mustWork=TRUE))
-    load(system.file("testdata/Y.class.rda",
-                     package="caretEnsemble", mustWork=TRUE))
-    set.seed(2239)
-    ens.class <- caretEnsemble(models_class, iter=100)
-    models_subset <- models_reg[2:4]
-    class(models_subset) <- 'caretList'
-    ens.reg <- caretEnsemble(models_subset, iter=100)
-    residTest <- residuals(ens.class)
-    residTest2 <- residuals(ens.reg)
-    obs1 <- ifelse(Y.class == "No", 0, 1)
-    obs2 <- Y.reg
-    predTest <- predict(ens.class)
-    predTest2 <- predict(ens.reg)
-    expect_identical(residTest, obs1 - predTest)
-    expect_identical(residTest2, obs2 - predTest2)
-    expect_false(identical(residTest2, predTest2 -obs2))
-    expect_false(identical(residTest, predTest -obs1))
-    mr1 <- multiResiduals(ens.class)
-    mr2 <- multiResiduals(ens.reg)
-    expect_identical(names(mr1), names(mr2))
-    expect_identical(names(mr1), c("method", "id", "yhat", "resid", "y"))
-    expect_equal(nrow(mr1), 150 * length(ens.class$models))
-    expect_equal(nrow(mr2), 150 * length(ens.reg$models))
-    expect_equal(ncol(mr1), ncol(mr2))
-    mr1 <- mr1[order(mr1$method, mr1$id),]
-    mr2 <- mr2[order(mr2$method, mr2$id),]
-    mr2.tmp1 <- residuals(ens.reg$models[[1]])
-    attributes(mr2.tmp1) <- NULL
-    mr2.tmp2 <- residuals(ens.reg$models[[2]])
-    tmpMR <- vector("list", length(ens.class$models))
-    testVec <- rep(NA, length(ens.class$models))
-    for(i in 1:length(ens.class$models)){
-      tmp <- caretEnsemble:::residuals2.train(ens.class$models[[i]])
-      tmpMR[[i]] <- merge(mr1, tmp)
-      testVec[i] <- identical(tmpMR[[i]]$resid, tmpMR[[i]]$.resid)
-    }
+  skip_on_cran()
+  load(system.file("testdata/studentEns.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/models_reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/models_class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/X.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/Y.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/X.class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/Y.class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  set.seed(2239)
+  ens.class <- caretEnsemble(models_class, iter=100)
+  models_subset <- models_reg[2:4]
+  class(models_subset) <- 'caretList'
+  ens.reg <- caretEnsemble(models_subset, iter=100)
+  residTest <- residuals(ens.class)
+  residTest2 <- residuals(ens.reg)
+  obs1 <- ifelse(Y.class == "No", 0, 1)
+  obs2 <- Y.reg
+  predTest <- predict(ens.class)
+  predTest2 <- predict(ens.reg)
+  expect_identical(residTest, obs1 - predTest)
+  expect_identical(residTest2, obs2 - predTest2)
+  expect_false(identical(residTest2, predTest2 -obs2))
+  expect_false(identical(residTest, predTest -obs1))
+  mr1 <- multiResiduals(ens.class)
+  mr2 <- multiResiduals(ens.reg)
+  expect_identical(names(mr1), names(mr2))
+  expect_identical(names(mr1), c("method", "id", "yhat", "resid", "y"))
+  expect_equal(nrow(mr1), 150 * length(ens.class$models))
+  expect_equal(nrow(mr2), 150 * length(ens.reg$models))
+  expect_equal(ncol(mr1), ncol(mr2))
+  mr1 <- mr1[order(mr1$method, mr1$id),]
+  mr2 <- mr2[order(mr2$method, mr2$id),]
+  mr2.tmp1 <- residuals(ens.reg$models[[1]])
+  attributes(mr2.tmp1) <- NULL
+  mr2.tmp2 <- residuals(ens.reg$models[[2]])
+  tmpMR <- vector("list", length(ens.class$models))
+  testVec <- rep(NA, length(ens.class$models))
+  for(i in 1:length(ens.class$models)){
+    tmp <- caretEnsemble:::residuals2.train(ens.class$models[[i]])
+    tmpMR[[i]] <- merge(mr1, tmp)
+    testVec[i] <- identical(tmpMR[[i]]$resid, tmpMR[[i]]$.resid)
+  }
   expect_true(identical(round(mr2[mr2$method == "lm", "resid"], 5), round(mr2.tmp1, 5)))
   expect_true(identical(round(mr2[mr2$method == "knn", "resid"], 5), round(mr2.tmp2, 5)))
   expect_true(all(testVec))
 })
-
 
 context("Does prediction method work for classification")
 
@@ -396,12 +396,12 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_equal(modres1[5, 3], caretEnsemble:::getMetricSD.train(ens.class$models[[5]], "AUC", which = "best"))
   expect_identical(modres1[2, 3], caretEnsemble:::getMetricSD.train(ens.class$models[[2]], "AUC", which = "all"))
   expect_false(identical(modres1[3, 3], caretEnsemble:::getMetricSD.train(ens.class$models[[3]],
-                                                    "AUC", which = "all")))
+                                                                          "AUC", which = "all")))
   expect_identical(modres2[1, 3], caretEnsemble:::getMetricSD.train(ens.reg$models[[1]], "RMSE", which = "best"))
   expect_identical(modres2[2, 3], caretEnsemble:::getMetricSD.train(ens.reg$models[[2]], "RMSE", which = "best"))
   expect_identical(modres2[1, 3], caretEnsemble:::getMetricSD.train(ens.reg$models[[1]], "RMSE", which = "all"))
   expect_false(identical(modres2[2, 3], caretEnsemble:::getMetricSD.train(ens.reg$models[[2]],
-                                                    "RMSE", which = "all")))
+                                                                          "RMSE", which = "all")))
   modres3 <- caretEnsemble:::extractModRes(ensNest)
   expect_equal(modres3[1, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[1]], "AUC", which = "best"))
   expect_equal(modres3[2, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[2]], "AUC", which = "best"))
@@ -490,6 +490,7 @@ test_that("We can ensemble models and handle missingness across predictors", {
 
 #Reg tests
 test_that("Prediction options are respected in regression and classification", {
+  skip_on_cran()
   load(system.file("testdata/models_reg.rda", package="caretEnsemble", mustWork=TRUE))
   ens.reg <- caretEnsemble(models_reg, iter=1000)
   tests <- expand.grid(keepNA=0:1, se=0:1, return_weights=0:1)
@@ -514,7 +515,6 @@ test_that("Prediction options are respected in regression and classification", {
     } else{
       expect_is(preds, 'numeric')
     }
-
   }
 
   #Class tests
@@ -542,6 +542,5 @@ test_that("Prediction options are respected in regression and classification", {
     } else{
       expect_is(preds, 'numeric')
     }
-
   }
 })

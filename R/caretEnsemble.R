@@ -91,7 +91,6 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
     }
   }
 
-
   #Return final model
   models <- all.models[keep]
   class(models) <- 'caretList'
@@ -574,10 +573,12 @@ extractModFrame <- function(model){
 #' @export
 #' @method plot caretEnsemble
 #' @examples
+#' \dontrun{
 #' set.seed(42)
 #' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'rpart'))
 #' ens <- caretEnsemble(models)
 #' plot(ens)
+#' }
 plot.caretEnsemble <- function(x, ...){
   dat <- extractModRes(x)
   metricLab <- names(x$error)
