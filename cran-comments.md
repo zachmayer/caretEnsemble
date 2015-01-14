@@ -1,13 +1,16 @@
-This is a new submission to CRAN.  It is a package for creating ensembles of
-caret models using greedy selection or other caret models.  It also has a helper
-function for fitting many caret models to one set of re-sampled data.
+This is a re-submission of a new package to CRAN.
 
-# R CMD CHECK passes on:
-## Mac (via `devtools::check()` on my local machine):
-No error, warnings, or notes
+The re-submission fixes the following issues in our first submission:
 
-## Ubuntu (via travis-ci on github)
-No error, warnings, or notes
-
-## Windows (via `devtools::build_win()`)
-1 Note: New submission (maintainer) I think it is safe for me to ignore this
+1. 'This package' is redundant: what else might it be a description of?:
+    'This package' removed from Description.
+2. Describe the package, not what it is not: Decpription updated to remove
+    extraneous lines.
+3. Examples take too long: We updated most of the example with `\dontrun{}` 
+    blocks so they will not be run on CRAN.
+4. Tests take too long: We used `testthat::skip_on_cran()` to skip all of the 
+    longer-runing rests.  Testing on CRAN should now take 30-40 seconds.
+    
+`R CMD CHECK` passes on mac and ubuntu with no errors, warnings or notes.
+`R CMD CHECK` passes on windows with no errors or warnings and 2 notes.
+    I think it is safe for me to ignore both windows build notes.

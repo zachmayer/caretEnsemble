@@ -32,6 +32,7 @@ This function provides a more robust series of diagnostic plots
 for a caretEnsemble object.
 }
 \examples{
+\dontrun{
 set.seed(42)
 models <- caretList(
  iris[1:50,1:2],
@@ -40,5 +41,6 @@ models <- caretList(
  methodList=c('glm', 'rpart'))
 ens <- caretEnsemble(models)
 autoplot(ens)
+}
 }
 

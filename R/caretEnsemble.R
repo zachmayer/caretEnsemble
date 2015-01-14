@@ -25,10 +25,12 @@
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 #' @export
 #' @examples
+#' \dontrun{
 #' set.seed(42)
 #' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
 #' ens <- caretEnsemble(models)
 #' summary(ens)
+#' }
 caretEnsemble <- function(all.models, optFUN=NULL, ...){
 
   stopifnot(is(all.models, 'caretList'))
@@ -89,7 +91,6 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
     }
   }
 
-
   #Return final model
   models <- all.models[keep]
   class(models) <- 'caretList'
@@ -118,10 +119,12 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @export
 #' @method predict caretEnsemble
 #' @examples
+#' \dontrun{
 #' set.seed(42)
 #' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
 #' ens <- caretEnsemble(models)
 #' cor(predict(ens, newdata=iris[51:150,1:2]), iris[51:150,3])
+#' }
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
   stopifnot(is(object$models, 'caretList'))
 
@@ -187,10 +190,12 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
 #' @param ... optional additional parameters.
 #' @export
 #' @examples
+#' \dontrun{
 #' set.seed(42)
 #' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
 #' ens <- caretEnsemble(models)
 #' summary(ens)
+#' }
 summary.caretEnsemble <- function(object, ...){
   types <- names(object$models)
   if(is.null(types)){
@@ -568,10 +573,12 @@ extractModFrame <- function(model){
 #' @export
 #' @method plot caretEnsemble
 #' @examples
+#' \dontrun{
 #' set.seed(42)
 #' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'rpart'))
 #' ens <- caretEnsemble(models)
 #' plot(ens)
+#' }
 plot.caretEnsemble <- function(x, ...){
   dat <- extractModRes(x)
   metricLab <- names(x$error)
@@ -602,6 +609,7 @@ plot.caretEnsemble <- function(x, ...){
 #' @importFrom gridExtra grid.arrange
 #' @export
 #' @examples
+#' \dontrun{
 #' set.seed(42)
 #' models <- caretList(
 #'  iris[1:50,1:2],
@@ -610,6 +618,7 @@ plot.caretEnsemble <- function(x, ...){
 #'  methodList=c('glm', 'rpart'))
 #' ens <- caretEnsemble(models)
 #' autoplot(ens)
+#' }
 autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
                                    xvars = NULL, ...){
   plotdf <- suppressMessages(fortify(object))

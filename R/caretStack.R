@@ -11,6 +11,7 @@
 #' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 #' @export
 #' @examples
+#' \dontrun{
 #' library('rpart')
 #' models <- caretList(
 #'   x=iris[1:50,1:2],
@@ -19,6 +20,7 @@
 #'   methodList=c('rpart', 'glm')
 #' )
 #' caretStack(models, method='glm')
+#' }
 caretStack <- function(all.models, ...){
 
   predobs <- makePredObsMatrix(all.models)
@@ -42,6 +44,7 @@ caretStack <- function(all.models, ...){
 #' @export
 #' @method predict caretStack
 #' @examples
+#' \dontrun{
 #' library('rpart')
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
@@ -51,6 +54,7 @@ caretStack <- function(all.models, ...){
 #' )
 #' meta_model <- caretStack(models, method='lm')
 #' RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
+#' }
 predict.caretStack <- function(object, newdata=NULL, ...){
   stopifnot(is(object$models, 'caretList'))
   type <- extractModelTypes(object$models)
@@ -65,6 +69,7 @@ predict.caretStack <- function(object, newdata=NULL, ...){
 #' @param ... ignored
 #' @export
 #' @examples
+#' \dontrun{
 #' library('rpart')
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
@@ -74,6 +79,7 @@ predict.caretStack <- function(object, newdata=NULL, ...){
 #' )
 #' meta_model <- caretStack(models, method='lm')
 #' summary(meta_model)
+#' }
 summary.caretStack <- function(object, ...){
   summary(object$ens_model)
 }
@@ -84,6 +90,7 @@ summary.caretStack <- function(object, ...){
 #' @param ... ignored
 #' @export
 #' @examples
+#' \dontrun{
 #' library('rpart')
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
@@ -93,6 +100,7 @@ summary.caretStack <- function(object, ...){
 #' )
 #' meta_model <- caretStack(models, method='lm')
 #' print(meta_model)
+#' }
 print.caretStack <- function(x, ...){
   n <- length(x$models)
   cat(paste(
@@ -111,6 +119,7 @@ print.caretStack <- function(x, ...){
 #' @export
 #' @method plot caretStack
 #' @examples
+#' \dontrun{
 #' library('rpart')
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
@@ -120,6 +129,7 @@ print.caretStack <- function(x, ...){
 #' )
 #' meta_model <- caretStack(models, method='rpart', tuneLength=2)
 #' plot(meta_model)
+#' }
 plot.caretStack <- function(x, ...){
   plot(x$ens_model, ...)
 }
