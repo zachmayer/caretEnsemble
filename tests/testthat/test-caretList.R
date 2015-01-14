@@ -35,6 +35,7 @@ test_that("caretModelSpec returns valid specs", {
 context("We can fit models with a mix of methodList and tuneList")
 ################################################
 test_that("We can fit models with a mix of methodList and tuneList", {
+  skip_on_cran()
   myList <- list(
     rpart=caretModelSpec(method='rpart', tuneLength=10),
     rf=caretModelSpec(method='rf', tuneGrid=data.frame(mtry=2))

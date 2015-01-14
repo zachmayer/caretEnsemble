@@ -82,6 +82,7 @@ test_that("We get the right dimensions back", {
 context("Do metric extraction functions work as expected")
 
 test_that("Metric is used correctly", {
+  skip_on_cran()
   load(system.file("testdata/models_reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_class.rda",
@@ -172,6 +173,7 @@ test_that("Metric is used correctly", {
 context("Metrics in student examples")
 
 test_that("metrics work for AUC in imbalanced example", {
+  skip_on_cran()
   load(system.file("testdata/studentEns.rda",
                    package="caretEnsemble", mustWork=TRUE))
   expect_equal(caretEnsemble:::getMetric.train(studentEns$models[[1]]), 0.9340861, tol = 0.01)
@@ -197,6 +199,7 @@ test_that("metrics work for AUC in imbalanced example", {
 context("Testing caretEnsemble generics")
 
 test_that("No errors are thrown by a generics for ensembles", {
+  skip_on_cran()
   load(system.file("testdata/studentEns.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_reg.rda",
@@ -239,6 +242,7 @@ test_that("No errors are thrown by a generics for ensembles", {
 context("Residual extraction")
 
 test_that("Residuals provided by residuals are proper for ensemble objects", {
+  skip_on_cran()
   load(system.file("testdata/studentEns.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_reg.rda",
@@ -486,6 +490,7 @@ test_that("We can ensemble models and handle missingness across predictors", {
 
 #Reg tests
 test_that("Prediction options are respected in regression and classification", {
+  skip_on_cran()
   load(system.file("testdata/models_reg.rda", package="caretEnsemble", mustWork=TRUE))
   ens.reg <- caretEnsemble(models_reg, iter=1000)
   tests <- expand.grid(keepNA=0:1, se=0:1, return_weights=0:1)

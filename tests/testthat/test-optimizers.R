@@ -28,29 +28,22 @@ myControl = trainControl(
   classProbs = TRUE, returnResamp = "final",
   returnData = TRUE, verboseIter = FALSE)
 
-myCL <- caretList( #This takes 20 seconds, out of the 60 we have to test
-  x = train[, -23],
-  y = train[, "Class"],
-  metric = "ROC",
-  trControl = myControl,
-  tuneList = myList)
-
 context("Test optimizer passing to caretEnsemble correctly")
 
 test_that("Test that optFUN does not take random values", {
+  skip_on_cran()
+  myCL <- caretList( #This takes 20 seconds, out of the 60 we have to test
+    x = train[, -23],
+    y = train[, "Class"],
+    metric = "ROC",
+    trControl = myControl,
+    tuneList = myList)
   expect_error(caretEnsemble(myCL, optFUN = randomAUC))
   expect_error(caretEnsemble(myCL, optFUN = noAUC))
-})
-
-context("Test optimizers function similarly under normal conditions")
-
-test_that("safe and greedy optimizers get same result in the limit", {
-  skip_on_cran()
   expect_identical(caretEnsemble(myCL, optFUN = safeOptAUC),
                    caretEnsemble(myCL, optFUN = greedOptAUC))
   expect_identical(caretEnsemble(myCL, optFUN = safeOptAUC, iter = 200),
                    caretEnsemble(myCL, optFUN = greedOptAUC, iter = 200))
-
 })
 
 context("Test more difficult cases")
@@ -149,6 +142,7 @@ test_that("Test that optFUN does not take random values", {
 })
 
 test_that("Optimizers respect iterations", {
+  skip_on_cran()
   wghts1 <- greedOptRMSE(predobs$preds, predobs$obs, iter = 3000)
   wghts2 <- greedOptRMSE(predobs$preds, predobs$obs, iter = 20)
   wghts3 <- greedOptRMSE(predobs$preds, predobs$obs, iter = 2)
@@ -188,6 +182,7 @@ MCAR.df <- function(df, p){
 }
 
 test_that("Missing values are ignored in optimization", {
+  skip_on_cran()
   set.seed(3256)
   trainC[, c(1:17)] <- MCAR.df(trainC[, c(1:17)], 0.15)
   testC[, c(1:17)] <- MCAR.df(testC[, c(1:17)], 0.05)
@@ -236,7 +231,8 @@ test_that("Missing values are ignored in optimization", {
 })
 
 context("Test for NA handling - regression")
-test_that("Missing values are ignored in optimization", {
+test_that("Test for NA handling - regression", {
+  skip_on_cran()
   myControl = trainControl(
     method = "cv", number = 10, repeats = 1,
     p = 0.75, savePrediction = TRUE,

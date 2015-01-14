@@ -135,6 +135,7 @@ test_that("Warnings issued for missing data correctly", {
 })
 
 test_that("Predictions the same for non-missing data under predict", {
+  skip_on_cran()
   load(system.file("testdata/models_class.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_reg.rda",
