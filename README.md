@@ -16,7 +16,7 @@ To install the latest development version from github:
 devtools::install_github('zachmayer/caretEnsemble')
 ```
 
-There are also several tagged versions of caretEnsemble on github you can install via devtools.  For example, to install the original draft of the API:
+There are also tagged versions of caretEnsemble on github you can install via devtools.  For example, to install the original draft of the API:
 ```{R}
 devtools::install_github('zachmayer/caretEnsemble@0.0')
 ```
