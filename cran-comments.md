@@ -11,6 +11,5 @@ The re-submission fixes the following issues in our first submission:
 4. Tests take too long: We used `testthat::skip_on_cran()` to skip all of the 
     longer-runing rests.  Testing on CRAN should now take 30-40 seconds.
     
-`R CMD CHECK` passes on mac and ubuntu with no errors, warnings or notes.
-`R CMD CHECK` passes on windows with no errors or warnings and 2 notes.
-    I think it is safe for me to ignore both windows build notes.
+`R CMD CHECK` passes on mac, ubuntu, and windows with no errors, warnings or 
+    notes
