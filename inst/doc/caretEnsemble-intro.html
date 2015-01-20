@@ -10,9 +10,9 @@
 
 <meta name="author" content="Zach Mayer" />
 
-<meta name="date" content="2015-01-14" />
+<meta name="date" content="2015-01-16" />
 
-<title>A brief introduction to caretEnsemble</title>
+<title>A Brief Introduction to caretEnsemble</title>
 
 
 
@@ -52,9 +52,9 @@ code > span.er { color: #ff0000; font-weight: bold; }
 
 
 <div id="header">
-<h1 class="title">A brief introduction to caretEnsemble</h1>
+<h1 class="title">A Brief Introduction to caretEnsemble</h1>
 <h4 class="author"><em>Zach Mayer</em></h4>
-<h4 class="date"><em>2015-01-14</em></h4>
+<h4 class="date"><em>2015-01-16</em></h4>
 </div>
 
 
@@ -598,7 +598,7 @@ model_preds3 &lt;-<span class="st"> </span>model_preds
 model_preds3$ensemble &lt;-<span class="st"> </span><span class="kw">predict</span>(gbm_ensemble, <span class="dt">newdata=</span>testing, <span class="dt">type=</span><span class="st">'prob'</span>)$M
 <span class="kw">colAUC</span>(model_preds3, testing$Class)</code></pre>
 <pre><code>##               glm     rpart  ensemble
-## M vs. R 0.6496914 0.6566358 0.6851852</code></pre>
+## M vs. R 0.6496914 0.6566358 0.6944444</code></pre>
 <p>In this case, the sophisticated ensemble is no better than a simple weighted linear combination. Non-linear ensembles seem to work best when you have:</p>
 <ol style="list-style-type: decimal">
 <li>Lots of data.</li>
