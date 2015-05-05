@@ -13,7 +13,7 @@ install.packages('caretEnsemble')
 ```
 ([You can also view the package page on CRAN](http://cran.r-project.org/web/packages/caretEnsemble/))
 
-# Install the latest development version from github:
+# Install the development version from github:
 ```{R}
 devtools::install_github('zachmayer/caretEnsemble')
 ```
