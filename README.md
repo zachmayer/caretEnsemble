@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/zachmayer/caretEnsemble.png?branch=master)](https://travis-ci.org/zachmayer/caretEnsemble)
 [![Coverage Status](https://coveralls.io/repos/zachmayer/caretEnsemble/badge.svg)](https://coveralls.io/r/zachmayer/caretEnsemble)
+[![Downloads](http://cranlogs.r-pkg.org/badges/caretEnsemble)](http://cran.rstudio.com/package=caretEnsemlbe)
 
 Package: caretEnsemble    
 Type: Package     
