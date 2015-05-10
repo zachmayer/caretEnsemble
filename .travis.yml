@@ -6,9 +6,8 @@ language: c
 env:
    global:
      - WARNINGS_ARE_ERRORS=1
-     - R_BUILD_ARGS=" "
-     - R_CHECK_ARGS="--as-cran"
-     - BOOTSTRAP_LATEX="1"
+     - R_BUILD_ARGS="--no-manual"
+     - R_CHECK_ARGS="--no-manual --as-cran"
    matrix:
      - NOT_CRAN="true"
      - NOT_CRAN="false"
