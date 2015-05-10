@@ -127,7 +127,8 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @param trControl a \code{\link{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.
 #' @param methodList optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.
 #' @param tuneList optional, a NAMED list of caretModelSpec objects. This much more flexible than methodList and allows the specificaiton of model-specific parameters (e.g. passing trace=FALSE to nnet)
-#' @return A list of \code{\link{train}} objects
+#' @return A list of \code{\link{train}} objects. If the model fails to build,
+#' it is dropped from the list.
 #' @import caret
 #' @export
 #' @examples
@@ -188,7 +189,7 @@ caretList <- function(
   #Loop through the tuneLists and fit caret models with those specs
   modelList <- lapply(tuneList, function(m){
     model_args <- c(global_args, m)
-    model <- do.call(train, model_args)
+    model <- tryCatch(do.call(train, model_args), error=function(e) NULL)
     return(model)
   })
   names(modelList) <- names(tuneList)
