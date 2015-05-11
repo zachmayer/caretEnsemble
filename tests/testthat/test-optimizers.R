@@ -133,7 +133,7 @@ load(system.file(
   "testdata/Y.reg.rda",
   package="caretEnsemble", mustWork=TRUE))
 
-predobs <- makePredObsMatrix(models_reg)
+predobs <- caretEnsemble:::makePredObsMatrix(models_reg)
 
 test_that("Test that optFUN does not take random values", {
   expect_error(caretEnsemble(models_reg, optFUN = randomRMSE))

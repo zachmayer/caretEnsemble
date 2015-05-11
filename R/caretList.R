@@ -189,8 +189,7 @@ caretList <- function(
   #Loop through the tuneLists and fit caret models with those specs
   modelList <- lapply(tuneList, function(m){
     model_args <- c(global_args, m)
-    # model <- tryCatch(do.call(train, model_args), error=function(e) NULL)
-    model <- do.call(train, model_args)
+    model <- tryCatch(do.call(train, model_args), error=function(e) NULL)
     return(model)
   })
   names(modelList) <- names(tuneList)
