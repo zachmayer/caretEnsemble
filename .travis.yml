@@ -20,6 +20,7 @@ before_install:
 install:
   - ./travis-tool.sh install_deps
   - ./travis-tool.sh github_package jimhester/covr
+  - ./travis-tool.sh github_package jimhester/lintr
 
 script: ./travis-tool.sh run_tests
 
@@ -33,3 +34,4 @@ notifications:
 
 after_success:
   - Rscript -e 'library(covr);coveralls()'
+  - Rscript -e 'lintr::lint_package()'
