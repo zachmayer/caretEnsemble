@@ -34,4 +34,4 @@ notifications:
 
 after_success:
   - Rscript -e 'library(covr);coveralls()'
-  - Rscript -e 'lintr::lint_package()'
+  - Rscript -e 'devtools::lint()'
