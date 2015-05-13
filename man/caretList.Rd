@@ -5,7 +5,7 @@
 \title{Create a list of several train models from the caret package}
 \usage{
 caretList(..., trControl = trainControl(), methodList = NULL,
-  tuneList = NULL)
+  tuneList = NULL, continue_on_fail = FALSE)
 }
 \arguments{
 \item{...}{arguments to pass to \code{\link{train}}.  These arguments will determine which train method gets dispatched.}
@@ -15,6 +15,8 @@ caretList(..., trControl = trainControl(), methodList = NULL,
 \item{methodList}{optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.}
 
 \item{tuneList}{optional, a NAMED list of caretModelSpec objects. This much more flexible than methodList and allows the specificaiton of model-specific parameters (e.g. passing trace=FALSE to nnet)}
+
+\item{continue_on_fail,}{logical, should a valid caretList be returned that excludes models that fail, default is FALSE}
 }
 \value{
 A list of \code{\link{train}} objects. If the model fails to build,

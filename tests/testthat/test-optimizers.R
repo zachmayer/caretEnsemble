@@ -110,7 +110,7 @@ test_that("Warnings and fallbacks in degenerate cases", {
 
   expect_false(identical(wghts1, wghts2))
   expect_equal(wghts1, c(1, 0, 0, 0))
-  expect_equal(wghts2, c(39, 1, 60, 0))
+  expect_equal(wghts2, c(46, 0, 54, 0))
 
   ens1 <- caretEnsemble(out, optFUN = safeOptAUC)
   ens2 <- caretEnsemble(out, optFUN = greedOptAUC)
