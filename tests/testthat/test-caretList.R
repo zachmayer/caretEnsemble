@@ -25,7 +25,7 @@ test_that("caretModelSpec returns valid specs", {
     caretModelSpec(method='rpart'),
     caretModelSpec(method='knn', tuneLength=10)
   )
-  tuneList <- tuneCheck(tuneList)
+  tuneList <- caretEnsemble:::tuneCheck(tuneList)
   expect_true(is.list(tuneList))
   expect_equal(length(tuneList), 4)
   expect_equal(sum(duplicated(names(tuneList))), 0)
@@ -71,13 +71,12 @@ test_that("We can handle different CV methods", {
   ){
     test_name <- paste0('CV works with method=', m)
     test_that(test_name, {
-
       myControl = trainControl(
         method = m,
         number = 7,
         repeats = 1,
         p = 0.75,
-        savePrediction = TRUE,
+        savePredictions = TRUE,
         returnResamp = "final",
         returnData = FALSE,
         verboseIter = FALSE)
@@ -119,7 +118,7 @@ test_that("Classification models", {
   # Specify controls
   myControl = trainControl(
     method = "cv", number = 3, repeats = 1,
-    p = 0.75, savePrediction = TRUE,
+    p = 0.75, savePredictions = TRUE,
     summaryFunction = twoClassSummary,
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
@@ -146,7 +145,7 @@ test_that("Longer tests for Classification models", {
   # Specify controls
   myControl = trainControl(
     method = "cv", number = 3, repeats = 1,
-    p = 0.75, savePrediction = TRUE,
+    p = 0.75, savePredictions = TRUE,
     summaryFunction = twoClassSummary,
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
@@ -201,7 +200,7 @@ test_that("Test that caretList preserves user specified error functions", {
 
   myControl = trainControl(
     method = "cv", number = 3, repeats = 1,
-    p = 0.75, savePrediction = TRUE,
+    p = 0.75, savePredictions = TRUE,
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
 
@@ -240,7 +239,7 @@ test_that("Test that caretList preserves user specified error functions", {
   expect_is(myEns1, "caretEnsemble")
   myControl = trainControl(
     method = "cv", number = 3, repeats = 1,
-    p = 0.75, savePrediction = TRUE,
+    p = 0.75, savePredictions = TRUE,
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
 
@@ -287,7 +286,7 @@ test_that("Users can pass a custom tuneList", {
   # User specifies methods and tuning parameters specifically using a tuneList
   myControl = trainControl(
     method = "cv", number = 3, repeats = 1,
-    p = 0.75, savePrediction = TRUE,
+    p = 0.75, savePredictions = TRUE,
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
 
@@ -328,7 +327,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
 
   myControl = trainControl(
     method = "cv", number = 3, repeats = 1,
-    p = 0.75, savePrediction = TRUE,
+    p = 0.75, savePredictions = TRUE,
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
 
