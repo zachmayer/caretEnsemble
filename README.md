@@ -22,4 +22,5 @@ There are also tagged versions of caretEnsemble on github you can install via de
 devtools::install_github('zachmayer/caretEnsemble@0.0')
 ```
 
+# Code of Conduct:
 Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.
