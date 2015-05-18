@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/zachmayer/caretEnsemble.png?branch=master)](https://travis-ci.org/zachmayer/caretEnsemble)
+[![Build Status](https://travis-ci.org/zachmayer/caretEnsemble.svg?branch=master)](https://travis-ci.org/zachmayer/caretEnsemble)
 [![Coverage Status](https://coveralls.io/repos/zachmayer/caretEnsemble/badge.svg)](https://coveralls.io/r/zachmayer/caretEnsemble)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/caretEnsemble)](http://cran.r-project.org/web/packages/caretEnsemble)
 [![Downloads](http://cranlogs.r-pkg.org/badges/caretEnsemble)](http://cran.rstudio.com/package=caretEnsemble)
