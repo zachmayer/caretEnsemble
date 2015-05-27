@@ -300,72 +300,6 @@ context("Does prediction method work for classification")
 
 test_that("We can ensemble models and handle missingness across predictors", {
   skip_on_cran()
-  mseeds <- vector(mode = "list", length = 12)
-  for(i in 1:11) mseeds[[i]] <- sample.int(1000, 1)
-  mseeds[[12]] <- sample.int(1000, 1)
-  myControl = trainControl(method = "cv", number = 10, repeats = 1,
-                           p = 0.75, savePrediction = TRUE,
-                           classProbs = TRUE, returnResamp = "final",
-                           returnData = TRUE, seeds = mseeds)
-
-  trainC <- twoClassSim(n = 2000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
-                        corrType = "AR1", corrValue = 0.6, mislabel = 0)
-
-  testC <- twoClassSim(n = 1000, intercept = -9,  linearVars = 6, noiseVars = 4, corrVars = 2,
-                       corrType = "AR1", corrValue = 0.6, mislabel = 0)
-
-  MCAR.df <- function(df, p){
-    MCARx <- function(x, p){
-      z <- rbinom(length(x), 1, prob=p)
-      x[z==1] <- NA
-      return(x)
-    }
-    if(length(p) == 1){
-      df <- apply(df, 2, MCARx, p)
-    } else if(length(p) > 1) {
-      df <- apply(df, 2, MCARx, sample(p, 1))
-    }
-    df <- as.data.frame(df)
-    return(df)
-  }
-
-  set.seed(3256)
-  trainC[, c(1:17)] <- MCAR.df(trainC[, c(1:17)], 0.15)
-  testC[, c(1:17)] <- MCAR.df(testC[, c(1:17)], 0.05)
-
-  set.seed(482)
-  glm1 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
-                trControl = myControl)
-  set.seed(482)
-  glm2 <- train(x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
-                trControl = myControl, preProcess = "medianImpute")
-  set.seed(482)
-  glm3 <- train(x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
-                trControl = myControl)
-  set.seed(482)
-  glm4 <- train(x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
-                trControl = myControl)
-  nestedList <- list(glm1, glm2, glm3, glm4)
-  class(nestedList) <- 'caretList'
-  set.seed(482)
-  ensNest <- caretEnsemble(nestedList, iter=2000)
-  pred.nest1 <- predict(ensNest, keepNA = TRUE, newdata=testC[, c(1:17)])
-  pred.nest1a <- predict(ensNest, newdata = testC[, c(1:17)])
-  pred.nest2 <- predict(ensNest, keepNA=FALSE, newdata = testC[, c(1:17)])
-  pred.nestTrain_a <- predict(ensNest, keepNA = FALSE)
-  pred.nestTrain_b <- predict(ensNest, keepNA = TRUE)
-  expect_that(ensNest, is_a("caretEnsemble"))
-  pred.nest1 <- predict(ensNest,  newdata=testC[, c(1:17)])
-  expect_message(predict(ensNest, newdata=testC[, c(1:17)]))
-  expect_message(predict(ensNest, keepNA=TRUE, newdata=testC[1:20, c(1:17)]))
-  expect_true(is.numeric(pred.nest1))
-  expect_is(pred.nest2, "numeric")
-  expect_true(is.numeric(pred.nest1a))
-  expect_true(length(pred.nestTrain_b)==2000)
-  expect_true(length(pred.nest1)==1000)
-  expect_true(length(pred.nestTrain_a)==2000)
-  expect_true(length(pred.nest2)==1000)
-  expect_true(anyNA(pred.nest1))
   load(system.file("testdata/models_reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/models_class.rda",
@@ -402,22 +336,12 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_identical(modres2[1, 3], caretEnsemble:::getMetricSD.train(ens.reg$models[[1]], "RMSE", which = "all"))
   expect_false(identical(modres2[2, 3], caretEnsemble:::getMetricSD.train(ens.reg$models[[2]],
                                                                           "RMSE", which = "all")))
-  modres3 <- caretEnsemble:::extractModRes(ensNest)
-  expect_equal(modres3[1, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[1]], "AUC", which = "best"))
-  expect_equal(modres3[2, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[2]], "AUC", which = "best"))
-  expect_equal(modres3[3, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[3]], "AUC", which = "best"))
-  expect_equal(modres3[4, 3], caretEnsemble:::getMetricSD.train(ensNest$models[[4]], "AUC", which = "best"))
   modF <- caretEnsemble:::extractModFrame(ens.class)
   modF2 <- caretEnsemble:::extractModFrame(ens.reg)
-  modF3 <- caretEnsemble:::extractModFrame(ensNest)
   expect_true(ncol(modF) > ncol(ens.class$models[[2]]$trainingData))
   expect_true(ncol(modF2) > ncol(ens.reg$models[[1]]$trainingData))
-  expect_true(ncol(modF3) > ncol(ensNest$models[[3]]$trainingData))
-  expect_true(ncol(modF3) > ncol(ensNest$models[[4]]$trainingData))
   expect_true(nrow(modF) == nrow(ens.class$models[[2]]$trainingData))
   expect_true(nrow(modF2) == nrow(ens.reg$models[[1]]$trainingData))
-  expect_true(nrow(modF3) == nrow(ensNest$models[[3]]$trainingData))
-  expect_true(nrow(modF3) == nrow(ensNest$models[[4]]$trainingData))
 })
 
 context("Does prediction method work for regression")

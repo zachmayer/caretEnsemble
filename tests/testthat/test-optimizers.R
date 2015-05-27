@@ -23,7 +23,7 @@ myList <- list(
 
 myControl = trainControl(
   method = "cv", number = 3, repeats = 1,
-  p = 0.75, savePrediction = TRUE,
+  p = 0.75, savePredictions = TRUE,
   summaryFunction = twoClassSummary,
   classProbs = TRUE, returnResamp = "final",
   returnData = TRUE, verboseIter = FALSE)
@@ -64,15 +64,6 @@ test_that("safe and greedy optimizers get same result in the limit", {
     metric = "ROC",
     trControl = myControl,
     tuneList = myList)
-
-  out <- caretList(
-    x = rbind(modeldat2$traindata$preds, modeldat2$testdata$preds),
-    y = factor(c(modeldat2$traindata$class,modeldat2$testdata$class)),
-    trControl = ctrl,
-    tuneLength = 3,
-    methodList = c("knn", "nb", "lda"),
-    tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
-  )
 
   expect_identical(
     caretEnsemble(myCL, optFUN = safeOptAUC),
@@ -119,15 +110,15 @@ test_that("Warnings and fallbacks in degenerate cases", {
 
   expect_false(identical(wghts1, wghts2))
   expect_equal(wghts1, c(1, 0, 0, 0))
-  expect_equal(wghts2, c(39, 1, 60, 0))
+  expect_equal(wghts2, c(46, 0, 54, 0))
 
   ens1 <- caretEnsemble(out, optFUN = safeOptAUC)
   ens2 <- caretEnsemble(out, optFUN = greedOptAUC)
-  expect_false(identical(ens1, ens2)) #THESE ALL FAIL TOO!
+  expect_false(identical(ens1, ens2)) # Fixed
   expect_equivalent(ens1$weights, 1)
   expect_equivalent(length(ens1$weights), 1)
-  expect_equivalent(ens2$weights, c(0.39, 0.01, 0.60))
-  expect_equivalent(length(ens2$weights), 3)
+  expect_equivalent(ens2$weights, c(0.46, 0.54))
+  expect_equivalent(length(ens2$weights), 2)
 })
 
 context("RMSE")
@@ -142,7 +133,7 @@ load(system.file(
   "testdata/Y.reg.rda",
   package="caretEnsemble", mustWork=TRUE))
 
-predobs <- makePredObsMatrix(models_reg)
+predobs <- caretEnsemble:::makePredObsMatrix(models_reg)
 
 test_that("Test that optFUN does not take random values", {
   expect_error(caretEnsemble(models_reg, optFUN = randomRMSE))

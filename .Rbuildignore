@@ -6,3 +6,4 @@ todo.txt
 ^\.travis\.yml$
 ^NEWS\.md$
 ^cran-comments\.md$
+^CONDUCT\.md$
