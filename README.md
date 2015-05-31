@@ -1,6 +1,6 @@
 [![Build Status](http://img.shields.io/travis/zachmayer/caretEnsemble.svg?style=flat)](https://travis-ci.org/zachmayer/caretEnsemble)
 [![Coverage Status](http://img.shields.io/coveralls/zachmayer/caretEnsemble.svg?style=flat)](https://coveralls.io/r/zachmayer/caretEnsemble)
-[![Github Issues](http://githubbadges.herokuapp.com/zachmayer/caretEnsemble/issues.svg?style=flat)](https://github.com/zachmayer/caretEnsemble/issues)
+[![Github Issues](https://img.shields.io/github/issues-raw/badges/shields.svg?style=flat)](https://github.com/zachmayer/caretEnsemble/issues)
 [![Pending Pull-Requests](http://githubbadges.herokuapp.com/zachmayer/caretEnsemble/pulls.svg?style=flat)](https://github.com/zachmayer/caretEnsemble/pulls)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/caretEnsemble)](http://cran.r-project.org/web/packages/caretEnsemble)
 [![Downloads](http://cranlogs.r-pkg.org/badges/caretEnsemble)](http://cran.rstudio.com/package=caretEnsemble)
