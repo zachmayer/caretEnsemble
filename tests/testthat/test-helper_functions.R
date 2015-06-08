@@ -2,17 +2,17 @@
 #TODO: add tests for every helper function
 
 context("Do the helper functions work for regression objects?")
-library('caret')
-library('randomForest')
-library('rpart')
+library("caret")
+library("randomForest")
+library("rpart")
 
-load(system.file("testdata/models_reg.rda",
+load(system.file("testdata/models.reg.rda",
                  package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/X.reg.rda",
                  package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/Y.reg.rda",
                  package="caretEnsemble", mustWork=TRUE))
-load(system.file("testdata/models_class.rda",
+load(system.file("testdata/models.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 load(system.file("testdata/X.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
@@ -20,14 +20,14 @@ load(system.file("testdata/Y.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 
 test_that("We can make the predobs matrix", {
-  out <- makePredObsMatrix(models_reg)
+  out <- makePredObsMatrix(models.reg)
   expect_that(out, is_a("list"))
   expect_true(length(out$obs)==150)
   expect_true(all(dim(out$preds)==c(150, 4)))
 })
 
 test_that("We can predict", {
-  out <- predict(models_reg, 'reg', newdata=X.reg)
+  out <- predict(models.reg, "reg", newdata=X.reg)
   expect_that(out, is_a("matrix"))
   expect_true(all(dim(out)==c(150, 4)))
   expect_true(all(colnames(out)==c("rf", "lm", "glm", "knn")))
@@ -36,7 +36,7 @@ test_that("We can predict", {
 context("Do the helper functions work for classification objects?")
 
 test_that("We can make the predobs matrix", {
-  out <- makePredObsMatrix(models_class)
+  out <- makePredObsMatrix(models.class)
   expect_that(out, is_a("list"))
   expect_true(length(out$obs)==150)
   expect_true(all(dim(out$preds)==c(150, 6)))
@@ -44,9 +44,9 @@ test_that("We can make the predobs matrix", {
 })
 
 test_that("We can predict", {
-  load(system.file("testdata/models_class.rda",
+  load(system.file("testdata/models.class.rda",
                    package="caretEnsemble", mustWork=TRUE))
-  load(system.file("testdata/models_reg.rda",
+  load(system.file("testdata/models.reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/X.class.rda",
                    package="caretEnsemble", mustWork=TRUE))
@@ -54,23 +54,23 @@ test_that("We can predict", {
                    package="caretEnsemble", mustWork=TRUE))
   load(system.file("testdata/X.reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
-  out <- predict(models_class, 'Classification', newdata=X.class)
+  out <- predict(models.class, "Classification", newdata=X.class)
   expect_that(out, is_a("matrix"))
   expect_true(all(dim(out)==c(150, 6)))
   expect_true(all(colnames(out)==c("rf", "glm", "svmRadial", "nnet", "treebag", "knn")))
-  out2 <- predict(models_reg, 'Regression', newdata = X.reg)
+  out2 <- predict(models.reg, "Regression", newdata = X.reg)
   expect_true(all(dim(out2)==c(150, 4)))
   expect_true(all(colnames(out2)==c("rf", "lm", "glm", "knn")))
 })
 
 test_that("predict results same regardless of verbose option", {
-  expect_is(predict(models_class, 'Classification', newdata = X.class), "matrix")
-  out1 <- predict(models_class, 'Classification', newdata = X.class)
-  out2 <- predict(models_class, 'Classification', verbose =TRUE, newdata = X.class)
+  expect_is(predict(models.class, "Classification", newdata = X.class), "matrix")
+  out1 <- predict(models.class, "Classification", newdata = X.class)
+  out2 <- predict(models.class, "Classification", verbose =TRUE, newdata = X.class)
   expect_identical(out1, out2)
-  expect_is(predict(models_reg, 'Regression', newdata = X.reg), "matrix")
-  out1 <- predict(models_reg, 'Regression', newdata =X.reg)
-  out2 <- predict(models_reg, 'Regression', verbose = TRUE, newdata = X.reg)
+  expect_is(predict(models.reg, "Regression", newdata = X.reg), "matrix")
+  out1 <- predict(models.reg, "Regression", newdata =X.reg)
+  out2 <- predict(models.reg, "Regression", verbose = TRUE, newdata = X.reg)
   expect_identical(out1, out2)
 })
 
@@ -110,11 +110,11 @@ test_that("wtd.sd handles NA values correctly", {
 test_that("Checks generate errors", {
   skip_on_cran()
   set.seed(42)
-  myControl <- trainControl(method='cv', number=5, savePredictions=TRUE)
+  myControl <- trainControl(method="cv", number=5, savePredictions=TRUE)
   x <- caretList(
     Sepal.Length ~ Sepal.Width,
     head(iris, 100),
-    methodList=c('glm', 'lm'),
+    methodList=c("glm", "lm"),
     trControl=myControl
   )
   modelLibrary <- extractBestPreds(x)
@@ -124,14 +124,14 @@ test_that("Checks generate errors", {
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
 
-  x$rpart <- train(Sepal.Length ~ Sepal.Width, head(iris, 100), method='rpart')
+  x$rpart <- train(Sepal.Length ~ Sepal.Width, head(iris, 100), method="rpart")
   expect_error(check_bestpreds_resamples(modelLibrary))
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
 
   expect_error(check_caretList_classes(x$glm$finalModel))
 
-  x$rpart <- train(Species ~ Sepal.Width, head(iris, 100), method='rpart', trControl=myControl)
+  x$rpart <- train(Species ~ Sepal.Width, head(iris, 100), method="rpart", trControl=myControl)
   check_caretList_classes(x)
   expect_error(check_caretList_model_types(x))
 
@@ -140,7 +140,7 @@ test_that("Checks generate errors", {
 
   set.seed(42)
   myControl2 <- trainControl(
-    method='cv',
+    method="cv",
     number=10,
     savePredictions=TRUE,
     classProbs=TRUE,
@@ -148,10 +148,10 @@ test_that("Checks generate errors", {
   )
   x <- caretList(
     iris[1:100,-5],
-    factor(ifelse(iris[1:100, 'Species'] == 'setosa', 'Yes', 'No')),
-    methodList=c('lda', 'rf'),
+    factor(ifelse(iris[1:100, "Species"] == "setosa", "Yes", "No")),
+    methodList=c("lda", "rf"),
     trControl=myControl2
   )
-  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, head(iris, 100), method='rpart')
+  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, head(iris, 100), method="rpart")
   expect_error(check_caretList_model_types(x))
 })

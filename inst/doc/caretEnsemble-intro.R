@@ -1,20 +1,20 @@
-## ----, echo=FALSE, results='hide'----------------------------------------
-suppressMessages(library('caret'))
-suppressMessages(library('mlbench'))
-suppressMessages(library('pROC'))
+## ---- echo=FALSE, results="hide"-----------------------------------------
+suppressMessages(library("caret"))
+suppressMessages(library("mlbench"))
+suppressMessages(library("pROC"))
 
-## ----, echo=TRUE, results='hide'-----------------------------------------
+## ---- echo=TRUE, results="hide"------------------------------------------
 #Adapted from the caret vignette
-library('caret')
-library('mlbench')
-library('pROC')
+library("caret")
+library("mlbench")
+library("pROC")
 data(Sonar)
 set.seed(107)
 inTrain <- createDataPartition(y = Sonar$Class, p = .75, list = FALSE)
 training <- Sonar[ inTrain,]
 testing <- Sonar[-inTrain,]
 my_control <- trainControl(
-  method='boot',
+  method="boot",
   number=25,
   savePredictions=TRUE,
   classProbs=TRUE,
@@ -22,75 +22,75 @@ my_control <- trainControl(
   summaryFunction=twoClassSummary
   )
 
-## ----, echo=TRUE, results='hide', warning=FALSE--------------------------
-library('rpart')
-library('caretEnsemble')
+## ---- echo=TRUE, results="hide", warning=FALSE---------------------------
+library("rpart")
+library("caretEnsemble")
 model_list <- caretList(
   Class~., data=training,
   trControl=my_control,
-  methodList=c('glm', 'rpart')
+  methodList=c("glm", "rpart")
   )
 
-## ----, echo=TRUE, results='hide'-----------------------------------------
+## ---- echo=TRUE, results="hide"------------------------------------------
 p <- as.data.frame(predict(model_list, newdata=head(testing)))
 print(p)
 
-## ----, echo=FALSE, results='asis'----------------------------------------
+## ---- echo=FALSE, results="asis"-----------------------------------------
 knitr::kable(p)
 
-## ----, echo=FALSE, results='hide', warning=FALSE-------------------------
-suppressMessages(library('mlbench'))
-suppressMessages(library('randomForest'))
-suppressMessages(library('nnet'))
+## ---- echo=FALSE, results="hide", warning=FALSE--------------------------
+suppressMessages(library("mlbench"))
+suppressMessages(library("randomForest"))
+suppressMessages(library("nnet"))
 
-## ----, echo=TRUE, results='hide', warning=FALSE--------------------------
-library('mlbench')
-library('randomForest')
-library('nnet')
+## ---- echo=TRUE, results="hide", warning=FALSE---------------------------
+library("mlbench")
+library("randomForest")
+library("nnet")
 model_list_big <- caretList(
   Class~., data=training,
   trControl=my_control,
-  metric='ROC',
-  methodList=c('glm', 'rpart'),
+  metric="ROC",
+  methodList=c("glm", "rpart"),
   tuneList=list(
-    rf1=caretModelSpec(method='rf', tuneGrid=data.frame(.mtry=2)),
-    rf2=caretModelSpec(method='rf', tuneGrid=data.frame(.mtry=10), preProcess='pca'),
-    nn=caretModelSpec(method='nnet', tuneLength=2, trace=FALSE)
+    rf1=caretModelSpec(method="rf", tuneGrid=data.frame(.mtry=2)),
+    rf2=caretModelSpec(method="rf", tuneGrid=data.frame(.mtry=10), preProcess="pca"),
+    nn=caretModelSpec(method="nnet", tuneLength=2, trace=FALSE)
   )
 )
 
-## ----, echo=TRUE, fig.show='hold'----------------------------------------
+## ---- echo=TRUE, fig.show="hold"-----------------------------------------
 xyplot(resamples(model_list))
 
-## ----, echo=TRUE---------------------------------------------------------
+## ---- echo=TRUE----------------------------------------------------------
 modelCor(resamples(model_list))
 
-## ----, echo=TRUE---------------------------------------------------------
+## ---- echo=TRUE----------------------------------------------------------
 greedy_ensemble <- caretEnsemble(model_list)
 summary(greedy_ensemble)
 
-## ----, echo=TRUE---------------------------------------------------------
-library('caTools')
-model_preds <- lapply(model_list, predict, newdata=testing, type='prob')
-model_preds <- lapply(model_preds, function(x) x[,'M'])
+## ---- echo=TRUE----------------------------------------------------------
+library("caTools")
+model_preds <- lapply(model_list, predict, newdata=testing, type="prob")
+model_preds <- lapply(model_preds, function(x) x[,"M"])
 model_preds <- data.frame(model_preds)
 ens_preds <- predict(greedy_ensemble, newdata=testing)
 model_preds$ensemble <- ens_preds
 colAUC(model_preds, testing$Class)
 
-## ----, echo=TRUE, results='hide'-----------------------------------------
+## ---- echo=TRUE, results="hide"------------------------------------------
 varImp(greedy_ensemble)
 
-## ----, echo=FALSE, results='asis'----------------------------------------
+## ---- echo=FALSE, results="asis"-----------------------------------------
 knitr::kable(varImp(greedy_ensemble))
 
-## ----, echo=TRUE---------------------------------------------------------
+## ---- echo=TRUE----------------------------------------------------------
 glm_ensemble <- caretStack(
-  model_list, 
-  method='glm',
-  metric='ROC',
+  model_list,
+  method="glm",
+  metric="ROC",
   trControl=trainControl(
-    method='boot',
+    method="boot",
     number=10,
     savePredictions=TRUE,
     classProbs=TRUE,
@@ -98,25 +98,25 @@ glm_ensemble <- caretStack(
   )
 )
 model_preds2 <- model_preds
-model_preds2$ensemble <- predict(glm_ensemble, newdata=testing, type='prob')$M
+model_preds2$ensemble <- predict(glm_ensemble, newdata=testing, type="prob")$M
 CF <- coef(glm_ensemble$ens_model$finalModel)[-1]
 colAUC(model_preds2, testing$Class)
 CF/sum(CF)
 
-## ----, echo=FALSE, results='hide'----------------------------------------
-suppressMessages(library('gbm'))
-suppressMessages(library('plyr'))
+## ---- echo=FALSE, results="hide"-----------------------------------------
+suppressMessages(library("gbm"))
+suppressMessages(library("plyr"))
 
-## ----, echo=TRUE---------------------------------------------------------
-library('gbm')
+## ---- echo=TRUE----------------------------------------------------------
+library("gbm")
 gbm_ensemble <- caretStack(
-  model_list, 
-  method='gbm',
+  model_list,
+  method="gbm",
   verbose=FALSE,
   tuneLength=10,
-  metric='ROC',
+  metric="ROC",
   trControl=trainControl(
-    method='boot',
+    method="boot",
     number=10,
     savePredictions=TRUE,
     classProbs=TRUE,
@@ -124,6 +124,5 @@ gbm_ensemble <- caretStack(
   )
 )
 model_preds3 <- model_preds
-model_preds3$ensemble <- predict(gbm_ensemble, newdata=testing, type='prob')$M
+model_preds3$ensemble <- predict(gbm_ensemble, newdata=testing, type="prob")$M
 colAUC(model_preds3, testing$Class)
-

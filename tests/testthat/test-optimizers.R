@@ -1,10 +1,10 @@
 # ## Test optimizers
 
 set.seed(442)
-library('caret')
-library('rpart')
-library('gbm')
-library('kernlab')
+library("caret")
+library("rpart")
+library("gbm")
+library("kernlab")
 
 train <- twoClassSim(
   n = 1000, intercept = -8, linearVars = 3,
@@ -15,13 +15,13 @@ test <- twoClassSim(
 
 myList <- list(
   rf1=caretModelSpec(),
-  rf2=caretModelSpec(method='rf', tuneLength=5),
-  caretModelSpec(method='rpart'),
-  caretModelSpec(method='knn', tuneLength=10),
+  rf2=caretModelSpec(method="rf", tuneLength=5),
+  caretModelSpec(method="rpart"),
+  caretModelSpec(method="knn", tuneLength=10),
   caretModelSpec(method = "glm")
 )
 
-myControl = trainControl(
+myControl <- trainControl(
   method = "cv", number = 3, repeats = 1,
   p = 0.75, savePredictions = TRUE,
   summaryFunction = twoClassSummary,
@@ -95,7 +95,7 @@ test_that("Warnings and fallbacks in degenerate cases", {
     trControl = ctrl,
     tuneLength = 3,
     methodList = c("knn", "nb", "lda"),
-    tuneList = list(nnet=caretModelSpec(method='nnet', trace=FALSE))
+    tuneList = list(nnet=caretModelSpec(method="nnet", trace=FALSE))
   )
 
   predobs <- caretEnsemble:::makePredObsMatrix(out)
@@ -110,21 +110,21 @@ test_that("Warnings and fallbacks in degenerate cases", {
 
   expect_false(identical(wghts1, wghts2))
   expect_equal(wghts1, c(1, 0, 0, 0))
-  expect_equal(wghts2, c(46, 0, 54, 0))
+  expect_equal(wghts2, c(2, 1, 97, 0))
 
   ens1 <- caretEnsemble(out, optFUN = safeOptAUC)
   ens2 <- caretEnsemble(out, optFUN = greedOptAUC)
   expect_false(identical(ens1, ens2)) # Fixed
   expect_equivalent(ens1$weights, 1)
   expect_equivalent(length(ens1$weights), 1)
-  expect_equivalent(ens2$weights, c(0.46, 0.54))
-  expect_equivalent(length(ens2$weights), 2)
+  expect_equivalent(ens2$weights, c(0.02, 0.01, 0.97))
+  expect_equivalent(length(ens2$weights), 3)
 })
 
 context("RMSE")
 set.seed(87495)
 load(system.file(
-  "testdata/models_reg.rda",
+  "testdata/models.reg.rda",
   package="caretEnsemble", mustWork=TRUE))
 load(system.file(
   "testdata/X.reg.rda",
@@ -133,11 +133,11 @@ load(system.file(
   "testdata/Y.reg.rda",
   package="caretEnsemble", mustWork=TRUE))
 
-predobs <- caretEnsemble:::makePredObsMatrix(models_reg)
+predobs <- caretEnsemble:::makePredObsMatrix(models.reg)
 
 test_that("Test that optFUN does not take random values", {
-  expect_error(caretEnsemble(models_reg, optFUN = randomRMSE))
-  expect_error(caretEnsemble(models_reg, optFUN = noRMSE))
+  expect_error(caretEnsemble(models.reg, optFUN = randomRMSE))
+  expect_error(caretEnsemble(models.reg, optFUN = noRMSE))
 })
 
 test_that("Optimizers respect iterations", {
@@ -147,13 +147,13 @@ test_that("Optimizers respect iterations", {
   wghts3 <- greedOptRMSE(predobs$preds, predobs$obs, iter = 2)
   expect_false(identical(wghts1, wghts2))
   expect_false(identical(wghts2, wghts3))
-  expect_identical(caretEnsemble(models_reg), caretEnsemble(models_reg, iter = 100))
-  expect_false(identical(caretEnsemble(models_reg), caretEnsemble(models_reg, iter = 10)))
+  expect_identical(caretEnsemble(models.reg), caretEnsemble(models.reg, iter = 100))
+  expect_false(identical(caretEnsemble(models.reg), caretEnsemble(models.reg, iter = 10)))
 })
 
 context("Test for NA value handling - classification")
 set.seed(329)
-myControl = trainControl(
+myControl <- trainControl(
   method = "cv", number = 10, repeats = 1,
   p = 0.75, savePrediction = TRUE,
   classProbs = TRUE, returnResamp = "final",
@@ -188,24 +188,24 @@ test_that("Missing values are ignored in optimization", {
 
   set.seed(482)
   glm1 <- train(
-    x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
+    x = trainC[, c(1:17)], y = trainC[, "Class"], method = "glm",
     trControl = myControl, metric = "ROC")
   set.seed(482)
   glm2 <- train(
-    x = trainC[, c(1:17)], y = trainC[, "Class"], method = 'glm',
+    x = trainC[, c(1:17)], y = trainC[, "Class"], method = "glm",
     trControl = myControl, preProcess = "medianImpute",
     metric = "ROC")
   set.seed(482)
   glm3 <- train(
-    x = trainC[, c(2:9)], y = trainC[, "Class"], method = 'glm',
+    x = trainC[, c(2:9)], y = trainC[, "Class"], method = "glm",
     trControl = myControl, metric = "ROC")
   set.seed(482)
   glm4 <- train(
-    x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = 'glm',
+    x = trainC[, c(1, 9:17)], y = trainC[, "Class"], method = "glm",
     trControl = myControl, metric = "ROC")
 
   nestedList <- list(glm1, glm2, glm3, glm4)
-  class(nestedList) <- 'caretList'
+  class(nestedList) <- "caretList"
   set.seed(482)
 
   predobs <- caretEnsemble:::makePredObsMatrix(nestedList)
@@ -232,7 +232,7 @@ test_that("Missing values are ignored in optimization", {
 context("Test for NA handling - regression")
 test_that("Test for NA handling - regression", {
   skip_on_cran()
-  myControl = trainControl(
+  myControl <- trainControl(
     method = "cv", number = 10, repeats = 1,
     p = 0.75, savePrediction = TRUE,
     returnResamp = "final",
@@ -250,23 +250,23 @@ test_that("Test for NA handling - regression", {
 
   set.seed(482)
   glm1 <- train(
-    x = trainC[, c(1:15)], y = trainC[, "Corr2"], method = 'glm',
+    x = trainC[, c(1:15)], y = trainC[, "Corr2"], method = "glm",
     trControl = myControl, metric = "RMSE")
   set.seed(482)
   glm2 <- train(
-    x = trainC[, c(1:15)], y = trainC[, "Corr2"], method = 'glm',
+    x = trainC[, c(1:15)], y = trainC[, "Corr2"], method = "glm",
     trControl = myControl, preProcess = "medianImpute", metric = "RMSE")
   set.seed(482)
   glm3 <- train(
-    x = trainC[, c(2:9)], y = trainC[, "Corr2"], method = 'glm',
+    x = trainC[, c(2:9)], y = trainC[, "Corr2"], method = "glm",
     trControl = myControl, metric = "RMSE")
   set.seed(482)
   glm4 <- train(
-    x = trainC[, c(1, 9:16)], y = trainC[, "Corr2"], method = 'glm',
+    x = trainC[, c(1, 9:16)], y = trainC[, "Corr2"], method = "glm",
     trControl = myControl, metric = "RMSE")
 
   nestedList <- list(glm1, glm2, glm3, glm4)
-  class(nestedList) <- 'caretList'
+  class(nestedList) <- "caretList"
 
   set.seed(482)
   predobs <- caretEnsemble:::makePredObsMatrix(nestedList)

@@ -23,14 +23,14 @@ Check the models, and make a matrix of obs and preds
 }
 \examples{
 \dontrun{
-library('rpart')
+library("rpart")
 models <- caretList(
   x=iris[1:50,1:2],
   y=iris[1:50,3],
-  trControl=trainControl(method='cv'),
-  methodList=c('rpart', 'glm')
+  trControl=trainControl(method="cv"),
+  methodList=c("rpart", "glm")
 )
-caretStack(models, method='glm')
+caretStack(models, method="glm")
 }
 }
 \references{
