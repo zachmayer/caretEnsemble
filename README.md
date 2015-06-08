@@ -5,7 +5,7 @@
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/caretEnsemble)](http://cran.r-project.org/web/packages/caretEnsemble)
 [![Downloads](http://cranlogs.r-pkg.org/badges/caretEnsemble)](http://cran.rstudio.com/package=caretEnsemble)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://badges.mit-license.org)
-[![Badges](http://img.shields.io/:badges-8/8-ff6799.svg?style=flat)](https://github.com/badges/badgerbadgerbadger)
+[![Badges](http://img.shields.io/:badges-8/8-438cf0.svg?style=flat)](https://github.com/badges/badgerbadgerbadger)
 
 # caretEnsemble
 Framework for fitting multiple [caret models](https://github.com/topepo/caret) using the same re-sampling strategy as well as creating ensembles of such models.  Use `caretList` to fit multiple models, and then use `caretEnsemble` to combine them greedily, or `caretStack` to combine them using a caret model.
