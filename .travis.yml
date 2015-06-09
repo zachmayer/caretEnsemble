@@ -2,15 +2,14 @@ language: r
 warnings_are_errors: true
 
 env:
-  matrix:
-   - NOT_CRAN="true"
-   - NOT_CRAN="false"
-
-r_build_args:
-   - "--no-manual --no-build-vignettes"
-
-r_check_args:
-   - "--no-manual --no-build-vignettes --as-cran"
+   global:
+     - WARNINGS_ARE_ERRORS=1
+     - R_BUILD_ARGS="--no-manual --no-build-vignettes"
+     - R_CHECK_ARGS="--no-manual --no-build-vignettes --as-cran"
+     - BOOTSTRAP_LATEX=""
+   matrix:
+     - NOT_CRAN="true"
+     - NOT_CRAN="false"
 
 r_github_packages:
    - jimhester/covr@4cae287abde5e2cf0c3c73aedeaec4d902dfd3ed
