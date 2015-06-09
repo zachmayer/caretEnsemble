@@ -1,39 +1,31 @@
 # Sample .travis.yml for R projects from https://github.com/craigcitro/r-travis
 # https://github.com/craigcitro/r-travis/wiki
 
-language: c
+language: r
+warnings_are_errors: true
+sudo: required
 
 env:
-   global:
-     - WARNINGS_ARE_ERRORS=1
-     - R_BUILD_ARGS="--no-manual"
-     - R_CHECK_ARGS="--no-manual --as-cran"
-   matrix:
-     - NOT_CRAN="true"
-     - NOT_CRAN="false"
+ global:
+   - BOOTSTRAP_LATEX=""
+  matrix:
+   - NOT_CRAN="true"
+   - NOT_CRAN="false"
 
-before_install:
-  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
-  - chmod 755 ./travis-tool.sh
-  - ./travis-tool.sh bootstrap
+r_build_args:
+   - "--no-manual --no-build-vignettes"
 
-install:
-  - ./travis-tool.sh install_deps
-  - ./travis-tool.sh github_package jimhester/covr
-  - ./travis-tool.sh github_package jimhester/lintr
+r_check_args:
+   - "--no-manual --no-build-vignettes --as-cran"
 
-script: ./travis-tool.sh run_tests
-
-on_failure:
-  - ./travis-tool.sh dump_logs
+r_github_packages:
+  - jimhester/covr
+  - jimhester/lintr
 
 notifications:
   email:
-    on_success: change
-    on_failure: change
+    - on_success: change
+    - on_failure: change
 
 after_success:
   - Rscript -e 'library(covr);coveralls()'
-  - Rscript -e 'library(lintr);load(system.file("testdata/my_linters.rda",package="caretEnsemble",mustWork=TRUE));lint_package(linters=my_linters)'
-
-#Linters to add:   line_length_linter (181), infix_spaces_linter (73)

@@ -42,7 +42,7 @@ ensemble weights may be biased and the function issues a message.
 \examples{
 \dontrun{
 set.seed(42)
-models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
+models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c("glm", "lm"))
 ens <- caretEnsemble(models)
 summary(ens)
 }

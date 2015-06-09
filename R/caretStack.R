@@ -12,14 +12,14 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' library('rpart')
+#' library("rpart")
 #' models <- caretList(
 #'   x=iris[1:50,1:2],
 #'   y=iris[1:50,3],
-#'   trControl=trainControl(method='cv'),
-#'   methodList=c('rpart', 'glm')
+#'   trControl=trainControl(method="cv"),
+#'   methodList=c("rpart", "glm")
 #' )
-#' caretStack(models, method='glm')
+#' caretStack(models, method="glm")
 #' }
 caretStack <- function(all.models, ...){
 
@@ -30,7 +30,7 @@ caretStack <- function(all.models, ...){
 
   #Return final model
   out <- list(models=all.models, ens_model=model, error=model$results)
-  class(out) <- 'caretStack'
+  class(out) <- "caretStack"
   return(out)
 }
 
@@ -45,18 +45,18 @@ caretStack <- function(all.models, ...){
 #' @method predict caretStack
 #' @examples
 #' \dontrun{
-#' library('rpart')
+#' library("rpart")
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
 #'   y=iris[1:100,3],
-#'   trControl=trainControl(method='cv'),
-#'   methodList=c('rpart', 'glm')
+#'   trControl=trainControl(method="cv"),
+#'   methodList=c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method='lm')
+#' meta_model <- caretStack(models, method="lm")
 #' RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
 #' }
 predict.caretStack <- function(object, newdata=NULL, ...){
-  stopifnot(is(object$models, 'caretList'))
+  stopifnot(is(object$models, "caretList"))
   type <- extractModelTypes(object$models)
   preds <- predict(object$models, newdata=newdata)
   out <- predict(object$ens_model, newdata=preds, ...)
@@ -70,14 +70,14 @@ predict.caretStack <- function(object, newdata=NULL, ...){
 #' @export
 #' @examples
 #' \dontrun{
-#' library('rpart')
+#' library("rpart")
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
 #'   y=iris[1:100,3],
-#'   trControl=trainControl(method='cv'),
-#'   methodList=c('rpart', 'glm')
+#'   trControl=trainControl(method="cv"),
+#'   methodList=c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method='lm')
+#' meta_model <- caretStack(models, method="lm")
 #' summary(meta_model)
 #' }
 summary.caretStack <- function(object, ...){
@@ -91,24 +91,24 @@ summary.caretStack <- function(object, ...){
 #' @export
 #' @examples
 #' \dontrun{
-#' library('rpart')
+#' library("rpart")
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
 #'   y=iris[1:100,3],
-#'   trControl=trainControl(method='cv'),
-#'   methodList=c('rpart', 'glm')
+#'   trControl=trainControl(method="cv"),
+#'   methodList=c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method='lm')
+#' meta_model <- caretStack(models, method="lm")
 #' print(meta_model)
 #' }
 print.caretStack <- function(x, ...){
   n <- length(x$models)
   cat(paste(
-    'A',
+    "A",
     x$ens_model$method,
-    'ensemble of 2 base models:',
-    paste(sapply(x$models, function(x) x$method), collapse=', ')))
-  cat('\n\nEnsemble results:\n')
+    "ensemble of 2 base models:",
+    paste(sapply(x$models, function(x) x$method), collapse=", ")))
+  cat("\n\nEnsemble results:\n")
   print(x$ens_model)
 }
 
@@ -120,14 +120,14 @@ print.caretStack <- function(x, ...){
 #' @method plot caretStack
 #' @examples
 #' \dontrun{
-#' library('rpart')
+#' library("rpart")
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
 #'   y=iris[1:100,3],
-#'   trControl=trainControl(method='cv'),
-#'   methodList=c('rpart', 'glm')
+#'   trControl=trainControl(method="cv"),
+#'   methodList=c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method='rpart', tuneLength=2)
+#' meta_model <- caretStack(models, method="rpart", tuneLength=2)
 #' plot(meta_model)
 #' }
 plot.caretStack <- function(x, ...){
@@ -143,19 +143,19 @@ plot.caretStack <- function(x, ...){
 #' @examples
 #' \dontrun{
 #' set.seed(42)
-#' library('rpart')
+#' library("rpart")
 #' models <- caretList(
 #'   x=iris[1:100,1:2],
 #'   y=iris[1:100,3],
-#'   trControl=trainControl(method='cv'),
-#'   methodList=c('rpart', 'glm')
+#'   trControl=trainControl(method="cv"),
+#'   methodList=c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method='lm', trControl=trainControl(method='cv'))
+#' meta_model <- caretStack(models, method="lm", trControl=trainControl(method="cv"))
 #' dotplot.caretStack(meta_model)
 #' }
 dotplot.caretStack <- function(x, data=NULL, ...){
   final <- list(x$ens_model)
-  names(final) <- paste(paste(x$ens_model$method, collapse='_'), 'ENSEMBLE', sep='_')
+  names(final) <- paste(paste(x$ens_model$method, collapse="_"), "ENSEMBLE", sep="_")
   base <- x$models
   dotplot(resamples(c(final, base)), data=data, ...)
 }

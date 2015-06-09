@@ -16,14 +16,14 @@ This is a function to summarize a caretStack.
 }
 \examples{
 \dontrun{
-library('rpart')
+library("rpart")
 models <- caretList(
   x=iris[1:100,1:2],
   y=iris[1:100,3],
-  trControl=trainControl(method='cv'),
-  methodList=c('rpart', 'glm')
+  trControl=trainControl(method="cv"),
+  methodList=c("rpart", "glm")
 )
-meta_model <- caretStack(models, method='lm')
+meta_model <- caretStack(models, method="lm")
 summary(meta_model)
 }
 }
