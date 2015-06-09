@@ -1,9 +1,5 @@
-# Sample .travis.yml for R projects from https://github.com/craigcitro/r-travis
-# https://github.com/craigcitro/r-travis/wiki
-
 language: r
 warnings_are_errors: true
-sudo: required
 
 env:
  global:
@@ -19,13 +15,8 @@ r_check_args:
    - "--no-manual --no-build-vignettes --as-cran"
 
 r_github_packages:
-  - jimhester/covr
-  - jimhester/lintr
-
-notifications:
-  email:
-    - on_success: change
-    - on_failure: change
+   - jimhester/covr
+   - jimhester/lintr
 
 after_success:
   - Rscript -e 'library(covr);coveralls()'
