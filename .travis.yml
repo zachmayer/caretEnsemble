@@ -9,10 +9,10 @@ env:
    - NOT_CRAN="false"
 
 r_build_args:
-   - "--no-manual --no-build-vignettes"
+   - --no-manual --no-build-vignettes
 
 r_check_args:
-   - "--no-manual --no-build-vignettes --as-cran"
+   - --no-manual --no-build-vignettes --as-cran
 
 r_github_packages:
    - jimhester/covr
