@@ -1,6 +1,5 @@
 if(require("lintr", quietly = TRUE)) {
   skip_on_cran()
-
   context("Code is high quality and lint free")
   test_that("Code Lint", {
     my_linters <- list(
