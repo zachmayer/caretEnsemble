@@ -1,31 +1,22 @@
-# Sample .travis.yml for R projects from https://github.com/craigcitro/r-travis
-# https://github.com/craigcitro/r-travis/wiki
-
 language: r
 warnings_are_errors: true
 sudo: required
 
 env:
- global:
-   - BOOTSTRAP_LATEX=""
-  matrix:
-   - NOT_CRAN="true"
-   - NOT_CRAN="false"
-
-r_build_args:
-   - "--no-manual --no-build-vignettes"
-
-r_check_args:
-   - "--no-manual --no-build-vignettes --as-cran"
+   global:
+     - WARNINGS_ARE_ERRORS=1
+     - R_BUILD_ARGS="--no-manual --no-build-vignettes"
+     - R_CHECK_ARGS="--no-manual --no-build-vignettes --as-cran"
+     - BOOTSTRAP_LATEX=""
+   matrix:
+     - NOT_CRAN="true"
+     - NOT_CRAN="false"
 
 r_github_packages:
-  - jimhester/covr
-  - jimhester/lintr
-
-notifications:
-  email:
-    - on_success: change
-    - on_failure: change
+   - jimhester/covr@4cae287abde5e2cf0c3c73aedeaec4d902dfd3ed
+   - jimhester/lintr@21607f469c2ce4f999d04a836f9348038a7282e2
+   - hadley/devtools@52bc15bb7eb87105bbf799d7f784054921146c02
+   - hadley/testthat@c67018fa4970ee3390ea2056efe56726626b07e3
 
 after_success:
   - Rscript -e 'library(covr);coveralls()'
