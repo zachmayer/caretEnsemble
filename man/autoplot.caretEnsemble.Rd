@@ -37,8 +37,8 @@ set.seed(42)
 models <- caretList(
  iris[1:50,1:2],
  iris[1:50,3],
- trControl=trainControl(method='cv'),
- methodList=c('glm', 'rpart'))
+ trControl=trainControl(method="cv"),
+ methodList=c("glm", "rpart"))
 ens <- caretEnsemble(models)
 autoplot(ens)
 }

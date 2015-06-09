@@ -2,7 +2,9 @@
 % Please edit documentation in R/caretList.R
 \name{caretList}
 \alias{caretList}
-\title{Create a list of several train models from the caret package}
+\title{Create a list of several train models from the caret package
+Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
+function.}
 \usage{
 caretList(..., trControl = trainControl(), methodList = NULL,
   tuneList = NULL, continue_on_fail = FALSE)
@@ -23,23 +25,24 @@ A list of \code{\link{train}} objects. If the model fails to build,
 it is dropped from the list.
 }
 \description{
+Create a list of several train models from the caret package
 Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
 function.
 }
 \examples{
 \dontrun{
-myControl <- trainControl(method='cv', number=5)
+myControl <- trainControl(method="cv", number=5)
 caretList(
   Sepal.Length ~ Sepal.Width,
   head(iris, 50),
-  methodList=c('glm', 'lm'),
+  methodList=c("glm", "lm"),
   trControl=myControl
   )
 caretList(
   Sepal.Length ~ Sepal.Width,
-  head(iris, 50), methodList=c('lm'),
+  head(iris, 50), methodList=c("lm"),
   tuneList=list(
-    nnet=caretModelSpec(method='nnet', trace=FALSE, tuneLength=1)
+    nnet=caretModelSpec(method="nnet", trace=FALSE, tuneLength=1)
  ),
   trControl=myControl
   )
