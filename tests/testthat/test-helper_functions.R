@@ -1,7 +1,7 @@
 
-#TODO: add tests for every helper function
-
+########################################################################
 context("Do the helper functions work for regression objects?")
+########################################################################
 library("caret")
 library("randomForest")
 library("rpart")
@@ -19,6 +19,41 @@ load(system.file("testdata/X.class.rda",
 load(system.file("testdata/Y.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 
+test_that("Recycling generates a warning", {
+  expect_warning(wtd.sd(matrix(1:10, ncol=2),weights=1))
+})
+
+test_that("No predictions generates an error", {
+  skip_if_not_installed('randomForest')
+  skip_if_not_installed('gbm')
+  skip_if_not_installed('plyr')
+  skip_if_not_installed('glmnet')
+  models_multi <- caretList(
+    iris[,1:2], iris[,5],
+    tuneLength=1, verbose=FALSE,
+    methodList=c("rf", "gbm"),
+    trControl=trainControl(method="cv", number=2, savePredictions=TRUE, classProbs=TRUE))
+  expect_error(check_caretList_model_types(models_multi))
+
+  models <- caretList(
+    iris[,1:2], factor(ifelse(iris[,5]=="setosa", "Yes", "No")),
+    tuneLength=1, verbose=FALSE,
+    methodList=c("rf", "gbm"),
+    trControl=trainControl(method="cv", number=2, savePredictions=TRUE, classProbs=TRUE))
+  ctrl <- models[[1]]
+  new_model <- train(
+    iris[,1:2], factor(ifelse(iris[,5]=="setosa", "Yes", "No")),
+    tuneLength=1,
+    method=c("glmnet"),
+    trControl=trainControl(method="cv", number=2, savePredictions=FALSE, classProbs=TRUE)
+    )
+  models2 <- c(list("glmnet"=new_model), models)
+  models3 <- c(models, list("glmnet"=new_model))
+  check_caretList_model_types(models)
+  expect_error(check_caretList_model_types(models2))
+  #expect_error(check_caretList_model_types(models3)) #THIS IS A BUG THAT NEEDS FIXING!!!!!!!!!!
+})
+
 test_that("We can make the predobs matrix", {
   out <- makePredObsMatrix(models.reg)
   expect_that(out, is_a("list"))
@@ -33,14 +68,15 @@ test_that("We can predict", {
   expect_true(all(colnames(out)==c("rf", "lm", "glm", "knn")))
 })
 
+########################################################################
 context("Do the helper functions work for classification objects?")
+########################################################################
 
 test_that("We can make the predobs matrix", {
   out <- makePredObsMatrix(models.class)
   expect_that(out, is_a("list"))
   expect_true(length(out$obs)==150)
   expect_true(all(dim(out$preds)==c(150, 6)))
-
 })
 
 test_that("We can predict", {
@@ -109,6 +145,7 @@ test_that("wtd.sd handles NA values correctly", {
 
 test_that("Checks generate errors", {
   skip_on_cran()
+  skip_if_not_installed('rpart')
   set.seed(42)
   myControl <- trainControl(method="cv", number=5, savePredictions=TRUE)
   x <- caretList(

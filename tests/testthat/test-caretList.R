@@ -29,6 +29,88 @@ test_that("caretModelSpec returns valid specs", {
   expect_true(is.list(tuneList))
   expect_equal(length(tuneList), 4)
   expect_equal(sum(duplicated(names(tuneList))), 0)
+  })
+
+test_that("caretModelSpec and checking functions work as expected", {
+
+  all_models <- sort(unique(modelLookup()$model))
+  for(model in all_models){
+    expect_equal(caretModelSpec(model, tuneLength=5, preProcess="knnImpute")$method, model)
+  }
+
+  tuneList <- lapply(all_models, function(x) list(method=x, preProcess="pca"))
+  all_models_check <- tuneCheck(tuneList)
+  expect_is(all_models_check, "list")
+  expect_equal(length(all_models), length(all_models_check))
+
+  tuneList <- lapply(all_models, function(x) list(method=x, preProcess="pca"))
+  names(tuneList) <- all_models
+  names(tuneList)[c(1, 5, 10)] <- ""
+  all_models_check <- tuneCheck(tuneList)
+  expect_is(all_models_check, "list")
+  expect_equal(length(all_models), length(all_models_check))
+
+  methodCheck(all_models)
+  expect_error(methodCheck(c(all_models, "THIS_IS_NOT_A_REAL_MODEL")))
+  expect_error(methodCheck(c(all_models, "THIS_IS_NOT_A_REAL_MODEL", "GBM")))
+})
+
+test_that("Target extraction functions work", {
+  data(iris)
+  expect_equal(extractCaretTarget(iris[,1:4], iris[,5]), iris[,5])
+  expect_equal(extractCaretTarget(iris[,2:5], iris[,1]), iris[,1])
+  expect_equal(extractCaretTarget(Species ~ ., iris), iris[,"Species"])
+  expect_equal(extractCaretTarget(Sepal.Width ~ ., iris), iris[,"Sepal.Width"])
+})
+
+test_that("caretList errors for bad models", {
+  data(iris)
+  skip_if_not_installed('glmnet')
+  expect_error(caretList(Sepal.Width ~ ., iris))
+  expect_warning(caretList(Sepal.Width ~ ., iris, methodList=c("lm", "lm")))
+  expect_warning(expect_is(caretList(Sepal.Width ~ ., iris, methodList="lm", continue_on_fail=TRUE), "caretList"))
+
+  my_control <- trainControl(method="cv", number=2)
+  bad_bad <- list(
+    bad1=caretModelSpec(method="glm", tuneLength=1),
+    bad2=caretModelSpec(method="glm", tuneLength=1)
+  )
+  good_bad <- list(
+    good=caretModelSpec(method="glmnet", tuneLength=1),
+    bad=caretModelSpec(method="glm", tuneLength=1)
+  )
+  sink <- capture.output(expect_error(caretList(iris[,1:4], iris[,5], tuneList=bad_bad, trControl=my_control)))
+  sink <- capture.output(expect_error(caretList(iris[,1:4], iris[,5], tuneList=good_bad, trControl=my_control)))
+  sink <- capture.output(expect_error(caretList(iris[,1:4], iris[,5], tuneList=bad_bad, trControl=my_control, continue_on_fail=TRUE)))
+  sink <- capture.output(expect_is(caretList(iris[,1:4], iris[,5], tuneList=good_bad, trControl=my_control, continue_on_fail=TRUE), "caretList"))
+})
+
+test_that("caretList predictions", {
+  skip_if_not_installed('randomForest')
+  skip_if_not_installed('gbm')
+  skip_if_not_installed('plyr')
+  models <- caretList(
+    iris[,1:2], iris[,5],
+    tuneLength=1, verbose=FALSE,
+    methodList=c("rf", "gbm"),
+    trControl=trainControl(method="cv", number=2, savePredictions=TRUE, classProbs=FALSE))
+  p1 <- predict(models)
+  expect_is(p1, "matrix")
+  expect_is(p1[,1], "character")
+  expect_is(p1[,2], "character")
+
+  models <- caretList(
+    iris[,1:2], iris[,5],
+    tuneLength=1, verbose=FALSE,
+    methodList=c("rf", "gbm"),
+    trControl=trainControl(method="cv", number=2, savePredictions=TRUE, classProbs=TRUE))
+  p2 <- predict(models)
+  expect_is(p2, "matrix")
+  expect_is(p2[,1], "numeric")
+  expect_is(p2[,2], "numeric")
+
+  models[[1]]$modelType <- "Bogus"
+  expect_error(predict(models))
 })
 
 ###############################################
@@ -36,6 +118,8 @@ context("We can fit models with a mix of methodList and tuneList")
 ################################################
 test_that("We can fit models with a mix of methodList and tuneList", {
   skip_on_cran()
+  skip_if_not_installed('randomForest')
+  skip_if_not_installed('rpart')
   myList <- list(
     rpart=caretModelSpec(method="rpart", tuneLength=10),
     rf=caretModelSpec(method="rf", tuneGrid=data.frame(mtry=2))
@@ -61,10 +145,13 @@ context("We can handle different CV methods")
 ################################################
 test_that("We can handle different CV methods", {
   skip_on_cran()
+  skip_if_not_installed('randomForest')
+  skip_if_not_installed('rpart')
   for(m in c(
     "boot",
     "adaptive_boot",
     "cv",
+    "repeatedcv",
     "adaptive_cv",
     "LGOCV",
     "adaptive_LGOCV")
@@ -111,6 +198,27 @@ test_that("We can handle different CV methods", {
   }
 })
 
+test_that("CV methods we can't handle fail", {
+  for(m in c(
+    "boot632",
+    "LOOCV",
+    "none",
+    "oob"
+    )
+  ){
+    test_name <- paste0("CV doesn't works with method=", m)
+    test_that(test_name, {
+      data(iris)
+      model <- train(
+        Sepal.Length ~ Sepal.Width, tuneLength=1,
+        data=iris, method=ifelse(m=="oob", "rf", "lm"),
+        trControl=trainControl(method=m))
+      expect_is(model, "train")
+      expect_error(trControlCheck(model))
+    })
+  }
+})
+
 ###############################################
 context("Classification models")
 ################################################
@@ -142,6 +250,8 @@ test_that("Classification models", {
 
 test_that("Longer tests for Classification models", {
   skip_on_cran()
+  skip_if_not_installed('rpart')
+  skip_if_not_installed('kernlab')
   # Specify controls
   myControl <- trainControl(
     method = "cv", number = 3, repeats = 1,
@@ -197,7 +307,7 @@ test_that("Longer tests for Classification models", {
 
 test_that("Test that caretList preserves user specified error functions", {
   skip_on_cran()
-
+  skip_if_not_installed('rpart')
   myControl <- trainControl(
     method = "cv", number = 3, repeats = 1,
     p = 0.75, savePredictions = TRUE,
@@ -283,6 +393,8 @@ test_that("Test that caretList preserves user specified error functions", {
 
 test_that("Users can pass a custom tuneList", {
   skip_on_cran()
+  skip_if_not_installed('rpart')
+  skip_if_not_installed('kernlab')
   # User specifies methods and tuning parameters specifically using a tuneList
   myControl <- trainControl(
     method = "cv", number = 3, repeats = 1,
@@ -324,7 +436,7 @@ test_that("Users can pass a custom tuneList", {
 context("User tuneTest parameters are respected and model is ensembled")
 test_that("User tuneTest parameters are respected and model is ensembled", {
   skip_on_cran()
-
+  skip_if_not_installed('nnet')
   myControl <- trainControl(
     method = "cv", number = 3, repeats = 1,
     p = 0.75, savePredictions = TRUE,
@@ -357,6 +469,8 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
 context("Formula interface for caretList works")
 test_that("User tuneTest parameters are respected and model is ensembled", {
   skip_on_cran()
+  skip_if_not_installed('rpart')
+  skip_if_not_installed('nnet')
   tuneTest <- list(
     rpart = list(method="rpart", tuneLength = 2),
     nnet = list(method="nnet", tuneLength = 2, trace=FALSE),

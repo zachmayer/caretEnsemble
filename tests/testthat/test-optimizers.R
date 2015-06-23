@@ -30,8 +30,16 @@ myControl <- trainControl(
 
 context("Test optimizer passing to caretEnsemble correctly")
 
+test_that("optAUC converts to factor", {
+  x <- matrix(1:20, ncol=2)
+  y <- rep(c("a", "b"), 5)
+  expect_is(greedOptAUC(x, y), "integer")
+})
+
 test_that("Test that optFUN does not take random values", {
   skip_on_cran()
+  skip_if_not_installed('randomForest')
+  skip_if_not_installed('rpart')
   myCL <- caretList(
     x = train[, -23],
     y = train[, "Class"],
@@ -57,7 +65,8 @@ ctrl <- trainControl(
 
 test_that("safe and greedy optimizers get same result in the limit", {
   skip_on_cran()
-
+  skip_if_not_installed('randomForest')
+  skip_if_not_installed('rpart')
   myCL <- caretList(
     x = train[, -23],
     y = train[, "Class"],
@@ -88,7 +97,8 @@ sampVec <- sample(1:151, 120)
 
 test_that("Warnings and fallbacks in degenerate cases", {
   skip_on_cran()
-
+  skip_if_not_installed('klaR')
+  skip_if_not_installed('MASS')
   out <- caretList(
     x = modeldat2$traindata$preds[sampVec,],
     y = modeldat2$traindata$class[sampVec],

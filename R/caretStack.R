@@ -154,8 +154,5 @@ plot.caretStack <- function(x, ...){
 #' dotplot.caretStack(meta_model)
 #' }
 dotplot.caretStack <- function(x, data=NULL, ...){
-  final <- list(x$ens_model)
-  names(final) <- paste(paste(x$ens_model$method, collapse="_"), "ENSEMBLE", sep="_")
-  base <- x$models
-  dotplot(resamples(c(final, base)), data=data, ...)
+  dotplot(resamples(x$models), data=data, ...)
 }
