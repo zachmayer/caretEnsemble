@@ -137,9 +137,6 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
   }
   modtype <- extractModelTypes(object$models)
   preds <- predict(object$models,  ...)
-  if(!anyNA(preds)){
-    keepNA <- TRUE
-  }
   if(keepNA == TRUE){
     if(anyNA(preds)){
       message("Predictions being made only for cases with complete data")

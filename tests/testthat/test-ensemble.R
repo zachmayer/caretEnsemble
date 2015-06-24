@@ -97,10 +97,36 @@ test_that("We can ensemble regression models", {
   expect_true(is.numeric(pred.class))
   expect_true(length(pred.class)==150)
 
+  #Check different cases
   p1 <- predict(ens.reg, return_weights=TRUE, se=FALSE, keepNA=FALSE)
   p2 <- predict(ens.reg, return_weights=TRUE, se=TRUE, keepNA=FALSE)
+  p3 <- predict(ens.reg, return_weights=FALSE, se=FALSE, keepNA=FALSE)
+  p4 <- predict(ens.reg, return_weights=FALSE, se=TRUE, keepNA=FALSE)
+  p5 <- predict(ens.reg, return_weights=TRUE, se=FALSE, keepNA=TRUE)
+  p6 <- predict(ens.reg, return_weights=TRUE, se=TRUE, keepNA=TRUE)
+  p7 <- predict(ens.reg, return_weights=FALSE, se=FALSE, keepNA=TRUE)
+  p8 <- predict(ens.reg, return_weights=FALSE, se=TRUE, keepNA=TRUE)
+
+  #Check preds
+  #I don't like how much the output data structure varies, depending on the input
+  #I feel like it maybe should be a single lists, with none of this
+  #swapping between list, data.fame, and vector output
   expect_true(all.equal(p1$preds, p2$preds$pred))
+  expect_true(all.equal(p1$preds, p3))
+  expect_true(all.equal(p1$preds, p4$pred))
+  expect_true(all.equal(p1$preds, p5$preds))
+  expect_true(all.equal(p1$preds, p6$preds$pred))
+  expect_true(all.equal(p1$preds, p7))
+  expect_true(all.equal(p1$preds, p8$pred))
+
+  #Check weights
   expect_true(all.equal(p1$weight, p2$weight))
+  expect_is(p3, "numeric")
+  expect_null(p4$weight)
+  expect_true(all.equal(p1$weight[1,,drop=FALSE], p5$weight))
+  expect_true(all.equal(p1$weight[1,,drop=FALSE], p6$weight))
+  expect_is(p7, "numeric")
+  expect_null(p8$weight)
 })
 
 #############################################################################

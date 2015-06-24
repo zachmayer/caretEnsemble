@@ -297,17 +297,24 @@ test_that("Residuals provided by residuals are proper for ensemble objects", {
 
   #I think the factors are backward somewhere in here
   #Also, caret doesn't yet support residuals for classification
-#   mr_class_wide <- as.data.frame(lapply(ens.class$models, residuals))
-#   names(mr_class_wide) <- lapply(ens.class$models, function(x) x$method)
-#   mr_class_long <- reshape(mr_class_wide, direction = "long", varying = names(mr_class_wide),
-#                            v.names = "resid", timevar = "method", times = names(mr_class_wide))
-#   expect_equal(mr_class_long[order(mr_class_long$method, mr_class_long$id),"resid"], -1*mr1[order(mr1$method, mr1$id),"resid"])
+  #   mr_class_wide <- as.data.frame(lapply(ens.class$models, residuals))
+  #   names(mr_class_wide) <- lapply(ens.class$models, function(x) x$method)
+  #   mr_class_long <- reshape(mr_class_wide, direction = "long", varying = names(mr_class_wide),
+  #                            v.names = "resid", timevar = "method", times = names(mr_class_wide))
+  #   expect_equal(mr_class_long[order(mr_class_long$method, mr_class_long$id),"resid"], -1*mr1[order(mr1$method, mr1$id),"resid"])
 
   mr_reg_wide <- as.data.frame(lapply(ens.reg$models, residuals))
   names(mr_reg_wide) <- lapply(ens.reg$models, function(x) x$method)
   mr_reg_long <- reshape(mr_reg_wide, direction = "long", varying = names(mr_reg_wide),
-                           v.names = "resid", timevar = "method", times = names(mr_reg_wide))
+                         v.names = "resid", timevar = "method", times = names(mr_reg_wide))
   expect_equal(mr_reg_long[order(mr_reg_long$method, mr_reg_long$id),"resid"], mr2[order(mr2$method, mr2$id),"resid"])
+
+  ens.class2 <- ens.class
+  ens.reg2 <- ens.reg
+  ens.class2$modelType <- ens.reg2$modelType <- NULL
+
+  expect_equal(residuals(ens.class2), residuals(ens.class))
+  expect_equal(residuals(ens.reg2), residuals(ens.reg))
 })
 
 context("Does prediction method work for classification")
@@ -436,7 +443,7 @@ test_that("Prediction options are respected in regression and classification", {
   for(i in 1:nrow(tests)){
     p <- predict(
       ens.reg,
-      keepNA=tests[i,"keepNa"],
+      keepNA=tests[i,"keepNA"],
       se=tests[i,"se"],
       return_weights=tests[i,"return_weights"]
     )
@@ -463,7 +470,7 @@ test_that("Prediction options are respected in regression and classification", {
   for(i in 1:nrow(tests)){
     p <- predict(
       ens.class,
-      keepNA=tests[i,"keepNa"],
+      keepNA=tests[i,"keepNA"],
       se=tests[i,"se"],
       return_weights=tests[i,"return_weights"]
     )
