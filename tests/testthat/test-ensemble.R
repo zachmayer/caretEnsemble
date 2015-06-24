@@ -3,6 +3,14 @@ library(caret)
 library(randomForest)
 
 #############################################################################
+context("Test errors and warnings")
+#############################################################################
+test_that("Ensembling fails with no CV", {
+  my_control <- trainControl(method="none", savePredictions=TRUE)
+  expect_error(expect_warning(trControlCheck(my_control)))
+})
+
+#############################################################################
 context("Test metric and residual extraction")
 #############################################################################
 
@@ -23,9 +31,17 @@ test_that("We can extract metrics", {
 })
 
 test_that("We can extract resdiuals from caretEnsemble objects", {
-  load(system.file(
-    "testdata/models.class.rda", package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/models.class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/models.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+
   ens <- caretEnsemble(models.class)
+  r <- residuals(ens)
+  expect_is(r, "numeric")
+  expect_equal(length(r), 150)
+
+  ens <- caretEnsemble(models.reg)
   r <- residuals(ens)
   expect_is(r, "numeric")
   expect_equal(length(r), 150)
@@ -80,6 +96,11 @@ test_that("We can ensemble regression models", {
   pred.class <- predict(ens.class)
   expect_true(is.numeric(pred.class))
   expect_true(length(pred.class)==150)
+
+  p1 <- predict(ens.reg, return_weights=TRUE, se=FALSE, keepNA=FALSE)
+  p2 <- predict(ens.reg, return_weights=TRUE, se=TRUE, keepNA=FALSE)
+  expect_true(all.equal(p1$preds, p2$preds$pred))
+  expect_true(all.equal(p1$weight, p2$weight))
 })
 
 #############################################################################

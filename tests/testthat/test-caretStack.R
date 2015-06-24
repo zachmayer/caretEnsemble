@@ -44,7 +44,7 @@ test_that("We can stack classification models", {
 })
 
 test_that("caretStack plots", {
-  skip_if_not_installed('gbm')
+  skip_if_not_installed("gbm")
   test_plot_file <- "caretEnsemble_test_plots.png"
   ens.reg <- caretStack(
     models.reg, method="gbm", tuneLength=2, verbose=FALSE,

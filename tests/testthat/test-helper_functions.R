@@ -24,10 +24,10 @@ test_that("Recycling generates a warning", {
 })
 
 test_that("No predictions generates an error", {
-  skip_if_not_installed('randomForest')
-  skip_if_not_installed('gbm')
-  skip_if_not_installed('plyr')
-  skip_if_not_installed('glmnet')
+  skip_if_not_installed("randomForest")
+  skip_if_not_installed("gbm")
+  skip_if_not_installed("plyr")
+  skip_if_not_installed("glmnet")
   models_multi <- caretList(
     iris[,1:2], iris[,5],
     tuneLength=1, verbose=FALSE,
@@ -145,7 +145,7 @@ test_that("wtd.sd handles NA values correctly", {
 
 test_that("Checks generate errors", {
   skip_on_cran()
-  skip_if_not_installed('rpart')
+  skip_if_not_installed("rpart")
   set.seed(42)
   myControl <- trainControl(method="cv", number=5, savePredictions=TRUE)
   x <- caretList(
