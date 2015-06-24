@@ -137,9 +137,6 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
   }
   modtype <- extractModelTypes(object$models)
   preds <- predict(object$models,  ...)
-  if(!anyNA(preds)){
-    keepNA <- TRUE
-  }
   if(keepNA == TRUE){
     if(anyNA(preds)){
       message("Predictions being made only for cases with complete data")
@@ -242,19 +239,21 @@ extractModRes <- function(ensemble){
   return(modRes)
 }
 
-#' Extract a model accuracy metric from an S3 object.
-#' @param x an object with model performanc metrics
-#' @param metric a character, either "RMSE" or "AUC" indicating which metric to extract
-#' @return A numeric representing the metric desired metric.
+#' Extract accuracy metrics from a model
 #' @rdname metrics
 #' @export
-getMetric <- function(x, metric){
+getMetric <- function(x, ...){
   UseMethod("getMetric")
 }
 
 #' Extract a model accuracy metric from a \code{\link{train}} object.
+#' @param x a caretEnsemble object
+#' @param metric Which metric to extract
+#' @param ... Passed between metric functions
+#' @return A numeric representing the metric desired metric.
 #' @rdname metrics
-getMetric.train <- function(x, metric= c("AUC", "RMSE")){
+#' @export
+getMetric.train <- function(x, metric= c("AUC", "RMSE"), ...){
   if(missing(metric)){
     metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
     warning("Metric not specified, so default is being chosen.")
@@ -451,7 +450,7 @@ varImpFrame <- function(x){
 #' @return A numeric of the residuals.
 residuals.caretEnsemble <- function(object, ...){
   if(is.null(object$modelType)){
-    object$modelType <- extractModelTypes(object$models)
+    object$modelType <- extractModelTypes(object$models)[1]
   }
   if(object$modelType == "Regression"){
     yhat <- predict(object)
@@ -466,31 +465,6 @@ residuals.caretEnsemble <- function(object, ...){
     y <- ifelse(y == prevOutcome, 0, 1)
     resid <- y - yhat
     return(resid)
-  }
-}
-
-#' @keywords internal
-residuals2.train <- function(object){
-  if(object$modelType == "Regression"){
-    y <- object$trainingData$.outcome
-    resid <- residuals(object)
-    yhat <- predict(object)
-    data <- data.frame(y = y, yhat = yhat, .resid = resid,
-                       method = object$method)
-    return(data)
-  } else if(object$modelType == "Classification"){
-    yhat <- predict(object, type = "prob")
-    if (!is.null(ncol(yhat))){
-      yhat <- yhat[, 1]
-    }
-    y <- as.character(object$trainingData$.outcome)
-    z <- table(y)
-    prevOutcome <- names(z)[z == max(z)]
-    y <- ifelse(y == prevOutcome, 1, 0)
-    resid <- y - yhat
-    data <- data.frame(y = y, yhat = yhat, .resid = resid,
-                       method = object$method)
-    return(data)
   }
 }
 
@@ -534,7 +508,6 @@ multiResiduals <- function(object, ...){
 #' @param data a data set, defaults to the data used to fit the model
 #' @param ... additional arguments to pass to fortify
 #' @return The original data with extra columns for fitted values and residuals
-#' @importFrom digest digest
 fortify.caretEnsemble <- function(model, data = NULL, ...){
   data <- extractModFrame(model)
   data$y <- model$models[[1]]$trainingData$.outcome
@@ -641,8 +614,6 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
     xvars <- names(plotdf)[!names(plotdf) %in% c("(Intercept)", ".outcome", "y",
                                                  ".fitted", ".resid")]
     xvars <- sample(xvars, 2)
-  } else {
-    xvars <- names(plotdf)[xvars]
   }
   # TODO: Insert checks for length of xvars here
   residOut <- multiResiduals(object)
@@ -669,7 +640,7 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
     geom_smooth(se = FALSE) + scale_x_continuous(xvars[2]) +
     scale_y_continuous("Residuals") +
     labs(title = paste0("Residuals Against ", xvars[2])) + theme_bw()
-  grid.arrange(g1, g2, g3, g4, g5, g6, newpage=FALSE)
+  grid.arrange(g1, g2, g3, g4, g5, g6, ncol=2)
 }
 
 utils::globalVariables(c(".fitted", ".resid", "method", "id", "yhat",

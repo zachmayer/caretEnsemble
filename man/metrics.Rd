@@ -5,20 +5,22 @@
 \alias{getMetric}
 \alias{getMetric.train}
 \alias{getRMSE}
-\title{Extract a model accuracy metric from an S3 object.}
+\title{Extract accuracy metrics from a model}
 \usage{
-getMetric(x, metric)
+getMetric(x, ...)
 
-\method{getMetric}{train}(x, metric = c("AUC", "RMSE"))
+\method{getMetric}{train}(x, metric = c("AUC", "RMSE"), ...)
 
 getAUC(x)
 
 getRMSE(x)
 }
 \arguments{
-\item{x}{an object with model performanc metrics}
+\item{x}{a caretEnsemble object}
 
-\item{metric}{a character, either "RMSE" or "AUC" indicating which metric to extract}
+\item{...}{Passed between metric functions}
+
+\item{metric}{Which metric to extract}
 }
 \value{
 A numeric representing the metric desired metric.
@@ -28,7 +30,7 @@ A numeric for the AUC of the best model
 A numeric for the RMSE of the best model
 }
 \description{
-Extract a model accuracy metric from an S3 object.
+Extract accuracy metrics from a model
 
 Extract a model accuracy metric from a \code{\link{train}} object.
 

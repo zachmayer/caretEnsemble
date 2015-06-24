@@ -1,6 +1,6 @@
-language: r
-warnings_are_errors: true
-sudo: required
+# Sample .travis.yml for R projects from https://github.com/craigcitro/r-travis
+
+language: c
 
 env:
    global:
@@ -12,11 +12,28 @@ env:
      - NOT_CRAN="true"
      - NOT_CRAN="false"
 
-r_github_packages:
-   - jimhester/covr@4cae287abde5e2cf0c3c73aedeaec4d902dfd3ed
-   - jimhester/lintr@21607f469c2ce4f999d04a836f9348038a7282e2
-   - hadley/devtools@52bc15bb7eb87105bbf799d7f784054921146c02
-   - hadley/testthat@c67018fa4970ee3390ea2056efe56726626b07e3
+before_install:
+  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+  - chmod 755 ./travis-tool.sh
+  - ./travis-tool.sh bootstrap
+
+install:
+  - ./travis-tool.sh install_deps
+  - ./travis-tool.sh github_package igraph/rigraph
+  - ./travis-tool.sh github_package jimhester/covr@4cae287abde5e2cf0c3c73aedeaec4d902dfd3ed
+  - ./travis-tool.sh github_package jimhester/lintr@21607f469c2ce4f999d04a836f9348038a7282e2
+  - ./travis-tool.sh github_package hadley/devtools@52bc15bb7eb87105bbf799d7f784054921146c02
+  - ./travis-tool.sh github_package hadley/testthat@c67018fa4970ee3390ea2056efe56726626b07e3
+
+script: ./travis-tool.sh run_tests
+
+on_failure:
+  - ./travis-tool.sh dump_logs
 
 after_success:
   - Rscript -e 'library(covr);coveralls()'
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
