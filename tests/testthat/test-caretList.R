@@ -211,7 +211,7 @@ test_that("CV methods we cant handle fail", {
       data(iris)
 
       #Ignore method if index is specified
-      expect_is(trainControl(method=m, index=1:10, savePredictions=TRUE), 'list')
+      expect_is(trainControl(method=m, index=1:10, savePredictions=TRUE), "list")
 
       #Fail if no index and un-known method
       expect_error(expect_warning(trControlCheck(trainControl(method=m, savePredictions=TRUE))))
