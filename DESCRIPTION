@@ -1,7 +1,7 @@
 Package: caretEnsemble
 Type: Package
 Title: Ensembles of Caret Models
-Version: 1.0.3
+Version: 1.0.4
 Date: 2015-01-14
 Authors@R: c(person(c("Zachary", "A."), "Deane-Mayer", role = c("aut", "cre"),
     email = "zach.mayer@gmail.com"),
@@ -42,6 +42,7 @@ Imports:
     plyr,
     grid,
     lattice,
-    gridExtra
+    gridExtra,
+    data.table
 License: MIT + file LICENSE
 VignetteBuilder: knitr
