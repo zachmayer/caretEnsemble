@@ -174,11 +174,6 @@ extractModelTypes <- function(list_of_models){
   return(type)
 }
 
-##Hack to make this function work with devtools::load_all
-#http://stackoverflow.com/questions/23252231/r-data-table-breaks-in-exported-functions
-#http://r.789695.n4.nabble.com/Import-problem-with-data-table-in-packages-td4665958.html
-assign(".datatable.aware", TRUE)
-
 #' @title Extract the best predictions from a train object
 #' @description Extract predictions for the best tune from a model
 #' @param x a train object
@@ -198,7 +193,11 @@ bestPreds <- function(x){
 #' @param list_of_models an object of class caretList or a list of caret models
 #' @importFrom pbapply pblapply
 extractBestPreds <- function(list_of_models){
-  lapply(list_of_models, bestPreds)
+  out <- lapply(list_of_models, bestPreds)
+  if(is.null(names(out))){
+    names(out) <- make.names(sapply(list_of_models, function(x) x$method))
+  }
+  return(out)
 }
 
 #' @title Make a prediction matrix from a list of models
@@ -206,6 +205,7 @@ extractBestPreds <- function(list_of_models){
 #' helper function
 #'
 #' @param  list_of_models an object of class caretList
+#' @importFrom data.table set rbindlist dcast.data.table
 makePredObsMatrix <- function(list_of_models){
 
   #caretList Checks
@@ -214,6 +214,7 @@ makePredObsMatrix <- function(list_of_models){
 
   #Make a list of models
   modelLibrary <- extractBestPreds(list_of_models)
+  model_names <- names(modelLibrary)
 
   #Model library checks
   check_bestpreds_resamples(modelLibrary)
@@ -224,20 +225,40 @@ makePredObsMatrix <- function(list_of_models){
   #Extract model type (class or reg)
   type <- extractModelTypes(list_of_models)
 
-  #Extract observations from the frist model in the list
-  obs <- modelLibrary[[1]]$obs
+  #Add names column
+  for(i in seq_along(modelLibrary)){
+    set(modelLibrary[[i]], j="modelname", value=names(modelLibrary)[[i]])
+  }
+
+  #Remove parameter columns
+  keep <- Reduce(intersect, lapply(modelLibrary, names))
+  for(i in seq_along(modelLibrary)){
+    rem <- setdiff(names(modelLibrary[[i]]), keep)
+    if(length(rem) > 0){
+      for(r in rem){
+        set(modelLibrary[[i]], j=r, value=NULL)
+      }
+    }
+  }
+  modelLibrary <- rbindlist(modelLibrary, fill=TRUE)
+
+  #For classification models that produce probs, use the probs as preds
+  #Otherwise, just use class predictions
   if (type=="Classification"){
-    positive <- as.character(unique(modelLibrary[[1]]$obs)[2]) #IMPROVE THIS!
+    positive <- as.character(unique(modelLibrary$obs)[2]) #IMPROVE THIS!
+    pos <- as.numeric(modelLibrary[[positive]])
+    good_pos_values <- which(is.finite(pos))
+    set(modelLibrary, j="pred", value=as.numeric(modelLibrary[["pred"]]))
+    set(modelLibrary, i=good_pos_values, j="pred", value=modelLibrary[good_pos_values,positive,with=FALSE])
   }
 
-  #Extract predicteds
-  if (type=="Regression"){
-    preds <- sapply(modelLibrary, function(x) as.numeric(x$pred))
-  } else if (type=="Classification"){
-    preds <- sapply(modelLibrary, function(x) as.numeric(x[[positive]]))
-  }
+  #Reshape wide for meta-modeling
+  modelLibrary <- dcast.data.table(
+    modelLibrary,
+    obs + rowIndex + Resample ~ modelname,
+    value.var = "pred"
+  )
 
-  #Name the predicteds and return
-  colnames(preds) <- make.names(sapply(list_of_models, function(x) x$method), unique=TRUE)
-  return(list(obs=obs, preds=preds, type=type))
+  #Return
+  return(list(obs=modelLibrary$obs, preds=as.matrix(modelLibrary[,model_names,with=FALSE]), type=type))
 }
