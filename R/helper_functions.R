@@ -216,12 +216,6 @@ makePredObsMatrix <- function(list_of_models){
 
   #Make a list of models
   modelLibrary <- extractBestPreds(list_of_models)
-
-  #Check model names are unique
-  if(anyDuplicated(names(modelLibrary))){
-    warning("Duplicate model names in library.  Using make.names(unique=TRUE)")
-    names(modelLibrary) <- make.names(names(modelLibrary), unique=TRUE)
-  }
   model_names <- names(modelLibrary)
 
   #Model library checks
