@@ -255,7 +255,7 @@ makePredObsMatrix <- function(list_of_models){
   }
 
   #Reshape wide for meta-modeling
-  modelLibrary <- dcast.data.table(
+  modelLibrary <- data.table::dcast.data.table(
     modelLibrary,
     obs + rowIndex + Resample ~ modelname,
     value.var = "pred"
