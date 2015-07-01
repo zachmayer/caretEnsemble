@@ -184,6 +184,7 @@ bestPreds <- function(x){
   a <- data.table(x$bestTune, key=names(x$bestTune))
   b <- data.table(x$pred, key=names(x$bestTune))
   b <- b[a,]
+  sink <- gc(reset=TRUE)
   setorderv(b, c("Resample", "rowIndex"))
   return(b)
 }
@@ -197,6 +198,7 @@ extractBestPreds <- function(list_of_models){
   if(is.null(names(out))){
     names(out) <- make.names(sapply(list_of_models, function(x) x$method))
   }
+  sink <- gc(reset=TRUE)
   return(out)
 }
 
@@ -217,10 +219,10 @@ makePredObsMatrix <- function(list_of_models){
   model_names <- names(modelLibrary)
 
   #Model library checks
-  check_bestpreds_resamples(modelLibrary)
-  check_bestpreds_indexes(modelLibrary)
-  check_bestpreds_obs(modelLibrary)
-  check_bestpreds_preds(modelLibrary)
+  check_bestpreds_resamples(modelLibrary) #Re-write with data.table?
+  check_bestpreds_indexes(modelLibrary) #Re-write with data.table?
+  check_bestpreds_obs(modelLibrary) #Re-write with data.table?
+  check_bestpreds_preds(modelLibrary) #Re-write with data.table?
 
   #Extract model type (class or reg)
   type <- extractModelTypes(list_of_models)
