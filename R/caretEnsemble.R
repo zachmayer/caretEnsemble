@@ -642,6 +642,3 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
     labs(title = paste0("Residuals Against ", xvars[2])) + theme_bw()
   grid.arrange(g1, g2, g3, g4, g5, g6, ncol=2)
 }
-
-utils::globalVariables(c(".fitted", ".resid", "method", "id", "yhat",
-                         "ymax", "yavg", "ymin", "metric", "metricSD"))
