@@ -118,6 +118,8 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @return If \code{return_weights = TRUE} a list is returned with a data.frame
 #' slot for predictions and a matrix slot for the model weights. If \code{return_weights = FALSE}
 #' a data.frame is returned for the predictions.
+#' @importFrom foreach foreach
+#' @importFrom foreach %dopar%
 #' @export
 #' @method predict caretEnsemble
 #' @examples
@@ -129,6 +131,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' }
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
   stopifnot(is(object$models, "caretList"))
+  devtools::use_package('foreach')
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){
     return_weights <- FALSE
@@ -144,7 +147,6 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
     if(dim(preds)[1]<1000){ # use apply for small data
       se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
     } else { # switch to foreach for large data
-      require('foreach')
       se.tmp <- foreach(n=1:dim(preds)[1], .combine= c) %dopar% {
         pred <- preds[n, ]
         wtd.sd(pred, weights = object$weights, normwt = TRUE)
@@ -166,7 +168,6 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
       se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights,
                       normwt = TRUE, na.rm = TRUE)
     } else { # switch to foreach for large data
-      require('foreach')
       est <- foreach(n=1:dim(preds)[1], .combine= c) %dopar% {
         pred <- preds[n, ]
         weighted.mean(pred, w=object$weights, na.rm = TRUE)
