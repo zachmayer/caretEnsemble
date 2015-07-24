@@ -126,4 +126,3 @@ gbm_ensemble <- caretStack(
 model_preds3 <- model_preds
 model_preds3$ensemble <- predict(gbm_ensemble, newdata=testing, type="prob")$M
 colAUC(model_preds3, testing$Class)
-

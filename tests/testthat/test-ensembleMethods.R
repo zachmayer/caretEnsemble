@@ -236,11 +236,10 @@ test_that("No errors are thrown by a generics for ensembles", {
 
   test_plot_file <- "caretEnsemble_test_plots.png"
   png(test_plot_file)
-  expect_identical(tryCatch(autoplot(ens.class)), NULL)
-  expect_identical(tryCatch(autoplot(ens.reg)), NULL)
-  expect_identical(tryCatch(autoplot(ens.class, xvars=c("Petal.Length", "Petal.Width"))), NULL)
-  expect_identical(tryCatch(autoplot(ens.reg, xvars=c("Petal.Length", "Petal.Width"))), NULL)
-  expect_error(autoplot(ens.class$models[[1]]))
+  p1 <- autoplot(ens.class)
+  p2 <- autoplot(ens.reg)
+  p3 <- autoplot(ens.class, xvars=c("Petal.Length", "Petal.Width"))
+  p4 <- autoplot(ens.reg, xvars=c("Petal.Length", "Petal.Width"))
   expect_error(autoplot(ens.reg$models[[1]]))
   dev.off()
   expect_true(file.exists(test_plot_file))
