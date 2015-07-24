@@ -131,7 +131,6 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' }
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
   stopifnot(is(object$models, "caretList"))
-  devtools::use_package('foreach')
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){
     return_weights <- FALSE
