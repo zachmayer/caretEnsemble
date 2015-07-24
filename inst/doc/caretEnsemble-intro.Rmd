@@ -136,7 +136,7 @@ caretStack allows us to move beyond simple blends of models to using "meta-model
 
 ```{r, echo=TRUE}
 glm_ensemble <- caretStack(
-  model_list, 
+  model_list,
   method="glm",
   metric="ROC",
   trControl=trainControl(
@@ -164,7 +164,7 @@ suppressMessages(library("plyr"))
 ```{r, echo=TRUE}
 library("gbm")
 gbm_ensemble <- caretStack(
-  model_list, 
+  model_list,
   method="gbm",
   verbose=FALSE,
   tuneLength=10,
