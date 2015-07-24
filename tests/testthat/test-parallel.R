@@ -1,43 +1,43 @@
 context("Parallelization works")
 test_that("predict.caretEnsemble works in parallel", {
   skip_on_cran()
-  X.reg <- model.matrix(~ ., iris[, -1])
-  X.reg.big <- do.call(rbind, lapply(1:100, function(x) X.reg))
-  Y.reg <- iris[, 1]
-  ens.reg <- caretEnsemble(caretList(X.reg, Y.reg, methodList=c("lm", "glm")))
+  X_reg <- model.matrix(~ ., iris[, -1])
+  X_reg_big <- do.call(rbind, lapply(1:100, function(x) X_reg))
+  Y_reg <- iris[, 1]
+  ens_reg <- caretEnsemble(caretList(X_reg, Y_reg, methodList=c("lm", "glm")))
 
   #Basic
-  pred.reg <- predict(ens.reg, newdata = X.reg)
-  pred.reg2 <- predict(ens.reg, newdata = X.reg.big)
-  expect_equal(pred.reg, pred.reg2[1:length(pred.reg)])
+  pred_reg <- predict(ens_reg, newdata = X_reg)
+  pred_reg2 <- predict(ens_reg, newdata = X_reg_big)
+  expect_equal(pred_reg, pred_reg2[1:length(pred_reg)])
 
   #Don't keep NAs
-  pred.reg <- predict(ens.reg, newdata = X.reg, keepNA = FALSE)
-  pred.reg2 <- predict(ens.reg, newdata = X.reg.big, keepNA = FALSE)
-  expect_equal(pred.reg, pred.reg2[1:length(pred.reg)])
+  pred_reg <- predict(ens_reg, newdata = X_reg, keepNA = FALSE)
+  pred_reg2 <- predict(ens_reg, newdata = X_reg_big, keepNA = FALSE)
+  expect_equal(pred_reg, pred_reg2[1:length(pred_reg)])
 
   #Return se
-  pred.reg <- predict(ens.reg, newdata = X.reg, se = TRUE)
-  pred.reg2 <- predict(ens.reg, newdata = X.reg.big, se = TRUE)
-  expect_equal(pred.reg, pred.reg2[1:nrow(pred.reg), ])
+  pred_reg <- predict(ens_reg, newdata = X_reg, se = TRUE)
+  pred_reg2 <- predict(ens_reg, newdata = X_reg_big, se = TRUE)
+  expect_equal(pred_reg, pred_reg2[1:nrow(pred_reg), ])
 
   #Return weights
-  pred.reg <- predict(ens.reg, newdata = X.reg, se = TRUE, return_weights = TRUE)
-  pred.reg2 <- predict(
-    ens.reg, newdata = X.reg.big, se = TRUE, return_weights = TRUE
+  pred_reg <- predict(ens_reg, newdata = X_reg, se = TRUE, return_weights = TRUE)
+  pred_reg2 <- predict(
+    ens_reg, newdata = X_reg_big, se = TRUE, return_weights = TRUE
     )
-  expect_equal(pred.reg$preds, pred.reg2$preds[1:nrow(pred.reg$preds),])
+  expect_equal(pred_reg$preds, pred_reg2$preds[1:nrow(pred_reg$preds),])
 
   #Don't keep NAs, return se
-  pred.reg <- predict(ens.reg, newdata = X.reg, keepNA = FALSE, se = TRUE)
-  pred.reg2 <- predict(ens.reg, newdata = X.reg.big, keepNA = FALSE, se = TRUE)
-  expect_equal(pred.reg, pred.reg2[1:nrow(pred.reg), ])
+  pred_reg <- predict(ens_reg, newdata = X_reg, keepNA = FALSE, se = TRUE)
+  pred_reg2 <- predict(ens_reg, newdata = X_reg_big, keepNA = FALSE, se = TRUE)
+  expect_equal(pred_reg, pred_reg2[1:nrow(pred_reg), ])
 
   #Don't keep NAs, return se, return weights
-  pred.reg <- predict(
-    ens.reg, newdata = X.reg, keepNA = FALSE, se = TRUE, return_weights = TRUE)
-  pred.reg2 <- predict(
-    ens.reg, newdata = X.reg.big, keepNA = FALSE, se = TRUE,
+  pred_reg <- predict(
+    ens_reg, newdata = X_reg, keepNA = FALSE, se = TRUE, return_weights = TRUE)
+  pred_reg2 <- predict(
+    ens_reg, newdata = X_reg_big, keepNA = FALSE, se = TRUE,
     return_weights = TRUE)
-  expect_equal(pred.reg$preds, pred.reg2$preds[1:nrow(pred.reg$preds),])
+  expect_equal(pred_reg$preds, pred_reg2$preds[1:nrow(pred_reg$preds),])
 })
