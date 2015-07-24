@@ -143,9 +143,11 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
       message("Predictions being made only for cases with complete data")
     }
     est <- as.numeric(preds %*% object$weights)
-    if(dim(preds)[1]<1000){ # use apply for small data
+    # use apply for small data
+    if(dim(preds)[1]<1000){ 
       se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
-    } else { # switch to foreach for large data
+    } else { 
+    # switch to foreach for large data
       se.tmp <- foreach(n=1:dim(preds)[1], .combine= c) %dopar% {
         pred <- preds[n, ]
         wtd.sd(pred, weights = object$weights, normwt = TRUE)
@@ -159,14 +161,16 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
     conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
-
-    if(dim(preds)[1]<1000){ # use apply for small data
+    
+    # use apply for small data
+    if(dim(preds)[1]<1000){ 
       est <- apply(preds, 1, function(x){
         weighted.mean(x, w=object$weights, na.rm = TRUE)
       })
       se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights,
                       normwt = TRUE, na.rm = TRUE)
-    } else { # switch to foreach for large data
+    } else { 
+    # switch to foreach for large data
       est <- foreach(n=1:dim(preds)[1], .combine= c) %dopar% {
         pred <- preds[n, ]
         weighted.mean(pred, w=object$weights, na.rm = TRUE)
