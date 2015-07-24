@@ -43,6 +43,7 @@ Imports:
     grid,
     lattice,
     gridExtra,
-    data.table
+    data.table, 
+    foreach
 License: MIT + file LICENSE
 VignetteBuilder: knitr
