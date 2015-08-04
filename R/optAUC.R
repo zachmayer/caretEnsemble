@@ -13,7 +13,8 @@
 #' x <- matrix(runif(10), ncol=2)
 #' y <- sample(c('Y', 'N'), 5, replace=TRUE)
 #' greedOptAUC(x, y, iter = 2L)
-greedOptAUC <- function(X, Y, iter = 100L){ #TODO: ADD POSITIVE LEVEL IF NEEDED
+greedOptAUC <- function(X, Y, iter = 100L){
+  #TODO: ADD POSITIVE LEVEL IF NEEDED
   if(is.character(Y)){
     Y <- factor(Y)
   }

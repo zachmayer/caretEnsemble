@@ -1,13 +1,13 @@
 # Sample .travis.yml for R projects from https://github.com/craigcitro/r-travis
-# https://github.com/craigcitro/r-travis/wiki
 
 language: c
 
 env:
    global:
      - WARNINGS_ARE_ERRORS=1
-     - R_BUILD_ARGS="--no-manual"
-     - R_CHECK_ARGS="--no-manual --as-cran"
+     - R_BUILD_ARGS="--no-manual --no-build-vignettes"
+     - R_CHECK_ARGS="--no-manual --no-build-vignettes --as-cran"
+     - BOOTSTRAP_LATEX=""
    matrix:
      - NOT_CRAN="true"
      - NOT_CRAN="false"
@@ -19,21 +19,21 @@ before_install:
 
 install:
   - ./travis-tool.sh install_deps
-  - ./travis-tool.sh github_package jimhester/covr
-  - ./travis-tool.sh github_package jimhester/lintr
+  - ./travis-tool.sh github_package igraph/rigraph
+  - ./travis-tool.sh github_package jimhester/covr@4cae287abde5e2cf0c3c73aedeaec4d902dfd3ed
+  - ./travis-tool.sh github_package jimhester/lintr@21607f469c2ce4f999d04a836f9348038a7282e2
+  - ./travis-tool.sh github_package hadley/devtools@52bc15bb7eb87105bbf799d7f784054921146c02
+  - ./travis-tool.sh github_package hadley/testthat@c67018fa4970ee3390ea2056efe56726626b07e3
 
 script: ./travis-tool.sh run_tests
 
 on_failure:
   - ./travis-tool.sh dump_logs
 
+after_success:
+  - Rscript -e 'library(covr);coveralls()'
+
 notifications:
   email:
     on_success: change
     on_failure: change
-
-after_success:
-  - Rscript -e 'library(covr);coveralls()'
-  - Rscript -e 'library(lintr);load(system.file("testdata/my_linters.rda",package="caretEnsemble",mustWork=TRUE));lint_package(linters=my_linters)'
-
-#Linters to add:   line_length_linter (181), infix_spaces_linter (73)

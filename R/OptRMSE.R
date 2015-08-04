@@ -29,11 +29,5 @@ greedOptRMSE <- function(X, Y, iter = 100L){
   }
   weights2 <- weights/sum(weights)
   maxtest       <- sqrt(sum((X %*% weights2 - Y) ^ 2L, na.rm=TRUE))
-  if(stopper < maxtest){
-    testresult <- round(maxtest/stopper, 5) * 100
-    wstr <- paste0("Optimized weights not better than best model. Ensembled result is ",
-                   testresult, "%", " of best model RMSE. Try more iterations.")
-    message(wstr)
-  }
   return(weights)
 }

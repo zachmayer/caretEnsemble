@@ -27,13 +27,13 @@
 #' @examples
 #' \dontrun{
 #' set.seed(42)
-#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
+#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c("glm", "lm"))
 #' ens <- caretEnsemble(models)
 #' summary(ens)
 #' }
 caretEnsemble <- function(all.models, optFUN=NULL, ...){
 
-  stopifnot(is(all.models, 'caretList'))
+  stopifnot(is(all.models, "caretList"))
 
   #Check the models, and make a matrix of obs and preds
   predobs <- makePredObsMatrix(all.models)
@@ -49,9 +49,11 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 
   #If the optimization function is NULL, choose default
   if (is.null(optFUN)){
-    if (predobs$type=='Classification') {
+    if (predobs$type=="Classification") {
       optFUN <- greedOptAUC
-    } else { optFUN <- greedOptRMSE }
+    } else {
+      optFUN <- greedOptRMSE
+    }
   }
 
   #Determine weights
@@ -74,29 +76,29 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
     }
     if (predobs$type == "Regression"){
       error <- RMSE(weightedPreds, predobs$obs, na.rm=TRUE)
-      names(error) <- 'RMSE'
+      names(error) <- "RMSE"
     } else {
-      metric <- 'AUC'
+      metric <- "AUC"
       error <- caTools::colAUC(weightedPreds, predobs$obs)
-      names(error) <- 'AUC'
+      names(error) <- "AUC"
     }
   } else{
     if (predobs$type == "Regression"){
       error <- RMSE(predobs$preds %*% weights, predobs$obs, na.rm=TRUE)
-      names(error) <- 'RMSE'
+      names(error) <- "RMSE"
     } else {
-      metric <- 'AUC'
+      metric <- "AUC"
       error <- caTools::colAUC(predobs$preds %*% weights, predobs$obs)
-      names(error) <- 'AUC'
+      names(error) <- "AUC"
     }
   }
 
   #Return final model
   models <- all.models[keep]
-  class(models) <- 'caretList'
+  class(models) <- "caretList"
   out <- list(models=models, weights=weights[keep], error=error,
               modelType = predobs$type)
-  class(out) <- 'caretEnsemble'
+  class(out) <- "caretEnsemble"
   return(out)
 }
 
@@ -121,12 +123,12 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @examples
 #' \dontrun{
 #' set.seed(42)
-#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
+#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c("glm", "lm"))
 #' ens <- caretEnsemble(models)
 #' cor(predict(ens, newdata=iris[51:150,1:2]), iris[51:150,3])
 #' }
 predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
-  stopifnot(is(object$models, 'caretList'))
+  stopifnot(is(object$models, "caretList"))
 
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){
@@ -135,9 +137,6 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
   }
   modtype <- extractModelTypes(object$models)
   preds <- predict(object$models,  ...)
-  if(!anyNA(preds)){
-    keepNA <- TRUE
-  }
   if(keepNA == TRUE){
     if(anyNA(preds)){
       message("Predictions being made only for cases with complete data")
@@ -152,7 +151,9 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
     conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
-    est <- apply(preds, 1, function(x){weighted.mean(x, w=object$weights, na.rm = TRUE)})
+    est <- apply(preds, 1, function(x){
+      weighted.mean(x, w=object$weights, na.rm = TRUE)
+    })
     se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights,
                     normwt = TRUE, na.rm = TRUE)
   }
@@ -192,7 +193,7 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
 #' @examples
 #' \dontrun{
 #' set.seed(42)
-#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'lm'))
+#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c("glm", "lm"))
 #' ens <- caretEnsemble(models)
 #' summary(ens)
 #' }
@@ -238,19 +239,21 @@ extractModRes <- function(ensemble){
   return(modRes)
 }
 
-#' Extract a model accuracy metric from an S3 object.
-#' @param x an object with model performanc metrics
-#' @param metric a character, either "RMSE" or "AUC" indicating which metric to extract
-#' @return A numeric representing the metric desired metric.
+#' Extract accuracy metrics from a model
 #' @rdname metrics
 #' @export
-getMetric <- function(x, metric){
+getMetric <- function(x, ...){
   UseMethod("getMetric")
 }
 
 #' Extract a model accuracy metric from a \code{\link{train}} object.
+#' @param x a caretEnsemble object
+#' @param metric Which metric to extract
+#' @param ... Passed between metric functions
+#' @return A numeric representing the metric desired metric.
 #' @rdname metrics
-getMetric.train <- function(x, metric= c("AUC", "RMSE")){
+#' @export
+getMetric.train <- function(x, metric= c("AUC", "RMSE"), ...){
   if(missing(metric)){
     metric <- ifelse(x$modelType == "Regression", "RMSE", "AUC")
     warning("Metric not specified, so default is being chosen.")
@@ -447,7 +450,7 @@ varImpFrame <- function(x){
 #' @return A numeric of the residuals.
 residuals.caretEnsemble <- function(object, ...){
   if(is.null(object$modelType)){
-    object$modelType <- extractModelTypes(object$models)
+    object$modelType <- extractModelTypes(object$models)[1]
   }
   if(object$modelType == "Regression"){
     yhat <- predict(object)
@@ -465,31 +468,6 @@ residuals.caretEnsemble <- function(object, ...){
   }
 }
 
-#' @keywords internal
-residuals2.train <- function(object){
-  if(object$modelType == "Regression"){
-    y <- object$trainingData$.outcome
-    resid <- residuals(object)
-    yhat <- predict(object)
-    data <- data.frame(y = y, yhat = yhat, .resid = resid,
-                       method = object$method)
-    return(data)
-  } else if(object$modelType == "Classification"){
-    yhat <- predict(object, type = "prob")
-    if (!is.null(ncol(yhat))){
-      yhat <- yhat[, 1]
-    }
-    y <- as.character(object$trainingData$.outcome)
-    z <- table(y)
-    prevOutcome <- names(z)[z == max(z)]
-    y <- ifelse(y == prevOutcome, 1, 0)
-    resid <- y - yhat
-    data <- data.frame(y = y, yhat = yhat, .resid = resid,
-                       method = object$method)
-    return(data)
-  }
-}
-
 #' @title Calculate the residuals from all component models of a caretEnsemble.
 #' @description This function calculates raw residuals for both regression and
 #' classification \code{train} objects within a \code{\link{caretEnsemble}}.
@@ -499,7 +477,7 @@ residuals2.train <- function(object){
 #' the observation id, yhat for the fitted values, resid for the residuals, and
 #' y for the observed value.
 multiResiduals <- function(object, ...){
-  stopifnot(is(object$models, 'caretList'))
+  stopifnot(is(object$models, "caretList"))
   modtype <- extractModelTypes(object$models)
   preds <- predict(object$models, ...)
   if(modtype == "Regression"){
@@ -530,7 +508,6 @@ multiResiduals <- function(object, ...){
 #' @param data a data set, defaults to the data used to fit the model
 #' @param ... additional arguments to pass to fortify
 #' @return The original data with extra columns for fitted values and residuals
-#' @importFrom digest digest
 fortify.caretEnsemble <- function(model, data = NULL, ...){
   data <- extractModFrame(model)
   data$y <- model$models[[1]]$trainingData$.outcome
@@ -575,7 +552,7 @@ extractModFrame <- function(model){
 #' @examples
 #' \dontrun{
 #' set.seed(42)
-#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c('glm', 'rpart'))
+#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c("glm", "rpart"))
 #' ens <- caretEnsemble(models)
 #' plot(ens)
 #' }
@@ -614,8 +591,8 @@ plot.caretEnsemble <- function(x, ...){
 #' models <- caretList(
 #'  iris[1:50,1:2],
 #'  iris[1:50,3],
-#'  trControl=trainControl(method='cv'),
-#'  methodList=c('glm', 'rpart'))
+#'  trControl=trainControl(method="cv"),
+#'  methodList=c("glm", "rpart"))
 #' ens <- caretEnsemble(models)
 #' autoplot(ens)
 #' }
@@ -631,14 +608,12 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
     scale_y_continuous("Residual") + labs(title = "Residuals vs Fitted") +
     theme_bw()
   g3 <- ggplot(wghtFrame, aes(method, weights)) +
-    geom_bar(stat = 'identity', fill = I("gray50"), color = I("black")) +
+    geom_bar(stat = "identity", fill = I("gray50"), color = I("black")) +
     labs(title = "Model Weights", x = "Method", y = "Weights") + theme_bw()
   if(missing(xvars)){
     xvars <- names(plotdf)[!names(plotdf) %in% c("(Intercept)", ".outcome", "y",
                                                  ".fitted", ".resid")]
     xvars <- sample(xvars, 2)
-  } else {
-    xvars <- names(plotdf)[xvars]
   }
   # TODO: Insert checks for length of xvars here
   residOut <- multiResiduals(object)
@@ -649,7 +624,7 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
                yhat = yhat[1])
   g4 <- ggplot(zed, aes(x = yhat, ymin = ymin, ymax = ymax, y = yavg)) +
     geom_linerange(alpha = I(0.5)) + geom_point(size = I(3), alpha = I(0.8)) +
-    theme_bw() + geom_smooth(method = 'lm', se = FALSE,
+    theme_bw() + geom_smooth(method = "lm", se = FALSE,
                              size = I(1.1), color = I("red"), linetype = 2) +
     labs(x = "Fitted Values", y = "Range of Resid.",
          title = "Model Disagreement Across Fitted Values")
@@ -665,8 +640,5 @@ autoplot.caretEnsemble <- function(object, which = c(1:6), mfrow = c(3, 2),
     geom_smooth(se = FALSE) + scale_x_continuous(xvars[2]) +
     scale_y_continuous("Residuals") +
     labs(title = paste0("Residuals Against ", xvars[2])) + theme_bw()
-  grid.arrange(g1, g2, g3, g4, g5, g6, newpage=FALSE)
+  grid.arrange(g1, g2, g3, g4, g5, g6, ncol=2)
 }
-
-utils::globalVariables(c(".fitted", ".resid", "method", "id", "yhat",
-                         "ymax", "yavg", "ymin", "metric", "metricSD"))

@@ -20,14 +20,14 @@ weights to get a single, combined vector of predictions.
 }
 \examples{
 \dontrun{
-library('rpart')
+library("rpart")
 models <- caretList(
   x=iris[1:100,1:2],
   y=iris[1:100,3],
-  trControl=trainControl(method='cv'),
-  methodList=c('rpart', 'glm')
+  trControl=trainControl(method="cv"),
+  methodList=c("rpart", "glm")
 )
-meta_model <- caretStack(models, method='lm')
+meta_model <- caretStack(models, method="lm")
 RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
 }
 }

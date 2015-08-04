@@ -1,9 +1,9 @@
 Package: caretEnsemble
 Type: Package
 Title: Ensembles of Caret Models
-Version: 1.0.1
+Version: 1.0.5
 Date: 2015-01-14
-Authors@R: c(person(c("Zachary", "A."), "Mayer", role = c("aut", "cre"),
+Authors@R: c(person(c("Zachary", "A."), "Deane-Mayer", role = c("aut", "cre"),
     email = "zach.mayer@gmail.com"),
     person(c("Jared", "E."), "Knowles", role=c("aut"),
     email="jknowles@gmail.com"))
@@ -22,6 +22,7 @@ Suggests:
     testthat,
     lintr,
     randomForest,
+    glmnet,
     rpart,
     kernlab,
     nnet,
@@ -41,6 +42,7 @@ Imports:
     plyr,
     grid,
     lattice,
-    gridExtra
+    gridExtra,
+    data.table
 License: MIT + file LICENSE
 VignetteBuilder: knitr
