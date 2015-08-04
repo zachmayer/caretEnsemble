@@ -107,6 +107,8 @@ test_that("We can ensemble regression models", {
   p7 <- predict(ens.reg, return_weights=FALSE, se=FALSE, keepNA=TRUE)
   p8 <- predict(ens.reg, return_weights=FALSE, se=TRUE, keepNA=TRUE)
 
+
+
   #Check preds
   #I don't like how much the output data structure varies, depending on the input
   #I feel like it maybe should be a single lists, with none of this
