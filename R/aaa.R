@@ -8,4 +8,4 @@ assign(".datatable.aware", TRUE)
 
 utils::globalVariables(
   c(".fitted", ".resid", "method", "id", "yhat",
-    "ymax", "yavg", "ymin", "metric", "metricSD"))
+    "ymax", "yavg", "ymin", "metric", "metricSD", "n"))

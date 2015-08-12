@@ -7,3 +7,5 @@ todo.txt
 ^NEWS\.md$
 ^cran-comments\.md$
 ^CONDUCT\.md$
+inst/docs
+inst/examples
