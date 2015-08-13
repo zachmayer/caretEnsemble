@@ -110,6 +110,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' cases where sufficient data exists or only for complete cases across all models. When
 #' TRUE this does not predict for missing values. When FALSE, missing values are overwritten
 #' with predictions where possible.
+#' @param level tolerance/confidence level
 #' @param se logical, should prediction errors be produced? Default is false.
 #' @param return_weights a logical indicating whether prediction weights for each model for
 #' each observation should be returend
@@ -127,7 +128,8 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' ens <- caretEnsemble(models)
 #' cor(predict(ens, newdata=iris[51:150,1:2]), iris[51:150,3])
 #' }
-predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
+predict.caretEnsemble <- function(object, keepNA = TRUE, level = 0.95, se = FALSE,
+                                  return_weights = FALSE, ...){
   stopifnot(is(object$models, "caretList"))
 
   # Default se to FALSE
@@ -142,7 +144,7 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
       message("Predictions being made only for cases with complete data")
     }
     est <- as.numeric(preds %*% object$weights)
-    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, w = object$weights)
   } else if(keepNA == FALSE){
     if(anyNA(preds)){
     message("Predictions being made only from models with available data")
@@ -154,35 +156,28 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
     est <- apply(preds, 1, function(x){
       weighted.mean(x, w=object$weights, na.rm = TRUE)
     })
-    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights,
-                    normwt = TRUE, na.rm = TRUE)
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, w = object$weights,
+                    na.rm = TRUE)
   }
-  if(return_weights == FALSE){
     if(se == FALSE){
-      return(est)
+      out <- est
     } else {
-      return(data.frame(pred = est, se = se.tmp))
-    }
-  } else if(return_weights == TRUE) {
-    if(se == FALSE){
-      if(keepNA == FALSE){
-        out <- list(preds = est, weight = conf)
+      out <- data.frame(fit = est, lwr = est - (qnorm(level) * se.tmp),
+                        upr = est + (qnorm(level) * se.tmp))
+  }
+
+  if(return_weights == TRUE) {
+    if(keepNA == FALSE){
+        attr(out, "weights") <- conf
         return(out)
       } else if(keepNA == TRUE){
         wghtMat <- matrix(object$weights, c(1, length(object$weights)),
                           dimnames = list(NULL, names(object$weights)))
-        return(list(preds = est,
-                    weight = wghtMat))
+        attr(out, "weights") <- wghtMat
+        return(out)
       }
-    } else if (se == TRUE){
-      if(keepNA == FALSE){
-        return(list(preds = data.frame(pred = est, se = se.tmp), weight = conf))
-      }
-      wghtMat <- matrix(object$weights, c(1, length(object$weights)),
-                        dimnames = list(NULL, names(object$weights)))
-      return(list(preds = data.frame(pred = est, se = se.tmp),
-                  weight = wghtMat))
-    }
+    } else {
+      return(out)
   }
 }
 
