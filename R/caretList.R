@@ -234,12 +234,12 @@ predict.caretList <- function(object, ..., verbose = FALSE){
     type <- x$modelType
     if (type=="Classification"){
       if(x$control$classProbs){
-        predict(x, type="prob", ...)[,2]
+        caret::predict.train(x, type="prob", ...)[,2]
       } else{
-        predict(x, type="raw", ...)
+        caret::predict.train(x, type="raw", ...)
       }
     } else if(type=="Regression"){
-      predict(x, type="raw", ...)
+      caret::predict.train(x, type="raw", ...)
     } else{
       stop(paste("Unknown model type:", type))
     }
