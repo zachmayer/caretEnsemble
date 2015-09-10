@@ -8,7 +8,9 @@
 #' @param w a vector of weights equal to length of x
 #' @param na.rm a logical indicating how to handle missing values, default = FALSE
 wtd.sd <- function (x, w = NULL, na.rm = FALSE) {
-  if (na.rm) { w <- w[i <- !is.na(x)]; x <- x[i] }
+  if (na.rm) {
+    w <- w[i <- !is.na(x)]; x <- x[i]
+    }
     n <- length(w)
     xWbar <- weighted.mean(x,w,na.rm=na.rm)
     wbar <- mean(w)
