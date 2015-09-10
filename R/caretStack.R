@@ -40,8 +40,15 @@ caretStack <- function(all.models, ...){
 #' weights to get a single, combined vector of predictions.
 #' @param object a  \code{\link{caretStack}} to make predictions from.
 #' @param newdata a new dataframe to make predictions on
+#' @param se logical, should prediction errors be produced? Default is false.
+#' @param level tolerance/confidence level
+#' @param return_weights a logical indicating whether prediction weights for each model
+#' should be returned
 #' @param ... arguments to pass to \code{\link{predict.train}}.
 #' @export
+#' @details Prediction weights are defined as variable importance in the stacked
+#' caret model. This is not available for all cases such as where the library
+#' model predictions are transformed before being passed to the stacking model.
 #' @method predict caretStack
 #' @examples
 #' \dontrun{
@@ -55,12 +62,49 @@ caretStack <- function(all.models, ...){
 #' meta_model <- caretStack(models, method="lm")
 #' RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
 #' }
-predict.caretStack <- function(object, newdata=NULL, ...){
+predict.caretStack <- function(object, newdata=NULL, se=FALSE, level=NULL,
+                               return_weights=FALSE, ...){
   stopifnot(is(object$models, "caretList"))
   type <- extractModelTypes(object$models)
   preds <- predict(object$models, newdata=newdata)
-  out <- predict(object$ens_model, newdata=preds, ...)
-  return(out)
+  if(type == "Classification"){
+    out <- predict(object$ens_model, newdata=preds, ...)
+    # Need a check here
+    if(class(out) %in% c("data.frame", "matrix")){
+      est <- out[, 2, drop = TRUE] # return only the probabilities for the second class
+    } else{
+      est <- out
+    }
+  } else{
+    est <- predict(object$ens_model, newdata=preds, ...)
+  }
+  wghts <- varImp(object$ens_model)$importance$Overall
+  names(wghts) <- row.names(varImp(object$ens_model)$importance)
+  if(se == TRUE){
+    methods <- colnames(preds)
+    enMethods <- row.names(varImp(object$ens_model)$importance)
+    if(all(intersect(methods, enMethods) != methods) | !class(est) %in% c("numeric")){
+      message("Standard errors not available.")
+      out <- est
+    } else{
+      wghts <- varImp(object$ens_model)$importance[methods, ]
+      names(wghts) <- row.names(varImp(object$ens_model)$importance)
+      se <- apply(preds, 1, caretEnsemble:::wtd.sd, w = wghts)
+      if(missing(level)){
+        level <- 0.95
+      }
+      out <- data.frame(fit = est, lwr = est - (qnorm(level) * se),
+                        upr = est + (qnorm(level) * se))
+    }
+  } else{
+    out <- est
+  }
+  if(return_weights == TRUE) {
+      attr(out, "weights") <- wghts
+      return(out)
+    } else {
+    return(out)
+  }
 }
 
 #' @title Summarize a caretStack object

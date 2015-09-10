@@ -87,8 +87,8 @@ test_that("We can ensemble regression models", {
   pred.reg4 <- predict(ens.reg, se=TRUE, keepNA=FALSE)
   expect_equal(pred.reg, pred.reg2)
   expect_equal(pred.reg3, pred.reg4)
-  expect_equal(pred.reg, pred.reg3$pred)
-  expect_warning(predict(ens.reg, return_weights="BOGUS"))
+  expect_equal(pred.reg, pred.reg3$fit)
+  expect_message(predict(ens.reg, return_weights="BOGUS"))
   expect_true(is.numeric(pred.reg))
   expect_true(length(pred.reg)==150)
   ens.class <- caretEnsemble(models.class, iter=1000)
@@ -99,36 +99,26 @@ test_that("We can ensemble regression models", {
 
   #Check different cases
   p1 <- predict(ens.reg, return_weights=TRUE, se=FALSE, keepNA=FALSE)
+  expect_is(attr(p1, which = "weights"), "matrix")
+  expect_equal(ncol(attr(p1, which = "weights")), 2)
+  expect_equal(nrow(attr(p1, which = "weights")), 150)
+  expect_equal(sd((attr(p1, which = "weights"))[,1]), 0) # check that values are constant
+  expect_equal(sd((attr(p1, which = "weights"))[,2]), 0) # check that values are constant
+  expect_is(p1, "numeric")
   p2 <- predict(ens.reg, return_weights=TRUE, se=TRUE, keepNA=FALSE)
+  expect_equal(attr(p2, which = "weights"),attr(p1, which = "weights"))
+  expect_is(p2, "data.frame")
+  expect_equal(ncol(p2), 3)
+  expect_identical(names(p2), c("fit", "lwr", "upr"))
   p3 <- predict(ens.reg, return_weights=FALSE, se=FALSE, keepNA=FALSE)
-  p4 <- predict(ens.reg, return_weights=FALSE, se=TRUE, keepNA=FALSE)
-  p5 <- predict(ens.reg, return_weights=TRUE, se=FALSE, keepNA=TRUE)
-  p6 <- predict(ens.reg, return_weights=TRUE, se=TRUE, keepNA=TRUE)
-  p7 <- predict(ens.reg, return_weights=FALSE, se=FALSE, keepNA=TRUE)
-  p8 <- predict(ens.reg, return_weights=FALSE, se=TRUE, keepNA=TRUE)
-
-
-
-  #Check preds
-  #I don't like how much the output data structure varies, depending on the input
-  #I feel like it maybe should be a single lists, with none of this
-  #swapping between list, data.fame, and vector output
-  expect_true(all.equal(p1$preds, p2$preds$pred))
-  expect_true(all.equal(p1$preds, p3))
-  expect_true(all.equal(p1$preds, p4$pred))
-  expect_true(all.equal(p1$preds, p5$preds))
-  expect_true(all.equal(p1$preds, p6$preds$pred))
-  expect_true(all.equal(p1$preds, p7))
-  expect_true(all.equal(p1$preds, p8$pred))
-
-  #Check weights
-  expect_true(all.equal(p1$weight, p2$weight))
   expect_is(p3, "numeric")
-  expect_null(p4$weight)
-  expect_true(all.equal(p1$weight[1,,drop=FALSE], p5$weight))
-  expect_true(all.equal(p1$weight[1,,drop=FALSE], p6$weight))
-  expect_is(p7, "numeric")
-  expect_null(p8$weight)
+  expect_true(all(p1 == p3))
+  expect_false(identical(p1, p3))
+  expect_equal(p3, p2$fit)
+  expect_null(attr(p3, which = "weights"))
+  p4 <- predict(ens.reg, return_weights=FALSE, se=TRUE, keepNA=FALSE)
+  expect_null(attr(p4, which = "weights"))
+  expect_equal(p4$fit, p2$fit)
 })
 
 #############################################################################

@@ -4,12 +4,20 @@
 \alias{predict.caretStack}
 \title{Make predictions from a caretStack}
 \usage{
-\method{predict}{caretStack}(object, newdata = NULL, ...)
+\method{predict}{caretStack}(object, newdata = NULL, se = FALSE,
+  level = NULL, return_weights = FALSE, ...)
 }
 \arguments{
 \item{object}{a  \code{\link{caretStack}} to make predictions from.}
 
 \item{newdata}{a new dataframe to make predictions on}
+
+\item{se}{logical, should prediction errors be produced? Default is false.}
+
+\item{level}{tolerance/confidence level}
+
+\item{return_weights}{a logical indicating whether prediction weights for each model
+should be returned}
 
 \item{...}{arguments to pass to \code{\link{predict.train}}.}
 }
@@ -17,6 +25,11 @@
 Make predictions from a caretStack. This function passes the data to each function in
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 weights to get a single, combined vector of predictions.
+}
+\details{
+Prediction weights are defined as variable importance in the stacked
+caret model. This is not available for all cases such as where the library
+model predictions are transformed before being passed to the stacking model.
 }
 \examples{
 \dontrun{
