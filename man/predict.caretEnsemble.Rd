@@ -6,13 +6,13 @@
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 weights to get a single, combined vector of predictions.}
 \usage{
-\method{predict}{caretEnsemble}(object, keepNA = TRUE, level = 0.95,
-  se = FALSE, return_weights = FALSE, ...)
+\method{predict}{caretEnsemble}(object, keepNA, level = 0.95, se = FALSE,
+  return_weights = FALSE, ...)
 }
 \arguments{
 \item{object}{a \code{\link{caretEnsemble}} to make predictions from.}
 
-\item{keepNA}{a logical indicating whether predictions should be made for all
+\item{keepNA}{deprecated, a logical indicating whether predictions should be made for all
 cases where sufficient data exists or only for complete cases across all models. When
 TRUE this does not predict for missing values. When FALSE, missing values are overwritten
 with predictions where possible.}

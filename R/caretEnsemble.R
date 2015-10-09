@@ -106,7 +106,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
 #' @param object a \code{\link{caretEnsemble}} to make predictions from.
-#' @param keepNA a logical indicating whether predictions should be made for all
+#' @param keepNA deprecated, a logical indicating whether predictions should be made for all
 #' cases where sufficient data exists or only for complete cases across all models. When
 #' TRUE this does not predict for missing values. When FALSE, missing values are overwritten
 #' with predictions where possible.
@@ -138,19 +138,26 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' ens <- caretEnsemble(models)
 #' cor(predict(ens, newdata=iris[51:150,1:2]), iris[51:150,3])
 #' }
-predict.caretEnsemble <- function(object, keepNA = TRUE, level = 0.95, se = FALSE,
+predict.caretEnsemble <- function(object, keepNA, level = 0.95, se = FALSE,
                                   return_weights = FALSE, ...){
   stopifnot(is(object$models, "caretList"))
   args <- eval(substitute(alist(...))) # get ellipsis values
   args <- lapply(args, eval, parent.frame()) # convert from symbols to objects
+  if (!missing(keepNA)) {
+    warning("argument keepNA is deprecated; missing data cannot be safely handled.",
+            call. = FALSE)
+    keepNA <- FALSE
+  } else if(missing(keepNA)){
+    keepNA <- FALSE
+  }
   if(exists("newdata", args)){
     # tmp <- args$newdata
     if(anyNA(args$newdata)){
-      stop("Missing data found in newdata. \nCurrently missing data cannot be consistently
-           handled in predict.caretEnsemble. \nPlease omit missing data before using
-           predict.")
+      stop("Missing data found in newdata. \nCurrently missing data cannot be handled
+in predict.caretEnsemble. \nPlease omit missing data before using predict.")
     }
   }
+
 
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){

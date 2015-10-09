@@ -445,6 +445,14 @@ test_that("Prediction options are respected in regression and classification", {
       expect_is(p, "numeric")
       preds <- p
     }
+    if(tests[i, "keepNA"]){
+      expect_warning(predict(
+        ens.class,
+        keepNA=tests[i,"keepNA"],
+        se=tests[i,"se"],
+        return_weights=tests[i,"return_weights"]
+      ), "argument keepNA is deprecated; missing data cannot be safely handled.")
+    }
 
     if(tests[i,"return_weights"]){
       expect_is(attr(preds, which = "weights"), "matrix")

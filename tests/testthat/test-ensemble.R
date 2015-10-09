@@ -153,6 +153,9 @@ test_that("We can ensemble models of different predictors", {
   pred.nest <- predict(ensNest, newdata = X.reg)
   expect_true(is.numeric(pred.nest))
   expect_true(length(pred.nest)==150)
+  X.reg[2, 3] <- NA
+  X.reg[25, 3] <- NA
+  expect_error(predict(ensNest, newdata = X.reg))
 })
 
 # context("Does ensembling work with missingness")
