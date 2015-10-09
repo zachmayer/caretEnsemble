@@ -23,6 +23,7 @@ env:
 #    caTools,
 #    pbapply,
 #    digest,
+#    grid,
 #    gridExtra,
 before_install:
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
@@ -69,7 +70,6 @@ before_install:
   - ./travis-tool.sh r_binary_install glmnet
   - ./travis-tool.sh r_binary_install rpart
   - ./travis-tool.sh r_binary_install kernlab
-  - ./travis-tool.sh r_binary_install grid
   - ./travis-tool.sh r_binary_install lattice
   - ./travis-tool.sh github_package igraph/rigraph
   - ./travis-tool.sh github_package jimhester/covr@4cae287abde5e2cf0c3c73aedeaec4d902dfd3ed
