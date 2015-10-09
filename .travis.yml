@@ -75,7 +75,7 @@ before_install:
   - ./travis-tool.sh github_package jimhester/covr@4cae287abde5e2cf0c3c73aedeaec4d902dfd3ed
   - ./travis-tool.sh github_package jimhester/lintr@21607f469c2ce4f999d04a836f9348038a7282e2
   - ./travis-tool.sh github_package hadley/devtools@52bc15bb7eb87105bbf799d7f784054921146c02
-  - ./travis-tool.sh github_package hadley/testthat@c67018fa4970ee3390ea2056efe56726626b07e3'
+  - ./travis-tool.sh github_package hadley/testthat@c67018fa4970ee3390ea2056efe56726626b07e3
 
 install:
   - ./travis-tool.sh install_deps
