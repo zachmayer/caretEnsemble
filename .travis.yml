@@ -81,7 +81,7 @@ install:
   - ./travis-tool.sh install_deps
 
 script:
-  - ./travis-tool.sh run_tests
+  - travis_wait ./travis-tool.sh run_tests
 
 after_success:
   - Rscript -e 'library(covr);coveralls()'
