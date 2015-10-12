@@ -158,4 +158,49 @@ test_that("We can ensemble models of different predictors", {
   expect_error(predict(ensNest, newdata = X.reg))
 })
 
-# context("Does ensembling work with missingness")
+context("Does ensemble prediction work with new data")
+
+test_that("It works for regression models", {
+  load(system.file("testdata/models.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/X.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/Y.reg.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  ens.reg <- caretEnsemble(models.reg, iter=1000)
+  expect_that(ens.reg, is_a("caretEnsemble"))
+  pred.reg <- predict(ens.reg)
+  newPreds1 <- as.data.frame(X.reg)
+  pred.regb <- predict(ens.reg, newdata = newPreds1)
+  pred.regc <- predict(ens.reg, newdata = newPreds1[2, ])
+  expect_identical(pred.reg, pred.regb)
+  expect_equal(pred.regc, 4.724, tol = .001)
+  expect_is(pred.reg, "numeric")
+  expect_is(pred.regb, "numeric")
+  expect_is(pred.regc, "numeric")
+  expect_equal(length(pred.regc), 1)
+})
+
+
+test_that("It works for classification models", {
+  load(system.file("testdata/models.class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/X.class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  load(system.file("testdata/Y.class.rda",
+                   package="caretEnsemble", mustWork=TRUE))
+  ens.class <- caretEnsemble(models.class, iter=1000)
+  expect_that(ens.class, is_a("caretEnsemble"))
+  pred.class <- predict(ens.class)
+  newPreds1 <- as.data.frame(X.class)
+  pred.classb <- predict(ens.class, newdata = newPreds1)
+  pred.classc <- predict(ens.class, newdata = newPreds1[2, ])
+  expect_true(is.numeric(pred.class))
+  expect_true(length(pred.class)==150)
+  expect_identical(pred.class, pred.classb)
+  expect_equal(pred.classc, .004834, tol = .001)
+  expect_is(pred.class, "numeric")
+  expect_is(pred.classb, "numeric")
+  expect_is(pred.classc, "numeric")
+  expect_equal(length(pred.classc), 1)
+})
