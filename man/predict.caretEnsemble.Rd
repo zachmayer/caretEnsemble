@@ -6,34 +6,50 @@
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 weights to get a single, combined vector of predictions.}
 \usage{
-\method{predict}{caretEnsemble}(object, keepNA = TRUE, se = FALSE,
+\method{predict}{caretEnsemble}(object, keepNA, level = 0.95, se = FALSE,
   return_weights = FALSE, ...)
 }
 \arguments{
 \item{object}{a \code{\link{caretEnsemble}} to make predictions from.}
 
-\item{keepNA}{a logical indicating whether predictions should be made for all
+\item{keepNA}{deprecated, a logical indicating whether predictions should be made for all
 cases where sufficient data exists or only for complete cases across all models. When
 TRUE this does not predict for missing values. When FALSE, missing values are overwritten
 with predictions where possible.}
 
+\item{level}{tolerance/confidence level}
+
 \item{se}{logical, should prediction errors be produced? Default is false.}
 
 \item{return_weights}{a logical indicating whether prediction weights for each model for
-each observation should be returend}
+each observation should be returned}
 
-\item{...}{arguments (including newdata) to pass to predict.train. These arguments
-must be named}
+\item{...}{additional arguments to pass to predict.train. Pass the \code{newdata}
+argument here, DO NOT PASS the "type" argument.  Classification models will
+return probabilities if possible, and regression models will return "raw".}
 }
 \value{
-If \code{return_weights = TRUE} a list is returned with a data.frame
-slot for predictions and a matrix slot for the model weights. If \code{return_weights = FALSE}
-a data.frame is returned for the predictions.
+If \code{se=TRUE} a data.frame is returned with three columns, fit,
+upr, and lwr which represent the predicted value, and the upper and lower
+confidence intervals, defined by the \code{level} argument. If \code{se=false}
+a numeric vector is returned of the predicted values. If \code{return_weights = TRUE}
+an attribute is attached to the object returned by predict with a matrix of
+the model weights for each observation.
 }
 \description{
 Make predictions from a caretEnsemble. This function passes the data to each function in
 turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 weights to get a single, combined vector of predictions.
+}
+\details{
+The standard error here is not a measure of the uncertainty of the
+predictions within each of the models in the ensemble, but instead a measure
+of disagreement among the models for each observation.
+}
+\note{
+Currently there is no support for NA handling in this function. A future
+update to the \code{caret} package will allow for the proper handling of NA values.
+An error will occur if the user passes newdata that contains missing values.
 }
 \examples{
 \dontrun{

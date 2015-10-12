@@ -5,30 +5,17 @@
 #' @description Used to weight deviations among ensembled model preditions
 #'
 #' @param x a vector of numerics
-#' @param weights a vector of weights equal to length of x
-#' @param normwt  a logical indicating whether the weights should be normalized to 1
+#' @param w a vector of weights equal to length of x
 #' @param na.rm a logical indicating how to handle missing values, default = FALSE
-wtd.sd <- function (x, weights = NULL, normwt = FALSE, na.rm = FALSE) {
-  if (!length(weights)) {
-    if (na.rm)
-      x <- x[!is.na(x)]
-    return(sd(x))
-  }
-  if(length(weights) != length(x)){
-    warning("length of the weights vector != the length of the x vector,
-            weights are being recycled.")
-  }
+wtd.sd <- function (x, w = NULL, na.rm = FALSE) {
   if (na.rm) {
-    s <- !is.na(x + weights)
-    x <- x[s]
-    weights <- weights[s]
-  }
-  if (normwt){
-    weights <- weights * length(x)/sum(weights)
-  }
-  xbar <- sum(weights * x)/sum(weights)
-  out <- sqrt(sum(weights * ((x - xbar)^2))/(sum(weights)))
-  return(out)
+    w <- w[i <- !is.na(x)]; x <- x[i]
+    }
+    n <- length(w)
+    xWbar <- weighted.mean(x,w,na.rm=na.rm)
+    wbar <- mean(w)
+    out <- n/((n-1)*sum(w)^2)*(sum((w*x-wbar*xWbar)^2)-2*xWbar*sum((w-wbar)*(w*x-wbar*xWbar))+xWbar^2*sum((w-wbar)^2))
+    return(out)
 }
 
 #####################################################

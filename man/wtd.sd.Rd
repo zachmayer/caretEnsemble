@@ -4,14 +4,12 @@
 \alias{wtd.sd}
 \title{Calculate a weighted standard deviation}
 \usage{
-wtd.sd(x, weights = NULL, normwt = FALSE, na.rm = FALSE)
+wtd.sd(x, w = NULL, na.rm = FALSE)
 }
 \arguments{
 \item{x}{a vector of numerics}
 
-\item{weights}{a vector of weights equal to length of x}
-
-\item{normwt}{a logical indicating whether the weights should be normalized to 1}
+\item{w}{a vector of weights equal to length of x}
 
 \item{na.rm}{a logical indicating how to handle missing values, default = FALSE}
 }

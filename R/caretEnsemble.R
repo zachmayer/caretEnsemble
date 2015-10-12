@@ -106,18 +106,29 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' turn to make a matrix of predictions, and then multiplies that matrix by the vector of
 #' weights to get a single, combined vector of predictions.
 #' @param object a \code{\link{caretEnsemble}} to make predictions from.
-#' @param keepNA a logical indicating whether predictions should be made for all
+#' @param keepNA deprecated, a logical indicating whether predictions should be made for all
 #' cases where sufficient data exists or only for complete cases across all models. When
 #' TRUE this does not predict for missing values. When FALSE, missing values are overwritten
 #' with predictions where possible.
+#' @param level tolerance/confidence level
 #' @param se logical, should prediction errors be produced? Default is false.
 #' @param return_weights a logical indicating whether prediction weights for each model for
-#' each observation should be returend
-#' @param ... arguments (including newdata) to pass to predict.train. These arguments
-#' must be named
-#' @return If \code{return_weights = TRUE} a list is returned with a data.frame
-#' slot for predictions and a matrix slot for the model weights. If \code{return_weights = FALSE}
-#' a data.frame is returned for the predictions.
+#' each observation should be returned
+#' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
+#' argument here, DO NOT PASS the "type" argument.  Classification models will
+#' return probabilities if possible, and regression models will return "raw".
+#' @return If \code{se=TRUE} a data.frame is returned with three columns, fit,
+#' upr, and lwr which represent the predicted value, and the upper and lower
+#' confidence intervals, defined by the \code{level} argument. If \code{se=false}
+#' a numeric vector is returned of the predicted values. If \code{return_weights = TRUE}
+#' an attribute is attached to the object returned by predict with a matrix of
+#' the model weights for each observation.
+#' @note Currently there is no support for NA handling in this function. A future
+#' update to the \code{caret} package will allow for the proper handling of NA values.
+#' An error will occur if the user passes newdata that contains missing values.
+#' @details The standard error here is not a measure of the uncertainty of the
+#' predictions within each of the models in the ensemble, but instead a measure
+#' of disagreement among the models for each observation.
 #' @export
 #' @method predict caretEnsemble
 #' @examples
@@ -127,13 +138,31 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' ens <- caretEnsemble(models)
 #' cor(predict(ens, newdata=iris[51:150,1:2]), iris[51:150,3])
 #' }
-predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weights = FALSE, ...){
+predict.caretEnsemble <- function(object, keepNA, level = 0.95, se = FALSE,
+                                  return_weights = FALSE, ...){
   stopifnot(is(object$models, "caretList"))
+  args <- eval(substitute(alist(...))) # get ellipsis values
+  args <- lapply(args, eval, parent.frame()) # convert from symbols to objects
+  if (!missing(keepNA)) {
+    warning("argument keepNA is deprecated; missing data cannot be safely handled.",
+            call. = FALSE)
+    keepNA <- FALSE
+  } else if(missing(keepNA)){
+    keepNA <- FALSE
+  }
+  if(exists("newdata", args)){
+    # tmp <- args$newdata
+    if(anyNA(args$newdata)){
+      stop("Missing data found in newdata. \nCurrently missing data cannot be handled
+in predict.caretEnsemble. \nPlease omit missing data before using predict.")
+    }
+  }
+
 
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){
     return_weights <- FALSE
-    warning("return_weights not set properly, default set to FALSE")
+    message("return_weights not set properly, default set to FALSE")
   }
   modtype <- extractModelTypes(object$models)
   preds <- predict(object$models,  ...)
@@ -142,7 +171,7 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
       message("Predictions being made only for cases with complete data")
     }
     est <- as.numeric(preds %*% object$weights)
-    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, w = object$weights)
   } else if(keepNA == FALSE){
     if(anyNA(preds)){
     message("Predictions being made only from models with available data")
@@ -154,35 +183,32 @@ predict.caretEnsemble <- function(object, keepNA = TRUE, se = FALSE, return_weig
     est <- apply(preds, 1, function(x){
       weighted.mean(x, w=object$weights, na.rm = TRUE)
     })
-    se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights,
-                    normwt = TRUE, na.rm = TRUE)
-  }
-  if(return_weights == FALSE){
-    if(se == FALSE){
-      return(est)
-    } else {
-      return(data.frame(pred = est, se = se.tmp))
+    se.tmp <- apply(preds, 1, FUN = wtd.sd, w = object$weights,
+                    na.rm = TRUE)
+    if(length(se.tmp[is.nan(se.tmp)]) > 0){
+      warning("Could not compute standard errors for some observations, reporting as 0.")
+      se.tmp[is.nan(se.tmp)] <- 0
     }
-  } else if(return_weights == TRUE) {
+  }
     if(se == FALSE){
-      if(keepNA == FALSE){
-        out <- list(preds = est, weight = conf)
+      out <- est
+    } else {
+      out <- data.frame(fit = est, lwr = est - (qnorm(level) * se.tmp),
+                        upr = est + (qnorm(level) * se.tmp))
+  }
+
+  if(return_weights == TRUE) {
+    if(keepNA == FALSE){
+        attr(out, "weights") <- conf
         return(out)
       } else if(keepNA == TRUE){
         wghtMat <- matrix(object$weights, c(1, length(object$weights)),
                           dimnames = list(NULL, names(object$weights)))
-        return(list(preds = est,
-                    weight = wghtMat))
+        attr(out, "weights") <- wghtMat
+        return(out)
       }
-    } else if (se == TRUE){
-      if(keepNA == FALSE){
-        return(list(preds = data.frame(pred = est, se = se.tmp), weight = conf))
-      }
-      wghtMat <- matrix(object$weights, c(1, length(object$weights)),
-                        dimnames = list(NULL, names(object$weights)))
-      return(list(preds = data.frame(pred = est, se = se.tmp),
-                  weight = wghtMat))
-    }
+    } else {
+      return(out)
   }
 }
 
