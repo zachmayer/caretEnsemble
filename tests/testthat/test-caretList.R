@@ -95,19 +95,36 @@ test_that("caretList predictions", {
     methodList=c("rf", "gbm"),
     trControl=trainControl(method="cv", number=2, savePredictions=TRUE, classProbs=FALSE))
   p1 <- predict(models)
+  p2 <- predict(models, newdata = iris[100, c(1:2)])
+  p3 <- predict(models, newdata = iris[110, c(1:2)])
+  expect_error(predict(models, newdata = iris[110, ]))
   expect_is(p1, "matrix")
   expect_is(p1[,1], "character")
   expect_is(p1[,2], "character")
+  expect_equal(names(models), colnames(p1))
+  expect_is(p2, "matrix")
+  expect_is(p2[,1], "character")
+  expect_is(p2[,2], "character")
+  expect_equal(names(models), colnames(p2))
+  expect_is(p3, "matrix")
+  expect_is(p3[,1], "character")
+  expect_is(p3[,2], "character")
+  expect_equal(names(models), colnames(p3))
 
   models <- caretList(
     iris[,1:2], iris[,5],
     tuneLength=1, verbose=FALSE,
-    methodList=c("rf", "gbm"),
+    methodList=c("rf", "nnet"),
     trControl=trainControl(method="cv", number=2, savePredictions=TRUE, classProbs=TRUE))
   p2 <- predict(models)
+  p3 <- predict(models, newdata = iris[100, c(1:2)])
   expect_is(p2, "matrix")
   expect_is(p2[,1], "numeric")
   expect_is(p2[,2], "numeric")
+  expect_is(p3, "matrix")
+  expect_is(p3[,1], "numeric")
+  expect_is(p3[,2], "numeric")
+  expect_equal(names(models), colnames(p3))
 
   models[[1]]$modelType <- "Bogus"
   expect_error(predict(models))

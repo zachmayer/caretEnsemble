@@ -146,7 +146,7 @@ test_that("Checks generate errors", {
   myControl <- trainControl(method="cv", number=5, savePredictions=TRUE)
   x <- caretList(
     Sepal.Length ~ Sepal.Width,
-    head(iris, 100),
+    iris,
     methodList=c("glm", "lm"),
     trControl=myControl
   )
@@ -157,14 +157,18 @@ test_that("Checks generate errors", {
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
 
-  x$rpart <- train(Sepal.Length ~ Sepal.Width, head(iris, 100), method="rpart")
+  x$rpart <- train(Sepal.Length ~ Sepal.Width, iris, method="rpart")
   expect_error(check_bestpreds_resamples(modelLibrary))
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
 
   expect_error(check_caretList_classes(x$glm$finalModel))
 
-  x$rpart <- train(Species ~ Sepal.Width, head(iris, 100), method="rpart", trControl=myControl)
+  x$rpart <- train(Species ~ Sepal.Width, iris, method="rpart", trControl=myControl)
+  # This has to be changed because train gives this error if dataset is truncated in
+  # newest version of caret:
+  # Error in train.default(x, y, weights = w, ...) :
+  #    One or more factor levels in the outcome has no data: 'virginica'
   check_caretList_classes(x)
   expect_error(check_caretList_model_types(x))
 
@@ -185,6 +189,6 @@ test_that("Checks generate errors", {
     methodList=c("lda", "rf"),
     trControl=myControl2
   )
-  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, head(iris, 100), method="rpart")
+  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method="rpart")
   expect_error(check_caretList_model_types(x))
 })

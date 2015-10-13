@@ -244,7 +244,12 @@ predict.caretList <- function(object, ..., verbose = FALSE){
       stop(paste("Unknown model type:", type))
     }
   })
+  if(class(preds) != "matrix" & class(preds) != "data.frame"){
+    if(class(preds) == "character" | class(preds) == "factor"){
+      preds <- as.character(preds) # drop factorization
+    }
+    preds <- as.matrix(t(preds))
+  }
   colnames(preds) <- make.names(sapply(object, function(x) x$method), unique=TRUE)
-
   return(preds)
 }

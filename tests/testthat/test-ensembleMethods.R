@@ -316,9 +316,9 @@ test_that("Residuals provided by residuals are proper for ensemble objects", {
   expect_equal(residuals(ens.reg2), residuals(ens.reg))
 })
 
-context("Does prediction method work for classification")
+context("Are ensembles construct accurately")
 
-test_that("We can ensemble models and handle missingness across predictors", {
+test_that("Do model results in caretEnsemble match component models - classification", {
   skip_on_cran()
   load(system.file("testdata/models.reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
@@ -364,9 +364,7 @@ test_that("We can ensemble models and handle missingness across predictors", {
   expect_true(nrow(modF2) == nrow(ens.reg$models[[1]]$trainingData))
 })
 
-context("Does prediction method work for regression")
-
-test_that("We can ensemble models and handle missingness across predictors", {
+test_that("Do model results in caretEnsemble match component models - regression", {
   skip_on_cran()
   load(system.file("testdata/models.reg.rda",
                    package="caretEnsemble", mustWork=TRUE))
