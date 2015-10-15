@@ -26,7 +26,7 @@ test_that("predict.caretEnsemble works in parallel", {
   pred_reg2 <- predict(
     ens_reg, newdata = X_reg_big, se = TRUE, return_weights = TRUE
     )
-  expect_equal(pred_reg$preds, pred_reg2$preds[1:nrow(pred_reg$preds),])
+  expect_equal(pred_reg$fit, pred_reg2$fit[1:length(pred_reg$fit)])
 
   #Don't keep NAs, return se
   pred_reg <- predict(ens_reg, newdata = X_reg, keepNA = FALSE, se = TRUE)
@@ -39,5 +39,5 @@ test_that("predict.caretEnsemble works in parallel", {
   pred_reg2 <- predict(
     ens_reg, newdata = X_reg_big, keepNA = FALSE, se = TRUE,
     return_weights = TRUE)
-  expect_equal(pred_reg$preds, pred_reg2$preds[1:nrow(pred_reg$preds),])
+  expect_equal(pred_reg$fit, pred_reg2$fit[1:nrow(pred_reg)])
 })

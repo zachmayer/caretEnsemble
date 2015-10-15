@@ -20,7 +20,7 @@ load(system.file("testdata/Y.class.rda",
                  package="caretEnsemble", mustWork=TRUE))
 
 test_that("Recycling generates a warning", {
-  expect_warning(wtd.sd(matrix(1:10, ncol=2),weights=1))
+  expect_error(caretEnsemble:::wtd.sd(matrix(1:10, ncol=2), w=1))
 })
 
 test_that("No predictions generates an error", {
@@ -113,34 +113,30 @@ test_that("predict results same regardless of verbose option", {
 context("Test weighted standard deviations")
 
 x <- rnorm(1000)
-y <- runif(1000)
 x1 <- c(3, 5, 9, 3, 4, 6, 4)
 x2 <- c(10, 10, 20, 14, 2, 2, 40)
 y <- c(10, 10, 10, 20)
 w1 <- c(0.1, 0.1, 0.1, 0.7)
 
 test_that("wtd.sd applies weights correctly", {
-  expect_equal(sd(x), wtd.sd(x))
-  expect_false(sd(x1) == wtd.sd(x1, weights = x2))
-  expect_false(sd(x1) == wtd.sd(x1, weights = x2, normwt=TRUE))
-  expect_true(sd(x1) == wtd.sd(x1))
-  expect_equal(sd(y), 5)
-  expect_equal(wtd.sd(y, weights = w1), 4.582576, tolerance = .001)
-  expect_equal(wtd.sd(y, weights = w1), wtd.sd(y, weights = w1, normwt=TRUE))
-  expect_equal(wtd.sd(y, weights = w1*100), wtd.sd(y, weights = w1*100, normwt=TRUE))
+  expect_error(caretEnsemble:::wtd.sd(x))
+  expect_false(sd(x1) == wtd.sd(x1, w = x2))
+  expect_false(sd(x1) == wtd.sd(x1, w = x2))
+  expect_equal(caretEnsemble:::wtd.sd(y, w = w1), 7.84, tolerance = .001)
+  expect_equal(caretEnsemble:::wtd.sd(y, w = w1*100), caretEnsemble:::wtd.sd(y, w = w1))
 })
 
 test_that("wtd.sd handles NA values correctly", {
   y <- c(10, 10, 10, 20, NA, NA)
   w1 <- c(0.1, 0.1, 0.1, 0.7, NA, NA)
-  expect_true(is.na(wtd.sd(y)))
+  expect_true(is.na(caretEnsemble:::wtd.sd(y, w = w1)))
   expect_true(is.na(sd(y)))
-  expect_true(!is.na(wtd.sd(y, na.rm=TRUE)))
+  expect_true(!is.na(caretEnsemble:::wtd.sd(y, w = w1, na.rm=TRUE)))
   expect_true(!is.na(sd(y, na.rm=TRUE)))
-  expect_true(is.na(wtd.sd(y, weights = w1)))
-  expect_true(!is.na(wtd.sd(y, weights = w1, na.rm=TRUE)))
+  expect_true(is.na(caretEnsemble:::wtd.sd(y, w = w1)))
+  expect_true(!is.na(caretEnsemble:::wtd.sd(y, w = w1, na.rm=TRUE)))
   w2 <- c(0.1, 0.1, NA, 0.7, NA, NA)
-  expect_false(wtd.sd(y, weights = w1, na.rm=TRUE, normwt = TRUE) == wtd.sd(y, weights = w2, na.rm=TRUE, normwt = TRUE))
+  expect_true(is.na(caretEnsemble:::wtd.sd(y, w = w1, na.rm=TRUE) == caretEnsemble:::wtd.sd(y, w = w2, na.rm=TRUE)))
 })
 
 test_that("Checks generate errors", {
@@ -150,7 +146,7 @@ test_that("Checks generate errors", {
   myControl <- trainControl(method="cv", number=5, savePredictions=TRUE)
   x <- caretList(
     Sepal.Length ~ Sepal.Width,
-    head(iris, 100),
+    iris,
     methodList=c("glm", "lm"),
     trControl=myControl
   )
@@ -161,14 +157,18 @@ test_that("Checks generate errors", {
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
 
-  x$rpart <- train(Sepal.Length ~ Sepal.Width, head(iris, 100), method="rpart")
+  x$rpart <- train(Sepal.Length ~ Sepal.Width, iris, method="rpart")
   expect_error(check_bestpreds_resamples(modelLibrary))
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
 
   expect_error(check_caretList_classes(x$glm$finalModel))
 
-  x$rpart <- train(Species ~ Sepal.Width, head(iris, 100), method="rpart", trControl=myControl)
+  x$rpart <- train(Species ~ Sepal.Width, iris, method="rpart", trControl=myControl)
+  # This has to be changed because train gives this error if dataset is truncated in
+  # newest version of caret:
+  # Error in train.default(x, y, weights = w, ...) :
+  #    One or more factor levels in the outcome has no data: 'virginica'
   check_caretList_classes(x)
   expect_error(check_caretList_model_types(x))
 
@@ -189,6 +189,6 @@ test_that("Checks generate errors", {
     methodList=c("lda", "rf"),
     trControl=myControl2
   )
-  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, head(iris, 100), method="rpart")
+  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method="rpart")
   expect_error(check_caretList_model_types(x))
 })
