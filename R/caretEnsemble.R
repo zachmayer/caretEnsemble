@@ -113,7 +113,7 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @param level tolerance/confidence level
 #' @param se logical, should prediction errors be produced? Default is false.
 #' @param return_weights a logical indicating whether prediction weights for each model for
-#' each observation should be returend
+#' each observation should be returned
 #' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
 #' argument here, DO NOT PASS the "type" argument.  Classification models will
 #' return probabilities if possible, and regression models will return "raw".
@@ -160,6 +160,7 @@ in predict.caretEnsemble. \nPlease omit missing data before using predict.")
     }
   }
 
+
   # Default se to FALSE
   if(!return_weights %in% c(TRUE, FALSE)){
     return_weights <- FALSE
@@ -173,7 +174,7 @@ in predict.caretEnsemble. \nPlease omit missing data before using predict.")
     }
     est <- as.numeric(preds %*% object$weights)
     # use apply for small data
-    if(dim(preds)[1]<1000){ 
+    if(dim(preds)[1] < 5000){ 
       se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
     } else { 
     # switch to foreach for large data
@@ -190,9 +191,8 @@ in predict.caretEnsemble. \nPlease omit missing data before using predict.")
     conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
-    
     # use apply for small data
-    if(dim(preds)[1]<1000){ 
+    if(dim(preds)[1] < 5000){ 
       est <- apply(preds, 1, function(x){
         weighted.mean(x, w=object$weights, na.rm = TRUE)
       })
@@ -214,6 +214,7 @@ in predict.caretEnsemble. \nPlease omit missing data before using predict.")
         se.tmp[is.nan(se.tmp)] <- 0
       }
     }
+  }
     if(se == FALSE){
       out <- est
     } else {
