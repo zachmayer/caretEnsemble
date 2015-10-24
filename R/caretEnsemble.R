@@ -174,13 +174,13 @@ in predict.caretEnsemble. \nPlease omit missing data before using predict.")
     }
     est <- as.numeric(preds %*% object$weights)
     # use apply for small data
-    if(dim(preds)[1] < 5000){ 
-      se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights, normwt = TRUE)
-    } else { 
+    if(dim(preds)[1] < 5000){
+      se.tmp <- apply(preds, 1, FUN = wtd.sd, w = object$weights)
+    } else {
     # switch to foreach for large data
       se.tmp <- foreach(n=1:dim(preds)[1], .combine= c) %dopar% {
         pred <- preds[n, ]
-        wtd.sd(pred, weights = object$weights, normwt = TRUE)
+        wtd.sd(pred, w = object$weights)
       }
     }
   } else if(keepNA == FALSE){
@@ -192,13 +192,12 @@ in predict.caretEnsemble. \nPlease omit missing data before using predict.")
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
     # use apply for small data
-    if(dim(preds)[1] < 5000){ 
+    if(dim(preds)[1] < 5000){
       est <- apply(preds, 1, function(x){
         weighted.mean(x, w=object$weights, na.rm = TRUE)
       })
-      se.tmp <- apply(preds, 1, FUN = wtd.sd, weights = object$weights,
-                      normwt = TRUE, na.rm = TRUE)
-    } else { 
+      se.tmp <- apply(preds, 1, FUN = wtd.sd, w = object$weights, na.rm = TRUE)
+    } else {
     # switch to foreach for large data
       est <- foreach(n=1:dim(preds)[1], .combine= c) %dopar% {
         pred <- preds[n, ]
@@ -206,7 +205,7 @@ in predict.caretEnsemble. \nPlease omit missing data before using predict.")
       }
       se.tmp <- foreach(n=1:dim(preds)[1], .combine= c) %dopar% {
         pred <- preds[n, ]
-        wtd.sd(pred, weights = object$weights, normwt = TRUE, na.rm = TRUE)
+        wtd.sd(pred, w = object$weights, na.rm = TRUE)
       }
 
       if(length(se.tmp[is.nan(se.tmp)]) > 0){
