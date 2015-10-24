@@ -89,7 +89,7 @@ predict.caretStack <- function(object, newdata=NULL, se=FALSE, level=NULL,
     } else{
       wghts <- varImp(object$ens_model)$importance[methods, ]
       names(wghts) <- row.names(varImp(object$ens_model)$importance)
-      se <- apply(preds, 1, caretEnsemble:::wtd.sd, w = wghts)
+      se <- apply(preds, 1, wtd.sd, w = wghts)
       if(missing(level)){
         level <- 0.95
       }
