@@ -1,4 +1,3 @@
-[![Join the chat at https://gitter.im/zachmayer/caretEnsemble](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zachmayer/caretEnsemble?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](http://img.shields.io/travis/zachmayer/caretEnsemble.svg?style=flat)](https://travis-ci.org/zachmayer/caretEnsemble)
 [![Coverage Status](http://img.shields.io/coveralls/zachmayer/caretEnsemble.svg?style=flat)](https://coveralls.io/r/zachmayer/caretEnsemble)
 [![Github Issues](http://githubbadges.herokuapp.com/zachmayer/caretEnsemble/issues.svg)](https://github.com/zachmayer/caretEnsemble/issues)
@@ -7,6 +6,7 @@
 [![Downloads](http://cranlogs.r-pkg.org/badges/caretEnsemble)](http://cran.rstudio.com/package=caretEnsemble)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](http://badges.mit-license.org)
 [![Badges](http://img.shields.io/:badges-9/9-438cf0.svg?style=flat)](https://github.com/badges/badgerbadgerbadger)
+[![Join the chat at https://gitter.im/zachmayer/caretEnsemble](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zachmayer/caretEnsemble?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # caretEnsemble: [(Read the vignette!)](https://htmlpreview.github.io/?https://github.com/zachmayer/caretEnsemble/blob/master/inst/doc/caretEnsemble-intro.html)
 
