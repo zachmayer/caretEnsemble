@@ -54,7 +54,7 @@ model_list <- caretList(
   methodList=c("glm", "rpart")
   )
 ```
-(As with `train`, the formula interface is convienent but introduces move overhead.  For large datasets the explicitly passing `x` and `y` is preferred).
+(As with `train`, the formula interface is convenient but introduces move overhead.  For large datasets the explicitly passing `x` and `y` is preferred).
 We can use the `predict` function to extract predicitons from this object for new data:
 ```{r, echo=TRUE, results="hide"}
 p <- as.data.frame(predict(model_list, newdata=head(testing)))
@@ -97,7 +97,7 @@ xyplot(resamples(model_list))
     
 As you can see from this plot, these 2 models are un-correlated, and the rpart model is ocassionally anti-predictive, with a few re-samples showing AUCS around 0.3 to 0.4.
 
-We can confirm the 2 model"s correlation with the `modelCor` function from caret (caret has a lot of convienent functions for analyzing lists of models):
+We can confirm the 2 model"s correlation with the `modelCor` function from caret (caret has a lot of convenient functions for analyzing lists of models):
 ```{r, echo=TRUE}
 modelCor(resamples(model_list))
 ```

@@ -129,6 +129,8 @@ caretEnsemble <- function(all.models, optFUN=NULL, ...){
 #' @details The standard error here is not a measure of the uncertainty of the
 #' predictions within each of the models in the ensemble, but instead a measure
 #' of disagreement among the models for each observation.
+#' @importFrom foreach foreach
+#' @importFrom foreach %dopar%
 #' @export
 #' @method predict caretEnsemble
 #' @examples
@@ -171,7 +173,16 @@ in predict.caretEnsemble. \nPlease omit missing data before using predict.")
       message("Predictions being made only for cases with complete data")
     }
     est <- as.numeric(preds %*% object$weights)
-    se.tmp <- apply(preds, 1, FUN = wtd.sd, w = object$weights)
+    # use apply for small data
+    if(dim(preds)[1] < 5000){
+      se.tmp <- apply(preds, 1, FUN = wtd.sd, w = object$weights)
+    } else {
+    # switch to foreach for large data
+      se.tmp <- foreach(n=1:dim(preds)[1], .combine= c) %dopar% {
+        pred <- preds[n, ]
+        wtd.sd(pred, w = object$weights)
+      }
+    }
   } else if(keepNA == FALSE){
     if(anyNA(preds)){
     message("Predictions being made only from models with available data")
@@ -180,14 +191,27 @@ in predict.caretEnsemble. \nPlease omit missing data before using predict.")
     conf <- sweep(conf, MARGIN=2, object$weights,`*`)
     conf <- apply(conf, 1, function(x) x / sum(x, na.rm=TRUE))
     conf <- t(conf); conf[is.na(conf)] <- 0
-    est <- apply(preds, 1, function(x){
-      weighted.mean(x, w=object$weights, na.rm = TRUE)
-    })
-    se.tmp <- apply(preds, 1, FUN = wtd.sd, w = object$weights,
-                    na.rm = TRUE)
-    if(length(se.tmp[is.nan(se.tmp)]) > 0){
-      warning("Could not compute standard errors for some observations, reporting as 0.")
-      se.tmp[is.nan(se.tmp)] <- 0
+    # use apply for small data
+    if(dim(preds)[1] < 5000){
+      est <- apply(preds, 1, function(x){
+        weighted.mean(x, w=object$weights, na.rm = TRUE)
+      })
+      se.tmp <- apply(preds, 1, FUN = wtd.sd, w = object$weights, na.rm = TRUE)
+    } else {
+    # switch to foreach for large data
+      est <- foreach(n=1:dim(preds)[1], .combine= c) %dopar% {
+        pred <- preds[n, ]
+        weighted.mean(pred, w=object$weights, na.rm = TRUE)
+      }
+      se.tmp <- foreach(n=1:dim(preds)[1], .combine= c) %dopar% {
+        pred <- preds[n, ]
+        wtd.sd(pred, w = object$weights, na.rm = TRUE)
+      }
+
+      if(length(se.tmp[is.nan(se.tmp)]) > 0){
+        warning("Could not compute standard errors for some observations, reporting as 0.")
+        se.tmp[is.nan(se.tmp)] <- 0
+      }
     }
   }
     if(se == FALSE){

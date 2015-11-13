@@ -14,6 +14,7 @@ wtd.sd <- function (x, w = NULL, na.rm = FALSE) {
     n <- length(w)
     xWbar <- weighted.mean(x,w,na.rm=na.rm)
     wbar <- mean(w)
+    if(n == 1) {return(xWbar)} # in case the denominator is zero
     out <- n/((n-1)*sum(w)^2)*(sum((w*x-wbar*xWbar)^2)-2*xWbar*sum((w-wbar)*(w*x-wbar*xWbar))+xWbar^2*sum((w-wbar)^2))
     return(out)
 }
