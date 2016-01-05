@@ -53,15 +53,15 @@ methodCheck <- function(x){
 }
 
 #' @title Check that the trainControl object supplied by the user is valid and has defined re-sampling indexes.
-#' @description This function checks the user-supplied trainControl object and makes sure it has all the required fields.  If the resampling indexes are missing, it adds them to the model.  If savePredictions=FALSE, this function sets it to TRUE.
+#' @description This function checks the user-supplied trainControl object and makes sure it has all the required fields.  If the resampling indexes are missing, it adds them to the model.  If savePredictions=FALSE or "none", this function sets it to "final".
 #' @param x a trainControl object.
 #' @param y the target for the model.  Used to determine resampling indexes.
 #' @return NULL
 trControlCheck <- function(x, y){
 
-  if(!x$savePredictions){
-    warning("trControl$savePredictions=FALSE.  Setting to TRUE so we can ensemble the models.")
-    x$savePredictions <- TRUE
+  if(!(x$savePredictions %in% c('all', 'final'))){
+    warning("trControl$savePredictions not 'all' or 'final'.  Setting to 'final' so we can ensemble the models.")
+    x$savePredictions <- 'final'
   }
 
   if(is.null(x$index)){
