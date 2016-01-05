@@ -148,7 +148,7 @@ glm_ensemble <- caretStack(
   )
 )
 model_preds2 <- model_preds
-model_preds2$ensemble <- predict(glm_ensemble, newdata=testing, type="prob")$M
+model_preds2$ensemble <- predict(glm_ensemble, newdata=testing, type="prob")
 CF <- coef(glm_ensemble$ens_model$finalModel)[-1]
 colAUC(model_preds2, testing$Class)
 CF/sum(CF)
@@ -178,7 +178,7 @@ gbm_ensemble <- caretStack(
   )
 )
 model_preds3 <- model_preds
-model_preds3$ensemble <- predict(gbm_ensemble, newdata=testing, type="prob") #$M
+model_preds3$ensemble <- predict(gbm_ensemble, newdata=testing, type="prob")
 colAUC(model_preds3, testing$Class)
 ```
 
