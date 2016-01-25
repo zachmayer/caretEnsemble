@@ -2,20 +2,19 @@
 % Please edit documentation in R/S3GenericExtenstions.R
 \name{c.caretList}
 \alias{c.caretList}
-\title{S3 definition for concatenating models}
+\title{S3 definition for concatenating caretList}
 \usage{
 \method{c}{caretList}(...)
 }
 \arguments{
-\item{modelList1}{an object of class caretList or train}
-
-\item{additionalModels}{an object of class caretList or train}
+\item{...}{the objects of class caretList or train to bind into a caretList}
 }
 \value{
 a \code{\link{caretList}} object
 }
 \description{
-take two lists of models and concatenat them for future Ensamble'ing
+take N objects of class caretList and concatenat them into a larger object of
+class caretList for future Ensamble'ing
 }
 \examples{
 \dontrun{

@@ -2,6 +2,7 @@
 
 S3method(autoplot,caretEnsemble)
 S3method(c,caretList)
+S3method(c,train)
 S3method(getMetric,train)
 S3method(plot,caretEnsemble)
 S3method(plot,caretStack)
