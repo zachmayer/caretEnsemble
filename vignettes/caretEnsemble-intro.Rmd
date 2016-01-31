@@ -11,7 +11,7 @@ vignette: >
 
 `caretEnsemble` is a package for making ensembles of caret models.  You should already be somewhat familiar with the caret package before trying out `caretEnsemble`.
 
-`caretEnsemble` has 3 primary functions: **`caretList`**, **`caretEnsemble`** and **`caretStack`**. `caretList` is used to build lists of caret models on the same training data, with the same re-sampling parameters.  `caretEnsemble` and `caretStack` are used to create ensemble models from such lists of caret models.  `caretEnsemble` uses greedy optimization to create a simple linear blend of models and `caretStack` uses a caret model to combine the outputs from several component caret models.
+`caretEnsemble` has 3 primary functions: **`caretList`**, **`caretEnsemble`** and **`caretStack`**. `caretList` is used to build lists of caret models on the same training data, with the same re-sampling parameters.  `caretEnsemble` and `caretStack` are used to create ensemble models from such lists of caret models.  `caretEnsemble` uses a glm to create a simple linear blend of models and `caretStack` uses a caret model to combine the outputs from several component caret models.
 
 ## caretList
 
@@ -36,7 +36,7 @@ testing <- Sonar[-inTrain,]
 my_control <- trainControl(
   method="boot",
   number=25,
-  savePredictions=TRUE,
+  savePredictions="final",
   classProbs=TRUE,
   index=createResample(training$Class, 25),
   summaryFunction=twoClassSummary
@@ -104,7 +104,14 @@ modelCor(resamples(model_list))
 
 These 2 models make a good candidate for an ensemble: their predicitons are fairly un-correlated, but their overall accuaracy is similar.  We do a simple, linear greedy optimization on AUC using caretEnsemble:
 ```{r, echo=TRUE}
-greedy_ensemble <- caretEnsemble(model_list)
+greedy_ensemble <- caretEnsemble(
+  model_list, 
+  metric="ROC",
+  trControl=trainControl(
+    number=2,
+    summaryFunction=twoClassSummary,
+    classProbs=TRUE
+    ))
 summary(greedy_ensemble)
 ```
 
@@ -114,9 +121,9 @@ library("caTools")
 model_preds <- lapply(model_list, predict, newdata=testing, type="prob")
 model_preds <- lapply(model_preds, function(x) x[,"M"])
 model_preds <- data.frame(model_preds)
-ens_preds <- predict(greedy_ensemble, newdata=testing)
+ens_preds <- predict(greedy_ensemble, newdata=testing, type="prob")
 model_preds$ensemble <- ens_preds
-colAUC(model_preds, testing$Class)
+caTools::colAUC(model_preds, testing$Class)
 ```
 
 The ensemble"s AUC on the test set is about 6% higher than the best individual model.
@@ -142,7 +149,7 @@ glm_ensemble <- caretStack(
   trControl=trainControl(
     method="boot",
     number=10,
-    savePredictions=TRUE,
+    savePredictions="final",
     classProbs=TRUE,
     summaryFunction=twoClassSummary
   )
@@ -172,7 +179,7 @@ gbm_ensemble <- caretStack(
   trControl=trainControl(
     method="boot",
     number=10,
-    savePredictions=TRUE,
+    savePredictions="final",
     classProbs=TRUE,
     summaryFunction=twoClassSummary
   )

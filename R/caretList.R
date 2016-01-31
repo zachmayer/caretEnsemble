@@ -41,6 +41,7 @@ tuneCheck <- function(x){
 #' @title Check that the methods supplied by the user are valid caret methods
 #' @description This function uses modelLookup from caret to ensure the list of methods supplied by the user are all models caret can fit.
 #' @param x a list of user-supplied tuning parameters and methods
+#' @importFrom caret modelLookup
 #' @return NULL
 methodCheck <- function(x){
   all_models <- unique(modelLookup()$model)
@@ -56,8 +57,18 @@ methodCheck <- function(x){
 #' @description This function checks the user-supplied trainControl object and makes sure it has all the required fields.  If the resampling indexes are missing, it adds them to the model.  If savePredictions=FALSE or "none", this function sets it to "final".
 #' @param x a trainControl object.
 #' @param y the target for the model.  Used to determine resampling indexes.
+#' @importFrom caret createResample createFolds createMultiFolds createDataPartition
 #' @return NULL
 trControlCheck <- function(x, y){
+
+  if(!length(x$savePredictions) == 1){
+    stop("Please pass exactly 1 argument to savePredictions, e.g. savePredictions='final'")
+  }
+
+  if(x$savePredictions == TRUE){
+    warning("x$savePredictions == TRUE is depreciated. Setting to 'final' instead.")
+    x$savePredictions <- "final"
+  }
 
   if(!(x$savePredictions %in% c("all", "final"))){
     warning("trControl$savePredictions not 'all' or 'final'.  Setting to 'final' so we can ensemble the models.")
@@ -130,7 +141,7 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @param continue_on_fail, logical, should a valid caretList be returned that excludes models that fail, default is FALSE
 #' @return A list of \code{\link{train}} objects. If the model fails to build,
 #' it is dropped from the list.
-#' @import caret
+#' @importFrom caret trainControl train
 #' @export
 #' @examples
 #' \dontrun{
@@ -152,12 +163,15 @@ extractCaretTarget.formula <- function(form, data, ...){
 #'   }
 caretList <- function(
   ...,
-  trControl = trainControl(),
+  trControl = NULL,
   methodList = NULL,
   tuneList = NULL,
   continue_on_fail = FALSE) {
 
   #Checks
+  if(is.null(trControl)){
+    trControl <- trainControl()
+  }
   if(is.null(tuneList) & is.null(methodList)){
     stop("Please either define a methodList or tuneList")
   }
@@ -210,12 +224,21 @@ caretList <- function(
   return(modelList)
 }
 
+#' @title Check if an object is a caretList object
+#' @description Check if an object is a caretList object
+#' @param object an R object
+#' @export
+is.caretList <- function(object){
+  is(object, "caretList")
+}
+
 #' @title Create a matrix of predictions for each of the models in a caretList
 #' @description Make a matrix of predictions from a list of caret models
 #"
 #' @param object an object of class caretList
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
+#' @param newdata New data for predictions.  It can be NULL, but this is ill-advised.
 #' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
 #' argument here, DO NOT PASS the "type" argument.  Classification models will
 #' return probabilities if possible, and regression models will return "raw".
@@ -223,7 +246,15 @@ caretList <- function(
 #' @importFrom pbapply pboptions
 #' @export
 #' @method predict caretList
-predict.caretList <- function(object, ..., verbose = FALSE){
+predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
+
+  if(is.null(newdata)){
+    warning("Predicting without new data is not well supported.  Attempting to predict on the training data.")
+    newdata <- object[[1]]$trainingData
+    if(is.null(newdata)){
+      stop("Could not find training data in the first model in the ensemble.")
+    }
+  }
 
   if(verbose == TRUE){
     pboptions(type = "txt", char = "*")
@@ -234,12 +265,12 @@ predict.caretList <- function(object, ..., verbose = FALSE){
     type <- x$modelType
     if (type=="Classification"){
       if(x$control$classProbs){
-        caret::predict.train(x, type="prob", ...)[,2]
+        caret::predict.train(x, type="prob", newdata=newdata, ...)[, 2]
       } else{
-        caret::predict.train(x, type="raw", ...)
+        caret::predict.train(x, type="raw", newdata=newdata, ...)
       }
     } else if(type=="Regression"){
-      caret::predict.train(x, type="raw", ...)
+      caret::predict.train(x, type="raw", newdata=newdata, ...)
     } else{
       stop(paste("Unknown model type:", type))
     }

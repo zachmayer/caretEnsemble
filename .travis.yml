@@ -73,9 +73,9 @@ before_install:
   - ./travis-tool.sh r_binary_install lattice
   - ./travis-tool.sh github_package igraph/rigraph
   - ./travis-tool.sh github_package jimhester/covr@4cae287abde5e2cf0c3c73aedeaec4d902dfd3ed
-  - ./travis-tool.sh github_package jimhester/lintr@21607f469c2ce4f999d04a836f9348038a7282e2
-  - ./travis-tool.sh github_package hadley/devtools@52bc15bb7eb87105bbf799d7f784054921146c02
-  - ./travis-tool.sh github_package hadley/testthat@c67018fa4970ee3390ea2056efe56726626b07e3
+  - ./travis-tool.sh github_package jimhester/lintr@a769c0b8be6740329d8d855f230e6ff3c31175c1
+  - ./travis-tool.sh github_package hadley/devtools@c1db284c876beef5d098a91b7b54d1e27cde25b8
+  - ./travis-tool.sh github_package hadley/testthat@b32ddfa4ae49e83f17b95cb06cbc34a7a3083bf0
 
 install:
   - ./travis-tool.sh install_deps
