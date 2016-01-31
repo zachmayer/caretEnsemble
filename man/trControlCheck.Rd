@@ -12,6 +12,6 @@ trControlCheck(x, y)
 \item{y}{the target for the model.  Used to determine resampling indexes.}
 }
 \description{
-This function checks the user-supplied trainControl object and makes sure it has all the required fields.  If the resampling indexes are missing, it adds them to the model.  If savePredictions=FALSE, this function sets it to TRUE.
+This function checks the user-supplied trainControl object and makes sure it has all the required fields.  If the resampling indexes are missing, it adds them to the model.  If savePredictions=FALSE or "none", this function sets it to "final".
 }
 
