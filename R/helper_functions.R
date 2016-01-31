@@ -167,7 +167,7 @@ extractModelTypes <- function(list_of_models){
 #' @importFrom data.table data.table setorderv
 bestPreds <- function(x){
   stopifnot(is(x, "train"))
-  stopifnot(x$control$savePredictions %in% c('all', 'final'))
+  stopifnot(x$control$savePredictions %in% c("all", "final"))
   a <- data.table(x$bestTune, key=names(x$bestTune))
   b <- data.table(x$pred, key=names(x$bestTune))
   b <- b[a,]

@@ -3,7 +3,7 @@
 set.seed(107)
 library("caret")
 library("caretEnsemble")
-library('pROC')
+library("pROC")
 library("randomForest")
 library("rpart")
 library("mlbench")
@@ -24,16 +24,16 @@ model_list1 <- caretList(Class ~ .,
                          data=Sonar,
                          trControl = ctrl1,
                          tuneList = list(
-                           glm=caretModelSpec(method='glm', family='binomial'),
-                           rpart=caretModelSpec(method='rpart')
+                           glm=caretModelSpec(method="glm", family="binomial"),
+                           rpart=caretModelSpec(method="rpart")
                          ),
-                         metric='ROC')
+                         metric="ROC")
 
 # a model of class train
 rfTrain <- train(Class ~ .,
                  data=Sonar,
                  trControl = ctrl1,
-                 method='rf')
+                 method="rf")
 
 ###############################################
 context("Ancillary caretList S3 Generic Functions Extensions")
@@ -44,10 +44,10 @@ test_that("c.caretEnsemble can bind two caretList objects", {
                            data=Sonar,
                            trControl = ctrl1,
                            tuneList = list(
-                             glm=caretModelSpec(method='rpart'),
-                             rpart=caretModelSpec(method='rf')
+                             glm=caretModelSpec(method="rpart"),
+                             rpart=caretModelSpec(method="rf")
                            ),
-                           metric='ROC')
+                           metric="ROC")
 
   bigList <- c(model_list1, model_list2)
   ens1 <- caretEnsemble(bigList)
@@ -75,7 +75,7 @@ test_that("c.caretEnsemble can bind two objects of class train", {
   rpartTrain <- train(Class ~ .,
                       data=Sonar,
                       trControl = ctrl1,
-                      method='rpart')
+                      method="rpart")
 
   bigList <- c(rfTrain, rpartTrain)
   ens1 <- caretEnsemble(bigList)

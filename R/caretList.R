@@ -59,9 +59,9 @@ methodCheck <- function(x){
 #' @return NULL
 trControlCheck <- function(x, y){
 
-  if(!(x$savePredictions %in% c('all', 'final'))){
+  if(!(x$savePredictions %in% c("all", "final"))){
     warning("trControl$savePredictions not 'all' or 'final'.  Setting to 'final' so we can ensemble the models.")
-    x$savePredictions <- 'final'
+    x$savePredictions <- "final"
   }
 
   if(is.null(x$index)){
