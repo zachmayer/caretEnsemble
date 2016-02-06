@@ -12,7 +12,7 @@ wtd.sd <- function (x, w = NULL, na.rm = FALSE) {
     w <- w[i <- !is.na(x)]; x <- x[i]
     }
     n <- length(w)
-    xWbar <- weighted.mean(x,w,na.rm=na.rm)
+    xWbar <- weighted.mean(x, w, na.rm = na.rm)
     wbar <- mean(w)
     out <- n/((n-1)*sum(w)^2)*(sum((w*x-wbar*xWbar)^2)-2*xWbar*sum((w-wbar)*(w*x-wbar*xWbar))+xWbar^2*sum((w-wbar)^2))
     return(out)
@@ -34,8 +34,9 @@ check_caretList_classes <- function(list_of_models){
 }
 
 #' @title Checks that caretList models are all of the same type.
-#'
+#' @description Validate a caretList
 #' @param list_of_models a list of caret models to check
+#' @importFrom caret modelLookup
 check_caretList_model_types <- function(list_of_models){
   #Check that models have the same type
   types <- sapply(list_of_models, function(x) x$modelType)
@@ -59,7 +60,7 @@ check_caretList_model_types <- function(list_of_models){
   #Check that classification models saved probabilities
   #TODO: ALLOW NON PROB MODELS!
   if (type=="Classification"){
-    probModels <- sapply(list_of_models, function(x) modelLookup(x$method)[1,"probModel"])
+    probModels <- sapply(list_of_models, function(x) modelLookup(x$method)[1, "probModel"])
     if(!all(probModels)) stop("All models for classification must be able to generate class probabilities.")
     classProbs <- sapply(list_of_models, function(x) x$control$classProbs)
     if(!all(classProbs)){
@@ -167,10 +168,13 @@ extractModelTypes <- function(list_of_models){
 #' @importFrom data.table data.table setorderv
 bestPreds <- function(x){
   stopifnot(is(x, "train"))
-  stopifnot(x$control$savePredictions %in% c("all", "final"))
+  stopifnot({
+    x$control$savePredictions %in% c("all", "final") |
+      x$control$savePredictions == TRUE
+  })
   a <- data.table(x$bestTune, key=names(x$bestTune))
   b <- data.table(x$pred, key=names(x$bestTune))
-  b <- b[a,]
+  b <- b[a, ]
   sink <- gc(reset=TRUE)
   setorderv(b, c("Resample", "rowIndex"))
   return(b)
@@ -238,7 +242,7 @@ makePredObsMatrix <- function(list_of_models){
     pos <- as.numeric(modelLibrary[[positive]])
     good_pos_values <- which(is.finite(pos))
     set(modelLibrary, j="pred", value=as.numeric(modelLibrary[["pred"]]))
-    set(modelLibrary, i=good_pos_values, j="pred", value=modelLibrary[good_pos_values,positive,with=FALSE])
+    set(modelLibrary, i=good_pos_values, j="pred", value=modelLibrary[good_pos_values, positive, with=FALSE])
   }
 
   #Reshape wide for meta-modeling
@@ -249,5 +253,5 @@ makePredObsMatrix <- function(list_of_models){
   )
 
   #Return
-  return(list(obs=modelLibrary$obs, preds=as.matrix(modelLibrary[,model_names,with=FALSE]), type=type))
+  return(list(obs=modelLibrary$obs, preds=as.matrix(modelLibrary[, model_names, with=FALSE]), type=type))
 }

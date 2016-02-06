@@ -11,12 +11,12 @@ library("pROC")
 data(Sonar)
 set.seed(107)
 inTrain <- createDataPartition(y = Sonar$Class, p = .75, list = FALSE)
-training <- Sonar[ inTrain,]
-testing <- Sonar[-inTrain,]
+training <- Sonar[ inTrain, ]
+testing <- Sonar[-inTrain, ]
 my_control <- trainControl(
   method="boot",
   number=25,
-  savePredictions=TRUE,
+  savePredictions="final",
   classProbs=TRUE,
   index=createResample(training$Class, 25),
   summaryFunction=twoClassSummary
@@ -66,17 +66,24 @@ xyplot(resamples(model_list))
 modelCor(resamples(model_list))
 
 ## ---- echo=TRUE----------------------------------------------------------
-greedy_ensemble <- caretEnsemble(model_list)
+greedy_ensemble <- caretEnsemble(
+  model_list,
+  metric="ROC",
+  trControl=trainControl(
+    number=2,
+    summaryFunction=twoClassSummary,
+    classProbs=TRUE
+    ))
 summary(greedy_ensemble)
 
 ## ---- echo=TRUE----------------------------------------------------------
 library("caTools")
 model_preds <- lapply(model_list, predict, newdata=testing, type="prob")
-model_preds <- lapply(model_preds, function(x) x[,"M"])
+model_preds <- lapply(model_preds, function(x) x[, "M"])
 model_preds <- data.frame(model_preds)
-ens_preds <- predict(greedy_ensemble, newdata=testing)
+ens_preds <- predict(greedy_ensemble, newdata=testing, type="prob")
 model_preds$ensemble <- ens_preds
-colAUC(model_preds, testing$Class)
+caTools::colAUC(model_preds, testing$Class)
 
 ## ---- echo=TRUE, results="hide"------------------------------------------
 varImp(greedy_ensemble)
@@ -92,13 +99,13 @@ glm_ensemble <- caretStack(
   trControl=trainControl(
     method="boot",
     number=10,
-    savePredictions=TRUE,
+    savePredictions="final",
     classProbs=TRUE,
     summaryFunction=twoClassSummary
   )
 )
 model_preds2 <- model_preds
-model_preds2$ensemble <- predict(glm_ensemble, newdata=testing, type="prob")$M
+model_preds2$ensemble <- predict(glm_ensemble, newdata=testing, type="prob")
 CF <- coef(glm_ensemble$ens_model$finalModel)[-1]
 colAUC(model_preds2, testing$Class)
 CF/sum(CF)
@@ -118,11 +125,11 @@ gbm_ensemble <- caretStack(
   trControl=trainControl(
     method="boot",
     number=10,
-    savePredictions=TRUE,
+    savePredictions="final",
     classProbs=TRUE,
     summaryFunction=twoClassSummary
   )
 )
 model_preds3 <- model_preds
-model_preds3$ensemble <- predict(gbm_ensemble, newdata=testing, type="prob")$M
+model_preds3$ensemble <- predict(gbm_ensemble, newdata=testing, type="prob")
 colAUC(model_preds3, testing$Class)

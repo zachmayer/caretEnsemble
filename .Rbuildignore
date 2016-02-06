@@ -9,3 +9,4 @@ todo.txt
 ^CONDUCT\.md$
 inst/docs
 inst/examples
+travis_wait_*
