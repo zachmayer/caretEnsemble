@@ -265,7 +265,8 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
     type <- x$modelType
     if (type=="Classification"){
       if(x$control$classProbs){
-        caret::predict.train(x, type="prob", newdata=newdata, ...)[, 2]
+        # return only the probabilities for the first class (assumed to be the "positive" class)
+        caret::predict.train(x, type="prob", newdata=newdata, ...)[, 1]
       } else{
         caret::predict.train(x, type="raw", newdata=newdata, ...)
       }

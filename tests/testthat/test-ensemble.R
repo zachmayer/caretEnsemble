@@ -180,7 +180,7 @@ test_that("It works for classification models", {
   expect_true(is.numeric(pred.class))
   expect_true(length(pred.class)==150)
   expect_identical(pred.class, pred.classb)
-  expect_less_than(abs(0.03727609 - pred.classc), 0.01)
+  expect_less_than(abs(0.9633519 - pred.classc), 0.01)
   expect_is(pred.class, "numeric")
   expect_is(pred.classb, "numeric")
   expect_is(pred.classc, "numeric")

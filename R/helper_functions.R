@@ -238,19 +238,12 @@ makePredObsMatrix <- function(list_of_models){
   #For classification models that produce probs, use the probs as preds
   #Otherwise, just use class predictions
   if (type=="Classification"){
-    # Determine the string name for the positive class; for now assume that
-    # this is the second level in the response factor vector.
-    # 
-    # * Note: This is contrary to the default positive class selection used 
-    #         by caret (i.e. the FIRST response level) and when comparing results
-    #         between caret models and caretEnsemble models, care must be taken
-    #         to override that default behavior to maintain consistency (e.g.
-    #         using caret::confusionMatrix(..., positive = 'second-class')).
-    if (!is.factor(modelLibrary$obs) || length(levels(modelLibrary$obs)) != 2) 
-      stop('Response vector must be a two-level factor for classification.')
-    positive <- levels(modelLibrary$obs)[2] 
-    
-    # Use the string name for the positive class determined above to select 
+    # Determine the string name for the positive class (assumed to be first level in binary response)
+    if (!is.factor(modelLibrary$obs) || length(levels(modelLibrary$obs)) != 2)
+      stop("Response vector must be a two-level factor for classification.")
+    positive <- levels(modelLibrary$obs)[1]
+
+    # Use the string name for the positive class determined above to select
     # predictions from base estimators as predictors for ensemble model
     pos <- as.numeric(modelLibrary[[positive]])
     good_pos_values <- which(is.finite(pos))
