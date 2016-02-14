@@ -74,7 +74,8 @@ predict.caretStack <- function(
     out <- predict(object$ens_model, newdata=preds, ...)
     # Need a check here
     if(class(out) %in% c("data.frame", "matrix")){
-      est <- out[, 2, drop = TRUE] # return only the probabilities for the second class
+      # return only the probabilities for the first class (assumed to be the "positive" class)
+      est <- out[, 1, drop = TRUE]
     } else{
       est <- out
     }
