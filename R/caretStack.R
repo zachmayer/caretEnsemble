@@ -74,8 +74,9 @@ predict.caretStack <- function(
     out <- predict(object$ens_model, newdata=preds, ...)
     # Need a check here
     if(class(out) %in% c("data.frame", "matrix")){
-      # return only the probabilities for the first class (assumed to be the "positive" class)
-      est <- out[, 1, drop = TRUE]
+      # Return probability predictions for only one of the classes
+      # as determined by configured default response class level
+      est <- out[, getBinaryLevel(), drop = TRUE]
     } else{
       est <- out
     }
