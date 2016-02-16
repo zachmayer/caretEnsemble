@@ -127,4 +127,7 @@ test_that("Target class selection configuration works", {
 
   set.seed(2239)
   runBinaryLevelValidation(refactor(Y.train), refactor(Y.test), pos.level=2)
+
+  # Set the target class back to the default level of 1
+  options(caret.ensemble.target.bin.level=1)
 })
