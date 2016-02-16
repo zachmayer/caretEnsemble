@@ -1,20 +1,49 @@
 #####################################################
 # Configuration Functions
 #####################################################
-#' @title Return the configured default binary class level
+#' @title Return the configured target binary class level
 #' @description For binary classification problems, ensemble
 #' stacks and certain performance measures require an awareness
-#' of which class in a two-factor outcome is "positive".  By default,
-#' this class will be assumed to be the first class in an outcome factor
-#' but that value can be overriden using global options (e.g.
-#' \code{options(caret.ensemble.target.bin.level=2)}).
-getBinaryLevel <- function() {
-  value <- as.numeric(getOption("caret.ensemble.target.bin.level", default = 1))
-  if (!value %in% c(1, 2))
+#' of which class in a two-factor outcome is the "target" class.
+#' By default, this class will be assumed to be the first level in
+#' an outcome factor but that setting can be overridden using
+#' \code{setBinaryTargetLevel(2L)}.
+#' @seealso setBinaryTargetLevel
+#' @return Currently configured binary target level (as integer equal to 1 or 2)
+#' @export
+getBinaryTargetLevel <- function() {
+  arg <- getOption("caret.ensemble.binary.target.level", default = 1L)
+  validateBinaryTargetLevel(arg)
+}
+
+#' @title Set the target binary class level
+#' @description For binary classification problems, ensemble
+#' stacks and certain performance measures require an awareness
+#' of which class in a two-factor outcome is the "target" class.
+#' By default, the first level in an outcome factor is used but
+#' this value can be overridden using \code{setBinaryTargetLevel(2L)}
+#' @param level an integer in \{1, 2\} to be used as target outcome level
+#' @seealso getBinaryTargetLevel
+#' @export
+setBinaryTargetLevel <- function(level){
+  level <- validateBinaryTargetLevel(level)
+  options(caret.ensemble.binary.target.level=level)
+}
+
+#' @title Validate arguments given as binary target level
+#' @description Helper function used to ensure that target
+#' binary class levels given by clients can be coerced to an integer
+#' and that the resulting integer is in \{1, 2\}.
+#' @param arg argument to potentially be used as new target level
+#' @return Binary target level (as integer equal to 1 or 2)
+validateBinaryTargetLevel <- function(arg){
+  val <- suppressWarnings(try(as.integer(arg), silent=T))
+  if (!is.integer(val) || !val %in% c(1L, 2L))
     stop(paste0(
-      "Configured default binary class level is not valid.  ",
-      "Value should be either 1 or 2 but '", value, "' was given"))
-  value
+      "Specified target binary class level is not valid.  ",
+      "Value should be either 1 or 2 but '", arg, "' was given ",
+      "(see caretEnsemble::setBinaryTargetLevel for more details)"))
+  val
 }
 
 
@@ -261,7 +290,7 @@ makePredObsMatrix <- function(list_of_models){
     # Determine the string name for the positive class
     if (!is.factor(modelLibrary$obs) || length(levels(modelLibrary$obs)) != 2)
       stop("Response vector must be a two-level factor for classification.")
-    positive <- levels(modelLibrary$obs)[getBinaryLevel()]
+    positive <- levels(modelLibrary$obs)[getBinaryTargetLevel()]
 
     # Use the string name for the positive class determined above to select
     # predictions from base estimators as predictors for ensemble model

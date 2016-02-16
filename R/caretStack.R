@@ -76,7 +76,7 @@ predict.caretStack <- function(
     if(class(out) %in% c("data.frame", "matrix")){
       # Return probability predictions for only one of the classes
       # as determined by configured default response class level
-      est <- out[, getBinaryLevel(), drop = TRUE]
+      est <- out[, getBinaryTargetLevel(), drop = TRUE]
     } else{
       est <- out
     }
