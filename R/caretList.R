@@ -267,7 +267,7 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
       if(x$control$classProbs){
         # Return probability predictions for only one of the classes
         # as determined by configured default response class level
-        caret::predict.train(x, type="prob", newdata=newdata, ...)[, getBinaryLevel()]
+        caret::predict.train(x, type="prob", newdata=newdata, ...)[, getBinaryTargetLevel()]
       } else{
         caret::predict.train(x, type="raw", newdata=newdata, ...)
       }

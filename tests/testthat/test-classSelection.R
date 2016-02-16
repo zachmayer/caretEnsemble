@@ -3,7 +3,8 @@ library(caret)
 library(caretEnsemble)
 
 # Load and prepare data for subsequent tests
-set.seed(2239)
+seed <- 2239
+set.seed(seed)
 data(models.class)
 data(X.class)
 data(Y.class)
@@ -89,11 +90,12 @@ test_that("Ensembled classifiers do not rearrange outcome factor levels", {
 
   # Make sure that caretEnsemble uses the first level in the
   # outcome factor as the target class
-  options(caret.ensemble.target.bin.level=1)
+  bin.level <- getBinaryTargetLevel()
+  setBinaryTargetLevel(1L)
 
   # First run the level selection test using the default levels
   # of the response (i.e. c('No', 'Yes'))
-  set.seed(2239)
+  set.seed(seed)
   runBinaryLevelValidation(Y.train, Y.test)
 
   # Now reverse the assigment of the response labels as well as
@@ -108,26 +110,31 @@ test_that("Ensembled classifiers do not rearrange outcome factor levels", {
     ifelse(d == Y.levels[1], Y.levels[2], Y.levels[1]),
     levels=rev(Y.levels))
 
-  set.seed(2239)
+  set.seed(seed)
   runBinaryLevelValidation(refactor(Y.train), refactor(Y.test))
 
+  # Set the target binary level back to what it was before this test
+  setBinaryTargetLevel(bin.level)
 })
 
 test_that("Target class selection configuration works", {
   skip_on_cran()
-  set.seed(2239)
-  expect_equal(1, 1)
 
-  # Make sure that caretEnsemble uses the first level in the
-  # outcome factor as the target class
-  options(caret.ensemble.target.bin.level=2)
+  # Get the current target binary level
+  bin.level <- getBinaryTargetLevel()
+
+  # Verify binary target level argument validation
+  expect_error(setBinaryTargetLevel("x"))
+
+  # Configure caret ensemble to use the second class as the target
+  setBinaryTargetLevel(2L)
 
   Y.levels <- levels(Y.train)
   refactor <- function(d) factor(as.character(d), levels=rev(Y.levels))
 
-  set.seed(2239)
+  set.seed(seed)
   runBinaryLevelValidation(refactor(Y.train), refactor(Y.test), pos.level=2)
 
-  # Set the target class back to the default level of 1
-  options(caret.ensemble.target.bin.level=1)
+  # Set the target binary level back to what it was before this test
+  setBinaryTargetLevel(bin.level)
 })
