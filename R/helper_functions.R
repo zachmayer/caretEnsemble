@@ -1,4 +1,24 @@
 #####################################################
+# Configuration Functions
+#####################################################
+#' @title Return the configured default binary class level
+#' @description For binary classification problems, ensemble
+#' stacks and certain performance measures require an awareness
+#' of which class in a two-factor outcome is "positive".  By default,
+#' this class will be assumed to be the first class in an outcome factor
+#' but that value can be overriden using global options (e.g.
+#' \code{options(caret.ensemble.target.bin.level=2)}).
+getBinaryLevel <- function() {
+  value <- as.numeric(getOption("caret.ensemble.target.bin.level", default = 1))
+  if (!value %in% c(1, 2))
+    stop(paste0(
+      "Configured default binary class level is not valid.  ",
+      "Value should be either 1 or 2 but '", value, "' was given"))
+  value
+}
+
+
+#####################################################
 # Misc. Functions
 #####################################################
 #' @title Calculate a weighted standard deviation
@@ -238,10 +258,10 @@ makePredObsMatrix <- function(list_of_models){
   #For classification models that produce probs, use the probs as preds
   #Otherwise, just use class predictions
   if (type=="Classification"){
-    # Determine the string name for the positive class (assumed to be first level in binary response)
+    # Determine the string name for the positive class
     if (!is.factor(modelLibrary$obs) || length(levels(modelLibrary$obs)) != 2)
       stop("Response vector must be a two-level factor for classification.")
-    positive <- levels(modelLibrary$obs)[1]
+    positive <- levels(modelLibrary$obs)[getBinaryLevel()]
 
     # Use the string name for the positive class determined above to select
     # predictions from base estimators as predictors for ensemble model
