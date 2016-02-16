@@ -25,7 +25,6 @@ tuneCheck <- function(x){
   x <- methodCheck(methods, x)
   method_names <- sapply(x, extractModelName)
 
-  browser()
   #Name models
   if(is.null(names(x))){
     names(x) <- method_names
