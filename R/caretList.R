@@ -7,7 +7,7 @@
 #' @examples
 #' caretModelSpec("rf", tuneLength=5, preProcess="ica")
 caretModelSpec <- function(method="rf", ...){
-  stopifnot(is.character(method))
+  #stopifnot(is.character(method))
   out <- c(list(method=method), list(...))
   return(out)
 }
@@ -20,16 +20,19 @@ tuneCheck <- function(x){
 
   #Check model methods
   stopifnot(is.list(x))
-  methods <- sapply(x, function(a) a$method)
-  methodCheck(methods)
 
+  methods <- lapply(x, function(m) m$method)
+  x <- methodCheck(methods, x)
+  method_names <- sapply(x, extractModelName)
+
+  browser()
   #Name models
   if(is.null(names(x))){
-    names(x) <- methods
+    names(x) <- method_names
   }
   i <- names(x)==""
   if(any(i)){
-    names(x)[i] <- methods[i]
+    names(x)[i] <- method_names[i]
   }
   names(x) <- make.names(names(x), unique=TRUE)
 
@@ -42,15 +45,40 @@ tuneCheck <- function(x){
 #' @description This function uses modelLookup from caret to ensure the list of methods supplied by the user are all models caret can fit.
 #' @param x a list of user-supplied tuning parameters and methods
 #' @importFrom caret modelLookup
-#' @return NULL
-methodCheck <- function(x){
-  all_models <- unique(modelLookup()$model)
-  bad_models <- setdiff(x, all_models)
+#' @return Deduplicated list of models
+methodCheck <- function(x, target=NULL){
+  supported_models <- unique(modelLookup()$model)
+  models <- lapply(x, function(m) {
+    if (is.list(m)){
+      validateCustomModel(m)
+      data.frame(type="custom", model=m$method)
+    } else if (is.character(m)){
+      data.frame(type="native", model=m)
+    } else {
+      stop(paste0(
+        "Method \"", m, "\" is invalid.  Methods must either be character names ",
+        "supported by caret (e.g. \"gbm\") or modelInfo lists ",
+        "(e.g. getModelInfo(\"gbm\", regex=F))"))
+    }
+  })
+  models <- do.call(rbind, models)
+
+  duplicates <- which(duplicated(models$model))
+  if (any(duplicates)){
+    warning("Duplicate entries in methodList.  Using unqiue methodList values.")
+  }
+
+  native_models <- subset(models, type == "native")$model
+  bad_models <- setdiff(native_models, supported_models)
   if(length(bad_models)>0){
     msg <- paste(bad_models, collapse=", ")
     stop(paste("The following models are not valid caret models:", msg))
   }
-  return(invisible(NULL))
+
+  if (is.null(target))
+    return(x[-duplicates])
+  else
+    return(target[-duplicates])
 }
 
 #' @title Check that the trainControl object supplied by the user is valid and has defined re-sampling indexes.
@@ -175,16 +203,11 @@ caretList <- function(
   if(is.null(tuneList) & is.null(methodList)){
     stop("Please either define a methodList or tuneList")
   }
-  if(!is.null(methodList) & any(duplicated(methodList))){
-    warning("Duplicate entries in methodList.  Using unqiue methodList values.")
-    methodList <- unique(methodList)
-  }
+
 
   #Make methodList into a tuneList and add onto tuneList
   if(!is.null(methodList)){
-    methodCheck(methodList)
-    tuneList_extra <- lapply(methodList, caretModelSpec)
-    tuneList <- c(tuneList, tuneList_extra)
+    tuneList <- c(tuneList, lapply(methodList, caretModelSpec))
   }
 
   #Make sure tuneList is valid
@@ -283,6 +306,6 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
     }
     preds <- as.matrix(t(preds))
   }
-  colnames(preds) <- make.names(sapply(object, function(x) x$method), unique=TRUE)
+  colnames(preds) <- make.names(sapply(object, extractModelName), unique=TRUE)
   return(preds)
 }
