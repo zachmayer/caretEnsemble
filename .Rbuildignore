@@ -10,3 +10,4 @@ todo.txt
 inst/docs
 inst/examples
 travis_wait_*
+.github/*
