@@ -97,17 +97,14 @@ check_caretList_model_types <- function(list_of_models) {
   # Check that the model type is VALID
   stopifnot(all(types %in% c("Classification", "Regression")))
 
-  # Warn that we have not yet implemented multiclass models
-  # add a check that if this is null you did not set savePredictions in the trainControl
+  # TODO: add a check that if this is null you didn't set savePredictions in the trainControl
   # TODO: add support for non-prob models (e.g. rFerns)
+  # TODO: Check for ANY models having nulls
   if (type == "Classification") {
     for (model in list_of_models) {
       unique_obs <- unique(model$pred$obs)
       if (is.null(unique_obs)) {
         stop("No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.")
-      }
-      if (length(unique_obs) != 2) {
-        stop("Not yet implemented for multiclass problems")
       }
     }
   }
@@ -321,6 +318,8 @@ makePredObsMatrix <- function(list_of_models) {
   if (type == "Classification") {
     # Determine the string name for the positive class
     positive <- levels(modelLibrary$obs)[getBinaryTargetLevel()]
+
+    # TODO: For multiclass, use ALL PROBS.  Currently this is JUST positive class probs!
 
     # Use the string name for the positive class determined above to select
     # predictions from base estimators as predictors for ensemble model

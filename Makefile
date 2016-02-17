@@ -3,7 +3,7 @@
 .PHONY: all install document update-test-fixtures test coverage-test check-cran fix-style lint clean
 
 # Default target
-all: fix-style install document test check-cran coverage-test
+all: clean fix-style install document test check-cran coverage-test
 
 # Install dependencies
 install:
