@@ -1,6 +1,6 @@
-If you are filing a bug, make sure these boxes are checked before submitting your issue— thank you!
-
 If you are filing a feature request or starting a discussion, you can ignore everything below and go wild =D
+
+If you are filing a bug, make sure these boxes are checked before submitting your issue— thank you!
 
 - [ ] Start a new R session
 - [ ] Install the latest version of caretEnsemble: `devtools::install_github("zachmayer/caretEnsemble")`
@@ -27,7 +27,6 @@ If you must use `dput(head())`, please first remove an columns from your dataset
 If your data frame has a factor with many levels, the `dput` output can be unwieldy because it will still list all the possible factor levels even if they aren't present in the the subset of your data. To solve this issue, you can use the `droplevels()` function. Notice below how species is a factor with only one level: `dput(droplevels(head(iris, 4)))`
 
 #### Minimal, runnable code:
-Be sure to test in an empty R session before submitting your issue!
 ```{R}
 library(caretEnsemble)
 models <- caretList(
@@ -49,3 +48,6 @@ print(ens)
 >sessionInfo()
 
 ```
+
+You can delete the text in each section that explains how to do it correctly.
+Be sure to test your 2 chunks of code in an empty R session before submitting your issue!
