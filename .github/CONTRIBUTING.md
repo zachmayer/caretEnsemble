@@ -1,3 +1,10 @@
+# Contributor guidelines
+
+If you're fixing a bug, don't think twice about making a PR!
+
+If you're adding a new feautre, take a look at the [issue tracker first](https://github.com/zachmayer/caretEnsemble/issues), and see if there's 
+already been some discussion you should be aware of, or another [open pull request](https://github.com/zachmayer/caretEnsemble/pulls).
+
 # Contributor Code of Conduct
 
 As contributors and maintainers of this project, we pledge to respect all people who 
