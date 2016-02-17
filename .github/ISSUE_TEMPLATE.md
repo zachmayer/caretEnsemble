@@ -17,7 +17,6 @@ set.seed(1)
 dat <- caret::twoClassSim(100)
 X <- dat[,1:5]
 y <- dat[["Class"]]
-
 ```
 If you have some data that would be too difficult to construct using `caret::twoClassSim` or `caret::SLC14_1`, then you can always make a subset of your original data, using e.g. `head()`, `subset()` or the indices. Then use e.g. `dput()` to give us something that can be put in R immediately, e.g. `dput(head(iris,4))`
 
@@ -44,7 +43,6 @@ print(ens)
 ### Session Info:
 ```{R}
 >sessionInfo()
-
 ```
 
 You can delete the text in each section that explains how to do it correctly.
