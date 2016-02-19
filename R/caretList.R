@@ -305,6 +305,7 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
     }
     preds <- as.matrix(t(preds))
   }
-  colnames(preds) <- make.names(sapply(object, extractModelName), unique=TRUE)
+  #colnames(preds) <- make.names(sapply(object, extractModelName), unique=TRUE)
+  colnames(preds) <- names(object)
   return(preds)
 }
