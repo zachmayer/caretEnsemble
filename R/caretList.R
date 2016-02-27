@@ -67,17 +67,19 @@ methodCheck <- function(x, target=NULL){
     warning("Duplicate entries in methodList.  Using unqiue methodList values.")
   }
 
+  good_models <- setdiff(seq_along(x), duplicates)
   native_models <- subset(models, type == "native")$model
   bad_models <- setdiff(native_models, supported_models)
+
   if(length(bad_models)>0){
     msg <- paste(bad_models, collapse=", ")
     stop(paste("The following models are not valid caret models:", msg))
   }
 
   if (is.null(target))
-    return(x[-duplicates])
+    return(x[good_models])
   else
-    return(target[-duplicates])
+    return(target[good_models])
 }
 
 #' @title Check that the trainControl object supplied by the user is valid and has defined re-sampling indexes.
