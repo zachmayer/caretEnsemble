@@ -69,6 +69,7 @@ predict.caretStack <- function(
   ...){
   stopifnot(is(object$models, "caretList"))
   type <- extractModelTypes(object$models)
+
   preds <- predict(object$models, newdata=newdata)
   if(type == "Classification"){
     out <- predict(object$ens_model, newdata=preds, ...)
@@ -167,9 +168,8 @@ summary.caretStack <- function(object, ...){
 #' print(meta_model)
 #' }
 print.caretStack <- function(x, ...){
-  model_count <- length(x$models)
-  model_names <- paste(sapply(x$models, function(x) x$method), collapse=", ")
-  cat(sprintf("A %s ensemble of %s base models: %s", x$ens_model$method, model_count, model_names))
+  base.models <- paste(names(x$models), collapse=", ")
+  cat(sprintf("A %s ensemble of %s base models: %s", x$ens_model$method, length(x$models), base.models))
   cat("\n\nEnsemble results:\n")
   print(x$ens_model)
 }
