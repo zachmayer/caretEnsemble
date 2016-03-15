@@ -7,7 +7,6 @@
 #' @examples
 #' caretModelSpec("rf", tuneLength=5, preProcess="ica")
 caretModelSpec <- function(method="rf", ...){
-  stopifnot(is.character(method))
   out <- c(list(method=method), list(...))
   return(out)
 }
@@ -20,16 +19,18 @@ tuneCheck <- function(x){
 
   #Check model methods
   stopifnot(is.list(x))
-  methods <- sapply(x, function(a) a$method)
+
+  methods <- lapply(x, function(m) m$method)
   methodCheck(methods)
+  method_names <- sapply(x, extractModelName)
 
   #Name models
   if(is.null(names(x))){
-    names(x) <- methods
+    names(x) <- method_names
   }
   i <- names(x)==""
   if(any(i)){
-    names(x)[i] <- methods[i]
+    names(x)[i] <- method_names[i]
   }
   names(x) <- make.names(names(x), unique=TRUE)
 
@@ -44,12 +45,30 @@ tuneCheck <- function(x){
 #' @importFrom caret modelLookup
 #' @return NULL
 methodCheck <- function(x){
-  all_models <- unique(modelLookup()$model)
-  bad_models <- setdiff(x, all_models)
+  supported_models <- unique(modelLookup()$model)
+  models <- lapply(x, function(m) {
+    if (is.list(m)){
+      validateCustomModel(m)
+      data.frame(type="custom", model=m$method)
+    } else if (is.character(m)){
+      data.frame(type="native", model=m)
+    } else {
+      stop(paste0(
+        "Method \"", m, "\" is invalid.  Methods must either be character names ",
+        "supported by caret (e.g. \"gbm\") or modelInfo lists ",
+        "(e.g. getModelInfo(\"gbm\", regex=F))"))
+    }
+  })
+  models <- do.call(rbind, models)
+
+  native_models <- subset(models, type == "native")$model
+  bad_models <- setdiff(native_models, supported_models)
+
   if(length(bad_models)>0){
     msg <- paste(bad_models, collapse=", ")
     stop(paste("The following models are not valid caret models:", msg))
   }
+
   return(invisible(NULL))
 }
 
@@ -182,9 +201,7 @@ caretList <- function(
 
   #Make methodList into a tuneList and add onto tuneList
   if(!is.null(methodList)){
-    methodCheck(methodList)
-    tuneList_extra <- lapply(methodList, caretModelSpec)
-    tuneList <- c(tuneList, tuneList_extra)
+    tuneList <- c(tuneList, lapply(methodList, caretModelSpec))
   }
 
   #Make sure tuneList is valid
@@ -283,6 +300,19 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
     }
     preds <- as.matrix(t(preds))
   }
-  colnames(preds) <- make.names(sapply(object, function(x) x$method), unique=TRUE)
+
+  if (is.null(names(object))){
+    # If the model list used for predictions is not currently named,
+    # then exctract the model names from each model individually.
+    # Note that this should only be possible when caretList objects
+    # are created manually
+    predcols <- sapply(object, extractModelName)
+    colnames(preds) <- make.names(predcols, unique=TRUE)
+  } else {
+    # Otherwise, assign the names of the prediction columns to be
+    # equal to the names in the given model list
+    colnames(preds) <- names(object)
+  }
+
   return(preds)
 }
