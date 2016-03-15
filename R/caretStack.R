@@ -168,7 +168,8 @@ summary.caretStack <- function(object, ...){
 #' print(meta_model)
 #' }
 print.caretStack <- function(x, ...){
-  cat(sprintf("A %s ensemble of %s base models: %s", x$ens_model$method, length(x$models), names(x$models)))
+  base.models <- paste(names(x$models), collapse=', ')
+  cat(sprintf("A %s ensemble of %s base models: %s", x$ens_model$method, length(x$models), base.models))
   cat("\n\nEnsemble results:\n")
   print(x$ens_model)
 }
