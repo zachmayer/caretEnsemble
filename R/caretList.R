@@ -200,10 +200,7 @@ caretList <- function(
   if(is.null(tuneList) & is.null(methodList)){
     stop("Please either define a methodList or tuneList")
   }
-  if(!is.null(methodList) & any(duplicated(methodList))){
-    warning("Duplicate entries in methodList.  Using unqiue methodList values.")
-    methodList <- unique(methodList)
-  }
+
 
   #Make methodList into a tuneList and add onto tuneList
   if(!is.null(methodList)){
