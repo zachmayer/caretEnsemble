@@ -45,7 +45,12 @@ tuneCheck <- function(x){
 #' @importFrom caret modelLookup
 #' @return NULL
 methodCheck <- function(x){
+
+  # Fetch list of existing caret models
   supported_models <- unique(modelLookup()$model)
+
+  # Split given model methods based on whether or not they
+  # are specified as strings or model info lists (ie custom models)
   models <- lapply(x, function(m) {
     if (is.list(m)){
       validateCustomModel(m)
@@ -61,6 +66,7 @@ methodCheck <- function(x){
   })
   models <- do.call(rbind, models)
 
+  # Ensure that all non-custom models are valid
   native_models <- subset(models, type == "native")$model
   bad_models <- setdiff(native_models, supported_models)
 
