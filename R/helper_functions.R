@@ -211,16 +211,12 @@ extractModelName <- function(x) {
   } else x$method
 }
 
-<<<<<<< HEAD
 #' @title Validate a custom caret model info list
 #' @description Currently, this only ensures that all model info lists
 #' were also assigned a "method" attribute for consistency with usage
 #' of non-custom models
 #' @param a model info list (e.g. getModelInfo("rf", regex=F)[[1]])
 #' @return x
-=======
-# Validate modelInfo list
->>>>>>> 0d5e06c1c6a5eedff094dba26af3a9eb1b0128c8
 validateCustomModel <- function(x) {
   if (is.null(x$method))
     stop(paste(

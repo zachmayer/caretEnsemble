@@ -201,7 +201,6 @@ caretList <- function(
     stop("Please either define a methodList or tuneList")
   }
 
-
   #Make methodList into a tuneList and add onto tuneList
   if(!is.null(methodList)){
     tuneList <- c(tuneList, lapply(methodList, caretModelSpec))
