@@ -186,3 +186,57 @@ test_that("It works for classification models", {
   expect_is(pred.classc, "numeric")
   expect_equal(length(pred.classc), 1)
 })
+
+test_that("Ensembles using custom models work correctly", {
+  set.seed(1234)
+
+  # Create custom caret models with a properly assigned method attribute
+  custom.rf <- getModelInfo("rf", regex=F)[[1]]
+  custom.rf$method <- "custom.rf"
+
+  custom.rpart <- getModelInfo("rpart", regex=F)[[1]]
+  custom.rpart$method <- "custom.rpart"
+
+  # Define models to be used in ensemble
+  tune.list <- list(
+    # Add an unnamed model to ensure that method names are extracted from model info
+    caretModelSpec(method=custom.rf, tuneLength=1),
+    # Add a named custom model, to contrast the above
+    myrpart=caretModelSpec(method=custom.rpart, tuneLength=1),
+    # Add a non-custom model
+    treebag=caretModelSpec(method="treebag", tuneLength=1)
+  )
+  train.control <- trainControl(method="cv", number=2, classProbs=T)
+  X.class.df <- as.data.frame(X.class)
+
+  # Create an ensemble using the above models
+  expect_warning(cl <- caretList(X.class.df, Y.class, tuneList=tune.list, trControl=train.control))
+  expect_that(cl, is_a("caretList"))
+  expect_silent(cs <- caretEnsemble(cl))
+  expect_that(cs, is_a("caretEnsemble"))
+
+  # Validate names assigned to ensembled models
+  expect_equal(sort(names(cs$models)), c("custom.rf", "myrpart", "treebag"))
+
+  # Validate ensemble predictions
+  expect_warning(pred.classa <- predict(cs, type="prob"))
+  expect_silent(pred.classb <- predict(cs, newdata = X.class.df, type="prob"))
+  expect_silent(pred.classc <- predict(cs, newdata = X.class.df[2,], type="prob"))
+  expect_true(is.numeric(pred.classa))
+  expect_true(is.numeric(pred.classb))
+  expect_true(is.numeric(pred.classc))
+  expect_true(length(pred.classa)==150)
+  expect_true(length(pred.classb)==150)
+  expect_true(length(pred.classc)==1)
+  expect_identical(pred.classa, pred.classb)
+  expect_less_than(abs(0.9749462 - pred.classc), 0.01)
+
+  # Verify that not specifying a method attribute for custom models causes an error
+  tune.list <- list(
+    # Add a custom caret models WITHOUT a properly assigned method attribute
+    caretModelSpec(method=getModelInfo("rf", regex=F)[[1]], tuneLength=1),
+    treebag=caretModelSpec(method="treebag", tuneLength=1)
+  )
+  msg <- "Custom models must be defined with a \"method\" attribute"
+  expect_error(caretList(X.class, Y.class, tuneList=tune.list, trControl=train.control), regexp=msg)
+})

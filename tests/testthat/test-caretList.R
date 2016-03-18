@@ -166,7 +166,7 @@ test_that("We can fit models with a mix of methodList and tuneList", {
   expect_is(test, "caretList")
   expect_is(caretEnsemble(test), "caretEnsemble")
   expect_equal(length(test), 4)
-  methods <- sapply(test, function(x) x$method)
+  methods <- sapply(test, extractModelName)
   names(methods) <- NULL
   expect_equal(methods, c("rpart", "rf", "knn", "glm"))
 })
