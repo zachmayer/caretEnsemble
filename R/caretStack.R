@@ -70,7 +70,7 @@ predict.caretStack <- function(
   stopifnot(is(object$models, "caretList"))
   type <- extractModelTypes(object$models)
 
-  preds <- predict(object$models, newdata=newdata)
+  preds <- predict(object$models, newdata=newdata, ...)
   if(type == "Classification"){
     out <- predict(object$ens_model, newdata=preds, ...)
     # Need a check here
