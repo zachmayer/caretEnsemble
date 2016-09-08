@@ -255,6 +255,18 @@ is.caretList <- function(object){
   is(object, "caretList")
 }
 
+#' @title Convert list of Caret Models to caretList object
+#' @description Convert list of Caret Models to caretList object
+#' @param modelList
+#' @export
+is.caretList <- function(modelList){
+  if(class(modelList)!='list'){
+    stop("modelList must be a list of caret models")
+  }
+  # TODO consider other parammeter checking perhaps check for the train class in the list??
+  class(modelList) <- 'caretList'
+}
+
 #' @title Create a matrix of predictions for each of the models in a caretList
 #' @description Make a matrix of predictions from a list of caret models
 #"
