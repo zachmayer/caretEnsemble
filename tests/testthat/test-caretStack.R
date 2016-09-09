@@ -114,3 +114,19 @@ test_that("Failure to calculate se occurs gracefully", {
     )
   )
 })
+
+test_that("Test na.action pass through", {
+  set.seed(96367)
+
+  ens.reg <- caretStack(models.reg[2:3], method="lm")
+
+  X.reg.na <- X.reg
+  # introduce random NA values into a column
+  X.reg.na[sample(1:nrow(X.reg.na), 20), sample(1:ncol(X.reg.na)-1, 1)] <- NA
+
+  expect_warning(pred.reg <- predict(ens.reg, newdata = X.reg.na, na.action = na.pass))
+  expect_length(pred.reg, nrow(X.reg.na))
+
+  expect_warning(pred.reg <- predict(ens.reg, newdata = X.reg.na))
+  expect_false(length(pred.reg) !=  nrow(X.reg.na))
+})

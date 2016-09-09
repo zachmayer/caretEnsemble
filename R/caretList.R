@@ -255,6 +255,25 @@ is.caretList <- function(object){
   is(object, "caretList")
 }
 
+#' @title Coerce object to caretList object
+#' @description Coerces list of caret models into a caretList
+#' @param list of caret models
+#' @return a \code{\link{caretList}} object
+#' @export
+as.caretList <- function(object){
+  if(class(object) != "list"){
+    stop("as.caretList requires a list of caret models")
+  }
+  # Check that each element in the list is of class train
+  if(all(sapply(object, is) != "train")){
+    stop("the list object requires a list of caret train models")
+  }
+
+  class(object) <- "caretList"
+
+  return(object)
+}
+
 #' @title Create a matrix of predictions for each of the models in a caretList
 #' @description Make a matrix of predictions from a list of caret models
 #"
@@ -321,4 +340,17 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
   }
 
   return(preds)
+}
+
+#' @title Index a caretList
+#' @description Index a caret list to extract caret models into a new caretList object
+#"
+#' @param object an object of class caretList
+#' @export
+`[.caretList` <- function(object, index){
+  newObject <- object
+  class(newObject) <- "list"
+  newObject <- newObject[index]
+  class(newObject) <- "caretList"
+  return(newObject)
 }
