@@ -2,17 +2,17 @@
 % Please edit documentation in R/caretList.R
 \name{as.caretList}
 \alias{as.caretList}
-\title{Coerce object to caretList object}
+\title{Convert object to caretList object}
 \usage{
 as.caretList(object)
 }
 \arguments{
-\item{list}{of caret models}
+\item{R}{object}
 }
 \value{
 a \code{\link{caretList}} object
 }
 \description{
-Coerces list of caret models into a caretList
+Converts object into a caretList
 }
 

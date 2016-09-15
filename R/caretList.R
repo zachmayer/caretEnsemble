@@ -255,17 +255,26 @@ is.caretList <- function(object){
   is(object, "caretList")
 }
 
-#' @title Coerce object to caretList object
-#' @description Coerces list of caret models into a caretList
-#' @param list of caret models
+#' @title Convert object to caretList object
+#' @description Converts object into a caretList
+#' @param R object
 #' @return a \code{\link{caretList}} object
 #' @export
 as.caretList <- function(object){
-  if(class(object) != "list"){
+  UseMethod(object)
+}
+
+#' @title Convert list to caretList object
+#' @param list of caret models
+#' @return a \code{\link{caretList}} object
+#' @export
+#' @method as.caretList list
+as.caretList.list <- function(list){
+  if(class(list) != "list"){
     stop("as.caretList requires a list of caret models")
   }
   # Check that each element in the list is of class train
-  if(all(sapply(object, is) != "train")){
+  if(all(sapply(object, is, "train"))){
     stop("the list object requires a list of caret train models")
   }
 
@@ -347,7 +356,7 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
 #"
 #' @param object an object of class caretList
 #' @export
-`[.caretList` <- function(object, index){
+"[.caretList" <- function(object, index){
   newObject <- object
   class(newObject) <- "list"
   newObject <- newObject[index]

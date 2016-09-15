@@ -124,9 +124,9 @@ test_that("Test na.action pass through", {
   # introduce random NA values into a column
   X_reg_na[sample(1:nrow(X_reg_na), 20), sample(1:ncol(X_reg_na)-1, 1)] <- NA
 
-  expect_warning(pred.reg <- predict(ens.reg, newdata = X.reg.na, na.action = na.pass))
-  expect_length(pred.reg, nrow(X.reg.na))
+  expect_warning(pred.reg <- predict(ens.reg, newdata = X_reg_na, na.action = na.pass))
+  expect_length(pred.reg, nrow(X_reg_na))
 
-  expect_warning(pred.reg <- predict(ens.reg, newdata = X.reg.na))
-  expect_false(length(pred.reg) !=  nrow(X.reg.na))
+  expect_warning(pred.reg <- predict(ens.reg, newdata = X_reg_na))
+  expect_false(length(pred.reg) !=  nrow(X_reg_na))
 })
