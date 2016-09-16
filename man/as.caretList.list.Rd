@@ -2,14 +2,17 @@
 % Please edit documentation in R/caretList.R
 \name{as.caretList.list}
 \alias{as.caretList.list}
-\title{Convert list to caretList object}
+\title{Convert list to caretList}
 \usage{
-\method{as.caretList}{list}(list)
+\method{as.caretList}{list}(object)
 }
 \arguments{
 \item{list}{of caret models}
 }
 \value{
 a \code{\link{caretList}} object
+}
+\description{
+Converts list to caretList
 }
 

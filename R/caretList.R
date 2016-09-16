@@ -242,7 +242,7 @@ caretList <- function(
   if(length(modelList)==0){
     stop("caret:train failed for all models.  Please inspect your data.")
   }
-  class(modelList) <- "caretList"
+  class(modelList) <- c("caretList")
 
   return(modelList)
 }
@@ -261,26 +261,43 @@ is.caretList <- function(object){
 #' @return a \code{\link{caretList}} object
 #' @export
 as.caretList <- function(object){
-  UseMethod(object)
+  if (is.null(object))
+    stop("object is null")
+  UseMethod("as.caretList")
 }
 
-#' @title Convert list to caretList object
+as.caretList.default <- function(object){
+  # nothing yet, future dreams go here
+}
+
+#' @title Convert list to caretList
+#' @description Converts list to caretList
 #' @param list of caret models
 #' @return a \code{\link{caretList}} object
 #' @export
 #' @method as.caretList list
-as.caretList.list <- function(list){
-  if(class(list) != "list"){
-    stop("as.caretList requires a list of caret models")
+as.caretList.list <- function(object){
+  if(!(class(object) == "list")){
+    stop("object must be a list of caret models")
   }
   # Check that each element in the list is of class train
-  if(all(sapply(object, is, "train"))){
-    stop("the list object requires a list of caret train models")
+  if(!all(sapply(object, is, "train"))){
+    stop("object requires all elements of list to be caret models")
   }
 
-  class(object) <- "caretList"
+  class(object) <- c("caretList")
 
   return(object)
+}
+
+#' @title Index a caretList
+#' @description Index a caret list to extract caret models into a new caretList object
+#"
+#' @param object an object of class caretList
+#' @export
+`[.caretList` <- function(object, index) {
+  newObj <- `[.listof`(object, index)
+  return(newObj)
 }
 
 #' @title Create a matrix of predictions for each of the models in a caretList
@@ -349,17 +366,4 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
   }
 
   return(preds)
-}
-
-#' @title Index a caretList
-#' @description Index a caret list to extract caret models into a new caretList object
-#"
-#' @param object an object of class caretList
-#' @export
-"[.caretList" <- function(object, index){
-  newObject <- object
-  class(newObject) <- "list"
-  newObject <- newObject[index]
-  class(newObject) <- "caretList"
-  return(newObject)
 }

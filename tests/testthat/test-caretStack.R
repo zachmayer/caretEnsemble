@@ -118,6 +118,7 @@ test_that("Failure to calculate se occurs gracefully", {
 test_that("Test na.action pass through", {
   set.seed(1337)
 
+  # drop the first model because it does not support na.pass
   ens.reg <- caretStack(models.reg[2:3], method="lm")
 
   X_reg_na <- X.reg

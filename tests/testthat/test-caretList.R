@@ -144,7 +144,7 @@ test_that("caretList predictions", {
   expect_error(expect_warning(predict(models)))
 })
 
-test_that("as.caretList returns a caretList object", {
+test_that("as.caretList.list returns a caretList object", {
 
   expect_warning({
     modelList <- caretList(Sepal.Length ~ Sepal.Width,
@@ -154,22 +154,6 @@ test_that("as.caretList returns a caretList object", {
 
   class(modelList) <- "list"
 
-  expect_is(as.caretList(modelList), "caretList")
-})
-
-test_that("[.caretList test caretList indexing", {
-
-  modelList <- c("glm", "lm", "knn")
-
-  expect_warning({
-    modelList <- caretList(Sepal.Length ~ Sepal.Width,
-                           head(iris, 50),
-                           methodList=modelList)
-  })
-
-  expect_is(as.caretList(modelList), "caretList")
-
-  modelList <- modelList[1:2]
   expect_is(as.caretList(modelList), "caretList")
 })
 
