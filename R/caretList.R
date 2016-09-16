@@ -266,6 +266,11 @@ as.caretList <- function(object){
   UseMethod("as.caretList")
 }
 
+#' @title Convert object to caretList object - For Future Use
+#' @description Converts object into a caretList  - For Future Use
+#' @param R object
+#' @return NA
+#' @export
 as.caretList.default <- function(object){
   # nothing yet, future dreams go here
 }
