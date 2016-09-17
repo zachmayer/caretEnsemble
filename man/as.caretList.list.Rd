@@ -7,7 +7,7 @@
 \method{as.caretList}{list}(object)
 }
 \arguments{
-\item{list}{of caret models}
+\item{object}{list of caret models}
 }
 \value{
 a \code{\link{caretList}} object

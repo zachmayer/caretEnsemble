@@ -277,7 +277,7 @@ as.caretList.default <- function(object){
 
 #' @title Convert list to caretList
 #' @description Converts list to caretList
-#' @param list of caret models
+#' @param object list of caret models
 #' @return a \code{\link{caretList}} object
 #' @export
 #' @method as.caretList list
