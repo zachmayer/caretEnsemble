@@ -268,7 +268,7 @@ as.caretList <- function(object){
 
 #' @title Convert object to caretList object - For Future Use
 #' @description Converts object into a caretList  - For Future Use
-#' @param R object
+#' @param object R object
 #' @return NA
 #' @export
 as.caretList.default <- function(object){
@@ -299,6 +299,7 @@ as.caretList.list <- function(object){
 #' @description Index a caret list to extract caret models into a new caretList object
 #"
 #' @param object an object of class caretList
+#' @param index
 #' @export
 `[.caretList` <- function(object, index) {
   newObj <- `[.listof`(object, index)
