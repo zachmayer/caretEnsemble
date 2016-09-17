@@ -7,7 +7,7 @@
 as.caretList(object)
 }
 \arguments{
-\item{R}{object}
+\item{object}{R Object}
 }
 \value{
 a \code{\link{caretList}} object

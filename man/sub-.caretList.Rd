@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{object}{an object of class caretList}
+
+\item{index}{selected index}
 }
 \description{
 Index a caret list to extract caret models into a new caretList object
