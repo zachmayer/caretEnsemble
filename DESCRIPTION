@@ -33,7 +33,8 @@ Suggests:
     mlbench,
     MASS,
     gbm,
-    klaR
+    klaR,
+    rmarkdown
 Imports:
     methods,
     pbapply,
