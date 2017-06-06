@@ -144,6 +144,19 @@ test_that("caretList predictions", {
   expect_error(expect_warning(predict(models)))
 })
 
+test_that("as.caretList.list returns a caretList object", {
+
+  expect_warning({
+    modelList <- caretList(Sepal.Length ~ Sepal.Width,
+                           head(iris, 50),
+                           methodList=c("glm", "lm", "knn"))
+  })
+
+  class(modelList) <- "list"
+
+  expect_is(as.caretList(modelList), "caretList")
+})
+
 ###############################################
 context("We can fit models with a mix of methodList and tuneList")
 ################################################

@@ -44,6 +44,7 @@ caretStack <- function(all.models, ...){
 #' @param level tolerance/confidence level
 #' @param return_weights a logical indicating whether prediction weights for each model
 #' should be returned
+#' @param na.action the method for handling missing data passed to \code{\link{predict.train}}.
 #' @param ... arguments to pass to \code{\link{predict.train}}.
 #' @export
 #' @details Prediction weights are defined as variable importance in the stacked
@@ -66,13 +67,15 @@ predict.caretStack <- function(
   object, newdata=NULL,
   se=FALSE, level=0.95,
   return_weights=FALSE,
+  na.action=na.omit,
   ...){
   stopifnot(is(object$models, "caretList"))
   type <- extractModelTypes(object$models)
 
-  preds <- predict(object$models, newdata=newdata)
+  #preds <- do.call(predict, c(list(object=object$models, newdata=newdata), modelList_predict_params)) TODO keep this around for future use
+  preds <- predict(object$models, newdata=newdata, na.action=na.action)
   if(type == "Classification"){
-    out <- predict(object$ens_model, newdata=preds, ...)
+    out <- predict(object$ens_model, newdata=preds, na.action=na.action, ...)
     # Need a check here
     if(class(out) %in% c("data.frame", "matrix")){
       # Return probability predictions for only one of the classes

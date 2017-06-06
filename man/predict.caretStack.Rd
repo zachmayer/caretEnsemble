@@ -5,7 +5,7 @@
 \title{Make predictions from a caretStack}
 \usage{
 \method{predict}{caretStack}(object, newdata = NULL, se = FALSE,
-  level = 0.95, return_weights = FALSE, ...)
+  level = 0.95, return_weights = FALSE, na.action = na.omit, ...)
 }
 \arguments{
 \item{object}{a  \code{\link{caretStack}} to make predictions from.}
@@ -18,6 +18,8 @@
 
 \item{return_weights}{a logical indicating whether prediction weights for each model
 should be returned}
+
+\item{na.action}{the method for handling missing data passed to \code{\link{predict.train}}.}
 
 \item{...}{arguments to pass to \code{\link{predict.train}}.}
 }
