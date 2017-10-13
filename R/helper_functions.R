@@ -329,7 +329,7 @@ makePredObsMatrix <- function(list_of_models){
     set(modelLibrary, j="pred", value=as.numeric(modelLibrary[["pred"]]))
     set(modelLibrary, i=good_pos_values, j="pred", value=modelLibrary[good_pos_values, positive, with=FALSE])
   }
-  
+
   #Reshape wide for meta-modeling
   modelLibrary <- data.table::dcast.data.table(
     modelLibrary,
