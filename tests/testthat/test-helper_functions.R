@@ -30,7 +30,7 @@ test_that("No predictions generates an error", {
       methodList=c("rf", "gbm"),
       trControl=trainControl(method="cv", number=2, savePredictions="final", classProbs=TRUE))
   )
-  expect_error(check_caretList_model_types(models_multi))
+  check_caretList_model_types(models_multi)
 
   expect_warning(
     models <- caretList(

@@ -59,12 +59,12 @@ validateBinaryTargetLevel <- function(arg){
 wtd.sd <- function (x, w = NULL, na.rm = FALSE) {
   if (na.rm) {
     w <- w[i <- !is.na(x)]; x <- x[i]
-    }
-    n <- length(w)
-    xWbar <- weighted.mean(x, w, na.rm = na.rm)
-    wbar <- mean(w)
-    out <- n/((n-1)*sum(w)^2)*(sum((w*x-wbar*xWbar)^2)-2*xWbar*sum((w-wbar)*(w*x-wbar*xWbar))+xWbar^2*sum((w-wbar)^2))
-    return(out)
+  }
+  n <- length(w)
+  xWbar <- weighted.mean(x, w, na.rm = na.rm)
+  wbar <- mean(w)
+  out <- n/((n-1)*sum(w)^2)*(sum((w*x-wbar*xWbar)^2)-2*xWbar*sum((w-wbar)*(w*x-wbar*xWbar))+xWbar^2*sum((w-wbar)^2))
+  return(out)
 }
 
 #####################################################
@@ -95,19 +95,15 @@ check_caretList_model_types <- function(list_of_models){
   #Check that the model type is VALID
   stopifnot(all(types %in% c("Classification", "Regression")))
 
-  #Warn that we haven"t yet implemented multiclass models
-  # add a check that if this is null you didn"t set savePredictions in the trainControl
-  #TODO: add support for non-prob models (e.g. rFerns)
-  if (type=="Classification" & length(unique(list_of_models[[1]]$pred$obs))!=2){
-    if(is.null(unique(list_of_models[[1]]$pred$obs))){
-      stop("No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.")
-    } else {
-      stop("Not yet implemented for multiclass problems")
-    }
+  # TODO: add a check that if this is null you didn't set savePredictions in the trainControl
+  # TODO: add support for non-prob models (e.g. rFerns)
+  # TODO: Check for ANY models having nulls
+  if (type=="Classification" & is.null(unique(list_of_models[[1]]$pred$obs))){
+    stop("No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.")
   }
 
   #Check that classification models saved probabilities
-  #TODO: ALLOW NON PROB MODELS!
+  # TODO: add support for non-prob models (e.g. rFerns)
   if (type=="Classification"){
     probModels <- sapply(list_of_models, function(x) is.function(x$modelInfo$prob))
     if(!all(probModels)) stop("All models for classification must be able to generate class probabilities.")
@@ -317,10 +313,11 @@ makePredObsMatrix <- function(list_of_models){
   #For classification models that produce probs, use the probs as preds
   #Otherwise, just use class predictions
   if (type=="Classification"){
+
     # Determine the string name for the positive class
-    if (!is.factor(modelLibrary$obs) || length(levels(modelLibrary$obs)) != 2)
-      stop("Response vector must be a two-level factor for classification.")
     positive <- levels(modelLibrary$obs)[getBinaryTargetLevel()]
+
+    # TODO: For multiclass, use ALL PROBS.  Currently this is JUST positive class probs!
 
     # Use the string name for the positive class determined above to select
     # predictions from base estimators as predictors for ensemble model
