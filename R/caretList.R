@@ -233,6 +233,7 @@ caretList <- function(
     } else{
       model <- do.call(train, model_args)
     }
+    if(!is.null(model)) model$pred$pred <- as.numeric(model$pred$pred)               
     return(model)
   })
   names(modelList) <- names(tuneList)
@@ -242,6 +243,8 @@ caretList <- function(
   if(length(modelList)==0){
     stop("caret:train failed for all models.  Please inspect your data.")
   }
+      
+      
   class(modelList) <- c("caretList")
 
   return(modelList)
