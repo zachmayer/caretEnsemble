@@ -235,9 +235,7 @@ caretList <- function(
     }
 
     if(!is.null(model)){
-      if(model$modelType != "Regression"){
-        model$pred$pred <- as.factor(model$pred$pred)
-      } else{
+      if(model$modelType == "Regression"){
         model$pred$pred <- as.numeric(model$pred$pred)
       }
     }
