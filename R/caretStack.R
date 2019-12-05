@@ -157,6 +157,7 @@ summary.caretStack <- function(object, ...){
 #' @description This is a function to print a caretStack.
 #' @param x An object of class caretStack
 #' @param ... ignored
+#' @importFrom stats na.omit
 #' @export
 #' @examples
 #' \dontrun{
