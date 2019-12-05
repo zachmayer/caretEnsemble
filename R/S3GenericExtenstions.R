@@ -34,8 +34,8 @@
 c.caretList <- function(...) {
 
   new_model_list <- unlist(lapply(list(...), function(x) {
-    if(class(x)[1] != "caretList") {
-      if(class(x)[1] != "train") stop("class of modelList1 must be 'caretList' or 'train'")
+    if(! inherits(x, "caretList")) {
+      if(! inherits(x, "train")) stop("class of modelList1 must be 'caretList' or 'train'")
 
       ## assuming this is a single train object
       x <- list(x)
@@ -81,8 +81,8 @@ c.caretList <- function(...) {
 c.train <- function(...) {
 
   new_model_list <- unlist(lapply(list(...), function(x) {
-    if(class(x)[1] != "caretList") {
-      if(class(x)[1] != "train") stop("class of modelList1 must be 'caretList' or 'train'")
+    if(! inherits(x, "caretList")) {
+      if(! inherits(x, "train")) stop("class of modelList1 must be 'caretList' or 'train'")
 
       ## assuming this is a single train object
       x <- list(x)

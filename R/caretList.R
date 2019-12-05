@@ -282,7 +282,7 @@ as.caretList.default <- function(object){
 #' @export
 #' @method as.caretList list
 as.caretList.list <- function(object){
-  if(!(class(object) == "list")){
+  if(! inherits(object, "list")){
     stop("object must be a list of caret models")
   }
   # Check that each element in the list is of class train
@@ -350,8 +350,8 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
       stop(paste("Unknown model type:", type))
     }
   })
-  if(class(preds) != "matrix" & class(preds) != "data.frame"){
-    if(class(preds) == "character" | class(preds) == "factor"){
+  if(! inherits(preds, "matrix") & ! inherits(preds, "data.frame")){
+    if(inherits(preds, "character") | inherits(preds, "factor")){
       preds <- as.character(preds) # drop factorization
     }
     preds <- as.matrix(t(preds))
