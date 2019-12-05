@@ -1,3 +1,4 @@
+Encoding: UTF-8
 Package: caretEnsemble
 Type: Package
 Title: Ensembles of Caret Models
