@@ -20,4 +20,3 @@ A caret model specificaiton consists of 2 parts: a model (as a string) and the a
 \examples{
 caretModelSpec("rf", tuneLength=5, preProcess="ica")
 }
-

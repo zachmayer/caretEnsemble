@@ -36,4 +36,3 @@ caretStack(models, method="glm")
 \references{
 \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 }
-

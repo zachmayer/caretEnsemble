@@ -26,4 +26,3 @@ ens <- caretEnsemble(models)
 plot(ens)
 }
 }
-

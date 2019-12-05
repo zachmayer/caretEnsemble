@@ -293,7 +293,7 @@ multiResiduals <- function(object, ...){
 fortify <- function(model, data = NULL, ...){
   data <- extractModFrame(model)
   data$y <- model$models[[1]]$trainingData$.outcome
-  if(inherits(data$y, "numeric")){
+  if(!inherits(data$y, "numeric")){
     data$y <- as.character(data$y)
     z <- table(data$y)
     prevOutcome <- names(z)[z == max(z)]

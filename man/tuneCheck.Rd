@@ -12,4 +12,3 @@ tuneCheck(x)
 \description{
 This function makes sure the tuning parameters passed by the user are valid and have the proper naming, etc.
 }
-

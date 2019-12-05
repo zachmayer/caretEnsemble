@@ -27,4 +27,3 @@ meta_model <- caretStack(models, method="rpart", tuneLength=2)
 plot(meta_model)
 }
 }
-

@@ -30,4 +30,3 @@ meta_model <- caretStack(models, method="lm", trControl=trainControl(method="cv"
 dotplot.caretStack(meta_model)
 }
 }
-

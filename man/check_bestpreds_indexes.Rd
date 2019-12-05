@@ -12,4 +12,3 @@ check_bestpreds_indexes(modelLibrary)
 \description{
 Check that the row indexes from a caretList are valid
 }
-

@@ -12,4 +12,3 @@ check_bestpreds_resamples(modelLibrary)
 \description{
 Check that the resamples from a caretList are valid
 }
-

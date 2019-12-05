@@ -22,4 +22,3 @@ variables in the ensembled models in a \code{caretEnsemble} object. Variable
 importance for each model is calculated and then averaged by the weight of the overall model
 in the ensembled object.
 }
-

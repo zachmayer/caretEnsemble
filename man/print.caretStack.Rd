@@ -27,4 +27,3 @@ meta_model <- caretStack(models, method="lm")
 print(meta_model)
 }
 }
-

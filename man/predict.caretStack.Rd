@@ -46,4 +46,3 @@ meta_model <- caretStack(models, method="lm")
 RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
 }
 }
-

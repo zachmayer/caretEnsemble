@@ -12,4 +12,3 @@ is.caretList(object)
 \description{
 Check if an object is a caretList object
 }
-

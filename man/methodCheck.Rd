@@ -12,4 +12,3 @@ methodCheck(x)
 \description{
 This function uses modelLookup from caret to ensure the list of methods supplied by the user are all models caret can fit.
 }
-

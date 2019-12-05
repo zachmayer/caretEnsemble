@@ -20,4 +20,3 @@ y for the observed value.
 This function calculates raw residuals for both regression and
 classification \code{train} objects within a \code{\link{caretEnsemble}}.
 }
-
