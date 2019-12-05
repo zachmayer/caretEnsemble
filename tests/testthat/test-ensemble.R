@@ -231,7 +231,7 @@ test_that("Ensembles using custom models work correctly", {
   expect_true(length(pred.classb)==150)
   expect_true(length(pred.classc)==1)
   expect_identical(pred.classa, pred.classb)
-  expect_less_than(abs(0.9749462 - pred.classc), 0.02)
+  expect_less_than(abs(0.9749462 - pred.classc), 0.05)
 
   # Verify that not specifying a method attribute for custom models causes an error
   tune.list <- list(

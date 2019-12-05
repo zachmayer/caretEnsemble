@@ -67,7 +67,7 @@ methodCheck <- function(x){
   models <- do.call(rbind, models)
 
   # Ensure that all non-custom models are valid
-  native_models <- subset(models, type == "native")$model
+  native_models <- subset(models, get(type) == "native")$model
   bad_models <- setdiff(native_models, supported_models)
 
   if(length(bad_models)>0){
