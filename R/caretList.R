@@ -64,7 +64,7 @@ methodCheck <- function(x){
         "(e.g. getModelInfo(\"gbm\", regex=F))"))
     }
   })
-  models <- do.call(rbind, models)
+  models <- do.call(rbind, models)  # Could use data.table to be more efficient with lots of models
 
   # Ensure that all non-custom models are valid
   native_models <- subset(models, get(type) == "native")$model
