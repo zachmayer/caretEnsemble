@@ -10,4 +10,4 @@ Found the following (possibly) invalid file URIs:
   URI: CONDUCT.md
     From: README.md
 
-CONDUCT.md is a local file in the git repo, and I linked to it from the readme
+CONDUCT.md is a local file in the git repo, and I linked to it from README.md

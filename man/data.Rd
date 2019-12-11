@@ -12,9 +12,6 @@
 \description{
 Data for the caretEnsemble package
 }
-\references{
-\url{data_blah.com}
-}
 \author{
 Zachary Deane-Mayer \email{zach.mayer@gmail.com}
 
