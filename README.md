@@ -6,7 +6,7 @@
 [![Badges](http://img.shields.io/:badges-7/7-438cf0.svg?style=flat)](https://github.com/badges/badgerbadgerbadger)
 [![Join the chat at https://gitter.im/zachmayer/caretEnsemble](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zachmayer/caretEnsemble?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# caretEnsemble: [(Read the vignette!)](https://htmlpreview.github.io/?https://github.com/zachmayer/caretEnsemble/blob/master/inst/doc/caretEnsemble-intro.html)
+# caretEnsemble: [(Read the vignette!)](https://htmlpreview.github.io/?https://github.com/zachmayer/caretEnsemble/blob/master/doc/caretEnsemble-intro.html)
 
 Framework for fitting multiple [caret models](https://github.com/topepo/caret) using the same re-sampling strategy as well as creating ensembles of such models.  Use `caretList` to fit multiple models, and then use `caretEnsemble` to combine them greedily, or `caretStack` to combine them using a caret model.
 
