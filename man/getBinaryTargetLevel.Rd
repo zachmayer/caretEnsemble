@@ -20,4 +20,3 @@ an outcome factor but that setting can be overridden using
 \seealso{
 setBinaryTargetLevel
 }
-

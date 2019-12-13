@@ -12,4 +12,3 @@ extractModelTypes(list_of_models)
 \description{
 Extracts the model types from a list of train model
 }
-

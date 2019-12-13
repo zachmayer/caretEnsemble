@@ -12,4 +12,3 @@ bestPreds(x)
 \description{
 Extract predictions for the best tune from a model
 }
-

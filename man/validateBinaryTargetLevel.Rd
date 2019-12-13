@@ -17,4 +17,3 @@ Helper function used to ensure that target
 binary class levels given by clients can be coerced to an integer
 and that the resulting integer is in \{1, 2\}.
 }
-

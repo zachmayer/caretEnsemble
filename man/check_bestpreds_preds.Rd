@@ -12,4 +12,3 @@ check_bestpreds_preds(modelLibrary)
 \description{
 Check that a list of predictions from a caretList are valid
 }
-

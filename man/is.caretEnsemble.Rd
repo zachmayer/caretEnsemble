@@ -12,4 +12,3 @@ is.caretEnsemble(object)
 \description{
 Check if an object is a caretEnsemble object
 }
-

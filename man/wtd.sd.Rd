@@ -16,4 +16,3 @@ wtd.sd(x, w = NULL, na.rm = FALSE)
 \description{
 Used to weight deviations among ensembled model preditions
 }
-

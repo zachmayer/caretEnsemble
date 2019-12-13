@@ -19,4 +19,3 @@ that for standard models (i.e. those already prespecified by caret), the
 models the "method" attribute within the model$modelInfo attribute is
 used instead.
 }
-

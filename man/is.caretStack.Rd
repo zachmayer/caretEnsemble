@@ -12,4 +12,3 @@ is.caretStack(object)
 \description{
 Check if an object is a caretStack object
 }
-

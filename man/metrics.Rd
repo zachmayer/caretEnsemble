@@ -2,8 +2,8 @@
 % Please edit documentation in R/caretEnsemble.R
 \name{getMetric}
 \alias{getMetric}
-\alias{getMetric.train}
 \alias{getMetricSD}
+\alias{getMetric.train}
 \alias{getMetricSD.train}
 \title{Extract accuracy metrics from a model}
 \usage{
@@ -34,4 +34,3 @@ Extract a model accuracy metric from a \code{\link{train}} object.
 
 Extract the standard deviation from resamples for an accuracy metric from a model object.
 }
-

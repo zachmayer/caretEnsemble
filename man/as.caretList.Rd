@@ -15,4 +15,3 @@ a \code{\link{caretList}} object
 \description{
 Converts object into a caretList
 }
-

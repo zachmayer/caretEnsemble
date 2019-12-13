@@ -18,4 +18,3 @@ A numeric of the residuals.
 This function calculates raw residuals for both regression and
 classification \code{caretEnsemble} objects.
 }
-

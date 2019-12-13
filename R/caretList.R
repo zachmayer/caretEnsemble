@@ -64,10 +64,10 @@ methodCheck <- function(x){
         "(e.g. getModelInfo(\"gbm\", regex=F))"))
     }
   })
-  models <- do.call(rbind, models)
+  models <- do.call(rbind, models)  # Could use data.table to be more efficient with lots of models
 
   # Ensure that all non-custom models are valid
-  native_models <- subset(models, type == "native")$model
+  native_models <- subset(models, get('type') == "native")$model
   bad_models <- setdiff(native_models, supported_models)
 
   if(length(bad_models)>0){
@@ -282,7 +282,7 @@ as.caretList.default <- function(object){
 #' @export
 #' @method as.caretList list
 as.caretList.list <- function(object){
-  if(!(class(object) == "list")){
+  if(! inherits(object, "list")){
     stop("object must be a list of caret models")
   }
   # Check that each element in the list is of class train
@@ -350,8 +350,8 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
       stop(paste("Unknown model type:", type))
     }
   })
-  if(class(preds) != "matrix" & class(preds) != "data.frame"){
-    if(class(preds) == "character" | class(preds) == "factor"){
+  if(! inherits(preds, "matrix") & ! inherits(preds, "data.frame")){
+    if(inherits(preds, "character") | inherits(preds, "factor")){
       preds <- as.character(preds) # drop factorization
     }
     preds <- as.matrix(t(preds))

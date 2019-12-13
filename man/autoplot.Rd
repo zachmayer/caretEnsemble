@@ -42,4 +42,3 @@ ens <- caretEnsemble(models)
 autoplot(ens)
 }
 }
-

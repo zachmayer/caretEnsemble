@@ -1,5 +1,8 @@
 #NEWS 
 
+## caretEnsemble 2.0.1
+- Minor fixes to support R 4.0
+
 ## caretEnsemble 2.0.0
 - caretEnsemble now inherits from caretStack
 - Removed the optimizers and now use a glm for caretEnsemble (optimizers will be added back ase caret.train models in a future release)
@@ -8,7 +11,6 @@
 - Fixed the build on travis and locally
 
 ## caretEnsemble 1.0.5
-
 - Change output for predict functions to better align with other predict methods 
 in R (predict.caretEnsemble and predict.caretStack)
 - Update documentation for predict methods to better explain the model disagreement 
@@ -18,5 +20,4 @@ calculation
 calculation
 
 ## caretEnsemble 1.0 - First CRAN release
-
-* caretEnsemble is a new package for making ensembles of [caret](http://cran.r-project.org/web/packages/caret/index.html) models.
+- caretEnsemble is a new package for making ensembles of [caret](https://CRAN.R-project.org/package=caret/) models.

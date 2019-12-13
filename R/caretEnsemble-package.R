@@ -37,7 +37,6 @@ NULL
 #' @name Y.class
 #' @docType data
 #' @rdname data
-#' @references \url{data_blah.com}
 #' @keywords data
 NULL
 

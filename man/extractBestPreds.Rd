@@ -12,4 +12,3 @@ extractBestPreds(list_of_models)
 \description{
 Extract predictions for the best tune from a list of caret models
 }
-
