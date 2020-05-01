@@ -95,7 +95,7 @@ Finally, you should note that `caretList` does not support custom caret models. 
 xyplot(resamples(model_list))
 ```
     
-As you can see from this plot, these 2 models are un-correlated, and the rpart model is ocassionally anti-predictive, with a few re-samples showing AUCS around 0.3 to 0.4.
+As you can see from this plot, these 2 models are un-correlated, and the rpart model is ocassionally anti-predictive, with a one re-sample showing AUC of 0.46.
 
 We can confirm the 2 model"s correlation with the `modelCor` function from caret (caret has a lot of convienent functions for analyzing lists of models):
 ```{r, echo=TRUE}
