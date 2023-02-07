@@ -363,7 +363,7 @@ plot.caretEnsemble <- function(x, ...) {
 
   if(nrow(x$error) > 0) {
     plt <- plt +
-    geom_hline(linetype = 2, size = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
+    geom_hline(linetype = 2, linewidth = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
   }
   return(plt)
 }
@@ -422,7 +422,7 @@ autoplot <- function(object, which = c(1:6), mfrow = c(3, 2),
   }
   # TODO: Insert checks for length of xvars here
   residOut <- multiResiduals(object)
-  zed <- ddply(residOut, .(id), summarize,
+  zed <- plyr::ddply(residOut, .(id), summarize,
                ymin = min(resid),
                ymax = max(resid),
                yavg = median(resid),
