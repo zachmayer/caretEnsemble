@@ -20,5 +20,5 @@ test_that("Code Lint", {
     lintr::trailing_blank_lines_linter(),
     lintr::trailing_whitespace_linter()
   )
-  lintr::lint_package(linters=my_linters)
+  lintr::expect_lint_free(linters=my_linters)
 })
