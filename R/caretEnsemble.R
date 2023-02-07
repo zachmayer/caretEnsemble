@@ -363,7 +363,7 @@ plot.caretEnsemble <- function(x, ...){
 
   if(nrow(x$error) > 0){
     plt <- plt +
-    geom_hline(linetype = 2, size = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"), size = I(1.1))
+    geom_hline(linetype = 2, size = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
   }
   return(plt)
 }
