@@ -11,7 +11,11 @@ test_that("predict.caretEnsemble works in parallel", {
   #Basic
   suppressWarnings(pred_reg <- predict(ens_reg, newdata = X_reg))
   suppressWarnings(pred_reg2 <- predict(ens_reg, newdata = X_reg_big))
-  expect_equal(pred_reg, pred_reg2[1:length(pred_reg)])
+  pred_reg2 <- pred_reg2[1:length(pred_reg)]
+
+  pred_reg <- unname(pred_reg)
+  pred_reg2 <- unname(pred_reg2)
+  expect_equal(pred_reg, pred_reg2)
 
   #Return se
   suppressWarnings(pred_reg <- predict(ens_reg, newdata = X_reg, se = TRUE))
