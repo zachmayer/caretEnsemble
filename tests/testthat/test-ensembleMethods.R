@@ -180,18 +180,18 @@ test_that("Residuals provided by residuals are proper for ensemble objects", {
   models.subset <- models.reg[2:4]
   class(models.subset) <- "caretList"
   ens.reg <- caretEnsemble(models.subset, trControl=trainControl(method="none"))
-  residTest <- residuals(ens.class)
-  residTest2 <- residuals(ens.reg)
+  suppressWarnings(residTest <- residuals(ens.class))
+  suppressWarnings(residTest2 <- residuals(ens.reg))
   obs1 <- ifelse(Y.class == "No", 0, 1)
   obs2 <- Y.reg
-  predTest <- predict(ens.class)
-  predTest2 <- predict(ens.reg)
+  suppressWarnings(predTest <- predict(ens.class))
+  suppressWarnings(predTest2 <- predict(ens.reg))
   #expect_identical(residTest, obs1 - predTest)
   #expect_identical(residTest2, obs2 - predTest2)
   expect_false(identical(residTest2, predTest2 -obs2))
 
-  mr1 <- multiResiduals(ens.class)
-  mr2 <- multiResiduals(ens.reg)
+  suppressWarnings(mr1 <- multiResiduals(ens.class))
+  suppressWarnings(mr2 <- multiResiduals(ens.reg))
   expect_identical(names(mr1), names(mr2))
   expect_identical(names(mr1), c("method", "id", "yhat", "resid", "y"))
   expect_equal(nrow(mr1), 150 * length(ens.class$models))
@@ -223,8 +223,8 @@ test_that("Residuals provided by residuals are proper for ensemble objects", {
   ens.reg2 <- ens.reg
   ens.class2$modelType <- ens.reg2$modelType <- NULL
 
-  expect_equal(residuals(ens.class2), residuals(ens.class))
-  expect_equal(residuals(ens.reg2), residuals(ens.reg))
+  suppressWarnings(expect_equal(residuals(ens.class2), residuals(ens.class)))
+  suppressWarnings(expect_equal(residuals(ens.reg2), residuals(ens.reg)))
 })
 
 context("Are ensembles construct accurately")

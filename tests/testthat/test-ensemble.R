@@ -123,7 +123,7 @@ test_that("We can ensemble models of different predictors", {
   X.reg <- model.matrix(~ ., iris[, -1])
   mseeds <- vector(mode = "list", length = 12)
   myControl <- trainControl(
-    method = "cv", number = 10, repeats = 1,
+    method = "cv", number = 10,
     p = 0.75, savePrediction = TRUE,
     classProbs = FALSE, returnResamp = "final",
     returnData = TRUE)

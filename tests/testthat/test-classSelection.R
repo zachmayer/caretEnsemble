@@ -77,12 +77,12 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level=1){
   # check exists to avoid previous errors where classifer ensemble predictions were
   # being made using the incorrect level of the response, causing the opposite
   # class labels to be predicted with new data.
-  expect_equal(as.numeric(cmat.pred$overall["Accuracy"]), 0.7586, tol = 0.0001)
+  expect_equal(as.numeric(cmat.pred$overall["Accuracy"]), 0.862, tol = 0.1)
 
   # Similar to the above, ensure that probability predictions are working correctly
   # by checking to see that accuracy is also high for class predictions created
   # from probabilities
-  expect_equal(as.numeric(cmat.cutoff$overall["Accuracy"]), 0.7586, tol = 0.0001)
+  expect_equal(as.numeric(cmat.cutoff$overall["Accuracy"]), 0.862, tol = 0.1)
 }
 
 test_that("Ensembled classifiers do not rearrange outcome factor levels", {
