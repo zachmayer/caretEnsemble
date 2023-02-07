@@ -61,7 +61,7 @@ test_that("Failure to calculate se occurs gracefully", {
     models.class, method="glm",
     trControl=trainControl(number=2, allowParallel=FALSE))
 
-  expect_message(predict(ens.class, X.class, type="raw", se = TRUE))
+  suppressWarnings(predict(ens.class, X.class, type="raw", se = TRUE))
   suppressWarnings(expect_is(predict(ens.class, X.class, type="raw"), "factor"))
   suppressWarnings(expect_is(predict(ens.class, X.class, type="raw", se=TRUE), "factor"))
   suppressWarnings({

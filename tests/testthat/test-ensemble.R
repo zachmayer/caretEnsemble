@@ -162,7 +162,7 @@ test_that("It works for regression models", {
   suppressWarnings(pred.regb <- predict(ens.reg, newdata = newPreds1))
   suppressWarnings(pred.regc <- predict(ens.reg, newdata = newPreds1[2, ]))
   expect_identical(pred.reg, pred.regb)
-  expect_less_than(abs(4.740135 - pred.regc), 0.01)
+  expect_lt(abs(4.740135 - pred.regc), 0.01)
   expect_is(pred.reg, "numeric")
   expect_is(pred.regb, "numeric")
   expect_is(pred.regc, "numeric")
@@ -180,7 +180,7 @@ test_that("It works for classification models", {
   expect_true(is.numeric(pred.class))
   expect_true(length(pred.class)==150)
   expect_identical(pred.class, pred.classb)
-  expect_less_than(abs(0.9633519 - pred.classc), 0.01)
+  expect_lt(abs(0.9633519 - pred.classc), 0.01)
   expect_is(pred.class, "numeric")
   expect_is(pred.classb, "numeric")
   expect_is(pred.classc, "numeric")
@@ -231,7 +231,7 @@ test_that("Ensembles using custom models work correctly", {
   expect_true(length(pred.classb)==150)
   expect_true(length(pred.classc)==1)
   expect_identical(pred.classa, pred.classb)
-  expect_less_than(abs(0.9749462 - pred.classc), 0.05)
+  expect_lt(abs(0.9749462 - pred.classc), 0.05)
 
   # Verify that not specifying a method attribute for custom models causes an error
   tune.list <- list(

@@ -205,7 +205,6 @@ test_that("We can handle different CV methods", {
       myControl <- trainControl(
         method = m,
         number = 7,
-        repeats = 1,
         p = 0.75,
         savePredictions ="final",
         returnResamp = "final",
@@ -278,7 +277,7 @@ context("Classification models")
 test_that("Classification models", {
   # Specify controls
   myControl <- trainControl(
-    method = "cv", number = 3, repeats = 1,
+    method = "cv", number = 3,
     p = 0.75, savePredictions ="final",
     summaryFunction = twoClassSummary,
     classProbs = TRUE, returnResamp = "final",
@@ -307,7 +306,7 @@ test_that("Longer tests for Classification models", {
   skip_if_not_installed("kernlab")
   # Specify controls
   myControl <- trainControl(
-    method = "cv", number = 3, repeats = 1,
+    method = "cv", number = 3,
     p = 0.75, savePredictions ="final",
     summaryFunction = twoClassSummary,
     classProbs = TRUE, returnResamp = "final",
@@ -362,7 +361,7 @@ test_that("Test that caretList preserves user specified error functions", {
   skip_on_cran()
   skip_if_not_installed("rpart")
   myControl <- trainControl(
-    method = "cv", number = 3, repeats = 1,
+    method = "cv", number = 3,
     p = 0.75, savePredictions ="final",
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
@@ -393,7 +392,7 @@ test_that("Test that caretList preserves user specified error functions", {
   expect_identical(test2[[1]]$metric, "Accuracy")
 
   expect_equal(nrow(test1[[1]]$results), 7)
-  expect_more_than(nrow(test1[[1]]$results), nrow(test2[[1]]$results))
+  expect_gt(nrow(test1[[1]]$results), nrow(test2[[1]]$results))
   expect_equal(nrow(test2[[1]]$results), 4)
 
   myEns2 <- caretEnsemble(test2)
@@ -401,7 +400,7 @@ test_that("Test that caretList preserves user specified error functions", {
   expect_is(myEns2, "caretEnsemble")
   expect_is(myEns1, "caretEnsemble")
   myControl <- trainControl(
-    method = "cv", number = 3, repeats = 1,
+    method = "cv", number = 3,
     p = 0.75, savePredictions ="final",
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
@@ -432,7 +431,7 @@ test_that("Test that caretList preserves user specified error functions", {
   expect_identical(test2[[1]]$metric, "Accuracy")
 
   expect_equal(nrow(test1[[1]]$results), 7)
-  expect_more_than(nrow(test1[[1]]$results), nrow(test2[[1]]$results))
+  expect_gt(nrow(test1[[1]]$results), nrow(test2[[1]]$results))
   expect_equal(nrow(test2[[1]]$results), 4)
 
 
@@ -450,7 +449,7 @@ test_that("Users can pass a custom tuneList", {
   skip_if_not_installed("kernlab")
   # User specifies methods and tuning parameters specifically using a tuneList
   myControl <- trainControl(
-    method = "cv", number = 3, repeats = 1,
+    method = "cv", number = 3,
     p = 0.75, savePredictions ="final",
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
@@ -491,7 +490,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   skip_on_cran()
   skip_if_not_installed("nnet")
   myControl <- trainControl(
-    method = "cv", number = 3, repeats = 1,
+    method = "cv", number = 3,
     p = 0.75, savePredictions ="final",
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
@@ -562,7 +561,7 @@ context("Regression models")
 
 test_that("Regression Models", {
   myControl2 <- trainControl(
-    method = "cv", number = 3, repeats = 1,
+    method = "cv", number = 3,
     p = 0.75, savePrediction = TRUE,
     returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
