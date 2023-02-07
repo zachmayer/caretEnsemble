@@ -4,8 +4,15 @@
 \alias{predict.caretStack}
 \title{Make predictions from a caretStack}
 \usage{
-\method{predict}{caretStack}(object, newdata = NULL, se = FALSE,
-  level = 0.95, return_weights = FALSE, na.action = na.omit, ...)
+\method{predict}{caretStack}(
+  object,
+  newdata = NULL,
+  se = FALSE,
+  level = 0.95,
+  return_weights = FALSE,
+  na.action = na.omit,
+  ...
+)
 }
 \arguments{
 \item{object}{a  \code{\link{caretStack}} to make predictions from.}

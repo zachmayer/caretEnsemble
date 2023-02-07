@@ -6,8 +6,13 @@
 Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
 function.}
 \usage{
-caretList(..., trControl = NULL, methodList = NULL, tuneList = NULL,
-  continue_on_fail = FALSE)
+caretList(
+  ...,
+  trControl = NULL,
+  methodList = NULL,
+  tuneList = NULL,
+  continue_on_fail = FALSE
+)
 }
 \arguments{
 \item{...}{arguments to pass to \code{\link{train}}.  These arguments will determine which train method gets dispatched.}
