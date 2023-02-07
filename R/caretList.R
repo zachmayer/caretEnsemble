@@ -1,5 +1,5 @@
 #' @title Generate a specification for fitting a caret model
-#' @description A caret model specificaiton consists of 2 parts: a model (as a string) and the argments to the train call for fitting that model
+#' @description A caret model specification consists of 2 parts: a model (as a string) and the arguments to the train call for fitting that model
 #' @param method the modeling method to pass to caret::train
 #' @param ... Other arguments that will eventually be passed to caret::train
 #' @export
