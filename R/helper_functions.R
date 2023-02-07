@@ -25,7 +25,7 @@ getBinaryTargetLevel <- function() {
 #' @param level an integer in \{1, 2\} to be used as target outcome level
 #' @seealso getBinaryTargetLevel
 #' @export
-setBinaryTargetLevel <- function(level){
+setBinaryTargetLevel <- function(level) {
   level <- validateBinaryTargetLevel(level)
   options(caret.ensemble.binary.target.level=level)
 }
@@ -36,7 +36,7 @@ setBinaryTargetLevel <- function(level){
 #' and that the resulting integer is in \{1, 2\}.
 #' @param arg argument to potentially be used as new target level
 #' @return Binary target level (as integer equal to 1 or 2)
-validateBinaryTargetLevel <- function(arg){
+validateBinaryTargetLevel <- function(arg) {
   val <- suppressWarnings(try(as.integer(arg), silent=T))
   if (!is.integer(val) || !val %in% c(1L, 2L))
     stop(paste0(
@@ -74,7 +74,7 @@ wtd.sd <- function (x, w = NULL, na.rm = FALSE) {
 #' @description This function checks caretList classes
 #'
 #' @param list_of_models a list of caret models to check
-check_caretList_classes <- function(list_of_models){
+check_caretList_classes <- function(list_of_models) {
 
   #Check that we have a list of train models
   stopifnot(is(list_of_models, "caretList"))
@@ -86,7 +86,7 @@ check_caretList_classes <- function(list_of_models){
 #' @description Validate a caretList
 #' @param list_of_models a list of caret models to check
 #' @importFrom caret modelLookup
-check_caretList_model_types <- function(list_of_models){
+check_caretList_model_types <- function(list_of_models) {
   #Check that models have the same type
   types <- sapply(list_of_models, function(x) x$modelType)
   type <- types[1]
@@ -98,8 +98,8 @@ check_caretList_model_types <- function(list_of_models){
   #Warn that we haven"t yet implemented multiclass models
   # add a check that if this is null you didn"t set savePredictions in the trainControl
   #TODO: add support for non-prob models (e.g. rFerns)
-  if (type=="Classification" & length(unique(list_of_models[[1]]$pred$obs))!=2){
-    if(is.null(unique(list_of_models[[1]]$pred$obs))){
+  if (type=="Classification" & length(unique(list_of_models[[1]]$pred$obs))!=2) {
+    if(is.null(unique(list_of_models[[1]]$pred$obs))) {
       stop("No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.")
     } else {
       stop("Not yet implemented for multiclass problems")
@@ -108,11 +108,11 @@ check_caretList_model_types <- function(list_of_models){
 
   #Check that classification models saved probabilities
   #TODO: ALLOW NON PROB MODELS!
-  if (type=="Classification"){
+  if (type=="Classification") {
     probModels <- sapply(list_of_models, function(x) is.function(x$modelInfo$prob))
     if(!all(probModels)) stop("All models for classification must be able to generate class probabilities.")
     classProbs <- sapply(list_of_models, function(x) x$control$classProbs)
-    if(!all(classProbs)){
+    if(!all(classProbs)) {
       bad_models <- names(list_of_models)[!classProbs]
       bad_models <- paste(bad_models, collapse=", ")
       stop(
@@ -129,12 +129,12 @@ check_caretList_model_types <- function(list_of_models){
 #' @description Check that the resamples from a caretList are valid
 #'
 #' @param modelLibrary a list of predictins from caret models
-check_bestpreds_resamples <- function(modelLibrary){
+check_bestpreds_resamples <- function(modelLibrary) {
   #TODO: ID which model(s) have bad row indexes
   resamples <- lapply(modelLibrary, function(x) x[["Resample"]])
   names(resamples) <- names(modelLibrary)
   check <- length(unique(resamples))
-  if(check != 1){
+  if(check != 1) {
     stop("Component models do not have the same re-sampling strategies")
   }
   return(invisible(NULL))
@@ -144,12 +144,12 @@ check_bestpreds_resamples <- function(modelLibrary){
 #' @description Check that the row indexes from a caretList are valid
 #'
 #' @param modelLibrary a list of predictins from caret models
-check_bestpreds_indexes <- function(modelLibrary){
+check_bestpreds_indexes <- function(modelLibrary) {
   #TODO: ID which model(s) have bad row indexes
   rows <- lapply(modelLibrary, function(x) x[["rowIndex"]])
   names(rows) <- names(modelLibrary)
   check <- length(unique(rows))
-  if(check != 1){
+  if(check != 1) {
     stop("Re-sampled predictions from each component model do not use the same rowIndexes from the origial dataset")
   }
   return(invisible(NULL))
@@ -159,12 +159,12 @@ check_bestpreds_indexes <- function(modelLibrary){
 #' @description Check that a list of observed values from a caretList are valid
 #'
 #' @param modelLibrary a list of predictins from caret models
-check_bestpreds_obs <- function(modelLibrary){
+check_bestpreds_obs <- function(modelLibrary) {
   #TODO: ID which model(s) have bad row indexes
   obs <- lapply(modelLibrary, function(x) x[["obs"]])
   names(obs) <- names(modelLibrary)
   check <- length(unique(obs))
-  if(check != 1){
+  if(check != 1) {
     stop("Observed values for each component model are not the same.  Please re-train the models with the same Y variable")
   }
   return(invisible(NULL))
@@ -174,14 +174,14 @@ check_bestpreds_obs <- function(modelLibrary){
 #' @description Check that a list of predictions from a caretList are valid
 #'
 #' @param modelLibrary a list of predictins from caret models
-check_bestpreds_preds <- function(modelLibrary){
+check_bestpreds_preds <- function(modelLibrary) {
   #TODO: ID which model(s) have bad preds
   #TODO: Regression models should be numeric, classification models should have numeric class probs
   pred <- lapply(modelLibrary, function(x) x[["pred"]])
   names(pred) <- names(modelLibrary)
   classes <- unique(sapply(pred, class))
   check <- length(classes)
-  if(check != 1){
+  if(check != 1) {
     stop(
       paste0(
         "Component models do not all have the same type of predicitons.  Predictions are a mix of ",
@@ -204,9 +204,9 @@ check_bestpreds_preds <- function(modelLibrary){
 #' @param x a single caret train object
 #' @return Name associated with model
 extractModelName <- function(x) {
-  if (is.list(x$method)){
+  if (is.list(x$method)) {
     validateCustomModel(x$method)$method
-  } else if (x$method == "custom"){
+  } else if (x$method == "custom") {
     validateCustomModel(x$modelInfo)$method
   } else x$method
 }
@@ -229,7 +229,7 @@ validateCustomModel <- function(x) {
 #' @description Extracts the model types from a list of train model
 #'
 #' @param list_of_models an object of class caretList
-extractModelTypes <- function(list_of_models){
+extractModelTypes <- function(list_of_models) {
 
   types <- sapply(list_of_models, function(x) x$modelType)
   type <- types[1]
@@ -245,7 +245,7 @@ extractModelTypes <- function(list_of_models){
 #' @description Extract predictions for the best tune from a model
 #' @param x a train object
 #' @importFrom data.table data.table setorderv
-bestPreds <- function(x){
+bestPreds <- function(x) {
   stopifnot(is(x, "train"))
   stopifnot({
     x$control$savePredictions %in% c("all", "final") |
@@ -263,9 +263,9 @@ bestPreds <- function(x){
 #' @description Extract predictions for the best tune from a list of caret models
 #' @param list_of_models an object of class caretList or a list of caret models
 #' @importFrom pbapply pblapply
-extractBestPreds <- function(list_of_models){
+extractBestPreds <- function(list_of_models) {
   out <- lapply(list_of_models, bestPreds)
-  if(is.null(names(out))){
+  if(is.null(names(out))) {
     names(out) <- make.names(sapply(list_of_models, extractModelName), unique=TRUE)
   }
   sink <- gc(reset=TRUE)
@@ -278,7 +278,7 @@ extractBestPreds <- function(list_of_models){
 #'
 #' @param  list_of_models an object of class caretList
 #' @importFrom data.table set rbindlist dcast.data.table
-makePredObsMatrix <- function(list_of_models){
+makePredObsMatrix <- function(list_of_models) {
 
   #caretList Checks
   check_caretList_classes(list_of_models)
@@ -306,7 +306,7 @@ makePredObsMatrix <- function(list_of_models){
   keep <- Reduce(intersect, lapply(modelLibrary, names))
   for(i in seq_along(modelLibrary)){
     rem <- setdiff(names(modelLibrary[[i]]), keep)
-    if(length(rem) > 0){
+    if(length(rem) > 0) {
       for(r in rem){
         set(modelLibrary[[i]], j=r, value=NULL)
       }
@@ -316,7 +316,7 @@ makePredObsMatrix <- function(list_of_models){
 
   #For classification models that produce probs, use the probs as preds
   #Otherwise, just use class predictions
-  if (type=="Classification"){
+  if (type=="Classification") {
     # Determine the string name for the positive class
     if (!is.factor(modelLibrary$obs) || length(levels(modelLibrary$obs)) != 2)
       stop("Response vector must be a two-level factor for classification.")

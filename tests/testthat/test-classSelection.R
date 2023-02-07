@@ -18,7 +18,7 @@ Y.train <- Y.class[index]; Y.test <- Y.class[-index]
 context("Do classifier predictions use the correct target classes?")
 #############################################################################
 
-runBinaryLevelValidation <- function(Y.train, Y.test, pos.level=1){
+runBinaryLevelValidation <- function(Y.train, Y.test, pos.level=1) {
 
   # Extract levels of response input data
   Y.levels <- levels(Y.train)
