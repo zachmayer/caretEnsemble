@@ -387,7 +387,7 @@ plot.caretEnsemble <- function(x, ...) {
 #' residuals against two random or user specified variables.
 #' @importFrom ggplot2 ggplot aes geom_point geom_smooth scale_x_continuous
 #' @importFrom ggplot2 scale_y_continuous theme_bw geom_bar labs geom_linerange aes_string
-#' @importFrom plyr ddply summarize
+#' @importFrom plyr ddply summarize .
 #' @importFrom gridExtra grid.arrange
 #' @export
 #' @examples
@@ -422,7 +422,7 @@ autoplot <- function(object, which = c(1:6), mfrow = c(3, 2),
   }
   # TODO: Insert checks for length of xvars here
   residOut <- multiResiduals(object)
-  zed <- plyr::ddply(residOut, .(id), summarize,
+  zed <- plyr::ddply(residOut, plyr::.(id), plyr::summarize,
                ymin = min(resid),
                ymax = max(resid),
                yavg = median(resid),

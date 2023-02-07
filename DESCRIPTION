@@ -45,7 +45,8 @@ Imports:
     lattice,
     gridExtra,
     data.table,
-    caret
+    caret,
+    devtools
 License: MIT + file LICENSE
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
