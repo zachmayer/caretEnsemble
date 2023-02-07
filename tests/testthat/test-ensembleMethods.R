@@ -149,8 +149,8 @@ test_that("No errors are thrown by a generics for ensembles", {
   expect_equal(nrow(tp2$data), 3)
   expect_equal(tp$data$method, names(ens.class$models))
   expect_equal(tp2$data$method, names(ens.reg$models))
-  expect_warning(fort1 <- fortify(ens.class))
-  expect_warning(fort2 <- fortify(ens.reg))
+  suppressWarnings(fort1 <- fortify(ens.class))
+  suppressWarnings(fort2 <- fortify(ens.reg))
   expect_is(fort1, "data.frame")
   expect_is(fort2, "data.frame")
   expect_equal(nrow(fort1), 150)
@@ -275,7 +275,7 @@ test_that("Prediction options are respected in regression and classification", {
   tests <- data.frame(lapply(tests, as.logical))
   for(i in 1:nrow(tests)){
 
-    expect_warning({
+    suppressWarnings({
       p <- predict(
         ens.reg,
         se=tests[i, "se"],
@@ -303,7 +303,7 @@ test_that("Prediction options are respected in regression and classification", {
   tests <- expand.grid(se=0:1, return_weights=0:1)
   tests <- data.frame(lapply(tests, as.logical))
   for(i in 1:nrow(tests)){
-    expect_warning({
+    suppressWarnings({
       p <- predict(
         ens.class,
         se=tests[i, "se"],

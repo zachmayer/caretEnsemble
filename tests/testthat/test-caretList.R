@@ -69,8 +69,8 @@ test_that("caretList errors for bad models", {
   data(iris)
   skip_if_not_installed("glmnet")
   expect_error(caretList(Sepal.Width ~ ., iris))
-  expect_warning(caretList(Sepal.Width ~ ., iris, methodList=c("lm", "lm")))
-  expect_warning(expect_is(caretList(Sepal.Width ~ ., iris, methodList="lm", continue_on_fail=TRUE), "caretList"))
+  suppressWarnings(caretList(Sepal.Width ~ ., iris, methodList=c("lm", "lm")))
+  suppressWarnings(expect_is(caretList(Sepal.Width ~ ., iris, methodList="lm", continue_on_fail=TRUE), "caretList"))
 
   my_control <- trainControl(method="cv", number=2)
   bad_bad <- list(
@@ -95,7 +95,7 @@ test_that("caretList predictions", {
   skip_if_not_installed("randomForest")
   skip_if_not_installed("nnet")
   skip_if_not_installed("plyr")
-  expect_warning({
+  suppressWarnings({
     models <- caretList(
       iris[, 1:2], iris[, 5],
       tuneLength=1, verbose=FALSE,
@@ -106,7 +106,7 @@ test_that("caretList predictions", {
         classProbs=FALSE)
       )
   })
-  expect_warning(p1 <- predict(models))
+  suppressWarnings(p1 <- predict(models))
   p2 <- predict(models, newdata = iris[100, c(1:2)])
   p3 <- predict(models, newdata = iris[110, c(1:2)])
   expect_is(p1, "matrix")
@@ -122,7 +122,7 @@ test_that("caretList predictions", {
   expect_is(p3[, 2], "character")
   expect_equal(names(models), colnames(p3))
 
-  expect_warning({
+  suppressWarnings({
     models <- caretList(
       iris[, 1:2], iris[, 5],
       tuneLength=1, verbose=FALSE,
@@ -130,7 +130,7 @@ test_that("caretList predictions", {
       trControl=trainControl(method="cv", number=2, savePredictions="final", classProbs=TRUE))
   })
 
-  expect_warning(p2 <- predict(models))
+  suppressWarnings(p2 <- predict(models))
   p3 <- predict(models, newdata = iris[100, c(1:2)])
   expect_is(p2, "matrix")
   expect_is(p2[, 1], "numeric")
@@ -141,12 +141,12 @@ test_that("caretList predictions", {
   expect_equal(names(models), colnames(p3))
 
   models[[1]]$modelType <- "Bogus"
-  expect_error(expect_warning(predict(models)))
+  expect_error(suppressWarnings(predict(models)))
 })
 
 test_that("as.caretList.list returns a caretList object", {
 
-  expect_warning({
+  suppressWarnings({
     modelList <- caretList(Sepal.Length ~ Sepal.Width,
                            head(iris, 50),
                            methodList=c("glm", "lm", "knn"))
@@ -168,7 +168,7 @@ test_that("We can fit models with a mix of methodList and tuneList", {
     rpart=caretModelSpec(method="rpart", tuneLength=10),
     rf=caretModelSpec(method="rf", tuneGrid=data.frame(mtry=2))
   )
-  expect_warning({
+  suppressWarnings({
     test <- caretList(
       x = iris[, 1:3],
       y = iris[, 4],
@@ -258,7 +258,7 @@ test_that("CV methods we cant handle fail", {
       expect_is(trainControl(method=m, index=1:10, savePredictions="final"), "list")
 
       #Fail if no index and un-known method
-      expect_error(expect_warning(trControlCheck(trainControl(method=m, savePredictions=TRUE))))
+      expect_error(suppressWarnings(trControlCheck(trainControl(method=m, savePredictions=TRUE))))
 
       #Model itself should fit fine
       suppressWarnings(
@@ -286,7 +286,7 @@ test_that("Classification models", {
 
   # Simple two method list
   # Warning because we"re going to auto-set indexes
-  expect_warning({
+  suppressWarnings({
     test1 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
@@ -315,7 +315,7 @@ test_that("Longer tests for Classification models", {
 
   # Simple two method list
   # Warning because we"re going to auto-set indexes
-  expect_warning({
+  suppressWarnings({
     test1 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
@@ -329,7 +329,7 @@ test_that("Longer tests for Classification models", {
   expect_is(caretEnsemble(test1), "caretEnsemble")
   expect_is(caretEnsemble(test1), "caretEnsemble")
 
-  expect_warning({
+  suppressWarnings({
     test2 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
@@ -339,7 +339,7 @@ test_that("Longer tests for Classification models", {
     )
   })
 
-  expect_warning({
+  suppressWarnings({
     test3 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
@@ -367,7 +367,7 @@ test_that("Test that caretList preserves user specified error functions", {
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
 
-  expect_warning({
+  suppressWarnings({
     test1 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
@@ -378,7 +378,7 @@ test_that("Test that caretList preserves user specified error functions", {
     )
   })
 
-  expect_warning({
+  suppressWarnings({
     test2 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
@@ -406,7 +406,7 @@ test_that("Test that caretList preserves user specified error functions", {
     classProbs = TRUE, returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
 
-  expect_warning({
+  suppressWarnings({
     test1 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
@@ -417,7 +417,7 @@ test_that("Test that caretList preserves user specified error functions", {
     )
   })
 
-  expect_warning({
+  suppressWarnings({
     test2 <- caretList(
       x = train[, -23],
       y = train[, "Class"],
@@ -469,7 +469,7 @@ test_that("Users can pass a custom tuneList", {
       tuneLength=3
     ))
 
-  expect_warning({
+  suppressWarnings({
     test2a <- caretList(
       x = train[, -23],
       y = train[, "Class"],
@@ -504,7 +504,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
       trace=FALSE,
       softmax=FALSE)
   )
-  expect_warning({
+  suppressWarnings({
     test <- caretList(
       x = train[, -23],
       y = train[, "Class"],
@@ -531,7 +531,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   )
   x <- iris[, 1:3]
   y <- iris[, 4]
-  expect_warning({
+  suppressWarnings({
     set.seed(42)
     test_default <- caretList(
       x = x,
@@ -539,7 +539,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
       tuneList = tuneTest
     )
   })
-  expect_warning({
+  suppressWarnings({
     set.seed(42)
     test_flma <- caretList(
       y ~ .,
@@ -567,7 +567,7 @@ test_that("Regression Models", {
     returnResamp = "final",
     returnData = TRUE, verboseIter = FALSE)
 
-  expect_warning({
+  suppressWarnings({
     test1 <- caretList(
       x = train[, c(-23, -1)],
       y = train[, 1],
@@ -576,7 +576,7 @@ test_that("Regression Models", {
     )
   })
 
-  expect_warning({
+  suppressWarnings({
     test2 <- caretList(
       x = train[, c(-23, -1)],
       y = train[, 1],

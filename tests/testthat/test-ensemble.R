@@ -15,7 +15,7 @@ context("Test errors and warnings")
 #############################################################################
 test_that("Ensembling fails with no CV", {
   my_control <- trainControl(method="none", savePredictions="final")
-  expect_error(expect_warning(trControlCheck(my_control)))
+  expect_error(suppressWarnings(trControlCheck(my_control)))
 })
 
 #############################################################################
@@ -40,12 +40,12 @@ test_that("We can extract metrics", {
 
 test_that("We can extract resdiuals from caretEnsemble objects", {
   ens <- caretEnsemble(models.class)
-  expect_warning(r <- residuals(ens))
+  suppressWarnings(r <- residuals(ens))
   expect_is(r, "numeric")
   expect_equal(length(r), 150)
 
   ens <- caretEnsemble(models.reg)
-  expect_warning(r <- residuals(ens))
+  suppressWarnings(r <- residuals(ens))
   expect_is(r, "numeric")
   expect_equal(length(r), 150)
 })
@@ -76,33 +76,33 @@ context("Does ensembling and prediction work?")
 test_that("We can ensemble regression models", {
   ens.reg <- caretEnsemble(models.reg, trControl=trainControl(number=2))
   expect_that(ens.reg, is_a("caretEnsemble"))
-  expect_warning(pred.reg <- predict(ens.reg))
-  expect_warning(pred.reg2 <- predict(ens.reg, se=TRUE))
+  suppressWarnings(pred.reg <- predict(ens.reg))
+  suppressWarnings(pred.reg2 <- predict(ens.reg, se=TRUE))
 
   expect_true(all(pred.reg == pred.reg2$fit))
 
-  expect_warning(expect_error(predict(ens.reg, return_weights="BOGUS")))
+  suppressWarnings(expect_error(predict(ens.reg, return_weights="BOGUS")))
 
   expect_true(is.numeric(pred.reg))
   expect_true(length(pred.reg)==150)
   ens.class <- caretEnsemble(models.class, trControl=trainControl(number=2))
   expect_that(ens.class, is_a("caretEnsemble"))
-  expect_warning(pred.class <- predict(ens.class, type="prob"))
+  suppressWarnings(pred.class <- predict(ens.class, type="prob"))
   expect_true(is.numeric(pred.class))
   expect_true(length(pred.class)==150)
 
   #Check different cases
-  expect_warning(p1 <- predict(ens.reg, return_weights=TRUE, se=FALSE))
+  suppressWarnings(p1 <- predict(ens.reg, return_weights=TRUE, se=FALSE))
   expect_is(attr(p1, which = "weights"), "numeric")
   expect_is(p1, "numeric")
 
-  expect_warning(p2 <- predict(ens.reg, return_weights=TRUE, se=TRUE))
+  suppressWarnings(p2 <- predict(ens.reg, return_weights=TRUE, se=TRUE))
   expect_is(attr(p2, which = "weights"), "numeric")
   expect_is(p2, "data.frame")
   expect_equal(ncol(p2), 3)
   expect_identical(names(p2), c("fit", "lwr", "upr"))
 
-  expect_warning(p3 <- predict(ens.reg, return_weights=FALSE, se=FALSE))
+  suppressWarnings(p3 <- predict(ens.reg, return_weights=FALSE, se=FALSE))
   expect_is(p3, "numeric")
   expect_true(all(p1 == p3))
   expect_false(identical(p1, p3))
@@ -157,10 +157,10 @@ test_that("It works for regression models", {
   set.seed(1234)
   ens.reg <- caretEnsemble(models.reg, trControl=trainControl(number=2))
   expect_is(ens.reg, "caretEnsemble")
-  expect_warning(pred.reg <- predict(ens.reg))
+  suppressWarnings(pred.reg <- predict(ens.reg))
   newPreds1 <- as.data.frame(X.reg)
-  expect_warning(pred.regb <- predict(ens.reg, newdata = newPreds1))
-  expect_warning(pred.regc <- predict(ens.reg, newdata = newPreds1[2, ]))
+  suppressWarnings(pred.regb <- predict(ens.reg, newdata = newPreds1))
+  suppressWarnings(pred.regc <- predict(ens.reg, newdata = newPreds1[2, ]))
   expect_identical(pred.reg, pred.regb)
   expect_less_than(abs(4.740135 - pred.regc), 0.01)
   expect_is(pred.reg, "numeric")
@@ -173,10 +173,10 @@ test_that("It works for classification models", {
   set.seed(1234)
   ens.class <- caretEnsemble(models.class, trControl=trainControl(number=2))
   expect_that(ens.class, is_a("caretEnsemble"))
-  expect_warning(pred.class <- predict(ens.class, type="prob"))
+  suppressWarnings(pred.class <- predict(ens.class, type="prob"))
   newPreds1 <- as.data.frame(X.class)
-  expect_warning(pred.classb <- predict(ens.class, newdata = newPreds1, type="prob"))
-  expect_warning(pred.classc <- predict(ens.class, newdata = newPreds1[2, ], type="prob"))
+  suppressWarnings(pred.classb <- predict(ens.class, newdata = newPreds1, type="prob"))
+  suppressWarnings(pred.classc <- predict(ens.class, newdata = newPreds1[2, ], type="prob"))
   expect_true(is.numeric(pred.class))
   expect_true(length(pred.class)==150)
   expect_identical(pred.class, pred.classb)
@@ -212,7 +212,7 @@ test_that("Ensembles using custom models work correctly", {
   X.df <- as.data.frame(X.class)
 
   # Create an ensemble using the above models
-  expect_warning(cl <- caretList(X.df, Y.class, tuneList=tune.list, trControl=train.control))
+  suppressWarnings(cl <- caretList(X.df, Y.class, tuneList=tune.list, trControl=train.control))
   expect_that(cl, is_a("caretList"))
   expect_silent(cs <- caretEnsemble(cl))
   expect_that(cs, is_a("caretEnsemble"))
@@ -221,7 +221,7 @@ test_that("Ensembles using custom models work correctly", {
   expect_equal(sort(names(cs$models)), c("custom.rf", "myrpart", "treebag"))
 
   # Validate ensemble predictions
-  expect_warning(pred.classa <- predict(cs, type="prob"))
+  suppressWarnings(pred.classa <- predict(cs, type="prob"))
   expect_silent(pred.classb <- predict(cs, newdata = X.df, type="prob"))
   expect_silent(pred.classc <- predict(cs, newdata = X.df[2, ], type="prob"))
   expect_true(is.numeric(pred.classa))

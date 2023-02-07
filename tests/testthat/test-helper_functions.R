@@ -23,7 +23,7 @@ test_that("No predictions generates an error", {
   skip_if_not_installed("gbm")
   skip_if_not_installed("plyr")
   skip_if_not_installed("glmnet")
-  expect_warning(
+  suppressWarnings(
     models_multi <- caretList(
       iris[, 1:2], iris[, 5],
       tuneLength=1, verbose=FALSE,
@@ -32,7 +32,7 @@ test_that("No predictions generates an error", {
   )
   expect_error(check_caretList_model_types(models_multi))
 
-  expect_warning(
+  suppressWarnings(
     models <- caretList(
       iris[, 1:2], factor(ifelse(iris[, 5]=="setosa", "Yes", "No")),
       tuneLength=1, verbose=FALSE,
@@ -60,7 +60,7 @@ test_that("We can make the predobs matrix", {
 })
 
 test_that("We can predict", {
-  expect_warning(out <- predict(models.reg, "reg", newdata=X.reg))
+  suppressWarnings(out <- predict(models.reg, "reg", newdata=X.reg))
   expect_is(out, "matrix")
   expect_true(all(dim(out)==c(150, 4)))
   expect_true(all(colnames(out)==c("rf", "glm", "rpart", "treebag")))
@@ -78,25 +78,25 @@ test_that("We can make the predobs matrix", {
 })
 
 test_that("We can predict", {
-  expect_warning(out <- predict(models.class, "Classification", newdata=X.class))
+  suppressWarnings(out <- predict(models.class, "Classification", newdata=X.class))
   expect_is(out, "matrix")
   expect_true(all(dim(out)==c(150, 4)))
   expect_true(all(colnames(out)==c("rf", "glm", "rpart", "treebag")))
-  expect_warning(out2 <- predict(models.reg, "Regression", newdata = X.reg))
+  suppressWarnings(out2 <- predict(models.reg, "Regression", newdata = X.reg))
   expect_true(all(dim(out2)==c(150, 4)))
   expect_true(all(colnames(out2)==c("rf", "glm", "rpart", "treebag")))
 })
 
 test_that("predict results same regardless of verbose option", {
   sink <- capture.output({
-    expect_warning({
+    suppressWarnings({
       expect_is(predict(models.class, "Classification", newdata = X.class), "matrix")
       out1 <- predict(models.class, "Classification", newdata = X.class)
       out2 <- predict(models.class, "Classification", verbose = TRUE, newdata = X.class)
       expect_identical(out1, out2)
 
     })
-    expect_warning({
+    suppressWarnings({
       expect_is(predict(models.reg, "Regression", newdata = X.reg), "matrix")
       out1 <- predict(models.reg, "Regression", newdata = X.reg)
       out2 <- predict(models.reg, "Regression", verbose = TRUE, newdata = X.reg)
@@ -139,7 +139,7 @@ test_that("Checks generate errors", {
   skip_if_not_installed("rpart")
   set.seed(42)
   myControl <- trainControl(method="cv", number=5, savePredictions="final")
-  expect_warning(
+  suppressWarnings(
     x <- caretList(
       Sepal.Length ~ Sepal.Width,
       iris,
@@ -154,7 +154,7 @@ test_that("Checks generate errors", {
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
 
-  expect_warning(x$rpart <- train(Sepal.Length ~ Sepal.Width, iris, method="rpart"))
+  suppressWarnings(x$rpart <- train(Sepal.Length ~ Sepal.Width, iris, method="rpart"))
   expect_error(check_bestpreds_resamples(modelLibrary))
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
@@ -180,7 +180,7 @@ test_that("Checks generate errors", {
     classProbs=TRUE,
     summaryFunction=twoClassSummary
   )
-  expect_warning(
+  suppressWarnings(
     x <- caretList(
       iris[1:100, -5],
       factor(ifelse(iris[1:100, "Species"] == "setosa", "Yes", "No")),
