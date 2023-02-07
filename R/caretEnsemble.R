@@ -300,7 +300,7 @@ fortify <- function(model, data = NULL, ...) {
     data$y <- ifelse(data$y == prevOutcome, 0, 1)
     data$y <- as.numeric(data$y)
   }
-  if(model$ens_model$modelType == "Classification"){
+  if(model$ens_model$modelType == "Classification") {
     data$.fitted <- predict(model, type="prob")
   } else if(model$ens_model$modelType == "Regression") {
     data$.fitted <- predict(model)

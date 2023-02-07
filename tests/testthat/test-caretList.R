@@ -86,7 +86,7 @@ test_that("caretList errors for bad models", {
       expect_error(caretList(iris[, 1:4], iris[, 5], tuneList=bad_bad, trControl=my_control))
       expect_error(caretList(iris[, 1:4], iris[, 5], tuneList=good_bad, trControl=my_control))
       expect_error(caretList(iris[, 1:4], iris[, 5], tuneList=bad_bad, trControl=my_control, continue_on_fail=TRUE))
-      working = caretList(iris[, 1:4], iris[, 5], tuneList=good_bad, trControl=my_control, continue_on_fail=TRUE)
+      working <- caretList(iris[, 1:4], iris[, 5], tuneList=good_bad, trControl=my_control, continue_on_fail=TRUE)
       expect_is(working, "caretList")
     })
   })

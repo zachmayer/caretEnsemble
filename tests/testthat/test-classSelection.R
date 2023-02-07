@@ -106,9 +106,12 @@ test_that("Ensembled classifiers do not rearrange outcome factor levels", {
   # Reversing the level order then ensures that the outcome is not
   # releveled at some point by caretEnsemble.
   Y.levels <- levels(Y.train)
-  refactor <- function(d) factor(
-    ifelse(d == Y.levels[1], Y.levels[2], Y.levels[1]),
-    levels=rev(Y.levels))
+  refactor <- function(d) {
+    factor(
+      ifelse(d == Y.levels[1], Y.levels[2], Y.levels[1]),
+      levels=rev(Y.levels)
+      )
+  }
 
   set.seed(seed)
   runBinaryLevelValidation(refactor(Y.train), refactor(Y.test))

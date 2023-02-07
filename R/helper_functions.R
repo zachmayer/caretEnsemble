@@ -208,7 +208,7 @@ extractModelName <- function(x) {
     validateCustomModel(x$method)$method
   } else if (x$method == "custom") {
     validateCustomModel(x$modelInfo)$method
-  } else x$method
+  } else {x$method}
 }
 
 #' @title Validate a custom caret model info list
