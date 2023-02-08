@@ -1,11 +1,14 @@
 #NEWS 
 
+## caretEnsemble 2.0.2
+- Fix broken tests on r-devel
+
 ## caretEnsemble 2.0.1
 - Minor fixes to support R 4.0
 
 ## caretEnsemble 2.0.0
 - caretEnsemble now inherits from caretStack
-- Removed the optimizers and now use a glm for caretEnsemble (optimizers will be added back ase caret.train models in a future release)
+- Removed the optimizers and now use a glm for caretEnsemble (optimizers will be added back as caret.train models in a future release)
 - Cleaned up namespace (all dependencies are explicit imports, rather than implicit imports or dependencies)
 - Removed S3 functions that are not really S3 functions (e.g. autoplot and fortify).  We will either make those true S3 classes, or inherit from the packages that define them in a future release
 - Fixed the build on travis and locally
