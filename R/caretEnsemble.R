@@ -160,12 +160,13 @@ matchBestTune <- function(out, bt) {
 #' per model in object
 #' @importFrom digest digest
 #' @importFrom caret varImp
+#' @importFrom plyr ddply
 #' @export
 varImp.caretEnsemble <- function(object, ...) {
 
   #Extract and formal individual model importances
   #Todo, clean up this code!
-  a <- lapply(object$models, varImp)
+  a <- lapply(object$models, caret::varImp)
   a <- lapply(a, clean_varImp)
 
   #Convert to data.frame
@@ -387,7 +388,7 @@ plot.caretEnsemble <- function(x, ...) {
 #' residuals against two random or user specified variables.
 #' @importFrom ggplot2 ggplot aes geom_point geom_smooth scale_x_continuous
 #' @importFrom ggplot2 scale_y_continuous theme_bw geom_bar labs geom_linerange aes_string
-#' @importFrom plyr ddply summarize
+#' @importFrom plyr ddply summarize .
 #' @importFrom gridExtra grid.arrange
 #' @export
 #' @examples
