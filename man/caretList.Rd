@@ -21,7 +21,7 @@ caretList(
 
 \item{methodList}{optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.}
 
-\item{tuneList}{optional, a NAMED list of caretModelSpec objects. This much more flexible than methodList and allows the specificaiton of model-specific parameters (e.g. passing trace=FALSE to nnet)}
+\item{tuneList}{optional, a NAMED list of caretModelSpec objects. This much more flexible than methodList and allows the specification of model-specific parameters (e.g. passing trace=FALSE to nnet)}
 
 \item{continue_on_fail, }{logical, should a valid caretList be returned that excludes models that fail, default is FALSE}
 }
