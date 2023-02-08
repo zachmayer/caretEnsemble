@@ -17,7 +17,7 @@ Description: Functions for creating ensembles of caret models: caretList()
     meta-model, and caretEnsemble() will make a robust linear combination of
     models using a GLM.
 Depends:
-    R (>= 3.2.0), caret
+    R (>= 3.2.0)
 Suggests:
     caTools,
     testthat,
@@ -35,7 +35,8 @@ Suggests:
     MASS,
     gbm,
     klaR,
-    rmarkdown
+    rmarkdown,
+    usethis
 Imports:
     methods,
     pbapply,
@@ -44,7 +45,9 @@ Imports:
     plyr,
     lattice,
     gridExtra,
-    data.table
+    data.table,
+    caret
 License: MIT + file LICENSE
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
+LazyData: true

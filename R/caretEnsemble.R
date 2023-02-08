@@ -160,7 +160,6 @@ matchBestTune <- function(out, bt) {
 #' per model in object
 #' @importFrom digest digest
 #' @importFrom caret varImp
-#' @importFrom plyr ddply .
 #' @export
 varImp.caretEnsemble <- function(object, ...) {
 

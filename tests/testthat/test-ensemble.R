@@ -1,3 +1,6 @@
+# Are tests failing here?
+# UPDATE THE FIXTURES!
+# source('inst/data-raw/build_test_data.R')
 
 library(caret)
 library(randomForest)
@@ -162,7 +165,7 @@ test_that("It works for regression models", {
   suppressWarnings(pred.regb <- predict(ens.reg, newdata = newPreds1))
   suppressWarnings(pred.regc <- predict(ens.reg, newdata = newPreds1[2, ]))
   expect_identical(pred.reg, pred.regb)
-  expect_lt(abs(4.740135 - pred.regc), 0.01)
+  expect_lt(abs(4.712746 - pred.regc), 0.01)
   expect_is(pred.reg, "numeric")
   expect_is(pred.regb, "numeric")
   expect_is(pred.regc, "numeric")
