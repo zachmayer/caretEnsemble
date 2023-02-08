@@ -388,7 +388,7 @@ plot.caretEnsemble <- function(x, ...) {
 #' residuals against two random or user specified variables.
 #' @importFrom ggplot2 ggplot aes geom_point geom_smooth scale_x_continuous
 #' @importFrom ggplot2 scale_y_continuous theme_bw geom_bar labs geom_linerange aes_string
-#' @importFrom plyr ddply summarize .
+#' @import plyr
 #' @importFrom gridExtra grid.arrange
 #' @export
 #' @examples
