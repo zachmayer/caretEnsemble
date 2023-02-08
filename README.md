@@ -1,5 +1,5 @@
 [![Build Status](http://img.shields.io/travis/zachmayer/caretEnsemble.svg?style=flat)](https://travis-ci.org/zachmayer/caretEnsemble)
-[![Coverage Status](http://img.shields.io/coveralls/zachmayer/caretEnsemble.svg?style=flat)](https://coveralls.io/r/zachmayer/caretEnsemble)
+[![Coverage Status](http://img.shields.io/coveralls/zachmayer/caretEnsemble.svg?style=flat)](https://coveralls.io/github/zachmayer/caretEnsemble)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/caretEnsemble)](https://CRAN.R-project.org/package=caretEnsemble/)
 [![Downloads](http://cranlogs.r-pkg.org/badges/caretEnsemble)](https://CRAN.R-project.org/package=caretEnsemble/)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](https://badges.mit-license.org)
