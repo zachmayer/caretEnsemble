@@ -36,7 +36,8 @@ Suggests:
     gbm,
     klaR,
     rmarkdown,
-    usethis
+    usethis,
+    sass
 Imports:
     methods,
     pbapply,
