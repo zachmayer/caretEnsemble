@@ -64,7 +64,7 @@ print(p)
 knitr::kable(p)
 ```
 
-If you desire more control over the model fit, use the `caretModelSpec` to contruct a list of model specifications for the `tuneList` argument. This argumenent can be used to fit several different variants of the same model, and can also be used to pass arguments through `train` down to the component functions (e.g. `trace=FALSE` for `nnet`):
+If you desire more control over the model fit, use the `caretModelSpec` to construct a list of model specifications for the `tuneList` argument. This argument can be used to fit several different variants of the same model, and can also be used to pass arguments through `train` down to the component functions (e.g. `trace=FALSE` for `nnet`):
 ```{r, echo=FALSE, results="hide", warning=FALSE}
 suppressMessages(library("mlbench"))
 suppressMessages(library("randomForest"))
@@ -102,7 +102,7 @@ We can confirm the 2 model"s correlation with the `modelCor` function from caret
 modelCor(resamples(model_list))
 ```
 
-These 2 models make a good candidate for an ensemble: their predicitons are fairly un-correlated, but their overall accuaracy is similar.  We do a simple, linear greedy optimization on AUC using caretEnsemble:
+These 2 models make a good candidate for an ensemble: their predicitons are fairly un-correlated, but their overall accuracy is similar.  We do a simple, linear greedy optimization on AUC using caretEnsemble:
 ```{r, echo=TRUE}
 greedy_ensemble <- caretEnsemble(
   model_list,

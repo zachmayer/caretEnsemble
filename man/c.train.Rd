@@ -13,7 +13,7 @@
 a \code{\link{caretList}} object
 }
 \description{
-take N objects of class train and concatenat into an object of class caretList for future Ensembling
+take N objects of class train and concatenate into an object of class caretList for future Ensembling
 }
 \examples{
 \dontrun{

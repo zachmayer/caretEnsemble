@@ -51,7 +51,7 @@ validateBinaryTargetLevel <- function(arg) {
 # Misc. Functions
 #####################################################
 #' @title Calculate a weighted standard deviation
-#' @description Used to weight deviations among ensembled model preditions
+#' @description Used to weight deviations among ensembled model predictions
 #'
 #' @param x a vector of numerics
 #' @param w a vector of weights equal to length of x
@@ -128,7 +128,7 @@ check_caretList_model_types <- function(list_of_models) {
 #' @title Check resamples
 #' @description Check that the resamples from a caretList are valid
 #'
-#' @param modelLibrary a list of predictins from caret models
+#' @param modelLibrary a list of predictions from caret models
 check_bestpreds_resamples <- function(modelLibrary) {
   #TODO: ID which model(s) have bad row indexes
   resamples <- lapply(modelLibrary, function(x) x[["Resample"]])
@@ -143,7 +143,7 @@ check_bestpreds_resamples <- function(modelLibrary) {
 #' @title Check row indexes
 #' @description Check that the row indexes from a caretList are valid
 #'
-#' @param modelLibrary a list of predictins from caret models
+#' @param modelLibrary a list of predictions from caret models
 check_bestpreds_indexes <- function(modelLibrary) {
   #TODO: ID which model(s) have bad row indexes
   rows <- lapply(modelLibrary, function(x) x[["rowIndex"]])
@@ -158,7 +158,7 @@ check_bestpreds_indexes <- function(modelLibrary) {
 #' @title Check observeds
 #' @description Check that a list of observed values from a caretList are valid
 #'
-#' @param modelLibrary a list of predictins from caret models
+#' @param modelLibrary a list of predictions from caret models
 check_bestpreds_obs <- function(modelLibrary) {
   #TODO: ID which model(s) have bad row indexes
   obs <- lapply(modelLibrary, function(x) x[["obs"]])
@@ -173,7 +173,7 @@ check_bestpreds_obs <- function(modelLibrary) {
 #' @title Check predictions
 #' @description Check that a list of predictions from a caretList are valid
 #'
-#' @param modelLibrary a list of predictins from caret models
+#' @param modelLibrary a list of predictions from caret models
 check_bestpreds_preds <- function(modelLibrary) {
   #TODO: ID which model(s) have bad preds
   #TODO: Regression models should be numeric, classification models should have numeric class probs
