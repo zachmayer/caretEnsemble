@@ -8,7 +8,7 @@
 #' @param all.models a list of caret models to ensemble.
 #' @param ... additional arguments to pass to the optimization function
 #' @return S3 caretStack object
-#' @references \url{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
+#' @references \url{https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.2859&rep=rep1&type=pdf}
 #' @export
 #' @examples
 #' \dontrun{
@@ -21,7 +21,7 @@
 #' )
 #' caretStack(models, method="glm")
 #' }
-caretStack <- function(all.models, ...){
+caretStack <- function(all.models, ...) {
 
   predobs <- makePredObsMatrix(all.models)
 
@@ -68,27 +68,27 @@ predict.caretStack <- function(
   se=FALSE, level=0.95,
   return_weights=FALSE,
   na.action=na.omit,
-  ...){
+  ...) {
   stopifnot(is(object$models, "caretList"))
   type <- extractModelTypes(object$models)
 
   #preds <- do.call(predict, c(list(object=object$models, newdata=newdata), modelList_predict_params)) TODO keep this around for future use
   preds <- predict(object$models, newdata=newdata, na.action=na.action)
-  if(type == "Classification"){
+  if(type == "Classification") {
     out <- predict(object$ens_model, newdata=preds, na.action=na.action, ...)
     # Need a check here
-    if(inherits(out, c("data.frame", "matrix"))){
+    if(inherits(out, c("data.frame", "matrix"))) {
       # Return probability predictions for only one of the classes
       # as determined by configured default response class level
       est <- out[, getBinaryTargetLevel(), drop = TRUE]
-    } else{
+    } else {
       est <- out
     }
-  } else{
+  } else {
     est <- predict(object$ens_model, newdata=preds, ...)
   }
 
-  if(se | return_weights){
+  if(se | return_weights) {
     imp <- varImp(object$ens_model)$importance
     weights <- imp$Overall
     weights[!is.finite(weights)] <- 0
@@ -103,11 +103,11 @@ predict.caretStack <- function(
   }
 
   out <- est
-  if(se){
-    if(!is.numeric(est)){
+  if(se) {
+    if(!is.numeric(est)) {
       message("Standard errors not available.")
       out <- est
-    } else{
+    } else {
       weights <- weights[methods]
       std_error <- apply(preds, 1, wtd.sd, w = weights)
       std_error <- (qnorm(level) * std_error)
@@ -128,7 +128,7 @@ predict.caretStack <- function(
 #' @param object an R object
 #' @description Check if an object is a caretStack object
 #' @export
-is.caretStack <- function(object){
+is.caretStack <- function(object) {
   is(object, "caretStack")
 }
 
@@ -149,7 +149,7 @@ is.caretStack <- function(object){
 #' meta_model <- caretStack(models, method="lm")
 #' summary(meta_model)
 #' }
-summary.caretStack <- function(object, ...){
+summary.caretStack <- function(object, ...) {
   summary(object$ens_model)
 }
 
@@ -171,7 +171,7 @@ summary.caretStack <- function(object, ...){
 #' meta_model <- caretStack(models, method="lm")
 #' print(meta_model)
 #' }
-print.caretStack <- function(x, ...){
+print.caretStack <- function(x, ...) {
   base.models <- paste(names(x$models), collapse=", ")
   cat(sprintf("A %s ensemble of %s base models: %s", x$ens_model$method, length(x$models), base.models))
   cat("\n\nEnsemble results:\n")
@@ -196,7 +196,7 @@ print.caretStack <- function(x, ...){
 #' meta_model <- caretStack(models, method="rpart", tuneLength=2)
 #' plot(meta_model)
 #' }
-plot.caretStack <- function(x, ...){
+plot.caretStack <- function(x, ...) {
   plot(x$ens_model, ...)
 }
 
@@ -220,6 +220,6 @@ plot.caretStack <- function(x, ...){
 #' meta_model <- caretStack(models, method="lm", trControl=trainControl(method="cv"))
 #' dotplot.caretStack(meta_model)
 #' }
-dotplot.caretStack <- function(x, data=NULL, ...){
+dotplot.caretStack <- function(x, data=NULL, ...) {
   dotplot(resamples(x$models), data=data, ...)
 }

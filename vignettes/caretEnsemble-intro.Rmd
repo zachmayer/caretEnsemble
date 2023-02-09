@@ -31,8 +31,8 @@ library("pROC")
 data(Sonar)
 set.seed(107)
 inTrain <- createDataPartition(y = Sonar$Class, p = .75, list = FALSE)
-training <- Sonar[ inTrain,]
-testing <- Sonar[-inTrain,]
+training <- Sonar[inTrain, ]
+testing <- Sonar[-inTrain, ]
 my_control <- trainControl(
   method="boot",
   number=25,
@@ -54,8 +54,8 @@ model_list <- caretList(
   methodList=c("glm", "rpart")
   )
 ```
-(As with `train`, the formula interface is convienent but introduces move overhead.  For large datasets the explicitly passing `x` and `y` is preferred).
-We can use the `predict` function to extract predicitons from this object for new data:
+(As with `train`, the formula interface is convenient but introduces move overhead.  For large datasets the explicitly passing `x` and `y` is preferred).
+We can use the `predict` function to extract predictions from this object for new data:
 ```{r, echo=TRUE, results="hide"}
 p <- as.data.frame(predict(model_list, newdata=head(testing)))
 print(p)
@@ -64,7 +64,7 @@ print(p)
 knitr::kable(p)
 ```
 
-If you desire more control over the model fit, use the `caretModelSpec` to contruct a list of model specifications for the `tuneList` argument. This argumenent can be used to fit several different variants of the same model, and can also be used to pass arguments through `train` down to the component functions (e.g. `trace=FALSE` for `nnet`):
+If you desire more control over the model fit, use the `caretModelSpec` to construct a list of model specifications for the `tuneList` argument. This argument can be used to fit several different variants of the same model, and can also be used to pass arguments through `train` down to the component functions (e.g. `trace=FALSE` for `nnet`):
 ```{r, echo=FALSE, results="hide", warning=FALSE}
 suppressMessages(library("mlbench"))
 suppressMessages(library("randomForest"))
@@ -95,17 +95,17 @@ Finally, you should note that `caretList` does not support custom caret models. 
 xyplot(resamples(model_list))
 ```
     
-As you can see from this plot, these 2 models are un-correlated, and the rpart model is ocassionally anti-predictive, with a one re-sample showing AUC of 0.46.
+As you can see from this plot, these 2 models are uncorrelated, and the rpart model is occasionally anti-predictive, with a one re-sample showing AUC of 0.46.
 
-We can confirm the 2 model"s correlation with the `modelCor` function from caret (caret has a lot of convienent functions for analyzing lists of models):
+We can confirm the 2 model"s correlation with the `modelCor` function from caret (caret has a lot of convenient functions for analyzing lists of models):
 ```{r, echo=TRUE}
 modelCor(resamples(model_list))
 ```
 
-These 2 models make a good candidate for an ensemble: their predicitons are fairly un-correlated, but their overall accuaracy is similar.  We do a simple, linear greedy optimization on AUC using caretEnsemble:
+These 2 models make a good candidate for an ensemble: their predictions are fairly uncorrelated, but their overall accuracy is similar.  We do a simple, linear greedy optimization on AUC using caretEnsemble:
 ```{r, echo=TRUE}
 greedy_ensemble <- caretEnsemble(
-  model_list, 
+  model_list,
   metric="ROC",
   trControl=trainControl(
     number=2,
@@ -119,7 +119,7 @@ The ensemble"s AUC on the training set resamples is 0.76, which is about 7% bett
 ```{r, echo=TRUE}
 library("caTools")
 model_preds <- lapply(model_list, predict, newdata=testing, type="prob")
-model_preds <- lapply(model_preds, function(x) x[,"M"])
+model_preds <- lapply(model_preds, function(x) x[, "M"])
 model_preds <- data.frame(model_preds)
 ens_preds <- predict(greedy_ensemble, newdata=testing, type="prob")
 model_preds$ensemble <- ens_preds
@@ -163,7 +163,7 @@ CF/sum(CF)
 
 Note that `glm_ensemble$ens_model` is a regular caret object of class `train`.  The glm-weighted model weights (glm vs rpart) and test-set AUCs are extremely similar to the caretEnsemble greedy optimization.
 
-We can also use more sophisticated ensembles than simple linear weights, but these models are much more succeptible to over-fitting, and generally require large sets of resamples to train on (n=50 or higher for bootstrap samples).  Lets try one anyways:
+We can also use more sophisticated ensembles than simple linear weights, but these models are much more susceptible to over-fitting, and generally require large sets of resamples to train on (n=50 or higher for bootstrap samples).  Lets try one anyways:
 ```{r, echo=FALSE, results="hide"}
 suppressMessages(library("gbm"))
 suppressMessages(library("plyr"))

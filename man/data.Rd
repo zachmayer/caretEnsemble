@@ -14,13 +14,5 @@ Data for the caretEnsemble package
 }
 \author{
 Zachary Deane-Mayer \email{zach.mayer@gmail.com}
-
-Zachary Deane-Mayer \email{zach.mayer@gmail.com}
-
-Zachary Deane-Mayer \email{zach.mayer@gmail.com}
-
-Zachary Deane-Mayer \email{zach.mayer@gmail.com}
-
-Zachary Deane-Mayer \email{zach.mayer@gmail.com}
 }
 \keyword{data}

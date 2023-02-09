@@ -7,7 +7,7 @@
 check_bestpreds_preds(modelLibrary)
 }
 \arguments{
-\item{modelLibrary}{a list of predictins from caret models}
+\item{modelLibrary}{a list of predictions from caret models}
 }
 \description{
 Check that a list of predictions from a caretList are valid

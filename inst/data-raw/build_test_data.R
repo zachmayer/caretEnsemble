@@ -13,12 +13,12 @@ Y.class <- factor(ifelse(iris$Sepal.Length <= 6.2, "No", "Yes"))
 
 # Reusable control
 myControl_reg <- trainControl(
-  method = "cv", number = 10, repeats = 1,
+  method = "cv", number = 10,
   p = 0.75, savePrediction = TRUE,
   classProbs = FALSE, returnResamp = "final",
   returnData = TRUE)
 myControl_class <- trainControl(
-  method = "cv", number = 10, repeats = 1,
+  method = "cv", number = 10,
   p = 0.75, savePrediction = TRUE,
   summaryFunction=twoClassSummary,
   classProbs = TRUE, returnResamp = "final",
@@ -48,7 +48,7 @@ suppressWarnings({
 })
 
 # Save
-devtools::use_data(
+usethis::use_data(
   models.reg, models.class,
   Y.reg, Y.class,
   X.reg, X.class,

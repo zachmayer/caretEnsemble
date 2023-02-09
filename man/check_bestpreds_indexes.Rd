@@ -7,7 +7,7 @@
 check_bestpreds_indexes(modelLibrary)
 }
 \arguments{
-\item{modelLibrary}{a list of predictins from caret models}
+\item{modelLibrary}{a list of predictions from caret models}
 }
 \description{
 Check that the row indexes from a caretList are valid

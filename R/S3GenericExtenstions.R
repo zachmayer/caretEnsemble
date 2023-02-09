@@ -3,8 +3,8 @@
 
 #' @title S3 definition for concatenating caretList
 #'
-#' @description take N objects of class caretList and concatenat them into a larger object of
-#' class caretList for future Ensamble'ing
+#' @description take N objects of class caretList and concatenate them into a larger object of
+#' class caretList for future ensembling
 #'
 #' @param ... the objects of class caretList or train to bind into a caretList
 #' @return a \code{\link{caretList}} object
@@ -58,7 +58,7 @@ c.caretList <- function(...) {
 
 #' @title S3 definition for concatenating train objects
 #'
-#' @description take N objects of class train and concatenat into an object of class caretList for future Ensamble'ing
+#' @description take N objects of class train and concatenate into an object of class caretList for future ensembling
 #'
 #' @param ... the objects of class train to bind into a caretList
 #' @return a \code{\link{caretList}} object

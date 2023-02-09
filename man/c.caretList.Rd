@@ -13,8 +13,8 @@
 a \code{\link{caretList}} object
 }
 \description{
-take N objects of class caretList and concatenat them into a larger object of
-class caretList for future Ensamble'ing
+take N objects of class caretList and concatenate them into a larger object of
+class caretList for future ensembling
 }
 \examples{
 \dontrun{

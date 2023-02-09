@@ -29,7 +29,7 @@
 #' ens <- caretEnsemble(models)
 #' summary(ens)
 #' }
-caretEnsemble <- function(all.models, ...){
+caretEnsemble <- function(all.models, ...) {
   out <- caretStack(all.models, method="glm", ...)
   class(out) <- c("caretEnsemble", "caretStack")
   return(out)
@@ -39,7 +39,7 @@ caretEnsemble <- function(all.models, ...){
 #' @param object an R object
 #' @description Check if an object is a caretEnsemble object
 #' @export
-is.caretEnsemble <- function(object){
+is.caretEnsemble <- function(object) {
   is(object, "caretEnsemble")
 }
 
@@ -55,7 +55,7 @@ is.caretEnsemble <- function(object){
 #' ens <- caretEnsemble(models)
 #' summary(ens)
 #' }
-summary.caretEnsemble <- function(object, ...){
+summary.caretEnsemble <- function(object, ...) {
   types <- names(object$models)
   types <- paste(types, collapse = ", ")
   wghts <- coef(object$ens_model$finalModel)
@@ -73,7 +73,7 @@ summary.caretEnsemble <- function(object, ...){
 
 #' Extract the model accuracy metrics of the individual models in an ensemble object.
 #' @param ensemble a caretEnsemble to make predictions from.
-extractModRes <- function(ensemble){
+extractModRes <- function(ensemble) {
   stopifnot(is.caretEnsemble(ensemble))
   methods <- names(ensemble$models)
   metric <- ensemble$ens_model$metric
@@ -100,14 +100,14 @@ extractModRes <- function(ensemble){
 #' @param ... passed through
 #' @rdname metrics
 #' @export
-getMetric <- function(x, metric, ...){
+getMetric <- function(x, metric, ...) {
   UseMethod("getMetric")
 }
 
 #' Extract accuracy metrics SDs from a model
 #' @rdname metrics
 #' @export
-getMetricSD <- function(x, metric, ...){
+getMetricSD <- function(x, metric, ...) {
   UseMethod("getMetricSD")
 }
 
@@ -115,8 +115,8 @@ getMetricSD <- function(x, metric, ...){
 #' @return A numeric representing the metric desired metric.
 #' @rdname metrics
 #' @export
-getMetric.train <- function(x, metric=NULL, ...){
-  if(is.null(metric)){
+getMetric.train <- function(x, metric=NULL, ...) {
+  if(is.null(metric)) {
     metric <- x$metric
   }
   stopifnot(metric %in% names(x$results))
@@ -128,7 +128,7 @@ getMetric.train <- function(x, metric=NULL, ...){
 #' Extract the standard deviation from resamples for an accuracy metric from a model object.
 #' @rdname metrics
 #' @export
-getMetricSD.train <- function(x, metric, ...){
+getMetricSD.train <- function(x, metric, ...) {
   stopifnot(metric %in% names(x$results))
   val <- x$results[[metric]]
   SD <- x$results[[paste0(metric, "SD")]]
@@ -137,7 +137,7 @@ getMetricSD.train <- function(x, metric, ...){
 }
 
 #' @keywords internal
-matchBestTune <- function(out, bt){
+matchBestTune <- function(out, bt) {
   nams <- names(attributes(out)$dimnames)
   nams <- nams[nams %in% names(bt)]
   tmp <- c()
@@ -161,11 +161,11 @@ matchBestTune <- function(out, bt){
 #' @importFrom digest digest
 #' @importFrom caret varImp
 #' @export
-varImp.caretEnsemble <- function(object, ...){
+varImp.caretEnsemble <- function(object, ...) {
 
   #Extract and formal individual model importances
   #Todo, clean up this code!
-  a <- lapply(object$models, varImp)
+  a <- lapply(object$models, caret::varImp)
   a <- lapply(a, clean_varImp)
 
   #Convert to data.frame
@@ -195,7 +195,7 @@ varImp.caretEnsemble <- function(object, ...){
 
 #' @keywords internal
 # This function only gets called once, in varImp.caretEnsemble
-clean_varImp <- function(x){
+clean_varImp <- function(x) {
   names(x$importance)[1] <- "Overall"
   x$importance <- x$importance[, "Overall", drop=FALSE]
   return(x$importance)
@@ -203,7 +203,7 @@ clean_varImp <- function(x){
 
 #' @keywords internal
 # This function only gets called once, in varImp.caretEnsemble
-varImpFrame <- function(x){
+varImpFrame <- function(x) {
 
   dat <- do.call(rbind.data.frame, x)
   dat <- dat[!duplicated(lapply(dat, summary))]
@@ -230,16 +230,16 @@ varImpFrame <- function(x){
 #' @param object a \code{caretEnsemble} to make predictions from.
 #' @param ... other arguments to be passed to residuals
 #' @return A numeric of the residuals.
-residuals.caretEnsemble <- function(object, ...){
-  if(is.null(object$modelType)){
+residuals.caretEnsemble <- function(object, ...) {
+  if(is.null(object$modelType)) {
     object$modelType <- extractModelTypes(object$models)[1]
   }
-  if(object$modelType == "Regression"){
+  if(object$modelType == "Regression") {
     yhat <- predict(object)
     y <- object$models[[1]]$trainingData$.outcome
     resid <- y - yhat
     return(resid)
-  } else if(object$modelType == "Classification"){
+  } else if(object$modelType == "Classification") {
     yhat <- predict(object, type="prob")
     y <- as.character(object$models[[1]]$trainingData$.outcome)
     z <- table(y)
@@ -258,13 +258,13 @@ residuals.caretEnsemble <- function(object, ...){
 #' @return A data.frame in the long format with columns for the model method,
 #' the observation id, yhat for the fitted values, resid for the residuals, and
 #' y for the observed value.
-multiResiduals <- function(object, ...){
+multiResiduals <- function(object, ...) {
   stopifnot(is(object$models, "caretList"))
   modtype <- extractModelTypes(object$models)
   preds <- predict(object$models, ...)
-  if(modtype == "Regression"){
+  if(modtype == "Regression") {
     y <- object$models[[1]]$trainingData$.outcome
-  } else if(modtype == "Classification"){
+  } else if(modtype == "Classification") {
     y <- as.character(object$models[[1]]$trainingData$.outcome)
     z <- table(y)
     prevOutcome <- names(z)[z == max(z)]
@@ -290,21 +290,21 @@ multiResiduals <- function(object, ...){
 #' @param data a data set, defaults to the data used to fit the model
 #' @param ... additional arguments to pass to fortify
 #' @return The original data with extra columns for fitted values and residuals
-fortify <- function(model, data = NULL, ...){
+fortify <- function(model, data = NULL, ...) {
   data <- extractModFrame(model)
   data$y <- model$models[[1]]$trainingData$.outcome
-  if(!inherits(data$y, "numeric")){
+  if(!inherits(data$y, "numeric")) {
     data$y <- as.character(data$y)
     z <- table(data$y)
     prevOutcome <- names(z)[z == max(z)]
     data$y <- ifelse(data$y == prevOutcome, 0, 1)
     data$y <- as.numeric(data$y)
   }
-  if(model$ens_model$modelType == "Classification"){
+  if(model$ens_model$modelType == "Classification") {
     data$.fitted <- predict(model, type="prob")
-  } else if(model$ens_model$modelType == "Regression"){
+  } else if(model$ens_model$modelType == "Regression") {
     data$.fitted <- predict(model)
-  }else{
+  }else {
     stop(paste("Uknown model type", model$ens_model$modelType))
   }
 
@@ -319,7 +319,7 @@ fortify <- function(model, data = NULL, ...){
 #' @param model a \code{caretEnsemble} to extract predictors from
 #' @return A data.frame combining all of the variables used across all models.
 #' @importFrom digest digest
-extractModFrame <- function(model){
+extractModFrame <- function(model) {
   datList <- vector("list", length = length(model$models))
   for(i in 1: length(model$models)){
     datList[[i]] <- model$models[[i]]$trainingData
@@ -345,7 +345,7 @@ extractModFrame <- function(model){
 #' ens <- caretEnsemble(models)
 #' plot(ens)
 #' }
-plot.caretEnsemble <- function(x, ...){
+plot.caretEnsemble <- function(x, ...) {
 
   # TODO: USE OUT OF SAMPLE RESIDUALS
 
@@ -361,9 +361,9 @@ plot.caretEnsemble <- function(x, ...){
     geom_pointrange() +
     theme_bw() + labs(x = "Individual Model Method", y = metricLab)
 
-  if(nrow(x$error) > 0){
+  if(nrow(x$error) > 0) {
     plt <- plt +
-    geom_hline(linetype = 2, size = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"), size = I(1.1))
+    geom_hline(linetype = 2, linewidth = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
   }
   return(plt)
 }
@@ -385,7 +385,8 @@ plot.caretEnsemble <- function(x, ...){
 #' right is the disagreement in the residuals of the component models (unweighted)
 #' across the fitted values. Bottom left and bottom right are the plots of the
 #' residuals against two random or user specified variables.
-#' @importFrom ggplot2 ggplot aes geom_point geom_smooth scale_x_continuous scale_y_continuous theme_bw geom_bar labs geom_linerange aes_string
+#' @importFrom ggplot2 ggplot aes geom_point geom_smooth scale_x_continuous
+#' @importFrom ggplot2 scale_y_continuous theme_bw geom_bar labs geom_linerange aes_string
 #' @importFrom plyr ddply summarize .
 #' @importFrom gridExtra grid.arrange
 #' @export
@@ -401,7 +402,7 @@ plot.caretEnsemble <- function(x, ...){
 #' autoplot(ens)
 #' }
 autoplot <- function(object, which = c(1:6), mfrow = c(3, 2),
-                                   xvars = NULL, ...){
+                                   xvars = NULL, ...) {
   plotdf <- suppressMessages(fortify(object))
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
   wghtFrame <- as.data.frame(coef(object$ens_model$finalModel))
@@ -414,14 +415,14 @@ autoplot <- function(object, which = c(1:6), mfrow = c(3, 2),
   g3 <- ggplot(wghtFrame, aes(method, weights)) +
     geom_bar(stat = "identity", fill = I("gray50"), color = I("black")) +
     labs(title = "Model Weights", x = "Method", y = "Weights") + theme_bw()
-  if(missing(xvars)){
+  if(missing(xvars)) {
     xvars <- names(plotdf)[!names(plotdf) %in% c("(Intercept)", ".outcome", "y",
                                                  ".fitted", ".resid")]
     xvars <- sample(xvars, 2)
   }
   # TODO: Insert checks for length of xvars here
   residOut <- multiResiduals(object)
-  zed <- ddply(residOut, .(id), summarize,
+  zed <- plyr::ddply(residOut, plyr::.(id), plyr::summarize,
                ymin = min(resid),
                ymax = max(resid),
                yavg = median(resid),

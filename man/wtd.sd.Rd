@@ -14,5 +14,5 @@ wtd.sd(x, w = NULL, na.rm = FALSE)
 \item{na.rm}{a logical indicating how to handle missing values, default = FALSE}
 }
 \description{
-Used to weight deviations among ensembled model preditions
+Used to weight deviations among ensembled model predictions
 }
