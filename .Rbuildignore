@@ -12,3 +12,4 @@ travis_wait_*
 .github/*
 ^doc$
 ^Meta$
+revdep/*
