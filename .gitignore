@@ -1,3 +1,9 @@
+
+# Reverse deps data
+revdep/checks.noindex
+revdep/data.sqlite
+revdep/library.noindex
+
 #################
 ## Eclipse
 
