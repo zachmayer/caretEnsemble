@@ -13,3 +13,4 @@ travis_wait_*
 ^doc$
 ^Meta$
 revdep/*
+^CRAN-SUBMISSION$
