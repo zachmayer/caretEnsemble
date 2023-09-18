@@ -1,5 +1,9 @@
 #NEWS 
 
+## caretEnsemble 2.0.3
+- Fix broken package documentation with new roxygen2
+- Replace deprecated linters with the new versions
+
 ## caretEnsemble 2.0.2
 - Fix broken tests on r-devel
 
