@@ -1,3 +1,4 @@
+devtools::check()
 devtools::check(cran=T, remote=T, manual=T, error_on="note")
 devtools::check(cran=F, remote=T, manual=T, error_on="note", force_suggests=T)
 
