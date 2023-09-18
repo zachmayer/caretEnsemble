@@ -2,6 +2,7 @@
 #'
 #' Functions for creating ensembles of caret models: caretList and caretStack
 #' @docType package
+#' @aliases caretEnsemble-package
 #' @name caretEnsemble
 #' @importFrom graphics plot
 #' @importFrom methods is

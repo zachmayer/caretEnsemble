@@ -3,6 +3,7 @@
 \docType{package}
 \name{caretEnsemble}
 \alias{caretEnsemble}
+\alias{caretEnsemble-package}
 \title{caretEnsemble: Make ensembles of caret models.}
 \usage{
 caretEnsemble(all.models, ...)
