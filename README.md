@@ -1,10 +1,10 @@
-[![Build Status](http://img.shields.io/travis/zachmayer/caretEnsemble.svg?style=flat)](https://travis-ci.org/zachmayer/caretEnsemble)
+[![Build Status](http://img.shields.io/travis/zachmayer/caretEnsemble.svg?style=flat)](https://app.travis-ci.com/zachmayer/caretEnsemble)
 [![Coverage Status](http://img.shields.io/coveralls/zachmayer/caretEnsemble.svg?style=flat)](https://coveralls.io/github/zachmayer/caretEnsemble)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/caretEnsemble)](https://CRAN.R-project.org/package=caretEnsemble/)
 [![Downloads](http://cranlogs.r-pkg.org/badges/caretEnsemble)](https://CRAN.R-project.org/package=caretEnsemble/)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](https://badges.mit-license.org)
 [![Badges](http://img.shields.io/:badges-7/7-438cf0.svg?style=flat)](https://github.com/badges/badgerbadgerbadger)
-[![Join the chat at https://gitter.im/zachmayer/caretEnsemble](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zachmayer/caretEnsemble?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/zachmayer/caretEnsemble](https://badges.gitter.im/Join%20Chat.svg)](https://app.gitter.im/#/room/#zachmayer_caretEnsemble:gitter.im)
 
 # caretEnsemble: [(Read the vignette!)](https://htmlpreview.github.io/?https://github.com/zachmayer/caretEnsemble/blob/master/doc/caretEnsemble-intro.html)
 
