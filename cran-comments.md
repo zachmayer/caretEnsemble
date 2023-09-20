@@ -1,5 +1,5 @@
 ## Test environments
-* local OS X install, R 4.2.2
+* local Intel Mac OS X install, R 4.3.1
 * win-builder (R-release, R-devel, R-oldrelease)
 
 ## R CMD check results

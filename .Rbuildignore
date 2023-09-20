@@ -14,3 +14,4 @@ travis_wait_*
 ^Meta$
 revdep/*
 ^CRAN-SUBMISSION$
+check_package.R
