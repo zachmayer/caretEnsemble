@@ -8,3 +8,5 @@ devtools::check(cran=F, remote=T, manual=T, error_on="note", force_suggests=T)
 devtools::check_win_devel()
 devtools::check_win_release()
 devtools::check_win_oldrelease()
+
+devtools::submit_cran()
