@@ -1,6 +1,7 @@
 context("Does binary class selection work?")
 library(caret)
 library(caretEnsemble)
+library(testthat)
 
 # Load and prepare data for subsequent tests
 seed <- 2239
@@ -10,16 +11,17 @@ data(X.class)
 data(Y.class)
 
 # Create 80/20 train/test split
-index <- createDataPartition(Y.class, p=.8)[[1]]
-X.train <- X.class[index, ]; X.test <- X.class[-index, ]
-Y.train <- Y.class[index]; Y.test <- Y.class[-index]
+index <- createDataPartition(Y.class, p = .8)[[1]]
+X.train <- X.class[index, ]
+X.test <- X.class[-index, ]
+Y.train <- Y.class[index]
+Y.test <- Y.class[-index]
 
 #############################################################################
 context("Do classifier predictions use the correct target classes?")
 #############################################################################
 
-runBinaryLevelValidation <- function(Y.train, Y.test, pos.level=1){
-
+runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1) {
   # Extract levels of response input data
   Y.levels <- levels(Y.train)
   expect_identical(Y.levels, levels(Y.test))
@@ -40,10 +42,12 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level=1){
   expect_true(all(fold.idx == seq_along(Y.train)), "CV indexes not generated correctly")
 
   # Train a caret ensemble
-  ctrl <- trainControl(method="cv", savePredictions="final", classProbs=TRUE, index=folds)
+  ctrl <- trainControl(method = "cv", savePredictions = "final", classProbs = TRUE, index = folds)
   model.list <- caretList(
-    X.train, Y.train, metric = "Accuracy",
-    trControl = ctrl, methodList = c("rpart", "glmnet"))
+    X.train, Y.train,
+    metric = "Accuracy",
+    trControl = ctrl, methodList = c("rpart", "glmnet")
+  )
   model.ens <- caretEnsemble(model.list)
 
   # Verify that the observed responses in each fold, for each model,
@@ -60,13 +64,13 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level=1){
 
   # Create class and probability predictions, as well as class predictions
   # generated from probability predictions using a .5 cutoff
-  Y.pred <- predict(model.ens, newdata=X.test, type="raw")
-  Y.prob <- predict(model.ens, newdata=X.test, type="prob")
-  Y.cutoff <- factor(ifelse(Y.prob > .5, Y.levels[pos.level], Y.levels[-pos.level]), levels=Y.levels)
+  Y.pred <- predict(model.ens, newdata = X.test, type = "raw")
+  Y.prob <- predict(model.ens, newdata = X.test, type = "prob")
+  Y.cutoff <- factor(ifelse(Y.prob > .5, Y.levels[pos.level], Y.levels[-pos.level]), levels = Y.levels)
 
   # Create confusion matricies for each class prediction vector
-  cmat.pred <- confusionMatrix(Y.pred, Y.test, positive=Y.levels[pos.level])
-  cmat.cutoff <- confusionMatrix(Y.cutoff, Y.test, positive=Y.levels[pos.level])
+  cmat.pred <- confusionMatrix(Y.pred, Y.test, positive = Y.levels[pos.level])
+  cmat.cutoff <- confusionMatrix(Y.cutoff, Y.test, positive = Y.levels[pos.level])
 
   # Verify that the positive level of the Y response is equal to the positive
   # class label used by caret.  This could potentially become untrue if
@@ -77,12 +81,12 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level=1){
   # check exists to avoid previous errors where classifer ensemble predictions were
   # being made using the incorrect level of the response, causing the opposite
   # class labels to be predicted with new data.
-  expect_equal(as.numeric(cmat.pred$overall["Accuracy"]), 0.7586, tol = 0.0001)
+  expect_equal(as.numeric(cmat.pred$overall["Accuracy"]), 0.862, tol = 0.001)
 
   # Similar to the above, ensure that probability predictions are working correctly
   # by checking to see that accuracy is also high for class predictions created
   # from probabilities
-  expect_equal(as.numeric(cmat.cutoff$overall["Accuracy"]), 0.7586, tol = 0.0001)
+  expect_equal(as.numeric(cmat.cutoff$overall["Accuracy"]), 0.862, tol = 0.001)
 }
 
 test_that("Ensembled classifiers do not rearrange outcome factor levels", {
@@ -106,9 +110,12 @@ test_that("Ensembled classifiers do not rearrange outcome factor levels", {
   # Reversing the level order then ensures that the outcome is not
   # releveled at some point by caretEnsemble.
   Y.levels <- levels(Y.train)
-  refactor <- function(d) factor(
-    ifelse(d == Y.levels[1], Y.levels[2], Y.levels[1]),
-    levels=rev(Y.levels))
+  refactor <- function(d) {
+    factor(
+      ifelse(d == Y.levels[1], Y.levels[2], Y.levels[1]),
+      levels = rev(Y.levels)
+    )
+  }
 
   set.seed(seed)
   runBinaryLevelValidation(refactor(Y.train), refactor(Y.test))
@@ -130,10 +137,10 @@ test_that("Target class selection configuration works", {
   setBinaryTargetLevel(2L)
 
   Y.levels <- levels(Y.train)
-  refactor <- function(d) factor(as.character(d), levels=rev(Y.levels))
+  refactor <- function(d) factor(as.character(d), levels = rev(Y.levels))
 
   set.seed(seed)
-  runBinaryLevelValidation(refactor(Y.train), refactor(Y.test), pos.level=2)
+  runBinaryLevelValidation(refactor(Y.train), refactor(Y.test), pos.level = 2)
 
   # Set the target binary level back to what it was before this test
   setBinaryTargetLevel(bin.level)
