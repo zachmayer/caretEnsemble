@@ -350,8 +350,8 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
       stop(paste("Unknown model type:", type))
     }
   })
-  if(class(preds) != "matrix" & class(preds) != "data.frame"){
-    if(class(preds) == "character" | class(preds) == "factor"){
+  if (!(any(class(preds) == "matrix") || any(class(preds) == "data.frame"))) {
+    if (any(class(preds) == "character") || any(class(preds) == "factor")) {
       preds <- as.character(preds) # drop factorization
     }
     preds <- as.matrix(t(preds))
