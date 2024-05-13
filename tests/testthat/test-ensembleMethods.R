@@ -40,7 +40,7 @@ test_that("varImp works for caretEnsembles", {
         i <- varImp(ens, scale = s, weight = w)
         expect_is(i, "data.frame")
         expect_equal(names(i), expected_names)
-        expect_equal(row.names(i), expected_row_names)
+        expect_equal(sort(row.names(i)), sort(expected_row_names))
       }
     }
   }
@@ -189,7 +189,7 @@ test_that("Residuals provided by residuals are proper for ensemble objects", {
   obs2 <- Y.reg
   suppressWarnings(predTest <- predict(ens.class, type = "prob"))
   suppressWarnings(predTest2 <- predict(ens.reg))
-  expect_equal(residTest, obs1 - predTest, tolerance = 1e-3)
+  expect_equal(residTest, obs1 - predTest[, "No"], tolerance = 1e-3)
   expect_equal(residTest2, obs2 - predTest2, tolerance = 1e-3)
   expect_false(identical(residTest2, predTest2 - obs2))
 
@@ -289,7 +289,7 @@ test_that("Prediction options are respected in regression and classification", {
     }
 
     if (tests[i, "return_weights"]) {
-      expect_is(attr(preds, which = "weights"), "numeric")
+      expect_is(attr(preds, which = "weights")$Overall, "numeric")
     } else {
       expect_null(attr(preds, which = "weights"))
     }
@@ -309,16 +309,11 @@ test_that("Prediction options are respected in regression and classification", {
       )
     })
 
-    if (tests[i, "se"]) {
-      expect_is(p, "data.frame")
-      preds <- p
-    } else {
-      expect_is(p, "numeric")
-      preds <- p
-    }
+    expect_is(p, "data.frame")
+    preds <- p
 
     if (tests[i, "return_weights"]) {
-      expect_is(attr(preds, which = "weights"), "numeric")
+      expect_is(unlist(attr(preds, which = "weights")), "numeric")
     } else {
       expect_null(attr(preds, which = "weights"))
     }

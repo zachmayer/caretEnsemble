@@ -64,8 +64,8 @@ test_that("Target extraction functions work", {
 test_that("caretList errors for bad models", {
   data(iris)
   expect_error(caretList(Sepal.Width ~ ., iris))
-  suppressWarnings(caretList(Sepal.Width ~ ., iris, methodList = c("lm", "lm")))
-  suppressWarnings(expect_is(caretList(Sepal.Width ~ ., iris, methodList = "lm", continue_on_fail = TRUE), "caretList"))
+  expect_warning(caretList(Sepal.Width ~ ., iris, methodList = c("lm", "lm")))
+  expect_warning(expect_is(caretList(Sepal.Width ~ ., iris, methodList = "lm", continue_on_fail = TRUE), "caretList"))
 
   my_control <- trainControl(method = "cv", number = 2)
   bad_bad <- list(
@@ -120,8 +120,11 @@ test_that("caretList predictions", {
     models <- caretList(
       iris[, 1:2], iris[, 5],
       tuneLength = 1, verbose = FALSE,
-      methodList = "rf", tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
-      trControl = trainControl(method = "cv", number = 2, savePredictions = "final", classProbs = TRUE)
+      methodList = "rf",
+      tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
+      trControl = trainControl(
+        method = "cv", number = 2, savePredictions = "final", classProbs = TRUE
+      )
     )
   })
 
@@ -130,17 +133,33 @@ test_that("caretList predictions", {
   expect_is(p2, "matrix")
   expect_is(p2[, 1], "numeric")
   expect_is(p2[, 2], "numeric")
+  expect_is(p2[, 3], "numeric")
+  expect_is(p2[, 4], "numeric")
   expect_is(p3, "matrix")
   expect_is(p3[, 1], "numeric")
   expect_is(p3[, 2], "numeric")
-  expect_equal(names(models), colnames(p3))
+  expect_is(p3[, 3], "numeric")
+  expect_is(p3[, 4], "numeric")
+  expect_equal(
+    length(names(models)) * length(levels(as.factor(iris[, 5]))),
+    length(colnames(p3))
+  ) # check that we have the right number of columns
+
+  modelnames <- names(models)
+  classes <- levels(iris[, 5])
+  combinations <- expand.grid(classes, modelnames)
+  correct_colnames <- apply(combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+  expect_equal(
+    correct_colnames,
+    colnames(p3)
+  ) # check the column names are correct and ordered correctly (methodname_classname)
 
   models[[1]]$modelType <- "Bogus"
   expect_error(suppressWarnings(predict(models)))
 })
 
 test_that("as.caretList.list returns a caretList object", {
-  suppressWarnings({
+  expect_warning({
     modelList <- caretList(Sepal.Length ~ Sepal.Width,
       head(iris, 50),
       methodList = c("glm", "lm", "knn")
@@ -211,6 +230,7 @@ test_that("We can handle different CV methods", {
           tuneLength = 2,
           methodList = c("rpart", "rf")
         )
+        ens <- caretStack(models, method = "glm", trControl = trainControl(number = 2))
       })
     })
     invisible(sapply(models, expect_is, class = "train"))

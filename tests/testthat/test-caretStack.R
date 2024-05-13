@@ -22,7 +22,7 @@ test_that("We can stack regression models", {
   expect_that(ens.reg, is_a("caretStack"))
   expect_is(summary(ens.reg), "summary.lm")
   invisible(capture.output(print(ens.reg)))
-  suppressWarnings(pred.reg <- predict(ens.reg, newdata = X.reg))
+  pred.reg <- predict(ens.reg, newdata = X.reg) # In the past this expected a warning, I do not know why. I think is caused by the used method (lm)
   expect_true(is.numeric(pred.reg))
   expect_true(length(pred.reg) == 150)
 })
@@ -37,10 +37,10 @@ test_that("We can stack classification models", {
   expect_that(ens.class, is_a("caretStack"))
   expect_is(summary(ens.class), "summary.glm")
   invisible(capture.output(print(ens.class)))
-  suppressWarnings(pred.class <- predict(ens.class, X.class, type = "prob"))
-  expect_true(is.numeric(pred.class))
-  expect_true(length(pred.class) == 150)
-  suppressWarnings(raw.class <- predict(ens.class, X.class, type = "raw"))
+  pred.class <- predict(ens.class, X.class, type = "prob")
+  expect_true(all(sapply(pred.class, is.numeric)))
+  expect_true(nrow(pred.class) == 150)
+  raw.class <- predict(ens.class, X.class, type = "raw")
   expect_true(is.factor(raw.class))
   expect_true(length(raw.class) == 150)
 })
@@ -69,60 +69,51 @@ test_that("Failure to calculate se occurs gracefully", {
     trControl = trainControl(number = 2, allowParallel = FALSE)
   )
 
-  suppressWarnings(predict(ens.class, X.class, type = "raw", se = TRUE))
-  suppressWarnings(expect_is(predict(ens.class, X.class, type = "raw"), "factor"))
-  suppressWarnings(expect_is(predict(ens.class, X.class, type = "raw", se = TRUE), "factor"))
-  suppressWarnings({
-    expect_identical(
-      predict(ens.class, X.class, type = "raw", se = TRUE),
-      predict(ens.class, X.class, type = "raw")
-    )
-  })
+  predict(ens.class, X.class, type = "raw", se = TRUE)
+  expect_is(predict(ens.class, X.class, type = "raw"), "factor")
+  expect_is(predict(ens.class, X.class, type = "raw", se = TRUE), "factor")
+  expect_identical(
+    predict(ens.class, X.class, type = "raw", se = TRUE),
+    predict(ens.class, X.class, type = "raw")
+  )
   ens.reg <- caretStack(
     models.reg,
     method = "lm", preProcess = "pca",
     trControl = trainControl(number = 2, allowParallel = FALSE)
   )
-  suppressWarnings(pred <- predict(ens.reg, X.reg, se = TRUE))
-  suppressWarnings(expect_is(predict(ens.reg, X.reg, se = TRUE), "data.frame"))
+  expect_is(predict(ens.reg, X.reg, se = TRUE), "data.frame")
 
-  suppressWarnings(expect_is(predict(ens.class, X.class, type = "prob", se = TRUE), "data.frame"))
-  suppressWarnings(
-    expect_is(
-      predict(
-        ens.class, X.class,
-        type = "prob", se = TRUE, return_weights = TRUE
-      ), "data.frame"
+  expect_is(predict(ens.class, X.class, type = "prob", se = TRUE), "data.frame")
+  expect_is(
+    predict(
+      ens.class, X.class,
+      type = "prob", se = TRUE, return_weights = TRUE
+    ), "data.frame"
+  )
+  expect_identical(
+    colnames(predict(ens.class, X.class, type = "prob", se = TRUE)),
+    c("No", "Yes")
+  )
+  expect_false(
+    identical(
+      predict(ens.class, X.class, type = "raw", return_weights = TRUE),
+      predict(ens.class, X.class, type = "raw", return_weights = FALSE)
     )
   )
-  suppressWarnings(
-    expect_identical(
-      colnames(predict(ens.class, X.class, type = "prob", se = TRUE)),
-      c("fit", "lwr", "upr")
+  expect_false(
+    identical(
+      predict(ens.class, X.class, type = "prob", se = TRUE),
+      predict(ens.class, X.class, type = "prob", se = TRUE, return_weights = TRUE)
     )
   )
-  suppressWarnings(
-    expect_false(
-      identical(
-        predict(ens.class, X.class, type = "raw", return_weights = TRUE),
-        predict(ens.class, X.class, type = "raw", return_weights = FALSE)
-      )
-    )
+  expect_identical(
+    predict(ens.class, X.class, type = "prob", se = TRUE, level = 0.8),
+    predict(ens.class, X.class, type = "prob", se = TRUE, return_weights = FALSE)
   )
-  suppressWarnings(
-    expect_false(
-      identical(
-        predict(ens.class, X.class, type = "prob", se = TRUE, level = 0.8),
-        predict(ens.class, X.class, type = "prob", se = TRUE, return_weights = FALSE)
-      )
-    )
-  )
-  suppressWarnings(
-    expect_true(
-      identical(
-        predict(ens.class, X.class, type = "prob", level = 0.8),
-        predict(ens.class, X.class, type = "prob", return_weights = FALSE)
-      )
+  expect_true(
+    identical(
+      predict(ens.class, X.class, type = "prob", level = 0.8),
+      predict(ens.class, X.class, type = "prob", return_weights = FALSE)
     )
   )
 })
@@ -135,12 +126,12 @@ test_that("Test na.action pass through", {
 
   X_reg_na <- X.reg
   # introduce random NA values into a column
-  X_reg_na[sample(1:nrow(X_reg_na), 20), sample(1:ncol(X_reg_na) - 1, 1)] <- NA
+  X_reg_na[sample(seq_len(nrow(X_reg_na)), 20), sample(seq_len(ncol(X_reg_na) - 1), 1)] <- NA
 
-  suppressWarnings(pred.reg <- predict(ens.reg, newdata = X_reg_na, na.action = na.pass))
+  pred.reg <- predict(ens.reg, newdata = X_reg_na, na.action = na.pass)
   expect_length(pred.reg, nrow(X_reg_na))
 
-  suppressWarnings(pred.reg <- predict(ens.reg, newdata = X_reg_na))
+  pred.reg <- predict(ens.reg, newdata = X_reg_na)
   expect_false(length(pred.reg) != nrow(X_reg_na))
 })
 

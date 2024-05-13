@@ -2,6 +2,7 @@ context("Does binary class selection work?")
 library(caret)
 library(testthat)
 library(caretEnsemble)
+library(testthat)
 
 # Load and prepare data for subsequent tests
 seed <- 2239
@@ -66,7 +67,7 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1) {
   # generated from probability predictions using a .5 cutoff
   Y.pred <- predict(model.ens, newdata = X.test, type = "raw")
   Y.prob <- predict(model.ens, newdata = X.test, type = "prob")
-  Y.cutoff <- factor(ifelse(Y.prob > .5, Y.levels[pos.level], Y.levels[-pos.level]), levels = Y.levels)
+  Y.cutoff <- factor(ifelse(Y.prob[, Y.levels[pos.level]] > .5, Y.levels[pos.level], Y.levels[-pos.level]), levels = Y.levels)
 
   # Create confusion matricies for each class prediction vector
   cmat.pred <- confusionMatrix(Y.pred, Y.test, positive = Y.levels[pos.level])
@@ -81,12 +82,12 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1) {
   # check exists to avoid previous errors where classifer ensemble predictions were
   # being made using the incorrect level of the response, causing the opposite
   # class labels to be predicted with new data.
-  expect_equal(as.numeric(cmat.pred$overall["Accuracy"]), 0.862, tol = 0.1)
+  expect_equal(as.numeric(cmat.pred$overall["Accuracy"]), 0.862, tol = 0.001)
 
   # Similar to the above, ensure that probability predictions are working correctly
   # by checking to see that accuracy is also high for class predictions created
   # from probabilities
-  expect_equal(as.numeric(cmat.cutoff$overall["Accuracy"]), 0.862, tol = 0.1)
+  expect_equal(as.numeric(cmat.cutoff$overall["Accuracy"]), 0.862, tol = 0.001)
 }
 
 test_that("Ensembled classifiers do not rearrange outcome factor levels", {

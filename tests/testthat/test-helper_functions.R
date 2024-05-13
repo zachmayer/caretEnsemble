@@ -60,7 +60,7 @@ test_that("We can make the predobs matrix", {
 })
 
 test_that("We can predict", {
-  suppressWarnings(out <- predict(models.reg, "reg", newdata = X.reg))
+  out <- predict(models.reg, "reg", newdata = X.reg)
   expect_is(out, "matrix")
   expect_true(all(dim(out) == c(150, 4)))
   expect_true(all(colnames(out) == c("rf", "glm", "rpart", "treebag")))
@@ -74,15 +74,18 @@ test_that("We can make the predobs matrix", {
   out <- makePredObsMatrix(models.class)
   expect_that(out, is_a("list"))
   expect_true(length(out$obs) == 150)
-  expect_true(all(dim(out$preds) == c(150, 4)))
+  expect_true(all(dim(out$preds) == c(150, 4 * 1))) # number of models * (number of classes-1)
 })
 
 test_that("We can predict", {
-  suppressWarnings(out <- predict(models.class, "Classification", newdata = X.class))
+  out <- predict(models.class, "Classification", newdata = X.class)
   expect_is(out, "matrix")
-  expect_true(all(dim(out) == c(150, 4)))
-  expect_true(all(colnames(out) == c("rf", "glm", "rpart", "treebag")))
-  suppressWarnings(out2 <- predict(models.reg, "Regression", newdata = X.reg))
+  expect_true(all(dim(out) == c(150, 4 * 2)))
+  model_names <- c("rf", "glm", "rpart", "treebag")
+  class_names <- c("No", "Yes")
+  combinations <- expand.grid(class_names, model_names)
+  expect_true(all(colnames(out) == paste(combinations$Var2, combinations$Var1, sep = "_")))
+  out2 <- predict(models.reg, "Regression", newdata = X.reg)
   expect_true(all(dim(out2) == c(150, 4)))
   expect_true(all(colnames(out2) == c("rf", "glm", "rpart", "treebag")))
 })
@@ -95,12 +98,11 @@ test_that("predict results same regardless of verbose option", {
       out2 <- predict(models.class, "Classification", verbose = TRUE, newdata = X.class)
       expect_identical(out1, out2)
     })
-    suppressWarnings({
-      expect_is(predict(models.reg, "Regression", newdata = X.reg), "matrix")
-      out1 <- predict(models.reg, "Regression", newdata = X.reg)
-      out2 <- predict(models.reg, "Regression", verbose = TRUE, newdata = X.reg)
-      expect_identical(out1, out2)
-    })
+
+    expect_is(predict(models.reg, "Regression", newdata = X.reg), "matrix")
+    out1 <- predict(models.reg, "Regression", newdata = X.reg)
+    out2 <- predict(models.reg, "Regression", verbose = TRUE, newdata = X.reg)
+    expect_identical(out1, out2)
   }))
 })
 
@@ -137,7 +139,7 @@ test_that("Checks generate errors", {
   skip_on_cran()
   set.seed(42)
   myControl <- trainControl(method = "cv", number = 5, savePredictions = "final")
-  suppressWarnings(
+  expect_warning(
     x <- caretList(
       Sepal.Length ~ Sepal.Width,
       iris,
@@ -152,7 +154,7 @@ test_that("Checks generate errors", {
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
 
-  suppressWarnings(x$rpart <- train(Sepal.Length ~ Sepal.Width, iris, method = "rpart"))
+  expect_warning(x$rpart <- train(Sepal.Length ~ Sepal.Width, iris, method = "rpart"))
   expect_error(check_bestpreds_resamples(modelLibrary))
   expect_error(check_bestpreds_indexes(modelLibrary))
   expect_error(check_bestpreds_obs(modelLibrary))
@@ -207,4 +209,63 @@ test_that("check_caretList_model_types stops when a classification model support
   model_list[[1]]$control$classProbs <- FALSE
   m <- "Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs=TRUE"
   expect_error(check_caretList_model_types(model_list), m)
+  context("Test helper functions for multiclass classification")
+
+  test_that("Check errors in caretEnsemble for multiclass classification work", {
+    skip_on_cran()
+    skip_if_not_installed("rpart")
+    data(iris)
+    myControl <- trainControl(method = "cv", number = 5, savePredictions = "final", index = createResample(iris[, 5], 5))
+    model_list <- caretList(
+      x = iris[, -5],
+      y = iris[, 5],
+      methodList = c("rpart", "glmnet"),
+      trControl = myControl
+    )
+
+    expect_error(check_binary_classification(model_list))
+    expect_true(is.null(check_binary_classification(models.class)))
+    expect_true(is.null(check_binary_classification(models.reg)))
+
+    # Do not produce errors when another object is passed
+    expect_true(is.null(check_binary_classification(NULL)))
+    expect_true(is.null(check_binary_classification(2)))
+    expect_true(is.null(check_binary_classification(list("string"))))
+    expect_true(is.null(check_binary_classification(iris)))
+  })
+
+  test_that("Configuration function for excluded level work", {
+    expect_warning(check_multiclass_excluded_level(4, 3))
+    expect_warning(check_multiclass_excluded_level(0, 3))
+    expect_true(is.null(check_multiclass_excluded_level(3, 3)))
+    expect_true(is.null(check_multiclass_excluded_level(1, 3)))
+
+    data(iris)
+    myControl <- trainControl(
+      method = "cv", number = 5,
+      savePredictions = "final", index = createResample(iris[, 5], 5),
+      classProbs = TRUE
+    )
+    model_list <- caretList(
+      x = iris[, -5],
+      y = iris[, 5],
+      methodList = c("rpart", "glmnet"),
+      trControl = myControl
+    )
+
+    setMulticlassExcludedLevel(0)
+    expect_warning(caretStack(model_list, method = "knn"))
+    setMulticlassExcludedLevel(4)
+    expect_warning(caretStack(model_list, method = "knn"))
+
+    # Check if we are actually excluding level 1 (setosa)
+    setMulticlassExcludedLevel(1)
+    classes <- levels(iris[, 5])[-1]
+    models <- c("rpart", "glmnet")
+    class_model_combinations <- expand.grid(classes, models)
+    varImp_rownames <- apply(class_model_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+
+    model_stack <- caretStack(model_list, method = "knn")
+    expect_identical(rownames(varImp(model_stack$ens_model)$importance), varImp_rownames)
+  })
 })
