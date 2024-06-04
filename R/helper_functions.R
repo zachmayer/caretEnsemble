@@ -282,7 +282,6 @@ makePredObsMatrix <- function(list_of_models){
 
   #Make a list of models
   modelLibrary <- extractBestPreds(list_of_models)
-  model_names <- names(modelLibrary)
 
   #Model library checks
   check_bestpreds_resamples(modelLibrary) #Re-write with data.table?
@@ -290,8 +289,23 @@ makePredObsMatrix <- function(list_of_models){
   check_bestpreds_obs(modelLibrary) #Re-write with data.table?
   check_bestpreds_preds(modelLibrary) #Re-write with data.table?
 
-  #Extract model type (class or reg)
+  # Extract model type (class or reg)
   type <- extractModelTypes(list_of_models)
+
+  if (type == "Classification") {
+    # The names of the columns of the final matrix will consist of a
+    # concatenation of the model name and the name of the class for
+    # which the probability is provided.
+    num_classes <- length(levels(list_of_models[[1]]$pred$obs))
+    # remove the last class to avoid colineality problems
+    # TODO: let the user choose which class to remove
+    classes <- levels(list_of_models[[1]]$pred$obs)[-num_classes] 
+    class_modelname_combinations <- expand.grid(classes, names(modelLibrary))
+    model_names <- apply(class_modelname_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+  } else {
+    # Otherwise, just use the model names
+    model_names <- names(modelLibrary)
+  }
 
   #Add names column
   for(i in seq_along(modelLibrary)){
@@ -310,30 +324,23 @@ makePredObsMatrix <- function(list_of_models){
   }
   modelLibrary <- rbindlist(modelLibrary, fill=TRUE)
 
-  #For classification models that produce probs, use the probs as preds
-  #Otherwise, just use class predictions
-  if (type=="Classification"){
-
-    # Determine the string name for the positive class
-    positive <- levels(modelLibrary$obs)[getBinaryTargetLevel()]
-
-    # TODO: For multiclass, use ALL PROBS.  Currently this is JUST positive class probs!
-
-    # Use the string name for the positive class determined above to select
-    # predictions from base estimators as predictors for ensemble model
-    pos <- as.numeric(modelLibrary[[positive]])
-    good_pos_values <- which(is.finite(pos))
-    set(modelLibrary, j="pred", value=as.numeric(modelLibrary[["pred"]]))
-    set(modelLibrary, i=good_pos_values, j="pred", value=modelLibrary[good_pos_values, positive, with=FALSE])
+  # For classification models that produce probs, use the probs as preds
+  # Otherwise, just use class predictions
+  if (type == "Classification") {
+    value.var <- c(levels(modelLibrary$obs), "pred")
+  } else {
+    value.var <- "pred"
   }
 
   #Reshape wide for meta-modeling
-  modelLibrary <- data.table::dcast.data.table(
+  modelLibrary <- dcast.data.table(
     modelLibrary,
     obs + rowIndex + Resample ~ modelname,
-    value.var = "pred"
+    value.var = value.var
   )
 
-  #Return
+  # Rename columns: methodname_classname
+  colnames(modelLibrary) <- sub("(.*)_(.*)", "\\2_\\1", colnames(modelLibrary))
+
   return(list(obs=modelLibrary$obs, preds=as.matrix(modelLibrary[, model_names, with=FALSE]), type=type))
 }

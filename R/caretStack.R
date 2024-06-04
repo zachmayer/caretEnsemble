@@ -14,22 +14,21 @@
 #' \dontrun{
 #' library("rpart")
 #' models <- caretList(
-#'   x=iris[1:50,1:2],
-#'   y=iris[1:50,3],
-#'   trControl=trainControl(method="cv"),
-#'   methodList=c("rpart", "glm")
+#'   x = iris[1:50, 1:2],
+#'   y = iris[1:50, 3],
+#'   trControl = trainControl(method = "cv"),
+#'   methodList = c("rpart", "glm")
 #' )
-#' caretStack(models, method="glm")
+#' caretStack(models, method = "glm")
 #' }
-caretStack <- function(all.models, ...){
-
+caretStack <- function(all.models, ...) {
   predobs <- makePredObsMatrix(all.models)
 
-  #Build a caret model
+  # Build a caret model
   model <- train(predobs$preds, predobs$obs, ...)
 
-  #Return final model
-  out <- list(models=all.models, ens_model=model, error=model$results)
+  # Return final model
+  out <- list(models = all.models, ens_model = model, error = model$results)
   class(out) <- "caretStack"
   return(out)
 }
@@ -55,72 +54,84 @@ caretStack <- function(all.models, ...){
 #' \dontrun{
 #' library("rpart")
 #' models <- caretList(
-#'   x=iris[1:100,1:2],
-#'   y=iris[1:100,3],
-#'   trControl=trainControl(method="cv"),
-#'   methodList=c("rpart", "glm")
+#'   x = iris[1:100, 1:2],
+#'   y = iris[1:100, 3],
+#'   trControl = trainControl(method = "cv"),
+#'   methodList = c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method="lm")
-#' RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
+#' meta_model <- caretStack(models, method = "lm")
+#' RMSE(predict(meta_model, iris[101:150, 1:2]), iris[101:150, 3])
 #' }
 predict.caretStack <- function(
-  object, newdata=NULL,
-  se=FALSE, level=0.95,
-  return_weights=FALSE,
-  na.action=na.omit,
-  ...){
+    object, newdata = NULL,
+    se = FALSE, level = 0.95,
+    return_weights = FALSE,
+    na.action = na.omit,
+    ...) {
   stopifnot(is(object$models, "caretList"))
   type <- extractModelTypes(object$models)
 
-  #preds <- do.call(predict, c(list(object=object$models, newdata=newdata), modelList_predict_params)) TODO keep this around for future use
-  preds <- predict(object$models, newdata=newdata, na.action=na.action)
-  if(type == "Classification"){
-    out <- predict(object$ens_model, newdata=preds, na.action=na.action, ...)
-    # Need a check here
-    if(class(out) %in% c("data.frame", "matrix")){
-      # Return probability predictions for only one of the classes
-      # as determined by configured default response class level
-      est <- out[, getBinaryTargetLevel(), drop = TRUE]
-    } else{
-      est <- out
-    }
-  } else{
-    est <- predict(object$ens_model, newdata=preds, ...)
+  # preds <- do.call(predict, c(list(object=object$models, newdata=newdata), modelList_predict_params)) TODO keep this around for future use
+  preds <- predict(object$models, newdata = newdata, na.action = na.action)
+
+  if (type == "Classification") {
+    # Do not include last class asociated probabilities
+    variable_names <- colnames(preds)
+    # TODO: let the user specify which classes to include or which to exclude
+    num_classes <- length(levels(object$models[[1]]$pred$obs))
+    levels_included <- levels(object$models[[1]]$pred$obs)[-num_classes]
+    pattern <- paste(levels_included, collapse = "|")
+    filtered_variable_names <- grep(pattern, variable_names, value = TRUE)
+    preds <- preds[, filtered_variable_names, drop = FALSE]
+
+    est <- predict(object$ens_model, newdata = preds, na.action = na.action, ...)
+  } else {
+    est <- predict(object$ens_model, newdata = preds, ...)
   }
 
-  if(se | return_weights){
+  if (se || return_weights) {
     imp <- varImp(object$ens_model)$importance
-    weights <- imp$Overall
-    weights[!is.finite(weights)] <- 0
-    weights <- weights / sum(weights)
-
-    names(weights) <- row.names(imp)
+    weights <- as.list(as.data.frame(imp))
     methods <- colnames(preds)
-
-    for(m in setdiff(methods, names(weights))){
-      weights[m] <- 0
-    }
+    weights <- lapply(weights, function(class_weights) {
+      # ensure that we have a numeric vector
+      ifelse(is.finite(class_weights), class_weights, 0)
+      # normalize weights
+      class_weights <- class_weights / sum(class_weights)
+      names(class_weights) <- row.names(imp)
+      # set 0 weights for methods that are not present in varImp
+      for (m in setdiff(methods, names(class_weights))) {
+        class_weights[m] <- 0
+      }
+      class_weights
+    })
   }
 
-  out <- est
-  if(se){
-    if(!is.numeric(est)){
+  if (se) {
+    if (!inherits(est, "numeric") || is.null(weights$Overall)) {
       message("Standard errors not available.")
       out <- est
-    } else{
-      weights <- weights[methods]
-      std_error <- apply(preds, 1, wtd.sd, w = weights)
-      std_error <- (qnorm(level) * std_error)
+    } else {
+      methods <- colnames(preds)
+      overall_weights <- weights$Overall[methods]
+
+      # Use overall weights to calculate standard error in regression estimations
+      std_error <- apply(preds, 1, wtd.sd, w = overall_weights)
+      std_error <- qnorm(level) * std_error
       out <- data.frame(
         fit = est,
         lwr = est - std_error,
         upr = est + std_error
       )
     }
+  } else {
+    out <- est
   }
-  if(return_weights) {
+
+  if (return_weights) {
     attr(out, "weights") <- weights
   }
+
   return(out)
 }
 
@@ -128,7 +139,7 @@ predict.caretStack <- function(
 #' @param object an R object
 #' @description Check if an object is a caretStack object
 #' @export
-is.caretStack <- function(object){
+is.caretStack <- function(object) {
   is(object, "caretStack")
 }
 
@@ -141,15 +152,15 @@ is.caretStack <- function(object){
 #' \dontrun{
 #' library("rpart")
 #' models <- caretList(
-#'   x=iris[1:100,1:2],
-#'   y=iris[1:100,3],
-#'   trControl=trainControl(method="cv"),
-#'   methodList=c("rpart", "glm")
+#'   x = iris[1:100, 1:2],
+#'   y = iris[1:100, 3],
+#'   trControl = trainControl(method = "cv"),
+#'   methodList = c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method="lm")
+#' meta_model <- caretStack(models, method = "lm")
 #' summary(meta_model)
 #' }
-summary.caretStack <- function(object, ...){
+summary.caretStack <- function(object, ...) {
   summary(object$ens_model)
 }
 
@@ -162,16 +173,16 @@ summary.caretStack <- function(object, ...){
 #' \dontrun{
 #' library("rpart")
 #' models <- caretList(
-#'   x=iris[1:100,1:2],
-#'   y=iris[1:100,3],
-#'   trControl=trainControl(method="cv"),
-#'   methodList=c("rpart", "glm")
+#'   x = iris[1:100, 1:2],
+#'   y = iris[1:100, 3],
+#'   trControl = trainControl(method = "cv"),
+#'   methodList = c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method="lm")
+#' meta_model <- caretStack(models, method = "lm")
 #' print(meta_model)
 #' }
-print.caretStack <- function(x, ...){
-  base.models <- paste(names(x$models), collapse=", ")
+print.caretStack <- function(x, ...) {
+  base.models <- paste(names(x$models), collapse = ", ")
   cat(sprintf("A %s ensemble of %s base models: %s", x$ens_model$method, length(x$models), base.models))
   cat("\n\nEnsemble results:\n")
   print(x$ens_model)
@@ -187,15 +198,15 @@ print.caretStack <- function(x, ...){
 #' \dontrun{
 #' library("rpart")
 #' models <- caretList(
-#'   x=iris[1:100,1:2],
-#'   y=iris[1:100,3],
-#'   trControl=trainControl(method="cv"),
-#'   methodList=c("rpart", "glm")
+#'   x = iris[1:100, 1:2],
+#'   y = iris[1:100, 3],
+#'   trControl = trainControl(method = "cv"),
+#'   methodList = c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method="rpart", tuneLength=2)
+#' meta_model <- caretStack(models, method = "rpart", tuneLength = 2)
 #' plot(meta_model)
 #' }
-plot.caretStack <- function(x, ...){
+plot.caretStack <- function(x, ...) {
   plot(x$ens_model, ...)
 }
 
@@ -211,14 +222,14 @@ plot.caretStack <- function(x, ...){
 #' set.seed(42)
 #' library("rpart")
 #' models <- caretList(
-#'   x=iris[1:100,1:2],
-#'   y=iris[1:100,3],
-#'   trControl=trainControl(method="cv"),
-#'   methodList=c("rpart", "glm")
+#'   x = iris[1:100, 1:2],
+#'   y = iris[1:100, 3],
+#'   trControl = trainControl(method = "cv"),
+#'   methodList = c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method="lm", trControl=trainControl(method="cv"))
+#' meta_model <- caretStack(models, method = "lm", trControl = trainControl(method = "cv"))
 #' dotplot.caretStack(meta_model)
 #' }
-dotplot.caretStack <- function(x, data=NULL, ...){
-  dotplot(resamples(x$models), data=data, ...)
+dotplot.caretStack <- function(x, data = NULL, ...) {
+  dotplot(resamples(x$models), data = data, ...)
 }

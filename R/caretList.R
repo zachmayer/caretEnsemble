@@ -338,9 +338,7 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
     type <- x$modelType
     if (type=="Classification"){
       if(x$control$classProbs){
-        # Return probability predictions for only one of the classes
-        # as determined by configured default response class level
-        caret::predict.train(x, type="prob", newdata=newdata, ...)[, getBinaryTargetLevel()]
+        caret::predict.train(x, type="prob", newdata=newdata, ...)
       } else{
         caret::predict.train(x, type="raw", newdata=newdata, ...)
       }
@@ -350,24 +348,63 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
       stop(paste("Unknown model type:", type))
     }
   })
-  if (!(any(class(preds) == "matrix") || any(class(preds) == "data.frame"))) {
-    if (any(class(preds) == "character") || any(class(preds) == "factor")) {
+
+  if (!inherits(preds, "matrix") && !inherits(preds, "data.frame")) {
+    if (inherits(preds, "character") || inherits(preds, "factor")) {
       preds <- as.character(preds) # drop factorization
     }
     preds <- as.matrix(t(preds))
   }
 
-  if (is.null(names(object))){
+  if (is.null(names(object))) {
     # If the model list used for predictions is not currently named,
     # then exctract the model names from each model individually.
     # Note that this should only be possible when caretList objects
     # are created manually
-    predcols <- sapply(object, extractModelName)
-    colnames(preds) <- make.names(predcols, unique=TRUE)
+    modelnames <- make.names(sapply(object, extractModelName), unique = TRUE)
   } else {
-    # Otherwise, assign the names of the prediction columns to be
-    # equal to the names in the given model list
-    colnames(preds) <- names(object)
+    # Otherwise, assign the names of the prediction columns
+    # using the names in the given model list
+    modelnames <- names(object)
+  }
+
+  if (object[[1]]$modelType=="Classification" && object[[1]]$control$classProbs) {
+
+    # list of data.frames containing probabilities associated to each model
+    list_probs_model <- list()
+    # rows of the dataset
+    indexes <- seq_len(nrow(newdata))
+    # classes of the dataset
+    classes <- levels(object[[1]]$pred$obs)
+
+    for (j in seq_len(ncol(preds))) {
+      modelname <- rep(modelnames[j], length(indexes))
+      class_probabilities <- data.frame(preds[, j])
+      list_probs_model[[modelnames[j]]] <- data.table::data.table(
+        index = indexes, class_probabilities, modelname = modelname
+      )
+    }
+    probs <- data.table::rbindlist(list_probs_model)
+
+    # reshape data from long to wide
+    probs <- data.table::dcast(
+      data = probs,
+      formula = index ~ modelname,
+      value.var = classes
+    )
+
+    probs <- probs[, 2:ncol(probs)] # remove index column
+
+    # Rename columns: methodname_classname
+    colnames(probs) <- sub("(.*)_(.*)", "\\2_\\1", colnames(probs))
+    # Order columns
+    class_modelname_combinations <- expand.grid(classes, modelnames)
+    ordered_colnames <- apply(class_modelname_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+    data.table::setcolorder(probs, ordered_colnames)
+
+    preds <- as.matrix(probs) # return probabilities in matrix format
+  } else {
+    colnames(preds) <- modelnames
   }
 
   return(preds)
