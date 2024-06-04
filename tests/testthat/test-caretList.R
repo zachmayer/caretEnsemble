@@ -102,7 +102,8 @@ test_that("caretList predictions", {
     models <- caretList(
       iris[, 1:2], iris[, 5],
       tuneLength = 1, verbose = FALSE,
-      methodList = "rf", tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
+      methodList = "rf",
+      tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
       trControl = trainControl(
         method = "cv",
         number = 2, savePredictions = "final",
@@ -130,8 +131,11 @@ test_that("caretList predictions", {
     models <- caretList(
       iris[, 1:2], iris[, 5],
       tuneLength = 1, verbose = FALSE,
-      methodList = "rf", tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
-      trControl = trainControl(method = "cv", number = 2, savePredictions = "final", classProbs = TRUE)
+      methodList = "rf",
+      tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
+      trControl = trainControl(
+        method = "cv", number = 2, savePredictions = "final", classProbs = TRUE
+      )
     )
   })
 
@@ -140,10 +144,26 @@ test_that("caretList predictions", {
   expect_is(p2, "matrix")
   expect_is(p2[, 1], "numeric")
   expect_is(p2[, 2], "numeric")
+  expect_is(p2[, 3], "numeric")
+  expect_is(p2[, 4], "numeric")
   expect_is(p3, "matrix")
   expect_is(p3[, 1], "numeric")
   expect_is(p3[, 2], "numeric")
-  expect_equal(names(models), colnames(p3))
+  expect_is(p3[, 3], "numeric")
+  expect_is(p3[, 4], "numeric")
+  expect_equal(
+    length(names(models)) * length(levels(as.factor(iris[, 5]))),
+    length(colnames(p3))
+  ) # check that we have the right number of columns
+
+  modelnames <- names(models)
+  classes <- levels(iris[, 5])
+  combinations <- expand.grid(classes, modelnames)
+  correct_colnames <- apply(combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+  expect_equal(
+    correct_colnames,
+    colnames(p3)
+  ) # check the column names are correct and ordered correctly (methodname_classname)
 
   models[[1]]$modelType <- "Bogus"
   expect_error(expect_warning(predict(models)))

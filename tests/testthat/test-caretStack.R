@@ -36,8 +36,8 @@ test_that("We can stack classification models", {
   expect_is(summary(ens.class), "summary.glm")
   sink <- capture.output(print(ens.class))
   expect_warning(pred.class <- predict(ens.class, X.class, type = "prob"))
-  expect_true(is.numeric(pred.class))
-  expect_true(length(pred.class) == 150)
+  expect_true(inherits(pred.class, c("data.frame", "matrix")))
+  expect_true(nrow(pred.class) == 150)
   expect_warning(raw.class <- predict(ens.class, X.class, type = "raw"))
   expect_true(is.factor(raw.class))
   expect_true(length(raw.class) == 150)
@@ -81,7 +81,6 @@ test_that("Failure to calculate se occurs gracefully", {
     method = "lm", preProcess = "pca",
     trControl = trainControl(number = 2, allowParallel = FALSE)
   )
-  pred <- predict(ens.reg, X.reg, se = TRUE)
   expect_is(predict(ens.reg, X.reg, se = TRUE), "data.frame")
 
   expect_warning(expect_is(predict(ens.class, X.class, type = "prob", se = TRUE), "data.frame"))
@@ -96,7 +95,7 @@ test_that("Failure to calculate se occurs gracefully", {
   expect_warning(
     expect_identical(
       colnames(predict(ens.class, X.class, type = "prob", se = TRUE)),
-      c("fit", "lwr", "upr")
+      c("No", "Yes")
     )
   )
   expect_warning(
@@ -110,9 +109,15 @@ test_that("Failure to calculate se occurs gracefully", {
   expect_warning(
     expect_false(
       identical(
-        predict(ens.class, X.class, type = "prob", se = TRUE, level = 0.8),
-        predict(ens.class, X.class, type = "prob", se = TRUE, return_weights = FALSE)
+        predict(ens.class, X.class, type = "prob", se = TRUE),
+        predict(ens.class, X.class, type = "prob", se = TRUE, return_weights = TRUE)
       )
+    )
+  )
+  expect_warning(
+    expect_identical(
+      predict(ens.class, X.class, type = "prob", se = TRUE, level = 0.8),
+      predict(ens.class, X.class, type = "prob", se = TRUE, return_weights = FALSE)
     )
   )
   expect_warning(

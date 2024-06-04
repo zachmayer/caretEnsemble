@@ -66,7 +66,7 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1) {
   # generated from probability predictions using a .5 cutoff
   Y.pred <- predict(model.ens, newdata = X.test, type = "raw")
   Y.prob <- predict(model.ens, newdata = X.test, type = "prob")
-  Y.cutoff <- factor(ifelse(Y.prob > .5, Y.levels[pos.level], Y.levels[-pos.level]), levels = Y.levels)
+  Y.cutoff <- factor(ifelse(Y.prob[, Y.levels[pos.level]] > .5, Y.levels[pos.level], Y.levels[-pos.level]), levels = Y.levels)
 
   # Create confusion matricies for each class prediction vector
   cmat.pred <- confusionMatrix(Y.pred, Y.test, positive = Y.levels[pos.level])

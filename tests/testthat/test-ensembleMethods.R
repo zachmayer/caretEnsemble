@@ -323,16 +323,11 @@ test_that("Prediction options are respected in regression and classification", {
       )
     })
 
-    if (tests[i, "se"]) {
-      expect_is(p, "data.frame")
-      preds <- p
-    } else {
-      expect_is(p, "numeric")
-      preds <- p
-    }
+    expect_is(p, "data.frame")
+    preds <- p
 
     if (tests[i, "return_weights"]) {
-      expect_is(attr(preds, which = "weights"), "numeric")
+      expect_is(unlist(attr(preds, which = "weights")), "numeric")
     } else {
       expect_null(attr(preds, which = "weights"))
     }

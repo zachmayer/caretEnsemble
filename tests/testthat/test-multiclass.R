@@ -23,6 +23,6 @@ test_that("Multiclass caretList and caretStack", {
   expect_equal(length(p_raw), nrow(iris))
 
   p <- predict(ens, iris[, -5], type = "prob")
-  expect_is(p, "numeric")
-  expect_equal(length(p), nrow(iris))
+  expect_is(p, "data.frame")
+  expect_equal(nrow(p), nrow(iris))
 })
