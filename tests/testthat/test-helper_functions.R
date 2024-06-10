@@ -75,7 +75,7 @@ test_that("We can make the predobs matrix", {
   out <- makePredObsMatrix(models.class)
   expect_that(out, is_a("list"))
   expect_true(length(out$obs) == 150)
-  expect_true(all(dim(out$preds) == c(150, 4*1))) # number of models * (number of classes-1)
+  expect_true(all(dim(out$preds) == c(150, 4 * 1))) # number of models * (number of classes-1)
 })
 
 test_that("We can predict", {
@@ -192,4 +192,27 @@ test_that("Checks generate errors", {
   )
   x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method = "rpart")
   expect_error(check_caretList_model_types(x))
+})
+
+test_that("Check Binary Classification for caretEnsemble work", {
+  skip_on_cran()
+  skip_if_not_installed("rpart")
+  data(iris)
+  myControl <- trainControl(method = "cv", number = 5, savePredictions = "final", index = createResample(iris[, 5], 5))
+  model_list <- caretList(
+    x = iris[, -5],
+    y = iris[, 5],
+    methodList = c("rpart", "glmnet"),
+    trControl = myControl
+  )
+
+  expect_error(check_binary_classification(model_list))
+  expect_true(is.null(check_binary_classification(models.class)))
+  expect_true(is.null(check_binary_classification(models.reg)))
+
+  # Do not produce errors when another object is passed
+  expect_true(is.null(check_binary_classification(NULL)))
+  expect_true(is.null(check_binary_classification(2)))
+  expect_true(is.null(check_binary_classification(list("string"))))
+  expect_true(is.null(check_binary_classification(iris)))
 })
