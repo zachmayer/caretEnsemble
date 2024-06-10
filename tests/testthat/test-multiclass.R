@@ -184,6 +184,10 @@ test_that("We can make a confusion matrix", {
   expect_true(cm$overall["Accuracy"] > 0.9)
 })
 
+#############################################################################
+context("caretEnsemble not avaible for multiclass problems")
+#############################################################################
+
 test_that("Multiclass is not supported for caretEnsemble", {
   data(iris)
   data(models.class)
