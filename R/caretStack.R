@@ -76,13 +76,14 @@ predict.caretStack <- function(
 
   if (type == "Classification") {
     # Do not include last class asociated probabilities
-    variable_names <- colnames(preds)
+    column_names <- colnames(preds)
     # TODO: let the user specify which classes to include or which to exclude
     num_classes <- length(levels(object$models[[1]]$pred$obs))
-    levels_included <- levels(object$models[[1]]$pred$obs)[-num_classes]
-    pattern <- paste(levels_included, collapse = "|")
-    filtered_variable_names <- grep(pattern, variable_names, value = TRUE)
-    preds <- preds[, filtered_variable_names, drop = FALSE]
+    classes_included <- levels(object$models[[1]]$pred$obs)[-num_classes] # exclude last class
+    pattern <- paste(classes_included, collapse = "|")
+    # Remove columns that are associated with the class that was excluded
+    filtered_column_names <- grep(pattern, column_names, value = TRUE)
+    preds <- preds[, filtered_column_names, drop = FALSE]
 
     est <- predict(object$ens_model, newdata = preds, na.action = na.action, ...)
   } else {

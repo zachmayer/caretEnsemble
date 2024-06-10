@@ -5,9 +5,9 @@
 #' @export
 #' @return a list of lists
 #' @examples
-#' caretModelSpec("rf", tuneLength=5, preProcess="ica")
-caretModelSpec <- function(method="rf", ...){
-  out <- c(list(method=method), list(...))
+#' caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
+caretModelSpec <- function(method = "rf", ...) {
+  out <- c(list(method = method), list(...))
   return(out)
 }
 
@@ -15,26 +15,25 @@ caretModelSpec <- function(method="rf", ...){
 #' @description This function makes sure the tuning parameters passed by the user are valid and have the proper naming, etc.
 #' @param x a list of user-supplied tuning parameters and methods
 #' @return NULL
-tuneCheck <- function(x){
-
-  #Check model methods
+tuneCheck <- function(x) {
+  # Check model methods
   stopifnot(is.list(x))
 
   methods <- lapply(x, function(m) m$method)
   methodCheck(methods)
   method_names <- sapply(x, extractModelName)
 
-  #Name models
-  if(is.null(names(x))){
+  # Name models
+  if (is.null(names(x))) {
     names(x) <- method_names
   }
-  i <- names(x)==""
-  if(any(i)){
+  i <- names(x) == ""
+  if (any(i)) {
     names(x)[i] <- method_names[i]
   }
-  names(x) <- make.names(names(x), unique=TRUE)
+  names(x) <- make.names(names(x), unique = TRUE)
 
-  #Check params
+  # Check params
   stopifnot(all(sapply(x, is.list)))
   return(x)
 }
@@ -44,24 +43,24 @@ tuneCheck <- function(x){
 #' @param x a list of user-supplied tuning parameters and methods
 #' @importFrom caret modelLookup
 #' @return NULL
-methodCheck <- function(x){
-
+methodCheck <- function(x) {
   # Fetch list of existing caret models
   supported_models <- unique(modelLookup()$model)
 
   # Split given model methods based on whether or not they
   # are specified as strings or model info lists (ie custom models)
   models <- lapply(x, function(m) {
-    if (is.list(m)){
+    if (is.list(m)) {
       validateCustomModel(m)
-      data.frame(type="custom", model=m$method)
-    } else if (is.character(m)){
-      data.frame(type="native", model=m)
+      data.frame(type = "custom", model = m$method)
+    } else if (is.character(m)) {
+      data.frame(type = "native", model = m)
     } else {
       stop(paste0(
         "Method \"", m, "\" is invalid.  Methods must either be character names ",
         "supported by caret (e.g. \"gbm\") or modelInfo lists ",
-        "(e.g. getModelInfo(\"gbm\", regex=F))"))
+        "(e.g. getModelInfo(\"gbm\", regex=F))"
+      ))
     }
   })
   models <- do.call(rbind, models)
@@ -70,8 +69,8 @@ methodCheck <- function(x){
   native_models <- subset(models, type == "native")$model
   bad_models <- setdiff(native_models, supported_models)
 
-  if(length(bad_models)>0){
-    msg <- paste(bad_models, collapse=", ")
+  if (length(bad_models) > 0) {
+    msg <- paste(bad_models, collapse = ", ")
     stop(paste("The following models are not valid caret models:", msg))
   }
 
@@ -84,40 +83,39 @@ methodCheck <- function(x){
 #' @param y the target for the model.  Used to determine resampling indexes.
 #' @importFrom caret createResample createFolds createMultiFolds createDataPartition
 #' @return NULL
-trControlCheck <- function(x, y){
-
-  if(!length(x$savePredictions) == 1){
+trControlCheck <- function(x, y) {
+  if (!length(x$savePredictions) == 1) {
     stop("Please pass exactly 1 argument to savePredictions, e.g. savePredictions='final'")
   }
 
-  if(x$savePredictions == TRUE){
+  if (x$savePredictions == TRUE) {
     warning("x$savePredictions == TRUE is depreciated. Setting to 'final' instead.")
     x$savePredictions <- "final"
   }
 
-  if(!(x$savePredictions %in% c("all", "final"))){
+  if (!(x$savePredictions %in% c("all", "final"))) {
     warning("trControl$savePredictions not 'all' or 'final'.  Setting to 'final' so we can ensemble the models.")
     x$savePredictions <- "final"
   }
 
-  if(is.null(x$index)){
+  if (is.null(x$index)) {
     warning("indexes not defined in trControl.  Attempting to set them ourselves, so each model in the ensemble will have the same resampling indexes.")
-    if(x$method=="none"){
+    if (x$method == "none") {
       stop("Models that aren't resampled cannot be ensembled.  All good ensemble methods rely on out-of sample data.  If you really need to ensemble without re-sampling, try the median or mean of the model's predictions.")
-
-    } else if(x$method=="boot" | x$method=="adaptive_boot"){
+    } else if (x$method == "boot" || x$method == "adaptive_boot") {
       x$index <- createResample(y, times = x$number, list = TRUE)
-    } else if(x$method=="cv" | x$method=="adaptive_cv"){
-      x$index  <- createFolds(y, k = x$number, list = TRUE, returnTrain = TRUE)
-    } else if(x$method=="repeatedcv"){
+    } else if (x$method == "cv" || x$method == "adaptive_cv") {
+      x$index <- createFolds(y, k = x$number, list = TRUE, returnTrain = TRUE)
+    } else if (x$method == "repeatedcv") {
       x$index <- createMultiFolds(y, k = x$number, times = x$repeats)
-    } else if(x$method=="LGOCV" | x$method=="adaptive_LGOCV"){
+    } else if (x$method == "LGOCV" || x$method == "adaptive_LGOCV") {
       x$index <- createDataPartition(
         y,
         times = x$number,
         p = 0.5,
         list = TRUE,
-        groups = min(5, length(y)))
+        groups = min(5, length(y))
+      )
     } else {
       stop(paste0("caretList does not currently know how to handle cross-validation method='", x$method, "'. Please specify trControl$index manually"))
     }
@@ -128,7 +126,7 @@ trControlCheck <- function(x, y){
 #' @title Extracts the target variable from a set of arguments headed to the caret::train function.
 #' @description This function extracts the y variable from a set of arguments headed to a caret::train model.  Since there are 2 methods to call caret::train, this function also has 2 methods.
 #' @param ... a set of arguments, as in the caret::train function
-extractCaretTarget <- function(...){
+extractCaretTarget <- function(...) {
   UseMethod("extractCaretTarget")
 }
 
@@ -138,7 +136,7 @@ extractCaretTarget <- function(...){
 #' @param y a numeric or factor vector containing the outcome for each sample.
 #' @param ... ignored
 #' @method extractCaretTarget default
-extractCaretTarget.default <- function(x, y, ...){
+extractCaretTarget.default <- function(x, y, ...) {
   return(y)
 }
 
@@ -148,17 +146,17 @@ extractCaretTarget.default <- function(x, y, ...){
 #' @param data Data frame from which variables specified in formula are preferentially to be taken.
 #' @param ... ignored
 #' @method extractCaretTarget formula
-extractCaretTarget.formula <- function(form, data, ...){
+extractCaretTarget.formula <- function(form, data, ...) {
   y <- model.response(model.frame(form, data))
   names(y) <- NULL
   return(y)
 }
 
 #' Create a list of several train models from the caret package
-#"
+# "
 #' Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
 #' function.
-#"
+# "
 #' @param ... arguments to pass to \code{\link{train}}.  These arguments will determine which train method gets dispatched.
 #' @param trControl a \code{\link{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.
 #' @param methodList optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.
@@ -170,67 +168,67 @@ extractCaretTarget.formula <- function(form, data, ...){
 #' @export
 #' @examples
 #' \dontrun{
-#' myControl <- trainControl(method="cv", number=5)
+#' myControl <- trainControl(method = "cv", number = 5)
 #' caretList(
 #'   Sepal.Length ~ Sepal.Width,
 #'   head(iris, 50),
-#'   methodList=c("glm", "lm"),
-#'   trControl=myControl
-#'   )
+#'   methodList = c("glm", "lm"),
+#'   trControl = myControl
+#' )
 #' caretList(
 #'   Sepal.Length ~ Sepal.Width,
-#'   head(iris, 50), methodList=c("lm"),
-#'   tuneList=list(
-#'     nnet=caretModelSpec(method="nnet", trace=FALSE, tuneLength=1)
-#'  ),
-#'   trControl=myControl
-#'   )
-#'   }
+#'   head(iris, 50),
+#'   methodList = c("lm"),
+#'   tuneList = list(
+#'     nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1)
+#'   ),
+#'   trControl = myControl
+#' )
+#' }
 caretList <- function(
-  ...,
-  trControl = NULL,
-  methodList = NULL,
-  tuneList = NULL,
-  continue_on_fail = FALSE) {
-
-  #Checks
-  if(is.null(trControl)){
+    ...,
+    trControl = NULL,
+    methodList = NULL,
+    tuneList = NULL,
+    continue_on_fail = FALSE) {
+  # Checks
+  if (is.null(trControl)) {
     trControl <- trainControl()
   }
-  if(is.null(tuneList) & is.null(methodList)){
+  if (is.null(tuneList) && is.null(methodList)) {
     stop("Please either define a methodList or tuneList")
   }
-  if(!is.null(methodList) & any(duplicated(methodList))){
+  if (!is.null(methodList) && any(duplicated(methodList))) {
     warning("Duplicate entries in methodList.  Using unqiue methodList values.")
     methodList <- unique(methodList)
   }
 
-  #Make methodList into a tuneList and add onto tuneList
-  if(!is.null(methodList)){
+  # Make methodList into a tuneList and add onto tuneList
+  if (!is.null(methodList)) {
     tuneList <- c(tuneList, lapply(methodList, caretModelSpec))
   }
 
-  #Make sure tuneList is valid
+  # Make sure tuneList is valid
   tuneList <- tuneCheck(tuneList)
 
-  #Capture global arguments for train as a list
+  # Capture global arguments for train as a list
   global_args <- list(...)
 
-  #Add indexes to trControl if they are missing
-  if(is.null(trControl$index)){
+  # Add indexes to trControl if they are missing
+  if (is.null(trControl$index)) {
     target <- extractCaretTarget(...)
-    trControl <- trControlCheck(x=trControl, y=target)
+    trControl <- trControlCheck(x = trControl, y = target)
   }
 
-  #Squish trControl back onto the global arguments list
+  # Squish trControl back onto the global arguments list
   global_args[["trControl"]] <- trControl
 
-  #Loop through the tuneLists and fit caret models with those specs
-  modelList <- lapply(tuneList, function(m){
+  # Loop through the tuneLists and fit caret models with those specs
+  modelList <- lapply(tuneList, function(m) {
     model_args <- c(global_args, m)
-    if(continue_on_fail == TRUE){
-      model <- tryCatch(do.call(train, model_args), error=function(e) NULL)
-    } else{
+    if (continue_on_fail == TRUE) {
+      model <- tryCatch(do.call(train, model_args), error = function(e) NULL)
+    } else {
       model <- do.call(train, model_args)
     }
     return(model)
@@ -239,7 +237,7 @@ caretList <- function(
   nulls <- sapply(modelList, is.null)
   modelList <- modelList[!nulls]
 
-  if(length(modelList)==0){
+  if (length(modelList) == 0) {
     stop("caret:train failed for all models.  Please inspect your data.")
   }
   class(modelList) <- c("caretList")
@@ -251,7 +249,7 @@ caretList <- function(
 #' @description Check if an object is a caretList object
 #' @param object an R object
 #' @export
-is.caretList <- function(object){
+is.caretList <- function(object) {
   is(object, "caretList")
 }
 
@@ -260,9 +258,10 @@ is.caretList <- function(object){
 #' @param object R Object
 #' @return a \code{\link{caretList}} object
 #' @export
-as.caretList <- function(object){
-  if (is.null(object))
+as.caretList <- function(object) {
+  if (is.null(object)) {
     stop("object is null")
+  }
   UseMethod("as.caretList")
 }
 
@@ -271,7 +270,7 @@ as.caretList <- function(object){
 #' @param object R object
 #' @return NA
 #' @export
-as.caretList.default <- function(object){
+as.caretList.default <- function(object) {
   # nothing yet, future dreams go here
 }
 
@@ -281,12 +280,12 @@ as.caretList.default <- function(object){
 #' @return a \code{\link{caretList}} object
 #' @export
 #' @method as.caretList list
-as.caretList.list <- function(object){
-  if(!(class(object) == "list")){
+as.caretList.list <- function(object) {
+  if (!(class(object) == "list")) {
     stop("object must be a list of caret models")
   }
   # Check that each element in the list is of class train
-  if(!all(sapply(object, is, "train"))){
+  if (!all(sapply(object, is, "train"))) {
     stop("object requires all elements of list to be caret models")
   }
 
@@ -307,7 +306,7 @@ as.caretList.list <- function(object){
 
 #' @title Create a matrix of predictions for each of the models in a caretList
 #' @description Make a matrix of predictions from a list of caret models
-#"
+# "
 #' @param object an object of class caretList
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
@@ -319,32 +318,31 @@ as.caretList.list <- function(object){
 #' @importFrom pbapply pboptions
 #' @export
 #' @method predict caretList
-predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
-
-  if(is.null(newdata)){
+predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE) {
+  if (is.null(newdata)) {
     warning("Predicting without new data is not well supported.  Attempting to predict on the training data.")
     newdata <- object[[1]]$trainingData
-    if(is.null(newdata)){
+    if (is.null(newdata)) {
       stop("Could not find training data in the first model in the ensemble.")
     }
   }
 
-  if(verbose == TRUE){
+  if (verbose == TRUE) {
     pboptions(type = "txt", char = "*")
-  } else if(verbose == FALSE){
+  } else if (verbose == FALSE) {
     pboptions(type = "none")
   }
-  preds <- pbsapply(object, function(x){
+  preds <- pbsapply(object, function(x) {
     type <- x$modelType
-    if (type=="Classification"){
-      if(x$control$classProbs){
-        caret::predict.train(x, type="prob", newdata=newdata, ...)
-      } else{
-        caret::predict.train(x, type="raw", newdata=newdata, ...)
+    if (type == "Classification") {
+      if (x$control$classProbs) {
+        caret::predict.train(x, type = "prob", newdata = newdata, ...)
+      } else {
+        caret::predict.train(x, type = "raw", newdata = newdata, ...)
       }
-    } else if(type=="Regression"){
-      caret::predict.train(x, type="raw", newdata=newdata, ...)
-    } else{
+    } else if (type == "Regression") {
+      caret::predict.train(x, type = "raw", newdata = newdata, ...)
+    } else {
       stop(paste("Unknown model type:", type))
     }
   })
@@ -368,23 +366,21 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
     modelnames <- names(object)
   }
 
-  if (object[[1]]$modelType=="Classification" && object[[1]]$control$classProbs) {
-
+  if (object[[1]]$modelType == "Classification" && object[[1]]$control$classProbs) {
     # list of data.frames containing probabilities associated to each model
-    list_probs_model <- list()
-    # rows of the dataset
+    probs_model_list <- list()
+    # create indexes to reshape later
     indexes <- seq_len(nrow(newdata))
-    # classes of the dataset
     classes <- levels(object[[1]]$pred$obs)
 
     for (j in seq_len(ncol(preds))) {
       modelname <- rep(modelnames[j], length(indexes))
       class_probabilities <- data.frame(preds[, j])
-      list_probs_model[[modelnames[j]]] <- data.table::data.table(
+      probs_model_list[[modelnames[j]]] <- data.table::data.table(
         index = indexes, class_probabilities, modelname = modelname
       )
     }
-    probs <- data.table::rbindlist(list_probs_model)
+    probs <- data.table::rbindlist(probs_model_list)
 
     # reshape data from long to wide
     probs <- data.table::dcast(
@@ -394,13 +390,15 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE){
     )
 
     probs <- probs[, 2:ncol(probs)] # remove index column
+    # Build old and new column names
+    class_model_combinations <- expand.grid(classes, modelnames)
+    old_colnames <- apply(class_model_combinations, 1, function(x) paste(x[1], x[2], sep = "_"))
+    new_colnames <- apply(class_model_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
 
-    # Rename columns: methodname_classname
-    colnames(probs) <- sub("(.*)_(.*)", "\\2_\\1", colnames(probs))
-    # Order columns
-    class_modelname_combinations <- expand.grid(classes, modelnames)
-    ordered_colnames <- apply(class_modelname_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
-    data.table::setcolorder(probs, ordered_colnames)
+    # Rename columns from classname_modelname to modelname_classname
+    data.table::setnames(probs, old = old_colnames, new = new_colnames)
+    # Order columns by model first and then by class
+    data.table::setcolorder(probs, new_colnames)
 
     preds <- as.matrix(probs) # return probabilities in matrix format
   } else {

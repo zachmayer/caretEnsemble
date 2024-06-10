@@ -25,9 +25,9 @@ getBinaryTargetLevel <- function() {
 #' @param level an integer in \{1, 2\} to be used as target outcome level
 #' @seealso getBinaryTargetLevel
 #' @export
-setBinaryTargetLevel <- function(level){
+setBinaryTargetLevel <- function(level) {
   level <- validateBinaryTargetLevel(level)
-  options(caret.ensemble.binary.target.level=level)
+  options(caret.ensemble.binary.target.level = level)
 }
 
 #' @title Validate arguments given as binary target level
@@ -36,13 +36,15 @@ setBinaryTargetLevel <- function(level){
 #' and that the resulting integer is in \{1, 2\}.
 #' @param arg argument to potentially be used as new target level
 #' @return Binary target level (as integer equal to 1 or 2)
-validateBinaryTargetLevel <- function(arg){
-  val <- suppressWarnings(try(as.integer(arg), silent=T))
-  if (!is.integer(val) || !val %in% c(1L, 2L))
+validateBinaryTargetLevel <- function(arg) {
+  val <- suppressWarnings(try(as.integer(arg), silent = T))
+  if (!is.integer(val) || !val %in% c(1L, 2L)) {
     stop(paste0(
       "Specified target binary class level is not valid.  ",
       "Value should be either 1 or 2 but '", arg, "' was given ",
-      "(see caretEnsemble::setBinaryTargetLevel for more details)"))
+      "(see caretEnsemble::setBinaryTargetLevel for more details)"
+    ))
+  }
   val
 }
 
@@ -56,14 +58,15 @@ validateBinaryTargetLevel <- function(arg){
 #' @param x a vector of numerics
 #' @param w a vector of weights equal to length of x
 #' @param na.rm a logical indicating how to handle missing values, default = FALSE
-wtd.sd <- function (x, w = NULL, na.rm = FALSE) {
+wtd.sd <- function(x, w = NULL, na.rm = FALSE) {
   if (na.rm) {
-    w <- w[i <- !is.na(x)]; x <- x[i]
+    w <- w[i <- !is.na(x)]
+    x <- x[i]
   }
   n <- length(w)
   xWbar <- weighted.mean(x, w, na.rm = na.rm)
   wbar <- mean(w)
-  out <- n/((n-1)*sum(w)^2)*(sum((w*x-wbar*xWbar)^2)-2*xWbar*sum((w-wbar)*(w*x-wbar*xWbar))+xWbar^2*sum((w-wbar)^2))
+  out <- n / ((n - 1) * sum(w)^2) * (sum((w * x - wbar * xWbar)^2) - 2 * xWbar * sum((w - wbar) * (w * x - wbar * xWbar)) + xWbar^2 * sum((w - wbar)^2))
   return(out)
 }
 
@@ -74,9 +77,8 @@ wtd.sd <- function (x, w = NULL, na.rm = FALSE) {
 #' @description This function checks caretList classes
 #'
 #' @param list_of_models a list of caret models to check
-check_caretList_classes <- function(list_of_models){
-
-  #Check that we have a list of train models
+check_caretList_classes <- function(list_of_models) {
+  # Check that we have a list of train models
   stopifnot(is(list_of_models, "caretList"))
   stopifnot(all(sapply(list_of_models, is, "train")))
   return(invisible(NULL))
@@ -86,36 +88,38 @@ check_caretList_classes <- function(list_of_models){
 #' @description Validate a caretList
 #' @param list_of_models a list of caret models to check
 #' @importFrom caret modelLookup
-check_caretList_model_types <- function(list_of_models){
-  #Check that models have the same type
+check_caretList_model_types <- function(list_of_models) {
+  # Check that models have the same type
   types <- sapply(list_of_models, function(x) x$modelType)
   type <- types[1]
-  stopifnot(all(types==type)) #TODO: Maybe in the future we can combine reg and class models
+  stopifnot(all(types == type)) # TODO: Maybe in the future we can combine reg and class models
 
-  #Check that the model type is VALID
+  # Check that the model type is VALID
   stopifnot(all(types %in% c("Classification", "Regression")))
 
   # TODO: add a check that if this is null you didn't set savePredictions in the trainControl
   # TODO: add support for non-prob models (e.g. rFerns)
   # TODO: Check for ANY models having nulls
-  if (type=="Classification" & is.null(unique(list_of_models[[1]]$pred$obs))){
+  if (type == "Classification" & is.null(unique(list_of_models[[1]]$pred$obs))) {
     stop("No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.")
   }
 
-  #Check that classification models saved probabilities
+  # Check that classification models saved probabilities
   # TODO: add support for non-prob models (e.g. rFerns)
-  if (type=="Classification"){
+  if (type == "Classification") {
     probModels <- sapply(list_of_models, function(x) is.function(x$modelInfo$prob))
-    if(!all(probModels)) stop("All models for classification must be able to generate class probabilities.")
+    if (!all(probModels)) stop("All models for classification must be able to generate class probabilities.")
     classProbs <- sapply(list_of_models, function(x) x$control$classProbs)
-    if(!all(classProbs)){
+    if (!all(classProbs)) {
       bad_models <- names(list_of_models)[!classProbs]
-      bad_models <- paste(bad_models, collapse=", ")
+      bad_models <- paste(bad_models, collapse = ", ")
       stop(
         paste0(
           "The following models were fit by caret::train with no class probabilities: ",
           bad_models,
-          ".\nPlease re-fit them with trainControl(classProbs=TRUE)"))
+          ".\nPlease re-fit them with trainControl(classProbs=TRUE)"
+        )
+      )
     }
   }
   return(invisible(NULL))
@@ -125,12 +129,12 @@ check_caretList_model_types <- function(list_of_models){
 #' @description Check that the resamples from a caretList are valid
 #'
 #' @param modelLibrary a list of predictins from caret models
-check_bestpreds_resamples <- function(modelLibrary){
-  #TODO: ID which model(s) have bad row indexes
+check_bestpreds_resamples <- function(modelLibrary) {
+  # TODO: ID which model(s) have bad row indexes
   resamples <- lapply(modelLibrary, function(x) x[["Resample"]])
   names(resamples) <- names(modelLibrary)
   check <- length(unique(resamples))
-  if(check != 1){
+  if (check != 1) {
     stop("Component models do not have the same re-sampling strategies")
   }
   return(invisible(NULL))
@@ -140,12 +144,12 @@ check_bestpreds_resamples <- function(modelLibrary){
 #' @description Check that the row indexes from a caretList are valid
 #'
 #' @param modelLibrary a list of predictins from caret models
-check_bestpreds_indexes <- function(modelLibrary){
-  #TODO: ID which model(s) have bad row indexes
+check_bestpreds_indexes <- function(modelLibrary) {
+  # TODO: ID which model(s) have bad row indexes
   rows <- lapply(modelLibrary, function(x) x[["rowIndex"]])
   names(rows) <- names(modelLibrary)
   check <- length(unique(rows))
-  if(check != 1){
+  if (check != 1) {
     stop("Re-sampled predictions from each component model do not use the same rowIndexes from the origial dataset")
   }
   return(invisible(NULL))
@@ -155,12 +159,12 @@ check_bestpreds_indexes <- function(modelLibrary){
 #' @description Check that a list of observed values from a caretList are valid
 #'
 #' @param modelLibrary a list of predictins from caret models
-check_bestpreds_obs <- function(modelLibrary){
-  #TODO: ID which model(s) have bad row indexes
+check_bestpreds_obs <- function(modelLibrary) {
+  # TODO: ID which model(s) have bad row indexes
   obs <- lapply(modelLibrary, function(x) x[["obs"]])
   names(obs) <- names(modelLibrary)
   check <- length(unique(obs))
-  if(check != 1){
+  if (check != 1) {
     stop("Observed values for each component model are not the same.  Please re-train the models with the same Y variable")
   }
   return(invisible(NULL))
@@ -170,20 +174,39 @@ check_bestpreds_obs <- function(modelLibrary){
 #' @description Check that a list of predictions from a caretList are valid
 #'
 #' @param modelLibrary a list of predictins from caret models
-check_bestpreds_preds <- function(modelLibrary){
-  #TODO: ID which model(s) have bad preds
-  #TODO: Regression models should be numeric, classification models should have numeric class probs
+check_bestpreds_preds <- function(modelLibrary) {
+  # TODO: ID which model(s) have bad preds
+  # TODO: Regression models should be numeric, classification models should have numeric class probs
   pred <- lapply(modelLibrary, function(x) x[["pred"]])
   names(pred) <- names(modelLibrary)
   classes <- unique(sapply(pred, class))
   check <- length(classes)
-  if(check != 1){
+  if (check != 1) {
     stop(
       paste0(
         "Component models do not all have the same type of predicitons.  Predictions are a mix of ",
-        paste(classes, collapse=", "),
-        ".")
+        paste(classes, collapse = ", "),
+        "."
+      )
     )
+  }
+  return(invisible(NULL))
+}
+
+#####################################################
+# caretEnsemble check functions
+#####################################################
+#' @title Check binary classification
+#' @description Check that the problem is a binary classification problem
+#'
+#' @param list_of_models a list of caret models to check
+check_binary_classification <- function(list_of_models) {
+  if (is.list(list_of_models) && length(list_of_models) > 1 &&
+    is(list_of_models[[1]], "train") &&
+    !is.null(list_of_models[[1]]$pred$obs) &&
+    is.factor(list_of_models[[1]]$pred$obs) && # avoid regression models
+    length(levels(list_of_models[[1]]$pred$obs)) > 2) {
+    stop("caretEnsemble only supports binary classification problems")
   }
   return(invisible(NULL))
 }
@@ -200,11 +223,13 @@ check_bestpreds_preds <- function(modelLibrary){
 #' @param x a single caret train object
 #' @return Name associated with model
 extractModelName <- function(x) {
-  if (is.list(x$method)){
+  if (is.list(x$method)) {
     validateCustomModel(x$method)$method
-  } else if (x$method == "custom"){
+  } else if (x$method == "custom") {
     validateCustomModel(x$modelInfo)$method
-  } else x$method
+  } else {
+    x$method
+  }
 }
 
 #' @title Validate a custom caret model info list
@@ -214,10 +239,12 @@ extractModelName <- function(x) {
 #' @param x a model info list (e.g. \code{getModelInfo("rf", regex=F)\[[1]]})
 #' @return validated model info list (i.e. x)
 validateCustomModel <- function(x) {
-  if (is.null(x$method))
+  if (is.null(x$method)) {
     stop(paste(
       "Custom models must be defined with a \"method\" attribute containing the name",
-      "by which that model should be referenced.  Example: my.glm.model$method <- \"custom_glm\""))
+      "by which that model should be referenced.  Example: my.glm.model$method <- \"custom_glm\""
+    ))
+  }
   x
 }
 
@@ -225,14 +252,13 @@ validateCustomModel <- function(x) {
 #' @description Extracts the model types from a list of train model
 #'
 #' @param list_of_models an object of class caretList
-extractModelTypes <- function(list_of_models){
-
+extractModelTypes <- function(list_of_models) {
   types <- sapply(list_of_models, function(x) x$modelType)
   type <- types[1]
 
-  #TODO: Maybe in the future we can combine reg and class models
-  #Also, this check is redundant, but I think that"s ok
-  stopifnot(all(types==type))
+  # TODO: Maybe in the future we can combine reg and class models
+  # Also, this check is redundant, but I think that"s ok
+  stopifnot(all(types == type))
   stopifnot(all(types %in% c("Classification", "Regression")))
   return(type)
 }
@@ -241,16 +267,16 @@ extractModelTypes <- function(list_of_models){
 #' @description Extract predictions for the best tune from a model
 #' @param x a train object
 #' @importFrom data.table data.table setorderv
-bestPreds <- function(x){
+bestPreds <- function(x) {
   stopifnot(is(x, "train"))
   stopifnot({
     x$control$savePredictions %in% c("all", "final") |
       x$control$savePredictions == TRUE
   })
-  a <- data.table(x$bestTune, key=names(x$bestTune))
-  b <- data.table(x$pred, key=names(x$bestTune))
+  a <- data.table(x$bestTune, key = names(x$bestTune))
+  b <- data.table(x$pred, key = names(x$bestTune))
   b <- b[a, ]
-  sink <- gc(reset=TRUE)
+  sink <- gc(reset = TRUE)
   setorderv(b, c("Resample", "rowIndex"))
   return(b)
 }
@@ -259,12 +285,12 @@ bestPreds <- function(x){
 #' @description Extract predictions for the best tune from a list of caret models
 #' @param list_of_models an object of class caretList or a list of caret models
 #' @importFrom pbapply pblapply
-extractBestPreds <- function(list_of_models){
+extractBestPreds <- function(list_of_models) {
   out <- lapply(list_of_models, bestPreds)
-  if(is.null(names(out))){
-    names(out) <- make.names(sapply(list_of_models, extractModelName), unique=TRUE)
+  if (is.null(names(out))) {
+    names(out) <- make.names(sapply(list_of_models, extractModelName), unique = TRUE)
   }
-  sink <- gc(reset=TRUE)
+  sink <- gc(reset = TRUE)
   return(out)
 }
 
@@ -274,55 +300,55 @@ extractBestPreds <- function(list_of_models){
 #'
 #' @param  list_of_models an object of class caretList
 #' @importFrom data.table set rbindlist dcast.data.table
-makePredObsMatrix <- function(list_of_models){
-
-  #caretList Checks
+makePredObsMatrix <- function(list_of_models) {
+  # caretList Checks
   check_caretList_classes(list_of_models)
   check_caretList_model_types(list_of_models)
 
-  #Make a list of models
+  # Make a list of models
   modelLibrary <- extractBestPreds(list_of_models)
 
-  #Model library checks
-  check_bestpreds_resamples(modelLibrary) #Re-write with data.table?
-  check_bestpreds_indexes(modelLibrary) #Re-write with data.table?
-  check_bestpreds_obs(modelLibrary) #Re-write with data.table?
-  check_bestpreds_preds(modelLibrary) #Re-write with data.table?
+  # Model library checks
+  check_bestpreds_resamples(modelLibrary) # Re-write with data.table?
+  check_bestpreds_indexes(modelLibrary) # Re-write with data.table?
+  check_bestpreds_obs(modelLibrary) # Re-write with data.table?
+  check_bestpreds_preds(modelLibrary) # Re-write with data.table?
 
   # Extract model type (class or reg)
   type <- extractModelTypes(list_of_models)
 
   if (type == "Classification") {
     # The names of the columns of the final matrix will consist of a
-    # concatenation of the model name and the name of the class for
+    # concatenation of the model name and the class name for
     # which the probability is provided.
     num_classes <- length(levels(list_of_models[[1]]$pred$obs))
-    # remove the last class to avoid colineality problems
+    # remove at least one class to avoid colineality problems
     # TODO: let the user choose which class to remove
-    classes <- levels(list_of_models[[1]]$pred$obs)[-num_classes] 
-    class_modelname_combinations <- expand.grid(classes, names(modelLibrary))
-    model_names <- apply(class_modelname_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+    classes_included <- levels(list_of_models[[1]]$pred$obs)[-num_classes] # remove last class
+    class_model_combinations <- expand.grid(classes_included, names(modelLibrary))
+    old_column_names <- apply(class_model_combinations, 1, function(x) paste(x[1], x[2], sep = "_"))
+    column_names <- apply(class_model_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
   } else {
     # Otherwise, just use the model names
-    model_names <- names(modelLibrary)
+    column_names <- names(modelLibrary)
   }
 
-  #Add names column
-  for(i in seq_along(modelLibrary)){
-    set(modelLibrary[[i]], j="modelname", value=names(modelLibrary)[[i]])
+  # Add names column
+  for (i in seq_along(modelLibrary)) {
+    set(modelLibrary[[i]], j = "modelname", value = names(modelLibrary)[[i]])
   }
 
-  #Remove parameter columns
+  # Remove parameter columns
   keep <- Reduce(intersect, lapply(modelLibrary, names))
-  for(i in seq_along(modelLibrary)){
+  for (i in seq_along(modelLibrary)) {
     rem <- setdiff(names(modelLibrary[[i]]), keep)
-    if(length(rem) > 0){
-      for(r in rem){
-        set(modelLibrary[[i]], j=r, value=NULL)
+    if (length(rem) > 0) {
+      for (r in rem) {
+        set(modelLibrary[[i]], j = r, value = NULL)
       }
     }
   }
-  modelLibrary <- rbindlist(modelLibrary, fill=TRUE)
+  modelLibrary <- rbindlist(modelLibrary, fill = TRUE)
 
   # For classification models that produce probs, use the probs as preds
   # Otherwise, just use class predictions
@@ -332,15 +358,17 @@ makePredObsMatrix <- function(list_of_models){
     value.var <- "pred"
   }
 
-  #Reshape wide for meta-modeling
+  # Reshape wide for meta-modeling
   modelLibrary <- dcast.data.table(
     modelLibrary,
     obs + rowIndex + Resample ~ modelname,
     value.var = value.var
   )
 
-  # Rename columns: methodname_classname
-  colnames(modelLibrary) <- sub("(.*)_(.*)", "\\2_\\1", colnames(modelLibrary))
+  if (type == "Classification") {
+    # Rename columns asociated with probabilities to modelname_classname
+    data.table::setnames(modelLibrary, old = old_column_names, new = column_names)
+  }
 
-  return(list(obs=modelLibrary$obs, preds=as.matrix(modelLibrary[, model_names, with=FALSE]), type=type))
+  return(list(obs = modelLibrary$obs, preds = as.matrix(modelLibrary[, column_names, with = FALSE]), type = type))
 }
