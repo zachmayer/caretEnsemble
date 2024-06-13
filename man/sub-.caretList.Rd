@@ -14,4 +14,3 @@
 \description{
 Index a caret list to extract caret models into a new caretList object
 }
-

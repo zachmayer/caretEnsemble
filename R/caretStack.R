@@ -50,6 +50,7 @@ caretStack <- function(all.models, ...) {
 #' caret model. This is not available for all cases such as where the library
 #' model predictions are transformed before being passed to the stacking model.
 #' @method predict caretStack
+#' @importFrom stats na.omit
 #' @examples
 #' \dontrun{
 #' library("rpart")

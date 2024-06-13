@@ -19,4 +19,3 @@ this value can be overridden using \code{setBinaryTargetLevel(2L)}
 \seealso{
 getBinaryTargetLevel
 }
-

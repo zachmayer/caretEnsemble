@@ -21,4 +21,3 @@ bar is shown. Default FALSE.}
 \description{
 Make a matrix of predictions from a list of caret models
 }
-

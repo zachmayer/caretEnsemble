@@ -2,8 +2,8 @@
 % Please edit documentation in R/caretEnsemble-package.R, R/caretEnsemble.R
 \docType{package}
 \name{caretEnsemble}
-\alias{caretEnsemble}
 \alias{caretEnsemble-package}
+\alias{caretEnsemble}
 \title{caretEnsemble: Make ensembles of caret models.}
 \usage{
 caretEnsemble(all.models, ...)
@@ -49,4 +49,20 @@ ens <- caretEnsemble(models)
 summary(ens)
 }
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/zachmayer/caretEnsemble}
+  \item Report bugs at \url{https://github.com/zachmayer/caretEnsemble/issues}
+}
 
+}
+\author{
+\strong{Maintainer}: Zachary A. Deane-Mayer \email{zach.mayer@gmail.com}
+
+Authors:
+\itemize{
+  \item Jared E. Knowles \email{jknowles@gmail.com}
+}
+
+}

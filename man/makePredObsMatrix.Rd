@@ -13,4 +13,3 @@ makePredObsMatrix(list_of_models)
 Extract obs from one models, and a matrix of predictions from all other models, a
 helper function
 }
-

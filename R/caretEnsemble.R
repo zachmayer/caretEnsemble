@@ -306,7 +306,7 @@ multiResiduals <- function(object, ...){
 fortify <- function(model, data = NULL, ...){
   data <- extractModFrame(model)
   data$y <- model$models[[1]]$trainingData$.outcome
-  if(class(data$y) != "numeric"){
+  if(is(data$y, "numeric")){
     data$y <- as.character(data$y)
     z <- table(data$y)
     prevOutcome <- names(z)[z == max(z)]
@@ -434,7 +434,7 @@ autoplot <- function(object, which = c(1:6), mfrow = c(3, 2),
   }
   # TODO: Insert checks for length of xvars here
   residOut <- multiResiduals(object)
-  zed <- ddply(residOut, .(id), summarize,
+  zed <- plyr::ddply(residOut, .(id), summarize,
                ymin = min(resid),
                ymax = max(resid),
                yavg = median(resid),

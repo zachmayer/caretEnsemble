@@ -12,4 +12,3 @@ check_caretList_model_types(list_of_models)
 \description{
 Validate a caretList
 }
-

@@ -31,4 +31,3 @@ rfTrain <- train(Class ~ .,
 }
 
 }
-

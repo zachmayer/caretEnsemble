@@ -39,4 +39,3 @@ model_list2 <- caretList(Class ~ .,
 }
 
 }
-

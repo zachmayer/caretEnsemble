@@ -12,4 +12,3 @@ extractModRes(ensemble)
 \description{
 Extract the model accuracy metrics of the individual models in an ensemble object.
 }
-

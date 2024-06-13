@@ -66,7 +66,7 @@ methodCheck <- function(x) {
   models <- do.call(rbind, models)
 
   # Ensure that all non-custom models are valid
-  native_models <- subset(models, type == "native")$model
+  native_models <- subset(models, models$type  == "native")$model
   bad_models <- setdiff(native_models, supported_models)
 
   if (length(bad_models) > 0) {
@@ -281,7 +281,7 @@ as.caretList.default <- function(object) {
 #' @export
 #' @method as.caretList list
 as.caretList.list <- function(object) {
-  if (!(class(object) == "list")) {
+  if (!(is(object, "list"))) {
     stop("object must be a list of caret models")
   }
   # Check that each element in the list is of class train

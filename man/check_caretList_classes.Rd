@@ -12,4 +12,3 @@ check_caretList_classes(list_of_models)
 \description{
 This function checks caretList classes
 }
-

@@ -12,4 +12,3 @@ check_bestpreds_obs(modelLibrary)
 \description{
 Check that a list of observed values from a caretList are valid
 }
-

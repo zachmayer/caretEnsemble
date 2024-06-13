@@ -2,29 +2,20 @@
 % Please edit documentation in R/caretEnsemble-package.R
 \docType{data}
 \name{models.class}
-\alias{X.class}
-\alias{X.reg}
-\alias{Y.class}
-\alias{Y.reg}
 \alias{models.class}
 \alias{models.reg}
+\alias{X.class}
+\alias{Y.class}
+\alias{X.reg}
+\alias{Y.reg}
 \title{caretList of classification models}
 \description{
 Data for the caretEnsemble package
 }
-\author{
-Zachary Deane-Mayer \email{zach.mayer@gmail.com}
-
-Zachary Deane-Mayer \email{zach.mayer@gmail.com}
-
-Zachary Deane-Mayer \email{zach.mayer@gmail.com}
-
-Zachary Deane-Mayer \email{zach.mayer@gmail.com}
-
-Zachary Deane-Mayer \email{zach.mayer@gmail.com}
-}
 \references{
 \url{data_blah.com}
 }
+\author{
+Zachary Deane-Mayer \email{zach.mayer@gmail.com}
+}
 \keyword{data}
-

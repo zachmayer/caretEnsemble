@@ -17,4 +17,3 @@ Currently, this only ensures that all model info lists
 were also assigned a "method" attribute for consistency with usage
 of non-custom models
 }
-

@@ -17,4 +17,3 @@ This function constructs a dataframe consisting of the outcome
 and all of the predictors used in any of the models ensembled in a \code{caretEnsemble}
 object.
 }
-

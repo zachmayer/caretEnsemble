@@ -4,8 +4,15 @@
 \alias{predict.caretStack}
 \title{Make predictions from a caretStack}
 \usage{
-\method{predict}{caretStack}(object, newdata = NULL, se = FALSE,
-  level = 0.95, return_weights = FALSE, na.action = na.omit, ...)
+\method{predict}{caretStack}(
+  object,
+  newdata = NULL,
+  se = FALSE,
+  level = 0.95,
+  return_weights = FALSE,
+  na.action = na.omit,
+  ...
+)
 }
 \arguments{
 \item{object}{a  \code{\link{caretStack}} to make predictions from.}
@@ -37,13 +44,12 @@ model predictions are transformed before being passed to the stacking model.
 \dontrun{
 library("rpart")
 models <- caretList(
-  x=iris[1:100,1:2],
-  y=iris[1:100,3],
-  trControl=trainControl(method="cv"),
-  methodList=c("rpart", "glm")
+  x = iris[1:100, 1:2],
+  y = iris[1:100, 3],
+  trControl = trainControl(method = "cv"),
+  methodList = c("rpart", "glm")
 )
-meta_model <- caretStack(models, method="lm")
-RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
+meta_model <- caretStack(models, method = "lm")
+RMSE(predict(meta_model, iris[101:150, 1:2]), iris[101:150, 3])
 }
 }
-
