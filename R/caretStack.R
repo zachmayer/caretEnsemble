@@ -75,6 +75,11 @@ predict.caretStack <- function(
   preds <- predict(object$models, newdata = newdata, na.action = na.action)
 
   if (type == "Classification") {
+    # We have to use the same columns (variables) as the ones used
+    # to train the model.
+    # If the user has specified a class to exclude within the range
+    # of 1 to num_classes, exclude that class from the predictions.
+    # Otherwise, include all classes.
     column_names <- colnames(preds)
     num_classes <- length(levels(object$models[[1]]$pred$obs))
     if (getMulticlassExcludedLevel() >= 1 && getMulticlassExcludedLevel() <= num_classes) {
@@ -98,7 +103,7 @@ predict.caretStack <- function(
     methods <- colnames(preds)
     weights <- lapply(weights, function(class_weights) {
       # ensure that we have a numeric vector
-      ifelse(is.finite(class_weights), class_weights, 0)
+      class_weights <- ifelse(is.finite(class_weights), class_weights, 0)
       # normalize weights
       class_weights <- class_weights / sum(class_weights)
       names(class_weights) <- row.names(imp)
