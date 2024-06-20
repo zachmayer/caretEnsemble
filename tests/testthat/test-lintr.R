@@ -6,6 +6,6 @@ test_that("Code Lint", {
   errors <- lintr::lint_package("../../")
   expect_true(
     length(errors) == 0,
-    paste0("There are ", length(errors), " errors. Please run `lintr::lint_package(\".\")` to see the errors.")
+    paste0("There are ", length(errors), " errors. Please run `lintr::lint_package()` to see the errors.")
   )
 })
