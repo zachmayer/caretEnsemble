@@ -180,11 +180,11 @@ varImp.caretEnsemble <- function(object, ...){
 
   # Calculate overall importance
   weights <- coef(object$ens_model$finalModel)
-  # Extract the model names form coefs. In the case of 2 classes
-  # each method will have only one coef associated
-  names(weights) <- sapply(names(weights), function(name) {
-    if (grepl("_", name)) sub("_[^_]*$", "", name) else name
-  })
+  # In the case of 2 classes each method will
+  # have only one coef associated.
+  # The names of the weights keep the order of the
+  # models in the ensemble
+  names(weights) <- names(object$models)
   weights <- weights[names(weights) %in% names(coef_importance)]
   weights <- abs(weights)
   overall <- norm_to_100(apply(dat, 1, weighted.mean, w = weights))
