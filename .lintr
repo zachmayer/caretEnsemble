@@ -1,0 +1,15 @@
+linters: linters_with_defaults(
+    absolute_path_linter(),
+    assignment_linter(),
+    commas_linter(),
+    spaces_inside_linter(),
+    object_length_linter(35),
+    trailing_blank_lines_linter(),
+    trailing_whitespace_linter(),
+    defaults = list()
+  )
+encoding: "UTF-8"
+exclusions: list(
+    "inst/doc/caretEnsemble-intro.Rmd",
+    "vignettes/caretEnsemble-intro.Rmd"
+  )

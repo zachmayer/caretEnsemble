@@ -11,31 +11,32 @@
 #' @export
 #' @examples
 #' \dontrun{
-#'  model_list1 <- caretList(Class ~ .,
-#'   data=Sonar, trControl = ctrl1,
+#' model_list1 <- caretList(Class ~ .,
+#'   data = Sonar, trControl = ctrl1,
 #'   tuneList = list(
-#'                  glm=caretModelSpec(method='glm', family='binomial'),
-#'                  rpart=caretModelSpec(method='rpart')
-#'                  ),
-#'    metric='ROC')
+#'     glm = caretModelSpec(method = "glm", family = "binomial"),
+#'     rpart = caretModelSpec(method = "rpart")
+#'   ),
+#'   metric = "ROC"
+#' )
 #'
 #' model_list2 <- caretList(Class ~ .,
-#'                          data=Sonar,
-#'                          trControl = ctrl1,
-#'                          tuneList = list(
-#'                            glm=caretModelSpec(method='rpart'),
-#'                            rpart=caretModelSpec(method='rf')
-#'                          ),
-#'                          metric='ROC')
+#'   data = Sonar,
+#'   trControl = ctrl1,
+#'   tuneList = list(
+#'     glm = caretModelSpec(method = "rpart"),
+#'     rpart = caretModelSpec(method = "rf")
+#'   ),
+#'   metric = "ROC"
+#' )
 #'
-#'  bigList <- c(model_list1, model_list2)
+#' bigList <- c(model_list1, model_list2)
 #' }
 #'
 c.caretList <- function(...) {
-
   new_model_list <- unlist(lapply(list(...), function(x) {
-    if(class(x)[1] != "caretList") {
-      if(class(x)[1] != "train") stop("class of modelList1 must be 'caretList' or 'train'")
+    if (class(x)[1] != "caretList") {
+      if (class(x)[1] != "train") stop("class of modelList1 must be 'caretList' or 'train'")
 
       ## assuming this is a single train object
       x <- list(x)
@@ -66,23 +67,24 @@ c.caretList <- function(...) {
 #' @examples
 #' \dontrun{
 #' rpartTrain <- train(Class ~ .,
-#'                     data=Sonar,
-#'                     trControl = ctrl1,
-#'                     method='rpart')
+#'   data = Sonar,
+#'   trControl = ctrl1,
+#'   method = "rpart"
+#' )
 #'
 #' rfTrain <- train(Class ~ .,
-#'                  data=Sonar,
-#'                  trControl = ctrl1,
-#'                  method='rf')
+#'   data = Sonar,
+#'   trControl = ctrl1,
+#'   method = "rf"
+#' )
 #'
-#'  bigList <- c(model_list1, model_list2)
+#' bigList <- c(model_list1, model_list2)
 #' }
 #'
 c.train <- function(...) {
-
   new_model_list <- unlist(lapply(list(...), function(x) {
-    if(class(x)[1] != "caretList") {
-      if(class(x)[1] != "train") stop("class of modelList1 must be 'caretList' or 'train'")
+    if (class(x)[1] != "caretList") {
+      if (class(x)[1] != "train") stop("class of modelList1 must be 'caretList' or 'train'")
 
       ## assuming this is a single train object
       x <- list(x)
