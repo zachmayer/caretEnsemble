@@ -7,6 +7,7 @@ all: install document test test-coverage check check-cran
 
 # Install dependencies
 install:
+	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
 	Rscript -e "devtools::install_deps()"
 	Rscript -e "devtools::install_dev_deps()"
 
@@ -16,11 +17,11 @@ document:
 
 # Run unit tests
 test:
-	Rscript -e "devtools::test()"
+	Rscript -e "devtools::test(stop_on_failure=TRUE)"
 
 # Unit test coverage report
 test-coverage:
-	Rscript -e "covr::coveralls()"
+	Rscript -e "devtools::test_coverage()"
 
 # Run R CMD check
 check: document
