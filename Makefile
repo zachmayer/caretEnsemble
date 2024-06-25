@@ -7,7 +7,6 @@ all: install document test test-coverage check check-cran
 
 # Install dependencies
 install:
-	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
 	Rscript -e "devtools::install_deps()"
 	Rscript -e "devtools::install_dev_deps()"
 
