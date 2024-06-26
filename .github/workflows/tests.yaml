@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, master]
 
-name: Unit-Tests
+name: Tests
 
 jobs:
   build:
