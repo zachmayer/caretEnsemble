@@ -1,10 +1,10 @@
-name: Unit Test
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
 
-push:
-  branches: [main, master]
-pull_request:
-  branches: [main, master]
-
+name: Unit-Tests
 
 jobs:
   build:
@@ -16,4 +16,3 @@ jobs:
       with:
             extra-packages: any::roxygen2
     - run: make test
-    - run: make check-cran
