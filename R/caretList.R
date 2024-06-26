@@ -88,7 +88,7 @@ trControlCheck <- function(x, y) {
     stop("Please pass exactly 1 argument to savePredictions, e.g. savePredictions='final'")
   }
 
-  if (x$savePredictions == TRUE) {
+  if (x$savePredictions) {
     warning("x$savePredictions == TRUE is depreciated. Setting to 'final' instead.")
     x$savePredictions <- "final"
   }
@@ -226,7 +226,7 @@ caretList <- function(
   # Loop through the tuneLists and fit caret models with those specs
   modelList <- lapply(tuneList, function(m) {
     model_args <- c(global_args, m)
-    if (continue_on_fail == TRUE) {
+    if (continue_on_fail) {
       model <- tryCatch(do.call(train, model_args), error = function(e) NULL)
     } else {
       model <- do.call(train, model_args)
@@ -327,9 +327,9 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE) {
     }
   }
 
-  if (verbose == TRUE) {
+  if (verbose) {
     pboptions(type = "txt", char = "*")
-  } else if (verbose == FALSE) {
+  } else if (verbose) {
     pboptions(type = "none")
   }
   preds <- pbsapply(object, function(x) {

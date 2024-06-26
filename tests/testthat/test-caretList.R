@@ -3,12 +3,7 @@
 set.seed(442)
 suppressMessages({
   library("caret")
-  library("randomForest")
-  library("rpart")
-  library("gbm")
   library("kernlab")
-  library("nnet")
-  library("ipred")
 })
 train <- twoClassSim(
   n = 1000, intercept = -8, linearVars = 3,

@@ -4,9 +4,6 @@ set.seed(107)
 suppressMessages({
   library("caret")
   library("caretEnsemble")
-  library("pROC")
-  library("randomForest")
-  library("rpart")
   library("mlbench")
 })
 

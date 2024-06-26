@@ -1,6 +1,5 @@
 context("Does stacking and prediction work?")
 library(caret)
-library(randomForest)
 
 data(models.reg)
 data(X.reg)

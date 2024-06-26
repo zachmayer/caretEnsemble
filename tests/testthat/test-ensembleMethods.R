@@ -4,7 +4,6 @@
 
 context("Does variable importance work?")
 library(caret)
-library(randomForest)
 
 data(models.reg)
 data(X.reg)

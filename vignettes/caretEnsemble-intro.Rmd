@@ -1,6 +1,6 @@
 ---
 title: "A Brief Introduction to caretEnsemble"
-author: "Zach Mayer"
+author: "Zach Deane-Mayer"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -21,13 +21,11 @@ vignette: >
 ```{r, echo=FALSE, results="hide"}
 suppressMessages(library("caret"))
 suppressMessages(library("mlbench"))
-suppressMessages(library("pROC"))
 ```
 ```{r, echo=TRUE, results="hide"}
 # Adapted from the caret vignette
 library("caret")
 library("mlbench")
-library("pROC")
 data(Sonar)
 set.seed(107)
 inTrain <- createDataPartition(y = Sonar$Class, p = .75, list = FALSE)
@@ -46,7 +44,6 @@ Notice that we are explicitly setting the resampling `index` to being used in `t
 
 Now we can use `caretList` to fit a series of models (each with the same `trControl`):
 ```{r, echo=TRUE, results="hide", warning=FALSE}
-library("rpart")
 library("caretEnsemble")
 model_list <- caretList(
   Class ~ .,
@@ -68,13 +65,9 @@ knitr::kable(p)
 If you desire more control over the model fit, use the `caretModelSpec` to construct a list of model specifications for the `tuneList` argument. This argument can be used to fit several different variants of the same model, and can also be used to pass arguments through `train` down to the component functions (e.g. `trace=FALSE` for `nnet`):
 ```{r, echo=FALSE, results="hide", warning=FALSE}
 suppressMessages(library("mlbench"))
-suppressMessages(library("randomForest"))
-suppressMessages(library("nnet"))
 ```
 ```{r, echo=TRUE, results="hide", warning=FALSE}
 library("mlbench")
-library("randomForest")
-library("nnet")
 model_list_big <- caretList(
   Class ~ .,
   data = training,
@@ -168,11 +161,9 @@ Note that `glm_ensemble$ens_model` is a regular caret object of class `train`.  
 
 We can also use more sophisticated ensembles than simple linear weights, but these models are much more susceptible to over-fitting, and generally require large sets of resamples to train on (n=50 or higher for bootstrap samples).  Lets try one anyways:
 ```{r, echo=FALSE, results="hide"}
-suppressMessages(library("gbm"))
 suppressMessages(library("plyr"))
 ```
 ```{r, echo=TRUE}
-library("gbm")
 gbm_ensemble <- caretStack(
   model_list,
   method = "gbm",

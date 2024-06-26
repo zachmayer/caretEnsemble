@@ -3,7 +3,6 @@
 # make update-test-fixtures
 
 library(caret)
-library(randomForest)
 
 data(models.reg)
 data(X.reg)

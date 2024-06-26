@@ -2,7 +2,6 @@
 context("Do the helper functions work for regression objects?")
 ########################################################################
 library("caret")
-library("randomForest")
 library("rpart")
 
 data(models.reg)

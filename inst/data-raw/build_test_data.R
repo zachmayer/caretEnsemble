@@ -1,8 +1,5 @@
-library(randomForest)
-library(rpart)
 library(caret)
 library(plyr)
-library(e1071)
 
 # Build test data
 data(iris)
