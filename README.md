@@ -4,8 +4,8 @@
 [![Code Coverage](https://codecov.io/gh/zachmayer/caretEnsemble/graph/badge.svg?token=IEtOlZDYMs)](https://codecov.io/gh/zachmayer/caretEnsemble)
 [![Downloads](http://cranlogs.r-pkg.org/badges/caretEnsemble)](https://CRAN.R-project.org/package=caretEnsemble/)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](https://badges.mit-license.org)
-[![Badges](http://img.shields.io/:badges-7/7-438cf0.svg?style=flat)](https://github.com/badges/badgerbadgerbadger)
-[![Join the chat at https://gitter.im/zachmayer/caretEnsemble](https://badges.gitter.im/Join%20Chat.svg)](https://app.gitter.im/#/room/#zachmayer_caretEnsemble:gitter.im)
+[![Discord](https://img.shields.io/discord/1255535052578619524)](https://discord.gg/zgPeSm8a3u)
+
 
 # caretEnsemble: [(Read the vignette!)](https://htmlpreview.github.io/?https://github.com/zachmayer/caretEnsemble/blob/master/doc/caretEnsemble-intro.html)
 
