@@ -3,7 +3,9 @@ linters: linters_with_tags(
         "default", 
         "best_practices_linters",
         "common_mistakes",
-        "consistency"),
+        "correctness",
+        "executing"
+        ),
     line_length_linter(305),  # TODO — change to 120
     seq_linter = NULL,  # TODO - small refactor
     cyclocomp_linter(complexity_limit = 16),  # TODO - small refactor
