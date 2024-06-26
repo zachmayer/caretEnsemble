@@ -1,6 +1,6 @@
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/caretEnsemble)](https://CRAN.R-project.org/package=caretEnsemble/)
-[![R-CMD-check](https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml)
-![Unit Tests](https://github.com/zachmayer/caretEnsemble/actions/workflows/unit-tests.yml/badge.svg)
+[![R-CMD-check](https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml)
+[![Unit Tests](https://github.com/zachmayer/caretEnsemble/actions/workflows/unit-tests.yml/badge.svg?branch=main)](https://github.com/zachmayer/caretEnsemble/actions/workflows/unit-tests.yaml)
 [![Code Coverage](https://codecov.io/gh/zachmayer/caretEnsemble/graph/badge.svg?token=IEtOlZDYMs)](https://codecov.io/gh/zachmayer/caretEnsemble)
 [![Downloads](http://cranlogs.r-pkg.org/badges/caretEnsemble)](https://CRAN.R-project.org/package=caretEnsemble/)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](https://badges.mit-license.org)
