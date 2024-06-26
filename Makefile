@@ -1,9 +1,9 @@
 # Makefile for R project
 
-.PHONY: all install document test check-cran lint clean
+.PHONY: all install document test check-cran fix-style lint clean
 
 # Default target
-all: install document test test-coverage check check-cran
+all: fix-style install document test test-coverage check check-cran
 
 # Install dependencies
 install:
@@ -23,9 +23,13 @@ test:
 check-cran: document
 	Rscript -e "devtools::check(cran=T, remote=T, manual=T, error_on='note')"
 
-# Auto lint the code
-lint:
+# Auto style the code
+fix-style:
 	Rscript -e "styler::style_pkg()"
+
+# Check the code for lint
+lint:
+	Rscript -e "lintr::lint_package()"
 
 # Clean up generated files
 clean:
