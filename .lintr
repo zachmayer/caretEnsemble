@@ -1,5 +1,5 @@
 linters: linters_with_defaults(
-    line_length_linter = NULL,
+    line_length_linter(256),
     commented_code_linter = NULL,
     object_name_linter = NULL,
     indentation_linter = NULL,
@@ -11,4 +11,4 @@ linters: linters_with_defaults(
     semicolon_linter = NULL,
     T_and_F_symbol_linter = NULL,
     object_usage_linter = NULL
-)
+  )
