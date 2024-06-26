@@ -1,3 +1,6 @@
+^Makefile$
+^README\.md$
+.Rhistory
 ^.*\.Rproj$
 ^\.Rproj\.user$
 todo.txt

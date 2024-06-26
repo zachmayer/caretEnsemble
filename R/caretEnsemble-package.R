@@ -7,7 +7,7 @@
 #' @importFrom graphics plot
 #' @importFrom methods is
 #' @importFrom stats coef median model.frame model.response predict qnorm reshape resid residuals weighted.mean weights
-NULL
+"_PACKAGE"
 
 #' @title caretList of classification models
 #' @name models.class

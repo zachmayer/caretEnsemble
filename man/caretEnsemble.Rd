@@ -49,3 +49,20 @@ ens <- caretEnsemble(models)
 summary(ens)
 }
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/zachmayer/caretEnsemble}
+  \item Report bugs at \url{https://github.com/zachmayer/caretEnsemble/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Zachary A. Deane-Mayer \email{zach.mayer@gmail.com}
+
+Authors:
+\itemize{
+  \item Jared E. Knowles \email{jknowles@gmail.com}
+}
+
+}

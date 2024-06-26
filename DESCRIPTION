@@ -2,8 +2,8 @@ Encoding: UTF-8
 Package: caretEnsemble
 Type: Package
 Title: Ensembles of Caret Models
-Version: 2.0.3
-Date: 2023-09-19
+Version: 2.0.4
+Date: 2024-06-25
 Authors@R: c(person(c("Zachary", "A."), "Deane-Mayer", role = c("aut", "cre"),
     email = "zach.mayer@gmail.com"),
     person(c("Jared", "E."), "Knowles", role=c("aut"),
@@ -21,7 +21,9 @@ Depends:
 Suggests:
     caTools,
     testthat,
+    devtools,
     lintr,
+    covr,
     randomForest,
     glmnet,
     rpart,
@@ -50,5 +52,5 @@ Imports:
     caret
 License: MIT + file LICENSE
 VignetteBuilder: knitr
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 LazyData: true
