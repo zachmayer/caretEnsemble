@@ -88,7 +88,7 @@ trControlCheck <- function(x, y) {
     stop("Please pass exactly 1 argument to savePredictions, e.g. savePredictions='final'")
   }
 
-  if (x$savePredictions) {
+  if (x$savePredictions %in% c(TRUE)) {
     warning("x$savePredictions == TRUE is depreciated. Setting to 'final' instead.")
     x$savePredictions <- "final"
   }

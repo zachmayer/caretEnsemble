@@ -1,4 +1,3 @@
-context("Does stacking and prediction work?")
 library(caret)
 
 data(models.reg)
@@ -8,6 +7,9 @@ data(Y.reg)
 data(models.class)
 data(X.class)
 data(Y.class)
+
+
+context("Does stacking and prediction work?")
 
 test_that("We can stack regression models", {
   set.seed(96367)
@@ -43,7 +45,6 @@ test_that("We can stack classification models", {
 })
 
 test_that("caretStack plots", {
-  skip_if_not_installed("gbm")
   test_plot_file <- "caretEnsemble_test_plots.png"
   ens.reg <- caretStack(
     models.reg,
@@ -55,6 +56,7 @@ test_that("caretStack plots", {
   dotplot(ens.reg, metric = "RMSE")
   dev.off()
   unlink(test_plot_file)
+  expect_is(ens.reg, "caretStack")
 })
 
 context("Prediction errors for caretStack work as expected")

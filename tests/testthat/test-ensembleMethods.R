@@ -29,22 +29,21 @@ test_that("We can get variable importance in ensembles", {
   expect_is(varImp(ens.reg, scale = TRUE, weight = TRUE), "data.frame")
 })
 
-test_that("We get warnings when scale is set to FALSE and weight is TRUE", {
-  skip_on_cran()
+test_that("varImp works for caretEnsembles", {
   set.seed(2239)
-  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
-  # varImp struggles with the rf in our test suite, why?
-  models.subset <- models.reg[2:4]
-  class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(method = "none"))
-  i <- varImp(ens.reg, scale = FALSE, weight = TRUE)
-  i <- varImp(ens.class, scale = FALSE, weight = TRUE)
-  i <- varImp(ens.reg, scale = FALSE, weight = TRUE)
-  i <- varImp(ens.class, scale = FALSE, weight = TRUE)
-  i <- varImp(ens.reg, scale = FALSE)
-  i <- varImp(ens.class, scale = FALSE)
-  i <- varImp(ens.reg, scale = FALSE)
-  i <- varImp(ens.class, scale = FALSE)
+  for (models in list(models.class, models.reg)) {
+    ens <- caretEnsemble(models, trControl = trainControl(method = "none"))
+    expected_names <- c("overall", names(ens$models))
+    expected_row_names <- c("Intercept", "Speciesversicolor", "Speciesvirginica", "Petal.Width", "Sepal.Width", "Petal.Length")
+    for (s in c(TRUE, FALSE)) {
+      for (w in c(TRUE, FALSE)) {
+        i <- varImp(ens, scale = s, weight = w)
+        expect_is(i, "data.frame")
+        expect_equal(names(i), expected_names)
+        expect_equal(row.names(i), expected_row_names)
+      }
+    }
+  }
 })
 
 test_that("We get the right dimensions back", {

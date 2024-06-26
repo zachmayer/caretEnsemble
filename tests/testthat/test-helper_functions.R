@@ -110,8 +110,8 @@ w1 <- c(0.1, 0.1, 0.1, 0.7)
 
 test_that("wtd.sd applies weights correctly", {
   expect_error(caretEnsemble:::wtd.sd(x))
-  expect_false(sd(x1) == wtd.sd(x1, w = x2))
-  expect_false(sd(x1) == wtd.sd(x1, w = x2))
+  expect_false(sd(x1) == caretEnsemble:::wtd.sd(x1, w = x2))
+  expect_false(sd(x1) == caretEnsemble:::wtd.sd(x1, w = x2))
   expect_equal(caretEnsemble:::wtd.sd(y, w = w1), 7.84, tolerance = .001)
   expect_equal(caretEnsemble:::wtd.sd(y, w = w1 * 100), caretEnsemble:::wtd.sd(y, w = w1))
 })
@@ -131,7 +131,6 @@ test_that("wtd.sd handles NA values correctly", {
 
 test_that("Checks generate errors", {
   skip_on_cran()
-  skip_if_not_installed("rpart")
   set.seed(42)
   myControl <- trainControl(method = "cv", number = 5, savePredictions = "final")
   suppressWarnings(
