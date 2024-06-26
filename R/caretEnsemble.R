@@ -25,12 +25,12 @@
 #' @examples
 #' \dontrun{
 #' set.seed(42)
-#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c("glm", "lm"))
+#' models <- caretList(iris[1:50, 1:2], iris[1:50, 3], methodList = c("glm", "lm"))
 #' ens <- caretEnsemble(models)
 #' summary(ens)
 #' }
 caretEnsemble <- function(all.models, ...) {
-  out <- caretStack(all.models, method="glm", ...)
+  out <- caretStack(all.models, method = "glm", ...)
   class(out) <- c("caretEnsemble", "caretStack")
   return(out)
 }
@@ -51,7 +51,7 @@ is.caretEnsemble <- function(object) {
 #' @examples
 #' \dontrun{
 #' set.seed(42)
-#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c("glm", "lm"))
+#' models <- caretList(iris[1:50, 1:2], iris[1:50, 3], methodList = c("glm", "lm"))
 #' ens <- caretEnsemble(models)
 #' summary(ens)
 #' }
@@ -83,13 +83,18 @@ extractModRes <- function(ensemble) {
       lapply(
         ensemble$models,
         getMetric.train,
-        metric = metric)),
+        metric = metric
+      )
+    ),
     metricSD = unlist(
       lapply(
         ensemble$models,
         getMetricSD.train,
-        metric = metric)),
-    stringsAsFactors = FALSE)
+        metric = metric
+      )
+    ),
+    stringsAsFactors = FALSE
+  )
   names(modRes)[2:3] <- c(metric, paste0(metric, "SD"))
   return(modRes)
 }
@@ -115,13 +120,13 @@ getMetricSD <- function(x, metric, ...) {
 #' @return A numeric representing the metric desired metric.
 #' @rdname metrics
 #' @export
-getMetric.train <- function(x, metric=NULL, ...) {
-  if(is.null(metric)) {
+getMetric.train <- function(x, metric = NULL, ...) {
+  if (is.null(metric)) {
     metric <- x$metric
   }
   stopifnot(metric %in% names(x$results))
   val <- x$results[[metric]]
-  val <- ifelse(x$maximize, max(val, na.rm=TRUE), min(val, na.rm=TRUE))
+  val <- ifelse(x$maximize, max(val, na.rm = TRUE), min(val, na.rm = TRUE))
   val
 }
 
@@ -141,7 +146,7 @@ matchBestTune <- function(out, bt) {
   nams <- names(attributes(out)$dimnames)
   nams <- nams[nams %in% names(bt)]
   tmp <- c()
-  for(i in length(nams)){
+  for (i in length(nams)) {
     tmp.t <- out[attributes(out)$dimnames[[nams[[i]]]] == as.character(bt[, nams[i]])]
     tmp <- c(tmp, tmp.t)
   }
@@ -162,33 +167,32 @@ matchBestTune <- function(out, bt) {
 #' @importFrom caret varImp
 #' @export
 varImp.caretEnsemble <- function(object, ...) {
-
-  #Extract and formal individual model importances
-  #Todo, clean up this code!
+  # Extract and formal individual model importances
+  # Todo, clean up this code!
   a <- lapply(object$models, caret::varImp)
   a <- lapply(a, clean_varImp)
 
-  #Convert to data.frame
+  # Convert to data.frame
   dat <- varImpFrame(a)
   dat[is.na(dat)] <- 0
   names(dat) <- make.names(names(a))
 
-  #Scale the importances
+  # Scale the importances
   norm_to_100 <- function(d) d / sum(d) * 100
   dat[] <- lapply(dat, norm_to_100)
 
-  #Calculated the overall importance
+  # Calculated the overall importance
   weights <- coef(object$ens_model$finalModel)
   weights <- weights[names(weights) %in% names(a)]
   weights <- abs(weights)
-  overall <- apply(dat, 1, weighted.mean, w=weights)
+  overall <- apply(dat, 1, weighted.mean, w = weights)
   overall <- norm_to_100(overall)
   dat <- data.frame(
     overall = overall,
     dat
   )
 
-  #Order, and return
+  # Order, and return
   dat <- dat[order(dat[["overall"]]), ]
   return(dat)
 }
@@ -197,14 +201,13 @@ varImp.caretEnsemble <- function(object, ...) {
 # This function only gets called once, in varImp.caretEnsemble
 clean_varImp <- function(x) {
   names(x$importance)[1] <- "Overall"
-  x$importance <- x$importance[, "Overall", drop=FALSE]
+  x$importance <- x$importance[, "Overall", drop = FALSE]
   return(x$importance)
 }
 
 #' @keywords internal
 # This function only gets called once, in varImp.caretEnsemble
 varImpFrame <- function(x) {
-
   dat <- do.call(rbind.data.frame, x)
   dat <- dat[!duplicated(lapply(dat, summary))]
 
@@ -218,8 +221,10 @@ varImpFrame <- function(x) {
   dat$var[grep("Inter", dat$var)] <- "Intercept"
   dat$id <- NULL
   row.names(dat) <- NULL
-  dat <- reshape(dat, direction = "wide", v.names="Overall",
-                 idvar = "var", timevar = "model")
+  dat <- reshape(dat,
+    direction = "wide", v.names = "Overall",
+    idvar = "var", timevar = "model"
+  )
   row.names(dat) <- dat[, 1]
   return(dat[, -1])
 }
@@ -231,16 +236,16 @@ varImpFrame <- function(x) {
 #' @param ... other arguments to be passed to residuals
 #' @return A numeric of the residuals.
 residuals.caretEnsemble <- function(object, ...) {
-  if(is.null(object$modelType)) {
+  if (is.null(object$modelType)) {
     object$modelType <- extractModelTypes(object$models)[1]
   }
-  if(object$modelType == "Regression") {
+  if (object$modelType == "Regression") {
     yhat <- predict(object)
     y <- object$models[[1]]$trainingData$.outcome
     resid <- y - yhat
     return(resid)
-  } else if(object$modelType == "Classification") {
-    yhat <- predict(object, type="prob")
+  } else if (object$modelType == "Classification") {
+    yhat <- predict(object, type = "prob")
     y <- as.character(object$models[[1]]$trainingData$.outcome)
     z <- table(y)
     prevOutcome <- names(z)[z == max(z)]
@@ -262,9 +267,9 @@ multiResiduals <- function(object, ...) {
   stopifnot(is(object$models, "caretList"))
   modtype <- extractModelTypes(object$models)
   preds <- predict(object$models, ...)
-  if(modtype == "Regression") {
+  if (modtype == "Regression") {
     y <- object$models[[1]]$trainingData$.outcome
-  } else if(modtype == "Classification") {
+  } else if (modtype == "Classification") {
     y <- as.character(object$models[[1]]$trainingData$.outcome)
     z <- table(y)
     prevOutcome <- names(z)[z == max(z)]
@@ -273,10 +278,14 @@ multiResiduals <- function(object, ...) {
   resid <- y - preds
   preds <- as.data.frame(preds)
   resid <- as.data.frame(resid)
-  resid <- reshape(resid, direction = "long", varying = names(resid),
-                    v.names = "resid", timevar = "method", times = names(resid))
-  preds <- reshape(preds, direction = "long", varying = names(preds),
-                   v.names = "yhat", timevar = "method", times = names(preds))
+  resid <- reshape(resid,
+    direction = "long", varying = names(resid),
+    v.names = "resid", timevar = "method", times = names(resid)
+  )
+  preds <- reshape(preds,
+    direction = "long", varying = names(preds),
+    v.names = "yhat", timevar = "method", times = names(preds)
+  )
   out <- merge(preds, resid)
   out$y <- out$yhat + out$resid
   return(out)
@@ -293,18 +302,18 @@ multiResiduals <- function(object, ...) {
 fortify <- function(model, data = NULL, ...) {
   data <- extractModFrame(model)
   data$y <- model$models[[1]]$trainingData$.outcome
-  if(!inherits(data$y, "numeric")) {
+  if (!inherits(data$y, "numeric")) {
     data$y <- as.character(data$y)
     z <- table(data$y)
     prevOutcome <- names(z)[z == max(z)]
     data$y <- ifelse(data$y == prevOutcome, 0, 1)
     data$y <- as.numeric(data$y)
   }
-  if(model$ens_model$modelType == "Classification") {
-    data$.fitted <- predict(model, type="prob")
-  } else if(model$ens_model$modelType == "Regression") {
+  if (model$ens_model$modelType == "Classification") {
+    data$.fitted <- predict(model, type = "prob")
+  } else if (model$ens_model$modelType == "Regression") {
     data$.fitted <- predict(model)
-  }else {
+  } else {
     stop(paste("Uknown model type", model$ens_model$modelType))
   }
 
@@ -321,7 +330,7 @@ fortify <- function(model, data = NULL, ...) {
 #' @importFrom digest digest
 extractModFrame <- function(model) {
   datList <- vector("list", length = length(model$models))
-  for(i in 1: length(model$models)){
+  for (i in 1:length(model$models)) {
     datList[[i]] <- model$models[[i]]$trainingData
   }
   modelFrame <- do.call(cbind, datList)
@@ -341,12 +350,11 @@ extractModFrame <- function(model) {
 #' @examples
 #' \dontrun{
 #' set.seed(42)
-#' models <- caretList(iris[1:50,1:2], iris[1:50,3], methodList=c("glm", "rpart"))
+#' models <- caretList(iris[1:50, 1:2], iris[1:50, 3], methodList = c("glm", "rpart"))
 #' ens <- caretEnsemble(models)
 #' plot(ens)
 #' }
 plot.caretEnsemble <- function(x, ...) {
-
   # TODO: USE OUT OF SAMPLE RESIDUALS
 
   dat <- extractModRes(x)
@@ -357,13 +365,16 @@ plot.caretEnsemble <- function(x, ...) {
     dat, aes(
       x = method, y = metric,
       ymin = metric - metricSD,
-      ymax = metric + metricSD)) +
+      ymax = metric + metricSD
+    )
+  ) +
     geom_pointrange() +
-    theme_bw() + labs(x = "Individual Model Method", y = metricLab)
+    theme_bw() +
+    labs(x = "Individual Model Method", y = metricLab)
 
-  if(nrow(x$error) > 0) {
+  if (nrow(x$error) > 0) {
     plt <- plt +
-    geom_hline(linetype = 2, linewidth = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
+      geom_hline(linetype = 2, linewidth = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
   }
   return(plt)
 }
@@ -394,52 +405,72 @@ plot.caretEnsemble <- function(x, ...) {
 #' \dontrun{
 #' set.seed(42)
 #' models <- caretList(
-#'  iris[1:50,1:2],
-#'  iris[1:50,3],
-#'  trControl=trainControl(method="cv"),
-#'  methodList=c("glm", "rpart"))
+#'   iris[1:50, 1:2],
+#'   iris[1:50, 3],
+#'   trControl = trainControl(method = "cv"),
+#'   methodList = c("glm", "rpart")
+#' )
 #' ens <- caretEnsemble(models)
 #' autoplot(ens)
 #' }
 autoplot <- function(object, which = c(1:6), mfrow = c(3, 2),
-                                   xvars = NULL, ...) {
+                     xvars = NULL, ...) {
   plotdf <- suppressMessages(fortify(object))
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
   wghtFrame <- as.data.frame(coef(object$ens_model$finalModel))
   wghtFrame$method <- row.names(wghtFrame)
   names(wghtFrame) <- c("weights", "method")
-  g2 <- ggplot(plotdf, aes(.fitted, .resid)) + geom_point() + geom_smooth(se = FALSE) +
+  g2 <- ggplot(plotdf, aes(.fitted, .resid)) +
+    geom_point() +
+    geom_smooth(se = FALSE) +
     scale_x_continuous("Fitted Values") +
-    scale_y_continuous("Residual") + labs(title = "Residuals vs Fitted") +
+    scale_y_continuous("Residual") +
+    labs(title = "Residuals vs Fitted") +
     theme_bw()
   g3 <- ggplot(wghtFrame, aes(method, weights)) +
     geom_bar(stat = "identity", fill = I("gray50"), color = I("black")) +
-    labs(title = "Model Weights", x = "Method", y = "Weights") + theme_bw()
-  if(missing(xvars)) {
-    xvars <- names(plotdf)[!names(plotdf) %in% c("(Intercept)", ".outcome", "y",
-                                                 ".fitted", ".resid")]
+    labs(title = "Model Weights", x = "Method", y = "Weights") +
+    theme_bw()
+  if (missing(xvars)) {
+    xvars <- names(plotdf)[!names(plotdf) %in% c(
+      "(Intercept)", ".outcome", "y",
+      ".fitted", ".resid"
+    )]
     xvars <- sample(xvars, 2)
   }
   # TODO: Insert checks for length of xvars here
   residOut <- multiResiduals(object)
   zed <- plyr::ddply(residOut, plyr::.(id), plyr::summarize,
-               ymin = min(resid),
-               ymax = max(resid),
-               yavg = median(resid),
-               yhat = yhat[1])
+    ymin = min(resid),
+    ymax = max(resid),
+    yavg = median(resid),
+    yhat = yhat[1]
+  )
   g4 <- ggplot(zed, aes(x = yhat, ymin = ymin, ymax = ymax, y = yavg)) +
-    geom_linerange(alpha = I(0.5)) + geom_point(size = I(3), alpha = I(0.8)) +
-    theme_bw() + geom_smooth(method = "lm", se = FALSE,
-                             size = I(1.1), color = I("red"), linetype = 2) +
-    labs(x = "Fitted Values", y = "Range of Resid.",
-         title = "Model Disagreement Across Fitted Values")
-  g5 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) + geom_point() +
-    geom_smooth(se = FALSE) + scale_x_continuous(xvars[1]) +
+    geom_linerange(alpha = I(0.5)) +
+    geom_point(size = I(3), alpha = I(0.8)) +
+    theme_bw() +
+    geom_smooth(
+      method = "lm", se = FALSE,
+      size = I(1.1), color = I("red"), linetype = 2
+    ) +
+    labs(
+      x = "Fitted Values", y = "Range of Resid.",
+      title = "Model Disagreement Across Fitted Values"
+    )
+  g5 <- ggplot(plotdf, aes_string(xvars[1], ".resid")) +
+    geom_point() +
+    geom_smooth(se = FALSE) +
+    scale_x_continuous(xvars[1]) +
     scale_y_continuous("Residuals") +
-    labs(title = paste0("Residuals Against ", xvars[1])) + theme_bw()
-  g6 <- ggplot(plotdf, aes_string(xvars[2], ".resid")) + geom_point() +
-    geom_smooth(se = FALSE) + scale_x_continuous(xvars[2]) +
+    labs(title = paste0("Residuals Against ", xvars[1])) +
+    theme_bw()
+  g6 <- ggplot(plotdf, aes_string(xvars[2], ".resid")) +
+    geom_point() +
+    geom_smooth(se = FALSE) +
+    scale_x_continuous(xvars[2]) +
     scale_y_continuous("Residuals") +
-    labs(title = paste0("Residuals Against ", xvars[2])) + theme_bw()
-  grid.arrange(g1, g2, g3, g4, g5, g6, ncol=2)
+    labs(title = paste0("Residuals Against ", xvars[2])) +
+    theme_bw()
+  grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2)
 }

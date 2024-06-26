@@ -21,12 +21,12 @@ This is a function to make a dotplot from a caretStack.  It uses dotplot from th
 set.seed(42)
 library("rpart")
 models <- caretList(
-  x=iris[1:100,1:2],
-  y=iris[1:100,3],
-  trControl=trainControl(method="cv"),
-  methodList=c("rpart", "glm")
+  x = iris[1:100, 1:2],
+  y = iris[1:100, 3],
+  trControl = trainControl(method = "cv"),
+  methodList = c("rpart", "glm")
 )
-meta_model <- caretStack(models, method="lm", trControl=trainControl(method="cv"))
+meta_model <- caretStack(models, method = "lm", trControl = trainControl(method = "cv"))
 dotplot.caretStack(meta_model)
 }
 }
