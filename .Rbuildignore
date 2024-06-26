@@ -1,4 +1,5 @@
-.codecov.yml
+.lintr
+.codecov.yaml
 ^Makefile$
 ^README\.md$
 .Rhistory
