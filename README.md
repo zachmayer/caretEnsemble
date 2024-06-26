@@ -1,6 +1,7 @@
-[![Build Status](http://img.shields.io/travis/zachmayer/caretEnsemble.svg?style=flat)](https://app.travis-ci.com/zachmayer/caretEnsemble)
-[![Coverage Status](http://img.shields.io/coveralls/zachmayer/caretEnsemble.svg?style=flat)](https://coveralls.io/github/zachmayer/caretEnsemble)
+![R CI](https://github.com/zachmayer/caretEnsemble/actions/workflows/unit-tests.yml/badge.svg)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/caretEnsemble)](https://CRAN.R-project.org/package=caretEnsemble/)
+ [![R-CMD-check](https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml
+[![Coverage Status](http://img.shields.io/coveralls/zachmayer/caretEnsemble.svg?style=flat)](https://coveralls.io/github/zachmayer/caretEnsemble)
 [![Downloads](http://cranlogs.r-pkg.org/badges/caretEnsemble)](https://CRAN.R-project.org/package=caretEnsemble/)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](https://badges.mit-license.org)
 [![Badges](http://img.shields.io/:badges-7/7-438cf0.svg?style=flat)](https://github.com/badges/badgerbadgerbadger)

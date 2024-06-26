@@ -18,3 +18,4 @@ travis_wait_*
 revdep/*
 ^CRAN-SUBMISSION$
 check_package.R
+^\.github$

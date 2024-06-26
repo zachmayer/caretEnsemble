@@ -1,6 +1,6 @@
 # Makefile for R project
 
-.PHONY: all install document test test-coverage check check-cran lint clean
+.PHONY: all install document test check-cran lint clean
 
 # Default target
 all: install document test test-coverage check check-cran
@@ -19,21 +19,13 @@ document:
 test:
 	Rscript -e "devtools::test(stop_on_failure=TRUE)"
 
-# Unit test coverage report
-test-coverage:
-	Rscript -e "devtools::test_coverage()"
-
-# Run R CMD check
-check: document
-	Rscript -e "devtools::check(error_on='note')"
-
 # Run R CMD check as CRAN
 check-cran: document
 	Rscript -e "devtools::check(cran=T, remote=T, manual=T, error_on='note')"
 
 # Auto lint the code
 lint:
-	Rscript -e "lintr::lint_dir()"
+	Rscript -e "styler::style_pkg()"
 
 # Clean up generated files
 clean:

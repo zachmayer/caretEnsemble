@@ -14,3 +14,7 @@ jobs:
     - run: make test
     - run: make check
     - run: make check-cran
+    - name: Test coverage
+      run: Rscript -e 'covr::codecov()'
+      env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
