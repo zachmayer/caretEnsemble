@@ -1,5 +1,6 @@
 library(caret)
 library(plyr)
+library(caretEnsemble)
 
 # Build test data
 data(iris)
