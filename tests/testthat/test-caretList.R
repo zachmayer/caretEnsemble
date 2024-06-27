@@ -77,13 +77,13 @@ test_that("caretList errors for bad models", {
     bad = caretModelSpec(method = "glm", tuneLength = 1)
   )
   suppressWarnings({
-    sink <- capture.output({
+    invisible(capture.output({
       expect_error(caretList(iris[, 1:4], iris[, 5], tuneList = bad_bad, trControl = my_control))
       expect_error(caretList(iris[, 1:4], iris[, 5], tuneList = good_bad, trControl = my_control))
       expect_error(caretList(iris[, 1:4], iris[, 5], tuneList = bad_bad, trControl = my_control, continue_on_fail = TRUE))
       working <- caretList(iris[, 1:4], iris[, 5], tuneList = good_bad, trControl = my_control, continue_on_fail = TRUE)
       expect_is(working, "caretList")
-    })
+    }))
   })
 })
 
@@ -213,7 +213,7 @@ test_that("We can handle different CV methods", {
         )
       })
     })
-    sink <- sapply(models, expect_is, class = "train")
+    invisible(sapply(models, expect_is, class = "train"))
 
     suppressWarnings({
       suppressMessages({

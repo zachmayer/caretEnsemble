@@ -84,7 +84,7 @@ test_that("We can predict", {
 })
 
 test_that("predict results same regardless of verbose option", {
-  sink <- capture.output({
+  invisible(capture.output({
     suppressWarnings({
       expect_is(predict(models.class, "Classification", newdata = X.class), "matrix")
       out1 <- predict(models.class, "Classification", newdata = X.class)
@@ -97,7 +97,7 @@ test_that("predict results same regardless of verbose option", {
       out2 <- predict(models.reg, "Regression", verbose = TRUE, newdata = X.reg)
       expect_identical(out1, out2)
     })
-  })
+  }))
 })
 
 context("Test weighted standard deviations")

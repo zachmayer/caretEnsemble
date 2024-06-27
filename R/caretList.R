@@ -153,10 +153,10 @@ extractCaretTarget.formula <- function(form, data, ...) {
 }
 
 #' Create a list of several train models from the caret package
-# "
+#'
 #' Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
 #' function.
-# "
+#'
 #' @param ... arguments to pass to \code{\link{train}}.  These arguments will determine which train method gets dispatched.
 #' @param trControl a \code{\link{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.
 #' @param methodList optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.
@@ -306,7 +306,7 @@ as.caretList.list <- function(object) {
 
 #' @title Create a matrix of predictions for each of the models in a caretList
 #' @description Make a matrix of predictions from a list of caret models
-# "
+#'
 #' @param object an object of class caretList
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
