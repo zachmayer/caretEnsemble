@@ -18,16 +18,18 @@ take N objects of class train and concatenate into an object of class caretList 
 \examples{
 \dontrun{
 rpartTrain <- train(Class ~ .,
-                    data=Sonar,
-                    trControl = ctrl1,
-                    method='rpart')
+  data = Sonar,
+  trControl = ctrl1,
+  method = "rpart"
+)
 
 rfTrain <- train(Class ~ .,
-                 data=Sonar,
-                 trControl = ctrl1,
-                 method='rf')
+  data = Sonar,
+  trControl = ctrl1,
+  method = "rf"
+)
 
- bigList <- c(model_list1, model_list2)
+bigList <- c(model_list1, model_list2)
 }
 
 }

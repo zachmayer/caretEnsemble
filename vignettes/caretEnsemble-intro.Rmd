@@ -1,6 +1,6 @@
 ---
 title: "A Brief Introduction to caretEnsemble"
-author: "Zach Mayer"
+author: "Zach Deane-Mayer"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -21,43 +21,41 @@ vignette: >
 ```{r, echo=FALSE, results="hide"}
 suppressMessages(library("caret"))
 suppressMessages(library("mlbench"))
-suppressMessages(library("pROC"))
 ```
 ```{r, echo=TRUE, results="hide"}
-#Adapted from the caret vignette
+# Adapted from the caret vignette
 library("caret")
 library("mlbench")
-library("pROC")
 data(Sonar)
 set.seed(107)
 inTrain <- createDataPartition(y = Sonar$Class, p = .75, list = FALSE)
 training <- Sonar[inTrain, ]
 testing <- Sonar[-inTrain, ]
 my_control <- trainControl(
-  method="boot",
-  number=25,
-  savePredictions="final",
-  classProbs=TRUE,
-  index=createResample(training$Class, 25),
-  summaryFunction=twoClassSummary
-  )
+  method = "boot",
+  number = 25,
+  savePredictions = "final",
+  classProbs = TRUE,
+  index = createResample(training$Class, 25),
+  summaryFunction = twoClassSummary
+)
 ```
 Notice that we are explicitly setting the resampling `index` to being used in `trainControl`.  If you do not set this index manually, `caretList` will attempt to set it for automatically, but it"s generally a good idea to set it yourself.
 
 Now we can use `caretList` to fit a series of models (each with the same `trControl`):
 ```{r, echo=TRUE, results="hide", warning=FALSE}
-library("rpart")
 library("caretEnsemble")
 model_list <- caretList(
-  Class~., data=training,
-  trControl=my_control,
-  methodList=c("glm", "rpart")
-  )
+  Class ~ .,
+  data = training,
+  trControl = my_control,
+  methodList = c("glm", "rpart")
+)
 ```
 (As with `train`, the formula interface is convenient but introduces move overhead.  For large datasets the explicitly passing `x` and `y` is preferred).
 We can use the `predict` function to extract predictions from this object for new data:
 ```{r, echo=TRUE, results="hide"}
-p <- as.data.frame(predict(model_list, newdata=head(testing)))
+p <- as.data.frame(predict(model_list, newdata = head(testing)))
 print(p)
 ```
 ```{r, echo=FALSE, results="asis"}
@@ -67,22 +65,19 @@ knitr::kable(p)
 If you desire more control over the model fit, use the `caretModelSpec` to construct a list of model specifications for the `tuneList` argument. This argument can be used to fit several different variants of the same model, and can also be used to pass arguments through `train` down to the component functions (e.g. `trace=FALSE` for `nnet`):
 ```{r, echo=FALSE, results="hide", warning=FALSE}
 suppressMessages(library("mlbench"))
-suppressMessages(library("randomForest"))
-suppressMessages(library("nnet"))
 ```
 ```{r, echo=TRUE, results="hide", warning=FALSE}
 library("mlbench")
-library("randomForest")
-library("nnet")
 model_list_big <- caretList(
-  Class~., data=training,
-  trControl=my_control,
-  metric="ROC",
-  methodList=c("glm", "rpart"),
-  tuneList=list(
-    rf1=caretModelSpec(method="rf", tuneGrid=data.frame(.mtry=2)),
-    rf2=caretModelSpec(method="rf", tuneGrid=data.frame(.mtry=10), preProcess="pca"),
-    nn=caretModelSpec(method="nnet", tuneLength=2, trace=FALSE)
+  Class ~ .,
+  data = training,
+  trControl = my_control,
+  metric = "ROC",
+  methodList = c("glm", "rpart"),
+  tuneList = list(
+    rf1 = caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 2)),
+    rf2 = caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 10), preProcess = "pca"),
+    nn = caretModelSpec(method = "nnet", tuneLength = 2, trace = FALSE)
   )
 )
 ```
@@ -106,22 +101,23 @@ These 2 models make a good candidate for an ensemble: their predictions are fair
 ```{r, echo=TRUE}
 greedy_ensemble <- caretEnsemble(
   model_list,
-  metric="ROC",
-  trControl=trainControl(
-    number=2,
-    summaryFunction=twoClassSummary,
-    classProbs=TRUE
-    ))
+  metric = "ROC",
+  trControl = trainControl(
+    number = 2,
+    summaryFunction = twoClassSummary,
+    classProbs = TRUE
+  )
+)
 summary(greedy_ensemble)
 ```
 
 The ensemble"s AUC on the training set resamples is 0.76, which is about 7% better than the best individual model.  We can confirm this finding on the test set:
 ```{r, echo=TRUE}
 library("caTools")
-model_preds <- lapply(model_list, predict, newdata=testing, type="prob")
+model_preds <- lapply(model_list, predict, newdata = testing, type = "prob")
 model_preds <- lapply(model_preds, function(x) x[, "M"])
 model_preds <- data.frame(model_preds)
-ens_preds <- predict(greedy_ensemble, newdata=testing, type="prob")
+ens_preds <- predict(greedy_ensemble, newdata = testing, type = "prob")
 model_preds$ensemble <- ens_preds
 caTools::colAUC(model_preds, testing$Class)
 ```
@@ -144,48 +140,46 @@ caretStack allows us to move beyond simple blends of models to using "meta-model
 ```{r, echo=TRUE}
 glm_ensemble <- caretStack(
   model_list,
-  method="glm",
-  metric="ROC",
-  trControl=trainControl(
-    method="boot",
-    number=10,
-    savePredictions="final",
-    classProbs=TRUE,
-    summaryFunction=twoClassSummary
+  method = "glm",
+  metric = "ROC",
+  trControl = trainControl(
+    method = "boot",
+    number = 10,
+    savePredictions = "final",
+    classProbs = TRUE,
+    summaryFunction = twoClassSummary
   )
 )
 model_preds2 <- model_preds
-model_preds2$ensemble <- predict(glm_ensemble, newdata=testing, type="prob")
+model_preds2$ensemble <- predict(glm_ensemble, newdata = testing, type = "prob")
 CF <- coef(glm_ensemble$ens_model$finalModel)[-1]
 colAUC(model_preds2, testing$Class)
-CF/sum(CF)
+CF / sum(CF)
 ```
 
 Note that `glm_ensemble$ens_model` is a regular caret object of class `train`.  The glm-weighted model weights (glm vs rpart) and test-set AUCs are extremely similar to the caretEnsemble greedy optimization.
 
 We can also use more sophisticated ensembles than simple linear weights, but these models are much more susceptible to over-fitting, and generally require large sets of resamples to train on (n=50 or higher for bootstrap samples).  Lets try one anyways:
 ```{r, echo=FALSE, results="hide"}
-suppressMessages(library("gbm"))
 suppressMessages(library("plyr"))
 ```
 ```{r, echo=TRUE}
-library("gbm")
 gbm_ensemble <- caretStack(
   model_list,
-  method="gbm",
-  verbose=FALSE,
-  tuneLength=10,
-  metric="ROC",
-  trControl=trainControl(
-    method="boot",
-    number=10,
-    savePredictions="final",
-    classProbs=TRUE,
-    summaryFunction=twoClassSummary
+  method = "gbm",
+  verbose = FALSE,
+  tuneLength = 10,
+  metric = "ROC",
+  trControl = trainControl(
+    method = "boot",
+    number = 10,
+    savePredictions = "final",
+    classProbs = TRUE,
+    summaryFunction = twoClassSummary
   )
 )
 model_preds3 <- model_preds
-model_preds3$ensemble <- predict(gbm_ensemble, newdata=testing, type="prob")
+model_preds3$ensemble <- predict(gbm_ensemble, newdata = testing, type = "prob")
 colAUC(model_preds3, testing$Class)
 ```
 

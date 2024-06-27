@@ -1,10 +1,9 @@
 # Are tests failing here?
 # UPDATE THE FIXTURES!
-# source('inst/data-raw/build_test_data.R')
+# make update-test-fixtures
 
 context("Does variable importance work?")
 library(caret)
-library(randomForest)
 
 data(models.reg)
 data(X.reg)
@@ -17,11 +16,11 @@ data(Y.class)
 test_that("We can get variable importance in ensembles", {
   skip_on_cran()
   set.seed(2239)
-  ens.class <- caretEnsemble(models.class, trControl=trainControl(method="none"))
+  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   # varImp struggles with the rf in our test suite, why?
   models.subset <- models.reg[2:4]
   class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl=trainControl(method="none"))
+  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(method = "none"))
   expect_is(varImp(ens.class), "data.frame")
   expect_is(varImp(ens.class, weight = TRUE), "data.frame")
   expect_is(varImp(ens.class, scale = TRUE, weight = TRUE), "data.frame")
@@ -30,22 +29,21 @@ test_that("We can get variable importance in ensembles", {
   expect_is(varImp(ens.reg, scale = TRUE, weight = TRUE), "data.frame")
 })
 
-test_that("We get warnings when scale is set to FALSE and weight is TRUE", {
-  skip_on_cran()
+test_that("varImp works for caretEnsembles", {
   set.seed(2239)
-  ens.class <- caretEnsemble(models.class, trControl=trainControl(method="none"))
-  # varImp struggles with the rf in our test suite, why?
-  models.subset <- models.reg[2:4]
-  class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl=trainControl(method="none"))
-  i <- varImp(ens.reg, scale = FALSE, weight = TRUE)
-  i <- varImp(ens.class, scale = FALSE, weight = TRUE)
-  i <- varImp(ens.reg, scale = FALSE, weight = TRUE)
-  i <- varImp(ens.class, scale = FALSE, weight = TRUE)
-  i <- varImp(ens.reg, scale = FALSE)
-  i <- varImp(ens.class, scale = FALSE)
-  i <- varImp(ens.reg, scale = FALSE)
-  i <- varImp(ens.class, scale = FALSE)
+  for (models in list(models.class, models.reg)) {
+    ens <- caretEnsemble(models, trControl = trainControl(method = "none"))
+    expected_names <- c("overall", names(ens$models))
+    expected_row_names <- c("Intercept", "Speciesversicolor", "Speciesvirginica", "Petal.Width", "Sepal.Width", "Petal.Length")
+    for (s in c(TRUE, FALSE)) {
+      for (w in c(TRUE, FALSE)) {
+        i <- varImp(ens, scale = s, weight = w)
+        expect_is(i, "data.frame")
+        expect_equal(names(i), expected_names)
+        expect_equal(row.names(i), expected_row_names)
+      }
+    }
+  }
 })
 
 test_that("We get the right dimensions back", {
@@ -55,11 +53,11 @@ test_that("We get the right dimensions back", {
   nrow1 <- 6
   nrow2 <- 6
   set.seed(2239)
-  ens.class <- caretEnsemble(models.class, trControl=trainControl(method="none"))
+  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   # varImp struggles with the rf in our test suite, why?
   models.subset <- models.reg[2:4]
   class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl=trainControl(method="none"))
+  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(method = "none"))
   expect_equal(ncol(varImp(ens.class)), ncol1)
   expect_equal(ncol(varImp(ens.class, weight = FALSE)), ncol1)
   expect_equal(ncol(varImp(ens.class, weight = TRUE)), ncol1)
@@ -80,44 +78,45 @@ test_that("Metric is used correctly", {
   skip_on_cran()
   set.seed(2239)
 
-  #Make ensemble
+  # Make ensemble
   ens.class <- caretEnsemble(
     models.class,
-    metric="ROC",
-    trControl=trainControl(
-      number=2,
-      summaryFunction=twoClassSummary,
-      classProbs=TRUE
-    ))
+    metric = "ROC",
+    trControl = trainControl(
+      number = 2,
+      summaryFunction = twoClassSummary,
+      classProbs = TRUE
+    )
+  )
 
-  #Make ensemble
+  # Make ensemble
   # varImp struggles with the rf in our test suite, why?
   models.subset <- models.reg[2:4]
   class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl=trainControl(number=2))
+  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2))
 
-  #Get an incorrect metric
+  # Get an incorrect metric
   expect_error(getMetric.train(ens.class$models[[3]], metric = "RMSE"))
   expect_error(getMetric.train(ens.reg$models[[2]], metric = "ROC"))
 
-  #Correct metric
+  # Correct metric
   expect_equal(getMetric.train(ens.class$models[[1]], metric = "ROC"), 0.9293333, tol = 0.1)
   expect_equal(getMetric.train(ens.class$models[[2]], metric = "ROC"), 0.9406667, tol = 0.1)
   expect_equal(getMetric.train(ens.class$models[[3]], metric = "ROC"), 0.8826667, tol = 0.1)
   expect_equal(getMetric.train(ens.class$models[[4]], metric = "ROC"), 0.9153333, tol = 0.1)
 
-  #Correct metric
+  # Correct metric
   expect_equal(getMetric.train(ens.reg$models[[1]], metric = "RMSE"), 0.3146584, tol = 0.1)
   expect_equal(getMetric.train(ens.reg$models[[2]], metric = "RMSE"), 0.439482, tol = 0.1)
   expect_equal(getMetric.train(ens.reg$models[[3]], metric = "RMSE"), 0.3361409, tol = 0.1)
 
-  #Correct metric
+  # Correct metric
   expect_equal(getMetricSD.train(ens.class$models[[1]], metric = "ROC"), 0.05897897, tol = 0.1)
   expect_equal(getMetricSD.train(ens.class$models[[2]], metric = "ROC"), 0.05196865, tol = 0.1)
   expect_equal(getMetricSD.train(ens.class$models[[3]], metric = "ROC"), 0.05985304, tol = 0.1)
   expect_equal(getMetricSD.train(ens.class$models[[4]], metric = "ROC"), 0.07554248, tol = 0.1)
 
-  #Correct metric
+  # Correct metric
   expect_equal(getMetricSD.train(ens.reg$models[[1]], metric = "RMSE"), 0.05839238, tol = 0.1)
   expect_equal(getMetricSD.train(ens.reg$models[[2]], metric = "RMSE"), 0.06043732, tol = 0.1)
   expect_equal(getMetricSD.train(ens.reg$models[[3]], metric = "RMSE"), 0.06942881, tol = 0.1)
@@ -130,16 +129,17 @@ test_that("No errors are thrown by a generics for ensembles", {
   set.seed(2239)
   ens.class <- caretEnsemble(
     models.class,
-    metric="ROC",
-    trControl=trainControl(
-    number=2,
-    summaryFunction=twoClassSummary,
-    classProbs=TRUE
-    ))
+    metric = "ROC",
+    trControl = trainControl(
+      number = 2,
+      summaryFunction = twoClassSummary,
+      classProbs = TRUE
+    )
+  )
   # varImp struggles with the rf in our test suite, why?
   models.subset <- models.reg[2:4]
   class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl=trainControl(number=2))
+  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2))
   expect_output(summary(ens.class), "ROC")
   expect_output(summary(ens.reg), "RMSE")
 
@@ -166,8 +166,8 @@ test_that("No errors are thrown by a generics for ensembles", {
   png(test_plot_file)
   suppressWarnings(p1 <- autoplot(ens.class))
   suppressWarnings(p2 <- autoplot(ens.reg))
-  suppressWarnings(p3 <- autoplot(ens.class, xvars=c("Petal.Length", "Petal.Width")))
-  suppressWarnings(p4 <- autoplot(ens.reg, xvars=c("Petal.Length", "Petal.Width")))
+  suppressWarnings(p3 <- autoplot(ens.class, xvars = c("Petal.Length", "Petal.Width")))
+  suppressWarnings(p4 <- autoplot(ens.reg, xvars = c("Petal.Length", "Petal.Width")))
   expect_error(autoplot(ens.reg$models[[1]]))
   dev.off()
   expect_true(file.exists(test_plot_file))
@@ -179,19 +179,19 @@ context("Residual extraction")
 test_that("Residuals provided by residuals are proper for ensemble objects", {
   skip_on_cran()
   set.seed(2239)
-  ens.class <- caretEnsemble(models.class, trControl=trainControl(method="none"))
+  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   models.subset <- models.reg[2:4]
   class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl=trainControl(method="none"))
+  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(method = "none"))
   suppressWarnings(residTest <- residuals(ens.class))
   suppressWarnings(residTest2 <- residuals(ens.reg))
   obs1 <- ifelse(Y.class == "No", 0, 1)
   obs2 <- Y.reg
-  suppressWarnings(predTest <- predict(ens.class))
+  suppressWarnings(predTest <- predict(ens.class, type = "prob"))
   suppressWarnings(predTest2 <- predict(ens.reg))
-  #expect_identical(residTest, obs1 - predTest)
-  #expect_identical(residTest2, obs2 - predTest2)
-  expect_false(identical(residTest2, predTest2 -obs2))
+  expect_equal(residTest, obs1 - predTest, tolerance = 1e-3)
+  expect_equal(residTest2, obs2 - predTest2, tolerance = 1e-3)
+  expect_false(identical(residTest2, predTest2 - obs2))
 
   suppressWarnings(mr1 <- multiResiduals(ens.class))
   suppressWarnings(mr2 <- multiResiduals(ens.reg))
@@ -205,21 +205,15 @@ test_that("Residuals provided by residuals are proper for ensemble objects", {
   mr2.tmp1 <- residuals(ens.reg$models[[1]])
   attributes(mr2.tmp1) <- NULL
   mr2.tmp2 <- residuals(ens.reg$models[[2]])
-  expect_true(identical(round(mr2[mr2$method == "glm", "resid"], 5), round(mr2.tmp1, 5)))
-  #expect_true(identical(round(mr2[mr2$method == "rpart", "resid"], 5), round(mr2.tmp2, 5)))
-
-  #I think the factors are backward somewhere in here
-  #Also, caret doesn't yet support residuals for classification
-  #   mr_class_wide <- as.data.frame(lapply(ens.class$models, residuals))
-  #   names(mr_class_wide) <- lapply(ens.class$models, function(x) x$method)
-  #   mr_class_long <- reshape(mr_class_wide, direction = "long", varying = names(mr_class_wide),
-  #                            v.names = "resid", timevar = "method", times = names(mr_class_wide))
-  #   expect_equal(mr_class_long[order(mr_class_long$method, mr_class_long$id),"resid"], -1*mr1[order(mr1$method, mr1$id),"resid"])
+  expect_equal(mr2[mr2$method == "glm", "resid"], mr2.tmp1, tolerance = 1e-5)
+  expect_equal(unname(mr2[mr2$method == "rpart", "resid"]), unname(mr2.tmp2), tolerance = 1e-5)
 
   mr_reg_wide <- as.data.frame(lapply(ens.reg$models, residuals))
   names(mr_reg_wide) <- lapply(ens.reg$models, function(x) x$method)
-  mr_reg_long <- reshape(mr_reg_wide, direction = "long", varying = names(mr_reg_wide),
-                         v.names = "resid", timevar = "method", times = names(mr_reg_wide))
+  mr_reg_long <- reshape(mr_reg_wide,
+    direction = "long", varying = names(mr_reg_wide),
+    v.names = "resid", timevar = "method", times = names(mr_reg_wide)
+  )
   expect_equal(mr_reg_long[order(mr_reg_long$method, mr_reg_long$id), "resid"], mr2[order(mr2$method, mr2$id), "resid"])
 
   ens.class2 <- ens.class
@@ -236,14 +230,15 @@ test_that("Do model results in caretEnsemble match component models - classifica
   skip_on_cran()
   set.seed(2239)
   ens.class <- caretEnsemble(
-    models.class, metric="ROC",
-    trControl=trainControl(
-      number=2, summaryFunction=twoClassSummary, classProbs=TRUE
-      )
+    models.class,
+    metric = "ROC",
+    trControl = trainControl(
+      number = 2, summaryFunction = twoClassSummary, classProbs = TRUE
     )
+  )
   models.subset <- models.reg[2:4]
   class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl=trainControl(number=2))
+  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2))
   modres1 <- extractModRes(ens.class)
   modres2 <- extractModRes(ens.reg)
 
@@ -255,38 +250,37 @@ test_that("Do model results in caretEnsemble match component models - classifica
 
 test_that("Do model results in caretEnsemble match component models - regression", {
   skip_on_cran()
-  ens.reg <- caretEnsemble(models.reg, trControl=trainControl(method="none"))
-  models.class2 <- models.class[c(2:4)]
-  class(models.class2) <- "caretList"
-  ens.class <- caretEnsemble(models.class2, trControl=trainControl(method="none"))
+  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
+  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   newDat <- ens.class$models[[3]]$trainingData
   newDat[2, 2] <- NA
   newDat[3, 3] <- NA
   newDat[4, 4] <- NA
   newDat <- newDat[1:10, ]
-  # expect_error(predict(ens.class, newdata = newDat, return_weights=TRUE, se=FALSE)) # BUG
-  expect_error(predict(ens.reg, newdata = newDat, return_weights=TRUE, se=TRUE))
-  expect_error(predict(ens.reg, newdata = newDat, return_weights=FALSE, se=FALSE))
-  expect_error(predict(ens.reg, newdata = newDat, return_weights=FALSE, se=TRUE))
+
+  # These yield errors on NAs because predict.randomForest can't handle NAs in new data
+  expect_error(predict(ens.class, newdata = newDat, return_weights = TRUE, se = FALSE))
+  expect_error(predict(ens.reg, newdata = newDat, return_weights = TRUE, se = TRUE))
+  expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = FALSE))
+  expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = TRUE))
 })
 
-#Reg tests
+# Reg tests
 test_that("Prediction options are respected in regression and classification", {
   skip_on_cran()
-  ens.reg <- caretEnsemble(models.reg, trControl=trainControl(method="none"))
-  tests <- expand.grid(se=0:1, return_weights=0:1)
+  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
+  tests <- expand.grid(se = 0:1, return_weights = 0:1)
   tests <- data.frame(lapply(tests, as.logical))
-  for(i in 1:nrow(tests)){
-
+  for (i in 1:nrow(tests)) {
     suppressWarnings({
       p <- predict(
         ens.reg,
-        se=tests[i, "se"],
-        return_weights=tests[i, "return_weights"]
+        se = tests[i, "se"],
+        return_weights = tests[i, "return_weights"]
       )
     })
 
-    if(tests[i, "se"]) {
+    if (tests[i, "se"]) {
       expect_is(p, "data.frame")
       preds <- p
     } else {
@@ -294,28 +288,28 @@ test_that("Prediction options are respected in regression and classification", {
       preds <- p
     }
 
-    if(tests[i, "return_weights"]) {
+    if (tests[i, "return_weights"]) {
       expect_is(attr(preds, which = "weights"), "numeric")
     } else {
       expect_null(attr(preds, which = "weights"))
     }
   }
 
-  #Class tests
-  ens.class <- caretEnsemble(models.class, trControl=trainControl(method="none"))
-  tests <- expand.grid(se=0:1, return_weights=0:1)
+  # Class tests
+  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
+  tests <- expand.grid(se = 0:1, return_weights = 0:1)
   tests <- data.frame(lapply(tests, as.logical))
-  for(i in 1:nrow(tests)){
+  for (i in 1:nrow(tests)) {
     suppressWarnings({
       p <- predict(
         ens.class,
-        se=tests[i, "se"],
-        return_weights=tests[i, "return_weights"],
-        type="prob"
+        se = tests[i, "se"],
+        return_weights = tests[i, "return_weights"],
+        type = "prob"
       )
     })
 
-    if(tests[i, "se"]) {
+    if (tests[i, "se"]) {
       expect_is(p, "data.frame")
       preds <- p
     } else {
@@ -323,7 +317,7 @@ test_that("Prediction options are respected in regression and classification", {
       preds <- p
     }
 
-    if(tests[i, "return_weights"]) {
+    if (tests[i, "return_weights"]) {
       expect_is(attr(preds, which = "weights"), "numeric")
     } else {
       expect_null(attr(preds, which = "weights"))

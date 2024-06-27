@@ -1,14 +1,13 @@
-linters: linters_with_defaults(
-    line_length_linter(305),
-    commented_code_linter = NULL,
-    object_name_linter = NULL,
-    indentation_linter = NULL,
-    infix_spaces_linter = NULL,
-    spaces_left_parentheses_linter = NULL,
-    seq_linter = NULL,
-    vector_logic_linter = NULL,
-    function_left_parentheses_linter = NULL,
-    semicolon_linter = NULL,
-    T_and_F_symbol_linter = NULL,
-    object_usage_linter = NULL
+linters: linters_with_tags(
+    tags = c(
+        "default", 
+        "best_practices_linters",
+        "common_mistakes",
+        "correctness",
+        "executing"
+        ),
+    line_length_linter(305),  # TODO — change to 120
+    seq_linter = NULL,  # TODO - small refactor
+    cyclocomp_linter(complexity_limit = 16),  # TODO - small refactor
+    object_name_linter = NULL # Probably never gonna remove this one
   )

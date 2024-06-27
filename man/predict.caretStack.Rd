@@ -44,12 +44,12 @@ model predictions are transformed before being passed to the stacking model.
 \dontrun{
 library("rpart")
 models <- caretList(
-  x=iris[1:100,1:2],
-  y=iris[1:100,3],
-  trControl=trainControl(method="cv"),
-  methodList=c("rpart", "glm")
+  x = iris[1:100, 1:2],
+  y = iris[1:100, 3],
+  trControl = trainControl(method = "cv"),
+  methodList = c("rpart", "glm")
 )
-meta_model <- caretStack(models, method="lm")
-RMSE(predict(meta_model, iris[101:150,1:2]), iris[101:150,3])
+meta_model <- caretStack(models, method = "lm")
+RMSE(predict(meta_model, iris[101:150, 1:2]), iris[101:150, 3])
 }
 }

@@ -1,3 +1,4 @@
+.coderabbit.yaml
 .lintr
 .codecov.yaml
 ^Makefile$
