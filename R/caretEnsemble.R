@@ -141,18 +141,6 @@ getMetricSD.train <- function(x, metric, ...) {
   SD[idx]
 }
 
-#' @keywords internal
-matchBestTune <- function(out, bt) {
-  nams <- names(attributes(out)$dimnames)
-  nams <- nams[nams %in% names(bt)]
-  tmp <- c()
-  for (i in length(nams)) {
-    tmp.t <- out[attributes(out)$dimnames[[nams[[i]]]] == as.character(bt[, nams[i]])]
-    tmp <- c(tmp, tmp.t)
-  }
-  return(tmp)
-}
-
 #' @title Calculate the variable importance of variables in a caretEnsemble.
 #' @description This function wraps the \code{\link{varImp}} function in the
 #' \code{caret} package to provide a weighted estimate of the importance of

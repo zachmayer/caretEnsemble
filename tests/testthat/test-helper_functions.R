@@ -1,8 +1,12 @@
+suppressMessages({
+  library(testthat)
+  library(caret)
+  library(rpart)
+})
+
 ########################################################################
 context("Do the helper functions work for regression objects?")
 ########################################################################
-library("caret")
-library("rpart")
 
 data(models.reg)
 data(X.reg)
@@ -184,4 +188,23 @@ test_that("Checks generate errors", {
   )
   x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method = "rpart")
   expect_error(check_caretList_model_types(x))
+})
+
+test_that("check_caretList_model_types stops when there are no predictions saved", {
+  model_list <- models.class
+  model_list[[1]]$pred <- NULL
+  expect_error(check_caretList_model_types(model_list), "No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.")
+})
+
+test_that("check_caretList_model_types stops when a classification model support probabilities", {
+  model_list <- models.class
+  model_list[[1]]$modelInfo$prob <- FALSE
+  expect_error(check_caretList_model_types(model_list), "All models for classification must be able to generate class probabilities.")
+})
+
+test_that("check_caretList_model_types stops when a classification model supports probabilities but did not save them", {
+  model_list <- models.class
+  model_list[[1]]$control$classProbs <- FALSE
+  m <- "Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs=TRUE"
+  expect_error(check_caretList_model_types(model_list), m)
 })

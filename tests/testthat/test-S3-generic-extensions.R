@@ -2,9 +2,10 @@
 
 set.seed(107)
 suppressMessages({
-  library("caret")
-  library("caretEnsemble")
-  library("mlbench")
+  library(testthat)
+  library(caret)
+  library(caretEnsemble)
+  library(mlbench)
 })
 
 data(Sonar)
@@ -97,4 +98,12 @@ test_that("c.caretEnsemble can bind two objects of class train", {
 
   expect_true((length(names(bigList)) == length(unique(names(bigList)))))
   expect_equal(length(unique(names(bigList))), 2)
+})
+
+test_that("c.caretList stops for invalid class", {
+  expect_error(c.caretList(list()), "class of modelList1 must be 'caretList' or 'train'")
+})
+
+test_that("c.train stops for invalid class", {
+  expect_error(c.train(list()), "class of modelList1 must be 'caretList' or 'train'")
 })
