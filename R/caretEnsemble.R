@@ -462,3 +462,7 @@ autoplot <- function(object, which = c(1:6), mfrow = c(3, 2),
     theme_bw()
   grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2)
 }
+
+noop <- function(...) {
+  return(NULL)
+}
