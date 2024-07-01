@@ -1,4 +1,5 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# https://docs.coderabbit.ai/guides/configure-coderabbit/
 language: "en-US"
 early_access: false
 reviews:
@@ -11,5 +12,6 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+    auto_incremental_review: false
 chat:
   auto_reply: false
