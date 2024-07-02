@@ -35,7 +35,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: ${{ runner.temp }}/coverage-report.html
+          path: coverage-report.html
 
       - name: Upload test results to codecov
         uses: codecov/codecov-action@v4
@@ -47,5 +47,5 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Test that coverage level is acceptabl
+      - name: Test that coverage level is good
         run: make coverage-test
