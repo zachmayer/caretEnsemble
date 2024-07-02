@@ -1,6 +1,6 @@
 # Makefile for R project
 
-.PHONY: all install document update-test-fixtures test coverage check-cran fix-style lint clean
+.PHONY: all install document update-test-fixtures test coverage-report coverage-test check-cran fix-style lint clean
 
 # Default target
 all: fix-style install document test check-cran coverage
@@ -36,8 +36,8 @@ coverage-report:
 	"
 	rm -rf lib/
 
-coverage-test: coverage-report
-	Rscript -e "testthat::expect_gte(readRDS(coverage.rds), 100.0);"
+coverage-test:
+	Rscript -e "testthat::expect_gte(readRDS('coverage.rds'), 100.0);"
 
 # Run R CMD check as CRAN
 check-cran: document
