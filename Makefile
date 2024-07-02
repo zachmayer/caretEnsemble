@@ -56,8 +56,8 @@ lint:
 clean:
 	rm -rf *.Rcheck
 	rm -f *.tar.gz
+	rm -f coverage.rds
 	rm -f cobertura.xml
 	rm -f coverage-report.html
-	rm -f coverage.rds
 	rm -f .Rhistory
 	rm -rf lib/

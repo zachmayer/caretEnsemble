@@ -619,8 +619,8 @@ test_that("predict.caretList gives a warning and stops for missing training data
 })
 
 test_that("extractModelName handles custom models correctly", {
-  mock_model <- structure(list(method = list(method = "custom_method")), class = "train")
-  expect_equal(extractModelName(mock_model), "custom_method")
+  mock_model <- structure(list(method = list(method = "custom")), class = "train")
+  expect_equal(extractModelName(mock_model), "custom")
 })
 
 test_that("as.caretList.list fails on NULL object", {
