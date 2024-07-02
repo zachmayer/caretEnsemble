@@ -28,8 +28,8 @@ jobs:
           extra-packages: any::covr, any::xml2, any::testthat, any::htmltools, any::DT
           needs: coverage
 
-      - name: Test coverage
-        run: make coverage
+      - name: Run unit tests and report coverage
+        run: make coverage-report
 
       - name: Upload test results html
         uses: actions/upload-artifact@v4
@@ -46,3 +46,6 @@ jobs:
           verbose: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Test that coverage level is acceptabl
+        run: make coverage-test

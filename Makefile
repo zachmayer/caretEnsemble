@@ -25,15 +25,19 @@ test:
 
 # Check unit test coverage
  # Dunno why package_coverage makes the dir 'lib/'
-coverage:
+coverage-report:
 	Rscript -e "\
 		Sys.setenv(NOT_CRAN = 'true'); \
 		cov = covr::package_coverage(quiet=FALSE, clean=TRUE); \
 		covr::to_cobertura(cov, filename='cobertura.xml') ; \
 		covr::report(cov, file='coverage-report.html', browse=interactive()); \
-		testthat::expect_gte(covr::percent_coverage(cov), 100.0); \
+		cov_num = covr::percent_coverage(cov); \
+		saveRDS(cov_num, 'coverage.rds'); \
 	"
 	rm -rf lib/
+
+coverage-test: coverage-report
+	Rscript -e "testthat::expect_gte(readRDS(coverage.rds), 100.0);"
 
 # Run R CMD check as CRAN
 check-cran: document
@@ -52,5 +56,8 @@ lint:
 clean:
 	rm -rf *.Rcheck
 	rm -f *.tar.gz
-	rm coverage-report.html
-	rm .Rhistory
+	rm -f cobertura.xml
+	rm -f coverage-report.html
+	rm -f coverage.rds
+	rm -f .Rhistory
+	rm -rf lib/
