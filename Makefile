@@ -1,9 +1,9 @@
 # Makefile for R project
 
-.PHONY: all install document update-test-fixtures test coverage-report coverage-test check-cran fix-style lint clean
+.PHONY: all install document update-test-fixtures test coverage-test check-cran fix-style lint clean
 
 # Default target
-all: fix-style install document test check-cran coverage
+all: fix-style install document test check-cran coverage-test
 
 # Install dependencies
 install:
@@ -23,21 +23,37 @@ update-test-fixtures:
 test:
 	Rscript -e "Sys.setenv(NOT_CRAN='true'); devtools::test(stop_on_failure=TRUE, stop_on_warning=TRUE)"
 
-# Check unit test coverage
- # Dunno why package_coverage makes the dir 'lib/'
-coverage-report:
+# Run test coverage
+# Dunno why package_coverage makes the dir 'lib/'
+coverage.rds: $(wildcard R/*.R) $(wildcard tests/testthat/*.R)
 	Rscript -e "\
 		Sys.setenv(NOT_CRAN = 'true'); \
 		cov = covr::package_coverage(quiet=FALSE, clean=TRUE); \
-		covr::to_cobertura(cov, filename='cobertura.xml') ; \
-		covr::report(cov, file='coverage-report.html', browse=interactive()); \
-		cov_num = covr::percent_coverage(cov); \
-		saveRDS(cov_num, 'coverage.rds'); \
+		saveRDS(cov, 'coverage.rds'); \
 	"
 	rm -rf lib/
 
-coverage-test:
-	Rscript -e "testthat::expect_gte(readRDS('coverage.rds'), 100.0);"
+# xml coverage report in cobertura format for app.codecov.io/gh/zachmayer/caretEnsemble
+cobertura.xml: coverage.rds
+	Rscript -e "\
+		cov = readRDS('coverage.rds'); \
+		covr::to_cobertura(cov, filename='cobertura.xml'); \
+	"
+
+# html coverage report for local viewing
+coverage-report.html: coverage.rds
+	Rscript -e "\
+		cov = readRDS('coverage.rds'); \
+		covr::report(cov, file='coverage-report.html', browse=interactive()); \
+	"
+
+# Test that coverage is 100%
+coverage-test: coverage.rds
+	Rscript -e "\
+		cov = readRDS('coverage.rds'); \
+		cov_num = as.numeric(covr::percent_coverage(cov)); \
+		testthat::expect_gte(cov_num, 100.0); \
+	"
 
 # Run R CMD check as CRAN
 check-cran: document
