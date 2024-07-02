@@ -24,15 +24,15 @@ test:
 	Rscript -e "Sys.setenv(NOT_CRAN='true'); devtools::test(stop_on_failure=TRUE, stop_on_warning=TRUE)"
 
 # Check unit test coverage
+ # Dunno why package_coverage makes the dir 'lib/'
 coverage:
 	Rscript -e "\
 		Sys.setenv(NOT_CRAN = 'true'); \
-		pth = tempdir(); \
-		cov = covr::package_coverage(quiet=FALSE, clean=TRUE, install_path=pth); \
+		cov = covr::package_coverage(quiet=FALSE, clean=TRUE); \
 		covr::report(cov, file='coverage-report.html', browse=interactive()); \
 		testthat::expect_gt(covr::percent_coverage(cov), 99.8); \
-		unlink(pth); \
 	"
+	rm -rf lib/
 
 # Run R CMD check as CRAN
 check-cran: document
