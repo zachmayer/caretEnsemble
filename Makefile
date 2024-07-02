@@ -31,7 +31,7 @@ coverage:
 		cov = covr::package_coverage(quiet=FALSE, clean=TRUE); \
 		covr::to_cobertura(cov, filename='cobertura.xml') ; \
 		covr::report(cov, file='coverage-report.html', browse=interactive()); \
-		testthat::expect_gt(covr::percent_coverage(cov), 99.8); \
+		testthat::expect_gte(covr::percent_coverage(cov), 100.0); \
 	"
 	rm -rf lib/
 
