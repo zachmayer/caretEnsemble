@@ -2,6 +2,7 @@
 # UPDATE THE FIXTURES!
 # make update-test-fixtures
 
+library(testthat)
 library(caret)
 
 data(models.reg)
@@ -241,4 +242,18 @@ test_that("Ensembles using custom models work correctly", {
   )
   msg <- "Custom models must be defined with a \"method\" attribute"
   expect_error(caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control), regexp = msg)
+})
+
+
+#############################################################################
+context("Other tests to get to 100% coverage")
+#############################################################################
+
+test_that("fortify stops for unknown model type", {
+  mock_model <- list(
+    ens_model = list(modelType = "Unknown"),
+    models = list(list(trainingData = data.frame(.outcome = 1:10)))
+  )
+  class(mock_model) <- "caretEnsemble"
+  expect_error(fortify(mock_model), "Uknown model type Unknown")
 })

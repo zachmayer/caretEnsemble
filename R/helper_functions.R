@@ -121,13 +121,7 @@ check_caretList_model_types <- function(list_of_models) {
     if (!all(classProbs)) {
       bad_models <- names(list_of_models)[!classProbs]
       bad_models <- paste(bad_models, collapse = ", ")
-      stop(
-        paste0(
-          "The following models were fit by caret::train with no class probabilities: ",
-          bad_models,
-          ".\nPlease re-fit them with trainControl(classProbs=TRUE)"
-        )
-      )
+      stop("Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs=TRUE")
     }
   }
   return(invisible(NULL))
@@ -326,9 +320,6 @@ makePredObsMatrix <- function(list_of_models) {
   # Otherwise, just use class predictions
   if (type == "Classification") {
     # Determine the string name for the positive class
-    if (!is.factor(modelLibrary$obs) || length(levels(modelLibrary$obs)) != 2) {
-      stop("Response vector must be a two-level factor for classification.")
-    }
     positive <- levels(modelLibrary$obs)[getBinaryTargetLevel()]
 
     # Use the string name for the positive class determined above to select

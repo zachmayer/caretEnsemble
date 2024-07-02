@@ -52,5 +52,5 @@ Imports:
     caret
 License: MIT + file LICENSE
 VignetteBuilder: knitr
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 LazyData: true

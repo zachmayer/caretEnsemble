@@ -1,3 +1,4 @@
+library(testthat)
 library(caret)
 
 data(models.reg)
@@ -141,4 +142,9 @@ test_that("Test na.action pass through", {
 
   suppressWarnings(pred.reg <- predict(ens.reg, newdata = X_reg_na))
   expect_false(length(pred.reg) != nrow(X_reg_na))
+})
+
+test_that("is.caretStack correctly identifies caretStack objects", {
+  expect_true(is.caretStack(structure(list(), class = "caretStack")))
+  expect_false(is.caretStack(list()))
 })

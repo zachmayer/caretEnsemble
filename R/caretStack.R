@@ -71,7 +71,6 @@ predict.caretStack <- function(
   stopifnot(is(object$models, "caretList"))
   type <- extractModelTypes(object$models)
 
-  # preds <- do.call(predict, c(list(object=object$models, newdata=newdata), modelList_predict_params)) TODO keep this around for future use
   preds <- predict(object$models, newdata = newdata, na.action = na.action)
   if (type == "Classification") {
     out <- predict(object$ens_model, newdata = preds, na.action = na.action, ...)

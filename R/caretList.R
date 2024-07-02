@@ -315,7 +315,6 @@ as.caretList.list <- function(object) {
 #' argument here, DO NOT PASS the "type" argument.  Classification models will
 #' return probabilities if possible, and regression models will return "raw".
 #' @importFrom pbapply pbsapply
-#' @importFrom pbapply pboptions
 #' @export
 #' @method predict caretList
 predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE) {
@@ -327,12 +326,11 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE) {
     }
   }
 
+  apply_fun <- sapply
   if (verbose) {
-    pboptions(type = "txt", char = "*")
-  } else if (verbose) {
-    pboptions(type = "none")
+    apply_fun <- pbsapply
   }
-  preds <- pbsapply(object, function(x) {
+  preds <- apply_fun(object, function(x) {
     type <- x$modelType
     if (type == "Classification") {
       if (x$control$classProbs) {

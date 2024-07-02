@@ -1,9 +1,9 @@
 # Makefile for R project
 
-.PHONY: all install document update-test-fixtures test check-cran fix-style lint clean
+.PHONY: all install document update-test-fixtures test coverage-report coverage-test check-cran fix-style lint clean
 
 # Default target
-all: fix-style install document test check-cran
+all: fix-style install document test check-cran coverage
 
 # Install dependencies
 install:
@@ -23,6 +23,22 @@ update-test-fixtures:
 test:
 	Rscript -e "Sys.setenv(NOT_CRAN='true'); devtools::test(stop_on_failure=TRUE, stop_on_warning=TRUE)"
 
+# Check unit test coverage
+ # Dunno why package_coverage makes the dir 'lib/'
+coverage-report:
+	Rscript -e "\
+		Sys.setenv(NOT_CRAN = 'true'); \
+		cov = covr::package_coverage(quiet=FALSE, clean=TRUE); \
+		covr::to_cobertura(cov, filename='cobertura.xml') ; \
+		covr::report(cov, file='coverage-report.html', browse=interactive()); \
+		cov_num = covr::percent_coverage(cov); \
+		saveRDS(cov_num, 'coverage.rds'); \
+	"
+	rm -rf lib/
+
+coverage-test:
+	Rscript -e "testthat::expect_gte(readRDS('coverage.rds'), 100.0);"
+
 # Run R CMD check as CRAN
 check-cran: document
 	Rscript -e "devtools::check(cran=T, remote=T, manual=T, error_on='note')"
@@ -40,3 +56,8 @@ lint:
 clean:
 	rm -rf *.Rcheck
 	rm -f *.tar.gz
+	rm -f cobertura.xml
+	rm -f coverage-report.html
+	rm -f coverage.rds
+	rm -f .Rhistory
+	rm -rf lib/
