@@ -1,9 +1,9 @@
 # Makefile for R project
 
-.PHONY: all install document update-test-fixtures test check-cran fix-style lint clean
+.PHONY: all install document update-test-fixtures test coverage check-cran fix-style lint clean
 
 # Default target
-all: fix-style install document test check-cran
+all: fix-style install document test check-cran coverage
 
 # Install dependencies
 install:
@@ -23,6 +23,17 @@ update-test-fixtures:
 test:
 	Rscript -e "Sys.setenv(NOT_CRAN='true'); devtools::test(stop_on_failure=TRUE, stop_on_warning=TRUE)"
 
+# Check unit test coverage
+coverage:
+	Rscript -e "\
+		Sys.setenv(NOT_CRAN = 'true'); \
+		pth = tempdir(); \
+		cov = covr::package_coverage(quiet=FALSE, clean=TRUE, install_path=pth); \
+		covr::report(cov, file='coverage-report.html', browse=interactive()); \
+		testthat::expect_gt(covr::percent_coverage(cov), 99.8); \
+		unlink(pth); \
+	"
+
 # Run R CMD check as CRAN
 check-cran: document
 	Rscript -e "devtools::check(cran=T, remote=T, manual=T, error_on='note')"
@@ -40,3 +51,5 @@ lint:
 clean:
 	rm -rf *.Rcheck
 	rm -f *.tar.gz
+	rm coverage-report.html
+	rm .Rhistory

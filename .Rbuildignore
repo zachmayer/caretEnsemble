@@ -1,3 +1,5 @@
+coverage-report.html
+cobertura.xml
 codecov.yml
 .coderabbit.yaml
 .lintr
