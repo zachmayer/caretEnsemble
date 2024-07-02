@@ -1,9 +1,9 @@
 # Test caretList
-
 set.seed(442)
 suppressMessages({
-  library("caret")
-  library("kernlab")
+  library(testthat)
+  library(caret)
+  library(kernlab)
 })
 train <- twoClassSim(
   n = 1000, intercept = -8, linearVars = 3,
@@ -581,4 +581,83 @@ test_that("Regression Models", {
 
   expect_is(ens1, "caretEnsemble")
   expect_is(ens2, "caretEnsemble")
+})
+
+test_that("methodCheck stops for invalid method type", {
+  expect_error(methodCheck(list(123)), "Method \"123\" is invalid.")
+  expect_error(methodCheck(list("invalid_method")), "The following models are not valid caret models: invalid_method")
+})
+
+test_that("trControlCheck stops for invalid savePredictions", {
+  ctrl <- trainControl(method = "cv", number = 5, savePredictions = c("all", "final"))
+  expect_error(trControlCheck(ctrl, y = 1:10), "Please pass exactly 1 argument to savePredictions, e.g. savePredictions='final'")
+})
+
+test_that("is.caretList correctly identifies caretList objects", {
+  expect_true(is.caretList(structure(list(), class = "caretList")))
+  expect_false(is.caretList(list()))
+})
+
+test_that("as.caretList stops for null object", {
+  expect_error(as.caretList(NULL), "object is null")
+})
+
+test_that("as.caretList.list stops for non-list object", {
+  expect_error(as.caretList.list(1), "object must be a list of caret models")
+})
+
+test_that("predict.caretList gives a warning and stops for missing training data", {
+  mock_model <- list(structure(list(trainingData = NULL), class = "train"))
+  class(mock_model) <- "caretList"
+
+  expect_warning(
+    {
+      expect_error(predict.caretList(mock_model), "Could not find training data in the first model in the ensemble.")
+    },
+    "Predicting without new data is not well supported.  Attempting to predict on the training data."
+  )
+})
+
+test_that("extractModelName handles custom models correctly", {
+  mock_model <- structure(list(method = list(method = "custom_method")), class = "train")
+  expect_equal(extractModelName(mock_model), "custom_method")
+})
+
+test_that("extractModelName handles custom models correctly", {
+  mock_model <- structure(list(method = "custom_method", class = "train"))
+  expect_equal(extractModelName(mock_model), "custom_method")
+})
+
+test_that("extractModelName handles custom models correctly", {
+  mock_model <- structure(list(method = "custom", class = "train", modelInfo = list(method = "custom_method")))
+  expect_equal(extractModelName(mock_model), "custom_method")
+})
+
+test_that("as.caretList.list fails on NULL object", {
+  err <- "object requires all elements of list to be caret models"
+  expect_error(as.caretList(list(NULL)), err)
+})
+
+test_that("predict.caretList works when the progress bar is turned off", {
+  set.seed(42)
+  N <- 100
+  noise_level <- 1 / 10
+  X <- data.frame(
+    a = runif(N),
+    b = runif(N)
+  )
+  y <- 7.5 - 10 * X$a + 5 * X$b + noise_level * rnorm(N)
+  models <- caretList(
+    X, y,
+    tuneLength = 1,
+    methodList = "lm",
+    trControl = trainControl(
+      method = "cv", number = 2,
+      savePredictions = "final",
+      index = createFolds(y, k = 2)
+    )
+  )
+  pred <- predict(models, X, verbose = FALSE)
+  rmse <- sqrt(mean((y - pred)^2))
+  expect_lt(rmse, noise_level)
 })

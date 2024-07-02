@@ -1,15 +1,16 @@
-comment: false
+comment: true
 
 coverage:
   status:
     project:
       default:
-        target: auto
-        target: 95.5%
+        target: 100%
         threshold: 0%
         informational: false
+        if_ci_failed: error
     patch:
       default:
-        target: auto
-        threshold: 1%
+        target: 100%
+        threshold: 0%
         informational: false
+        if_ci_failed: error

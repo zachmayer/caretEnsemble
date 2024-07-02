@@ -1,3 +1,7 @@
+coverage.rds
+coverage-report.html
+cobertura.xml
+codecov.yml
 .coderabbit.yaml
 .lintr
 .codecov.yaml

@@ -38,7 +38,7 @@ c.caretList <- function(...) {
     if (!inherits(x, "caretList")) {
       if (!inherits(x, "train")) stop("class of modelList1 must be 'caretList' or 'train'")
 
-      ## assuming this is a single train object
+      # assuming this is a single train object
       x <- list(x)
       names(x) <- x[[1]]$method
       return(x)
@@ -47,10 +47,10 @@ c.caretList <- function(...) {
     }
   }), recursive = FALSE)
 
-  ## Make sure names are unique
+  # Make sure names are unique
   names(new_model_list) <- paste0(names(new_model_list), 1:length(new_model_list))
 
-  ## reset the class to caretList
+  # reset the class to caretList
   class(new_model_list) <- "caretList"
 
   return(new_model_list)
@@ -86,7 +86,7 @@ c.train <- function(...) {
     if (!inherits(x, "caretList")) {
       if (!inherits(x, "train")) stop("class of modelList1 must be 'caretList' or 'train'")
 
-      ## assuming this is a single train object
+      # assuming this is a single train object
       x <- list(x)
       names(x) <- x[[1]]$method
       return(x)
@@ -95,10 +95,10 @@ c.train <- function(...) {
     }
   }), recursive = FALSE)
 
-  ## Make sure names are unique
+  # Make sure names are unique
   names(new_model_list) <- paste0(names(new_model_list), 1:length(new_model_list))
 
-  ## reset the class to caretList
+  # reset the class to caretList
   class(new_model_list) <- "caretList"
 
   return(new_model_list)

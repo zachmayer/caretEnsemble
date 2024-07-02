@@ -1,3 +1,5 @@
+# weirdness from covr::package_coverage
+lib/
 
 # Reverse deps data
 revdep/checks.noindex
