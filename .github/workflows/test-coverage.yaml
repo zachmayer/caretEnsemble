@@ -25,7 +25,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::covr, any::xml2, any::testhat
+          extra-packages: any::covr, any::xml2, any::testthat
           needs: coverage
 
       - name: Test coverage
@@ -41,11 +41,7 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
-          file: ./cobertura.xml
-          codecov_yml_path: .codecov.yaml
-          plugin: noop
-          disable_search: true
-          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ${{ runner.temp }}/cobertura.xml
           flags: unittests
           verbose: true
         env:
