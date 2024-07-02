@@ -29,13 +29,7 @@ jobs:
           needs: coverage
 
       - name: Run unit tests and report coverage
-        run: make coverage-report
-
-      - name: Upload test results html
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage-report.html
+        run: make cobertura.xml
 
       - name: Upload test results to codecov
         uses: codecov/codecov-action@v4
