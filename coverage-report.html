@@ -95,7 +95,7 @@ table.table-condensed {
   font-size: 11px;
 }</style>
   <div class="col-md-8 col-md-offset-2">
-    <h2>caretEnsemble coverage - 99.82%</h2>
+    <h2>caretEnsemble coverage - 100.00%</h2>
     <div class="tabbable">
       <ul class="nav nav-tabs" data-tabsetid="covr">
         <li class="active">
@@ -107,8 +107,8 @@ table.table-condensed {
       </ul>
       <div class="tab-content" data-tabsetid="covr">
         <div class="tab-pane active" title="Files" data-value="Files" id="tab-covr-1">
-          <div class="datatables html-widget html-fill-item" id="htmlwidget-b17327faf7860b8695ee" style="width:100%;height:500px;"></div>
-          <script type="application/json" data-for="htmlwidget-b17327faf7860b8695ee">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[["<a href=\"#\">R/helper_functions.R<\/a>","<a href=\"#\">R/caretEnsemble.R<\/a>","<a href=\"#\">R/caretList.R<\/a>","<a href=\"#\">R/caretStack.R<\/a>","<a href=\"#\">R/S3GenericExtenstions.R<\/a>"],[342,464,370,223,105],[127,206,130,46,22],[126,206,130,46,22],[1,0,0,0,0],["1615","13","74","35","3"],["99.21%","100.00%","100.00%","100.00%","100.00%"]],"container":"<table class=\"row-border\">\n  <thead>\n    <tr>\n      <th>File<\/th>\n      <th>Lines<\/th>\n      <th>Relevant<\/th>\n      <th>Covered<\/th>\n      <th>Missed<\/th>\n      <th>Hits / Line<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"dom":"t","paging":false,"columnDefs":[{"targets":6,"createdCell":"function(td, cellData, rowData, row, col) {\n  var percent = cellData.replace(\"%\", \"\");\n  if (percent > 90) {\n    var grad = \"linear-gradient(90deg, #edfde7 \" + cellData + \", white \" + cellData + \")\";\n  } else if (percent > 75) {\n    var grad = \"linear-gradient(90deg, #f9ffe5 \" + cellData + \", white \" + cellData + \")\";\n  } else {\n    var grad = \"linear-gradient(90deg, #fcece9 \" + cellData + \", white \" + cellData + \")\";\n  }\n  $(td).css(\"background\", grad);\n}\n"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"File","targets":0},{"name":"Lines","targets":1},{"name":"Relevant","targets":2},{"name":"Covered","targets":3},{"name":"Missed","targets":4},{"name":"Hits / Line","targets":5},{"name":"Coverage","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"callback":"function(table) {\ntable.on('click.dt', 'a', function() {\n  files = $('div#files div');\n  files.not('div.hidden').addClass('hidden');\n  id = $(this).text();\n  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');\n  $('ul.nav a[data-value=Source]').text(id).tab('show');\n});\n}"},"evals":["options.columnDefs.0.createdCell","callback"],"jsHooks":[]}</script>
+          <div class="datatables html-widget html-fill-item" id="htmlwidget-ef6e4970bea9f66c3c74" style="width:100%;height:500px;"></div>
+          <script type="application/json" data-for="htmlwidget-ef6e4970bea9f66c3c74">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[["<a href=\"#\">R/caretEnsemble.R<\/a>","<a href=\"#\">R/caretList.R<\/a>","<a href=\"#\">R/helper_functions.R<\/a>","<a href=\"#\">R/caretStack.R<\/a>","<a href=\"#\">R/S3GenericExtenstions.R<\/a>"],[464,370,342,223,105],[206,130,127,46,22],[206,130,127,46,22],[0,0,0,0,0],["13","74","1615","35","3"],["100.00%","100.00%","100.00%","100.00%","100.00%"]],"container":"<table class=\"row-border\">\n  <thead>\n    <tr>\n      <th>File<\/th>\n      <th>Lines<\/th>\n      <th>Relevant<\/th>\n      <th>Covered<\/th>\n      <th>Missed<\/th>\n      <th>Hits / Line<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"dom":"t","paging":false,"columnDefs":[{"targets":6,"createdCell":"function(td, cellData, rowData, row, col) {\n  var percent = cellData.replace(\"%\", \"\");\n  if (percent > 90) {\n    var grad = \"linear-gradient(90deg, #edfde7 \" + cellData + \", white \" + cellData + \")\";\n  } else if (percent > 75) {\n    var grad = \"linear-gradient(90deg, #f9ffe5 \" + cellData + \", white \" + cellData + \")\";\n  } else {\n    var grad = \"linear-gradient(90deg, #fcece9 \" + cellData + \", white \" + cellData + \")\";\n  }\n  $(td).css(\"background\", grad);\n}\n"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"File","targets":0},{"name":"Lines","targets":1},{"name":"Relevant","targets":2},{"name":"Covered","targets":3},{"name":"Missed","targets":4},{"name":"Hits / Line","targets":5},{"name":"Coverage","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"callback":"function(table) {\ntable.on('click.dt', 'a', function() {\n  files = $('div#files div');\n  files.not('div.hidden').addClass('hidden');\n  id = $(this).text();\n  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');\n  $('ul.nav a[data-value=Source]').text(id).tab('show');\n});\n}"},"evals":["options.columnDefs.0.createdCell","callback"],"jsHooks":[]}</script>
         </div>
         <div class="tab-pane" title="Source" data-value="Source" id="tab-covr-2">
           <div id="files">
@@ -1580,7 +1580,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">210</td>
-                    <td class="coverage">591<em>x</em></td>
+                    <td class="coverage">593<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.list(x$method)) {</pre>
                     </td>
@@ -1594,14 +1594,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">212</td>
-                    <td class="coverage">588<em>x</em></td>
+                    <td class="coverage">590<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  } else if (x$method == "custom") {</pre>
                     </td>
                   </tr>
-                  <tr class="missed">
+                  <tr class="covered">
                     <td class="num">213</td>
-                    <td class="coverage">!</td>
+                    <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    validateCustomModel(x$modelInfo)$method</pre>
                     </td>
@@ -1615,7 +1615,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">215</td>
-                    <td class="coverage">588<em>x</em></td>
+                    <td class="coverage">589<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    x$method</pre>
                     </td>
@@ -1692,7 +1692,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">226</td>
-                    <td class="coverage">6<em>x</em></td>
+                    <td class="coverage">7<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(x$method)) {</pre>
                     </td>
@@ -1734,7 +1734,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">232</td>
-                    <td class="coverage">5<em>x</em></td>
+                    <td class="coverage">6<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  x</pre>
                     </td>
