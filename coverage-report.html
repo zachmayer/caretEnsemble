@@ -107,8 +107,8 @@ table.table-condensed {
       </ul>
       <div class="tab-content" data-tabsetid="covr">
         <div class="tab-pane active" title="Files" data-value="Files" id="tab-covr-1">
-          <div class="datatables html-widget html-fill-item" id="htmlwidget-ef6e4970bea9f66c3c74" style="width:100%;height:500px;"></div>
-          <script type="application/json" data-for="htmlwidget-ef6e4970bea9f66c3c74">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[["<a href=\"#\">R/caretEnsemble.R<\/a>","<a href=\"#\">R/caretList.R<\/a>","<a href=\"#\">R/helper_functions.R<\/a>","<a href=\"#\">R/caretStack.R<\/a>","<a href=\"#\">R/S3GenericExtenstions.R<\/a>"],[464,370,342,223,105],[206,130,127,46,22],[206,130,127,46,22],[0,0,0,0,0],["13","74","1615","35","3"],["100.00%","100.00%","100.00%","100.00%","100.00%"]],"container":"<table class=\"row-border\">\n  <thead>\n    <tr>\n      <th>File<\/th>\n      <th>Lines<\/th>\n      <th>Relevant<\/th>\n      <th>Covered<\/th>\n      <th>Missed<\/th>\n      <th>Hits / Line<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"dom":"t","paging":false,"columnDefs":[{"targets":6,"createdCell":"function(td, cellData, rowData, row, col) {\n  var percent = cellData.replace(\"%\", \"\");\n  if (percent > 90) {\n    var grad = \"linear-gradient(90deg, #edfde7 \" + cellData + \", white \" + cellData + \")\";\n  } else if (percent > 75) {\n    var grad = \"linear-gradient(90deg, #f9ffe5 \" + cellData + \", white \" + cellData + \")\";\n  } else {\n    var grad = \"linear-gradient(90deg, #fcece9 \" + cellData + \", white \" + cellData + \")\";\n  }\n  $(td).css(\"background\", grad);\n}\n"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"File","targets":0},{"name":"Lines","targets":1},{"name":"Relevant","targets":2},{"name":"Covered","targets":3},{"name":"Missed","targets":4},{"name":"Hits / Line","targets":5},{"name":"Coverage","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"callback":"function(table) {\ntable.on('click.dt', 'a', function() {\n  files = $('div#files div');\n  files.not('div.hidden').addClass('hidden');\n  id = $(this).text();\n  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');\n  $('ul.nav a[data-value=Source]').text(id).tab('show');\n});\n}"},"evals":["options.columnDefs.0.createdCell","callback"],"jsHooks":[]}</script>
+          <div class="datatables html-widget html-fill-item" id="htmlwidget-a87b8082d5838e0f6d9c" style="width:100%;height:500px;"></div>
+          <script type="application/json" data-for="htmlwidget-a87b8082d5838e0f6d9c">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[["<a href=\"#\">R/caretEnsemble.R<\/a>","<a href=\"#\">R/caretList.R<\/a>","<a href=\"#\">R/helper_functions.R<\/a>","<a href=\"#\">R/caretStack.R<\/a>","<a href=\"#\">R/S3GenericExtenstions.R<\/a>"],[464,370,341,223,105],[206,130,125,46,22],[206,130,125,46,22],[0,0,0,0,0],["13","74","1641","36","3"],["100.00%","100.00%","100.00%","100.00%","100.00%"]],"container":"<table class=\"row-border\">\n  <thead>\n    <tr>\n      <th>File<\/th>\n      <th>Lines<\/th>\n      <th>Relevant<\/th>\n      <th>Covered<\/th>\n      <th>Missed<\/th>\n      <th>Hits / Line<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"dom":"t","paging":false,"columnDefs":[{"targets":6,"createdCell":"function(td, cellData, rowData, row, col) {\n  var percent = cellData.replace(\"%\", \"\");\n  if (percent > 90) {\n    var grad = \"linear-gradient(90deg, #edfde7 \" + cellData + \", white \" + cellData + \")\";\n  } else if (percent > 75) {\n    var grad = \"linear-gradient(90deg, #f9ffe5 \" + cellData + \", white \" + cellData + \")\";\n  } else {\n    var grad = \"linear-gradient(90deg, #fcece9 \" + cellData + \", white \" + cellData + \")\";\n  }\n  $(td).css(\"background\", grad);\n}\n"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"File","targets":0},{"name":"Lines","targets":1},{"name":"Relevant","targets":2},{"name":"Covered","targets":3},{"name":"Missed","targets":4},{"name":"Hits / Line","targets":5},{"name":"Coverage","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"callback":"function(table) {\ntable.on('click.dt', 'a', function() {\n  files = $('div#files div');\n  files.not('div.hidden').addClass('hidden');\n  id = $(this).text();\n  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');\n  $('ul.nav a[data-value=Source]').text(id).tab('show');\n});\n}"},"evals":["options.columnDefs.0.createdCell","callback"],"jsHooks":[]}</script>
         </div>
         <div class="tab-pane" title="Source" data-value="Source" id="tab-covr-2">
           <div id="files">
@@ -215,14 +215,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">15</td>
-                    <td class="coverage">262<em>x</em></td>
+                    <td class="coverage">268<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  arg &lt;- getOption("caret.ensemble.binary.target.level", default = 1L)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">16</td>
-                    <td class="coverage">262<em>x</em></td>
+                    <td class="coverage">268<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  validateBinaryTargetLevel(arg)</pre>
                     </td>
@@ -390,14 +390,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">40</td>
-                    <td class="coverage">267<em>x</em></td>
+                    <td class="coverage">273<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  val &lt;- suppressWarnings(try(as.integer(arg), silent = TRUE))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">41</td>
-                    <td class="coverage">267<em>x</em></td>
+                    <td class="coverage">273<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (!is.integer(val) || !val %in% c(1L, 2L)) {</pre>
                     </td>
@@ -446,7 +446,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">48</td>
-                    <td class="coverage">266<em>x</em></td>
+                    <td class="coverage">272<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  val</pre>
                     </td>
@@ -684,21 +684,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">82</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(is(list_of_models, "caretList"))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">83</td>
-                    <td class="coverage">73<em>x</em></td>
+                    <td class="coverage">74<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(all(sapply(list_of_models, is, "train")))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">84</td>
-                    <td class="coverage">73<em>x</em></td>
+                    <td class="coverage">74<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(invisible(NULL))</pre>
                     </td>
@@ -761,21 +761,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">93</td>
-                    <td class="coverage">81<em>x</em></td>
+                    <td class="coverage">82<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  types &lt;- sapply(list_of_models, function(x) x$modelType)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">94</td>
-                    <td class="coverage">81<em>x</em></td>
+                    <td class="coverage">82<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  type &lt;- types[1]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">95</td>
-                    <td class="coverage">81<em>x</em></td>
+                    <td class="coverage">82<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(all(types == type)) # TODO: Maybe in the future we can combine reg and class models</pre>
                     </td>
@@ -796,7 +796,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">98</td>
-                    <td class="coverage">80<em>x</em></td>
+                    <td class="coverage">81<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(all(types %in% c("Classification", "Regression")))</pre>
                     </td>
@@ -831,28 +831,28 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">103</td>
-                    <td class="coverage">80<em>x</em></td>
+                    <td class="coverage">81<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (type == "Classification") {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">104</td>
-                    <td class="coverage">42<em>x</em></td>
+                    <td class="coverage">43<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    for (model in list_of_models) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">105</td>
-                    <td class="coverage">127<em>x</em></td>
+                    <td class="coverage">130<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      unique_obs &lt;- unique(model$pred$obs)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">106</td>
-                    <td class="coverage">127<em>x</em></td>
+                    <td class="coverage">130<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      if (is.null(unique_obs)) {</pre>
                     </td>
@@ -871,1327 +871,1327 @@ table.table-condensed {
                       <pre class="language-r">      }</pre>
                     </td>
                   </tr>
-                  <tr class="covered">
+                  <tr class="never">
                     <td class="num">109</td>
-                    <td class="coverage">123<em>x</em></td>
+                    <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">      if (length(unique_obs) != 2) {</pre>
+                      <pre class="language-r">    }</pre>
                     </td>
                   </tr>
-                  <tr class="covered">
+                  <tr class="never">
                     <td class="num">110</td>
-                    <td class="coverage">1<em>x</em></td>
+                    <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">        stop("Not yet implemented for multiclass problems")</pre>
+                      <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">111</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">      }</pre>
+                      <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">112</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">    }</pre>
+                      <pre class="language-r">  # Check that classification models saved probabilities</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">113</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">  }</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">114</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r"></pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">115</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  # Check that classification models saved probabilities</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">116</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
                       <pre class="language-r">  # TODO: ALLOW NON PROB MODELS!</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">117</td>
-                    <td class="coverage">75<em>x</em></td>
+                    <td class="num">114</td>
+                    <td class="coverage">77<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (type == "Classification") {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">118</td>
-                    <td class="coverage">37<em>x</em></td>
+                    <td class="num">115</td>
+                    <td class="coverage">39<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    probModels &lt;- sapply(list_of_models, function(x) is.function(x$modelInfo$prob))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">119</td>
+                    <td class="num">116</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (!all(probModels)) stop("All models for classification must be able to generate class probabilities.")</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">120</td>
-                    <td class="coverage">36<em>x</em></td>
+                    <td class="num">117</td>
+                    <td class="coverage">38<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    classProbs &lt;- sapply(list_of_models, function(x) x$control$classProbs)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">121</td>
-                    <td class="coverage">36<em>x</em></td>
+                    <td class="num">118</td>
+                    <td class="coverage">38<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (!all(classProbs)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">122</td>
+                    <td class="num">119</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      bad_models &lt;- names(list_of_models)[!classProbs]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">123</td>
+                    <td class="num">120</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      bad_models &lt;- paste(bad_models, collapse = ", ")</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">124</td>
+                    <td class="num">121</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      stop("Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs=TRUE")</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">125</td>
+                    <td class="num">122</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    }</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">126</td>
+                    <td class="num">123</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">127</td>
-                    <td class="coverage">73<em>x</em></td>
+                    <td class="num">124</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(invisible(NULL))</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">128</td>
+                    <td class="num">125</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">129</td>
+                    <td class="num">126</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">130</td>
+                    <td class="num">127</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @title Check resamples</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">131</td>
+                    <td class="num">128</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @description Check that the resamples from a caretList are valid</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">132</td>
+                    <td class="num">129</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#'</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">133</td>
+                    <td class="num">130</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @param modelLibrary a list of predictions from caret models</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">134</td>
+                    <td class="num">131</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">check_bestpreds_resamples &lt;- function(modelLibrary) {</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">135</td>
+                    <td class="num">132</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # TODO: ID which model(s) have bad row indexes</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">136</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">133</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  resamples &lt;- lapply(modelLibrary, function(x) x[["Resample"]])</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">137</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">134</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  names(resamples) &lt;- names(modelLibrary)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">138</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">135</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  check &lt;- length(unique(resamples))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">139</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">136</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (check != 1) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">140</td>
+                    <td class="num">137</td>
                     <td class="coverage">2<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    stop("Component models do not have the same re-sampling strategies")</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">141</td>
+                    <td class="num">138</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">142</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">139</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(invisible(NULL))</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">143</td>
+                    <td class="num">140</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">144</td>
+                    <td class="num">141</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">145</td>
+                    <td class="num">142</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @title Check row indexes</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">146</td>
+                    <td class="num">143</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @description Check that the row indexes from a caretList are valid</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">147</td>
+                    <td class="num">144</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#'</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">148</td>
+                    <td class="num">145</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @param modelLibrary a list of predictions from caret models</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">149</td>
+                    <td class="num">146</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">check_bestpreds_indexes &lt;- function(modelLibrary) {</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">150</td>
+                    <td class="num">147</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # TODO: ID which model(s) have bad row indexes</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">151</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">148</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  rows &lt;- lapply(modelLibrary, function(x) x[["rowIndex"]])</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">152</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">149</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  names(rows) &lt;- names(modelLibrary)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">153</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">150</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  check &lt;- length(unique(rows))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">154</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">151</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (check != 1) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">155</td>
+                    <td class="num">152</td>
                     <td class="coverage">2<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    stop("Re-sampled predictions from each component model do not use the same rowIndexes from the origial dataset")</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">156</td>
+                    <td class="num">153</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">157</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">154</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(invisible(NULL))</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">158</td>
+                    <td class="num">155</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">159</td>
+                    <td class="num">156</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">160</td>
+                    <td class="num">157</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @title Check observeds</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">161</td>
+                    <td class="num">158</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @description Check that a list of observed values from a caretList are valid</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">162</td>
+                    <td class="num">159</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#'</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">163</td>
+                    <td class="num">160</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @param modelLibrary a list of predictions from caret models</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">164</td>
+                    <td class="num">161</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">check_bestpreds_obs &lt;- function(modelLibrary) {</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">165</td>
+                    <td class="num">162</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # TODO: ID which model(s) have bad row indexes</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">166</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">163</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  obs &lt;- lapply(modelLibrary, function(x) x[["obs"]])</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">167</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">164</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  names(obs) &lt;- names(modelLibrary)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">168</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">165</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  check &lt;- length(unique(obs))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">169</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">166</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (check != 1) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">170</td>
+                    <td class="num">167</td>
                     <td class="coverage">2<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    stop("Observed values for each component model are not the same.  Please re-train the models with the same Y variable")</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">171</td>
+                    <td class="num">168</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">172</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">169</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(invisible(NULL))</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">173</td>
+                    <td class="num">170</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">174</td>
+                    <td class="num">171</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">175</td>
+                    <td class="num">172</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @title Check predictions</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">176</td>
+                    <td class="num">173</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @description Check that a list of predictions from a caretList are valid</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">177</td>
+                    <td class="num">174</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#'</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">178</td>
+                    <td class="num">175</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @param modelLibrary a list of predictions from caret models</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">179</td>
+                    <td class="num">176</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">check_bestpreds_preds &lt;- function(modelLibrary) {</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">180</td>
+                    <td class="num">177</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # TODO: ID which model(s) have bad preds</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">181</td>
+                    <td class="num">178</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # TODO: Regression models should be numeric, classification models should have numeric class probs</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">182</td>
-                    <td class="coverage">73<em>x</em></td>
+                    <td class="num">179</td>
+                    <td class="coverage">74<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  pred &lt;- lapply(modelLibrary, function(x) x[["pred"]])</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">183</td>
-                    <td class="coverage">73<em>x</em></td>
+                    <td class="num">180</td>
+                    <td class="coverage">74<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  names(pred) &lt;- names(modelLibrary)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">184</td>
-                    <td class="coverage">73<em>x</em></td>
+                    <td class="num">181</td>
+                    <td class="coverage">74<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  classes &lt;- unique(sapply(pred, class))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">185</td>
-                    <td class="coverage">73<em>x</em></td>
+                    <td class="num">182</td>
+                    <td class="coverage">74<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  check &lt;- length(classes)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">186</td>
-                    <td class="coverage">73<em>x</em></td>
+                    <td class="num">183</td>
+                    <td class="coverage">74<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (check != 1) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">187</td>
+                    <td class="num">184</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    stop(</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">188</td>
+                    <td class="num">185</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      paste0(</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">189</td>
+                    <td class="num">186</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        "Component models do not all have the same type of predicitons.  Predictions are a mix of ",</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">190</td>
+                    <td class="num">187</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        paste(classes, collapse = ", "),</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">191</td>
+                    <td class="num">188</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        "."</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">192</td>
+                    <td class="num">189</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      )</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">193</td>
+                    <td class="num">190</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    )</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">194</td>
+                    <td class="num">191</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">195</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">192</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(invisible(NULL))</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">193</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">}</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">194</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r"></pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">195</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#####################################################</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">196</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">}</pre>
+                      <pre class="language-r"># Extraction functions</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">197</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r"></pre>
+                      <pre class="language-r">#####################################################</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">198</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#####################################################</pre>
+                      <pre class="language-r">#' @title Extract the method name associated with a single train object</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">199</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r"># Extraction functions</pre>
+                      <pre class="language-r">#' @description Extracts the method name associated with a single train object.  Note</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">200</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#####################################################</pre>
+                      <pre class="language-r">#' that for standard models (i.e. those already prespecified by caret), the</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">201</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' @title Extract the method name associated with a single train object</pre>
+                      <pre class="language-r">#' "method" attribute on the train object is used directly while for custom</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">202</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' @description Extracts the method name associated with a single train object.  Note</pre>
+                      <pre class="language-r">#' models the "method" attribute within the model$modelInfo attribute is</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">203</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' that for standard models (i.e. those already prespecified by caret), the</pre>
+                      <pre class="language-r">#' used instead.</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">204</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' "method" attribute on the train object is used directly while for custom</pre>
+                      <pre class="language-r">#' @param x a single caret train object</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">205</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' models the "method" attribute within the model$modelInfo attribute is</pre>
+                      <pre class="language-r">#' @return Name associated with model</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">206</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' used instead.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">207</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @param x a single caret train object</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">208</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @return Name associated with model</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">209</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
                       <pre class="language-r">extractModelName &lt;- function(x) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">210</td>
-                    <td class="coverage">593<em>x</em></td>
+                    <td class="num">207</td>
+                    <td class="coverage">595<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.list(x$method)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">211</td>
+                    <td class="num">208</td>
                     <td class="coverage">3<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    validateCustomModel(x$method)$method</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">212</td>
-                    <td class="coverage">590<em>x</em></td>
+                    <td class="num">209</td>
+                    <td class="coverage">592<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  } else if (x$method == "custom") {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">213</td>
+                    <td class="num">210</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    validateCustomModel(x$modelInfo)$method</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">214</td>
+                    <td class="num">211</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  } else {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">215</td>
-                    <td class="coverage">589<em>x</em></td>
+                    <td class="num">212</td>
+                    <td class="coverage">591<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    x$method</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">213</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  }</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">214</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">}</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">215</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">216</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">  }</pre>
+                      <pre class="language-r">#' @title Validate a custom caret model info list</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">217</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">}</pre>
+                      <pre class="language-r">#' @description Currently, this only ensures that all model info lists</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">218</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r"></pre>
+                      <pre class="language-r">#' were also assigned a "method" attribute for consistency with usage</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">219</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' @title Validate a custom caret model info list</pre>
+                      <pre class="language-r">#' of non-custom models</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">220</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' @description Currently, this only ensures that all model info lists</pre>
+                      <pre class="language-r">#' @param x a model info list (e.g. \code{getModelInfo("rf", regex=F)\[[1]]})</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">221</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' were also assigned a "method" attribute for consistency with usage</pre>
+                      <pre class="language-r">#' @return validated model info list (i.e. x)</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">222</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' of non-custom models</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">223</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @param x a model info list (e.g. \code{getModelInfo("rf", regex=F)\[[1]]})</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">224</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @return validated model info list (i.e. x)</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">225</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
                       <pre class="language-r">validateCustomModel &lt;- function(x) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">226</td>
+                    <td class="num">223</td>
                     <td class="coverage">7<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(x$method)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">227</td>
+                    <td class="num">224</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    stop(paste(</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">228</td>
+                    <td class="num">225</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      "Custom models must be defined with a \"method\" attribute containing the name",</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">229</td>
+                    <td class="num">226</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      "by which that model should be referenced.  Example: my.glm.model$method &lt;- \"custom_glm\""</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">230</td>
+                    <td class="num">227</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    ))</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">231</td>
+                    <td class="num">228</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">232</td>
+                    <td class="num">229</td>
                     <td class="coverage">6<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  x</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">233</td>
+                    <td class="num">230</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">234</td>
+                    <td class="num">231</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">235</td>
+                    <td class="num">232</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @title Extracts the model types from a list of train model</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">236</td>
+                    <td class="num">233</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @description Extracts the model types from a list of train model</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">237</td>
+                    <td class="num">234</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#'</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">238</td>
+                    <td class="num">235</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @param list_of_models an object of class caretList</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">239</td>
+                    <td class="num">236</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">extractModelTypes &lt;- function(list_of_models) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">240</td>
-                    <td class="coverage">177<em>x</em></td>
+                    <td class="num">237</td>
+                    <td class="coverage">180<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  types &lt;- sapply(list_of_models, function(x) x$modelType)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">241</td>
-                    <td class="coverage">177<em>x</em></td>
+                    <td class="num">238</td>
+                    <td class="coverage">180<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  type &lt;- types[1]</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">242</td>
+                    <td class="num">239</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">243</td>
+                    <td class="num">240</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # TODO: Maybe in the future we can combine reg and class models</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">244</td>
+                    <td class="num">241</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # Also, this check is redundant, but I think that"s ok</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">245</td>
-                    <td class="coverage">177<em>x</em></td>
+                    <td class="num">242</td>
+                    <td class="coverage">180<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(all(types == type))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">246</td>
-                    <td class="coverage">177<em>x</em></td>
+                    <td class="num">243</td>
+                    <td class="coverage">180<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(all(types %in% c("Classification", "Regression")))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">247</td>
-                    <td class="coverage">177<em>x</em></td>
+                    <td class="num">244</td>
+                    <td class="coverage">180<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(type)</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">248</td>
+                    <td class="num">245</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">249</td>
+                    <td class="num">246</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">250</td>
+                    <td class="num">247</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @title Extract the best predictions from a train object</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">251</td>
+                    <td class="num">248</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @description Extract predictions for the best tune from a model</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">252</td>
+                    <td class="num">249</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @param x a train object</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">253</td>
+                    <td class="num">250</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @importFrom data.table data.table setorderv</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">254</td>
+                    <td class="num">251</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">bestPreds &lt;- function(x) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">255</td>
-                    <td class="coverage">222<em>x</em></td>
+                    <td class="num">252</td>
+                    <td class="coverage">224<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(is(x, "train"))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">256</td>
-                    <td class="coverage">222<em>x</em></td>
+                    <td class="num">253</td>
+                    <td class="coverage">224<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(x$control$savePredictions %in% c("all", "final", TRUE))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">257</td>
-                    <td class="coverage">222<em>x</em></td>
+                    <td class="num">254</td>
+                    <td class="coverage">224<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  a &lt;- data.table(x$bestTune, key = names(x$bestTune))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">258</td>
-                    <td class="coverage">222<em>x</em></td>
+                    <td class="num">255</td>
+                    <td class="coverage">224<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  b &lt;- data.table(x$pred, key = names(x$bestTune))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">259</td>
-                    <td class="coverage">222<em>x</em></td>
+                    <td class="num">256</td>
+                    <td class="coverage">224<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  b &lt;- b[a, ]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">260</td>
-                    <td class="coverage">222<em>x</em></td>
+                    <td class="num">257</td>
+                    <td class="coverage">224<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  invisible(gc(reset = TRUE))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">261</td>
-                    <td class="coverage">222<em>x</em></td>
+                    <td class="num">258</td>
+                    <td class="coverage">224<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  setorderv(b, c("Resample", "rowIndex"))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">262</td>
-                    <td class="coverage">222<em>x</em></td>
+                    <td class="num">259</td>
+                    <td class="coverage">224<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(b)</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">263</td>
+                    <td class="num">260</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">264</td>
+                    <td class="num">261</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">265</td>
+                    <td class="num">262</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @title Extract the best predictions from a list of train objects</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">266</td>
+                    <td class="num">263</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @description Extract predictions for the best tune from a list of caret models</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">267</td>
+                    <td class="num">264</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @param list_of_models an object of class caretList or a list of caret models</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">268</td>
+                    <td class="num">265</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @importFrom pbapply pblapply</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">269</td>
+                    <td class="num">266</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">extractBestPreds &lt;- function(list_of_models) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">270</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">267</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  out &lt;- lapply(list_of_models, bestPreds)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">271</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">268</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(names(out))) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">272</td>
+                    <td class="num">269</td>
                     <td class="coverage">1<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    names(out) &lt;- make.names(sapply(list_of_models, extractModelName), unique = TRUE)</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">273</td>
+                    <td class="num">270</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">274</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">271</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  invisible(gc(reset = TRUE))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">275</td>
-                    <td class="coverage">74<em>x</em></td>
+                    <td class="num">272</td>
+                    <td class="coverage">75<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(out)</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">276</td>
+                    <td class="num">273</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">277</td>
+                    <td class="num">274</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">278</td>
+                    <td class="num">275</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @title Make a prediction matrix from a list of models</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">279</td>
+                    <td class="num">276</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @description Extract obs from one models, and a matrix of predictions from all other models, a</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">280</td>
+                    <td class="num">277</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' helper function</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">281</td>
+                    <td class="num">278</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#'</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">282</td>
+                    <td class="num">279</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @param  list_of_models an object of class caretList</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">283</td>
+                    <td class="num">280</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">#' @importFrom data.table set rbindlist dcast.data.table</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">284</td>
+                    <td class="num">281</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">makePredObsMatrix &lt;- function(list_of_models) {</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">285</td>
+                    <td class="num">282</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # caretList Checks</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">286</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">283</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  check_caretList_classes(list_of_models)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">287</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">284</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  check_caretList_model_types(list_of_models)</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">288</td>
+                    <td class="num">285</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">289</td>
+                    <td class="num">286</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # Make a list of models</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">290</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">287</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  modelLibrary &lt;- extractBestPreds(list_of_models)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">291</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">288</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  model_names &lt;- names(modelLibrary)</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">292</td>
+                    <td class="num">289</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">293</td>
+                    <td class="num">290</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # Model library checks</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">294</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">291</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  check_bestpreds_resamples(modelLibrary) # Re-write with data.table?</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">295</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">292</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  check_bestpreds_indexes(modelLibrary) # Re-write with data.table?</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">296</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">293</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  check_bestpreds_obs(modelLibrary) # Re-write with data.table?</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">297</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">294</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  check_bestpreds_preds(modelLibrary) # Re-write with data.table?</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">295</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r"></pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">296</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  # Extract model type (class or reg)</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">297</td>
+                    <td class="coverage">73<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  type &lt;- extractModelTypes(list_of_models)</pre>
                     </td>
                   </tr>
                   <tr class="never">
@@ -2205,305 +2205,298 @@ table.table-condensed {
                     <td class="num">299</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">  # Extract model type (class or reg)</pre>
+                      <pre class="language-r">  # Add names column</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">300</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">  type &lt;- extractModelTypes(list_of_models)</pre>
+                      <pre class="language-r">  for (i in seq_along(modelLibrary)) {</pre>
                     </td>
                   </tr>
-                  <tr class="never">
+                  <tr class="covered">
                     <td class="num">301</td>
-                    <td class="coverage"></td>
+                    <td class="coverage">219<em>x</em></td>
                     <td class="col-sm-12">
-                      <pre class="language-r"></pre>
+                      <pre class="language-r">    set(modelLibrary[[i]], j = "modelname", value = names(modelLibrary)[[i]])</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">302</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">  # Add names column</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">303</td>
-                    <td class="coverage">72<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  for (i in seq_along(modelLibrary)) {</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">304</td>
-                    <td class="coverage">217<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    set(modelLibrary[[i]], j = "modelname", value = names(modelLibrary)[[i]])</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">305</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
                       <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">306</td>
+                    <td class="num">303</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">307</td>
+                    <td class="num">304</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # Remove parameter columns</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">308</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">305</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  keep &lt;- Reduce(intersect, lapply(modelLibrary, names))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">309</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">306</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  for (i in seq_along(modelLibrary)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">310</td>
-                    <td class="coverage">217<em>x</em></td>
+                    <td class="num">307</td>
+                    <td class="coverage">219<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    rem &lt;- setdiff(names(modelLibrary[[i]]), keep)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">311</td>
-                    <td class="coverage">217<em>x</em></td>
+                    <td class="num">308</td>
+                    <td class="coverage">219<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (length(rem) &gt; 0) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">312</td>
-                    <td class="coverage">212<em>x</em></td>
+                    <td class="num">309</td>
+                    <td class="coverage">214<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      for (r in rem) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">313</td>
-                    <td class="coverage">218<em>x</em></td>
+                    <td class="num">310</td>
+                    <td class="coverage">221<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        set(modelLibrary[[i]], j = r, value = NULL)</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">314</td>
+                    <td class="num">311</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      }</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">315</td>
+                    <td class="num">312</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    }</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">316</td>
+                    <td class="num">313</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">317</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">314</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  modelLibrary &lt;- rbindlist(modelLibrary, fill = TRUE)</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">318</td>
+                    <td class="num">315</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">319</td>
+                    <td class="num">316</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # For classification models that produce probs, use the probs as preds</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">320</td>
+                    <td class="num">317</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # Otherwise, just use class predictions</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">321</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">318</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (type == "Classification") {</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">322</td>
+                    <td class="num">319</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    # Determine the string name for the positive class</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">323</td>
-                    <td class="coverage">34<em>x</em></td>
+                    <td class="num">320</td>
+                    <td class="coverage">35<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    positive &lt;- levels(modelLibrary$obs)[getBinaryTargetLevel()]</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">321</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r"></pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">322</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    # TODO: For multiclass, use ALL PROBS.  Currently this is JUST positive class probs!</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">323</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">324</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r"></pre>
+                      <pre class="language-r">    # Use the string name for the positive class determined above to select</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">325</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">    # Use the string name for the positive class determined above to select</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">326</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
                       <pre class="language-r">    # predictions from base estimators as predictors for ensemble model</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">327</td>
-                    <td class="coverage">34<em>x</em></td>
+                    <td class="num">326</td>
+                    <td class="coverage">35<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    pos &lt;- as.numeric(modelLibrary[[positive]])</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">328</td>
-                    <td class="coverage">34<em>x</em></td>
+                    <td class="num">327</td>
+                    <td class="coverage">35<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    good_pos_values &lt;- which(is.finite(pos))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">329</td>
-                    <td class="coverage">34<em>x</em></td>
+                    <td class="num">328</td>
+                    <td class="coverage">35<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    set(modelLibrary, j = "pred", value = as.numeric(modelLibrary[["pred"]]))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">330</td>
-                    <td class="coverage">34<em>x</em></td>
+                    <td class="num">329</td>
+                    <td class="coverage">35<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    set(modelLibrary, i = good_pos_values, j = "pred", value = modelLibrary[good_pos_values, positive, with = FALSE])</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">331</td>
+                    <td class="num">330</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  }</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">332</td>
+                    <td class="num">331</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">333</td>
+                    <td class="num">332</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # Reshape wide for meta-modeling</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">334</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">333</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  modelLibrary &lt;- data.table::dcast.data.table(</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">335</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">334</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    modelLibrary,</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">336</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">335</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    rowIndex + obs + Resample ~ modelname,</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">337</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">336</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    value.var = "pred"</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">338</td>
+                    <td class="num">337</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  )</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">339</td>
+                    <td class="num">338</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r"></pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">340</td>
+                    <td class="num">339</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  # Return</pre>
                     </td>
                   </tr>
                   <tr class="covered">
-                    <td class="num">341</td>
-                    <td class="coverage">72<em>x</em></td>
+                    <td class="num">340</td>
+                    <td class="coverage">73<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(list(obs = modelLibrary$obs, preds = as.matrix(modelLibrary[, model_names, with = FALSE]), type = type))</pre>
                     </td>
                   </tr>
                   <tr class="never">
-                    <td class="num">342</td>
+                    <td class="num">341</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>
@@ -2580,14 +2573,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">10</td>
-                    <td class="coverage">331<em>x</em></td>
+                    <td class="coverage">333<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  out &lt;- c(list(method = method), list(...))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">11</td>
-                    <td class="coverage">331<em>x</em></td>
+                    <td class="coverage">333<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(out)</pre>
                     </td>
@@ -2650,7 +2643,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">20</td>
-                    <td class="coverage">47<em>x</em></td>
+                    <td class="coverage">48<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(is.list(x))</pre>
                     </td>
@@ -2664,21 +2657,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">22</td>
-                    <td class="coverage">47<em>x</em></td>
+                    <td class="coverage">48<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  methods &lt;- lapply(x, function(m) m$method)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">23</td>
-                    <td class="coverage">47<em>x</em></td>
+                    <td class="coverage">48<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  methodCheck(methods)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">24</td>
-                    <td class="coverage">46<em>x</em></td>
+                    <td class="coverage">47<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  method_names &lt;- sapply(x, extractModelName)</pre>
                     </td>
@@ -2699,14 +2692,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">27</td>
-                    <td class="coverage">46<em>x</em></td>
+                    <td class="coverage">47<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(names(x))) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">28</td>
-                    <td class="coverage">30<em>x</em></td>
+                    <td class="coverage">31<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    names(x) &lt;- method_names</pre>
                     </td>
@@ -2720,14 +2713,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">30</td>
-                    <td class="coverage">46<em>x</em></td>
+                    <td class="coverage">47<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  i &lt;- names(x) == ""</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">31</td>
-                    <td class="coverage">46<em>x</em></td>
+                    <td class="coverage">47<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (any(i)) {</pre>
                     </td>
@@ -2748,7 +2741,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">34</td>
-                    <td class="coverage">46<em>x</em></td>
+                    <td class="coverage">47<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  names(x) &lt;- make.names(names(x), unique = TRUE)</pre>
                     </td>
@@ -2769,14 +2762,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">37</td>
-                    <td class="coverage">46<em>x</em></td>
+                    <td class="coverage">47<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(all(sapply(x, is.list)))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">38</td>
-                    <td class="coverage">46<em>x</em></td>
+                    <td class="coverage">47<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(x)</pre>
                     </td>
@@ -2846,7 +2839,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">48</td>
-                    <td class="coverage">52<em>x</em></td>
+                    <td class="coverage">53<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  supported_models &lt;- unique(modelLookup()$model)</pre>
                     </td>
@@ -2874,14 +2867,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">52</td>
-                    <td class="coverage">52<em>x</em></td>
+                    <td class="coverage">53<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  models &lt;- lapply(x, function(m) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">53</td>
-                    <td class="coverage">1301<em>x</em></td>
+                    <td class="coverage">1303<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (is.list(m)) {</pre>
                     </td>
@@ -2902,14 +2895,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">56</td>
-                    <td class="coverage">1298<em>x</em></td>
+                    <td class="coverage">1300<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    } else if (is.character(m)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">57</td>
-                    <td class="coverage">1297<em>x</em></td>
+                    <td class="coverage">1299<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      data.frame(type = "native", model = m)</pre>
                     </td>
@@ -2972,7 +2965,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">66</td>
-                    <td class="coverage">50<em>x</em></td>
+                    <td class="coverage">51<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  models &lt;- do.call(rbind, models) # Could use data.table to be more efficient with lots of models</pre>
                     </td>
@@ -2993,14 +2986,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">69</td>
-                    <td class="coverage">50<em>x</em></td>
+                    <td class="coverage">51<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  native_models &lt;- subset(models, get("type") == "native")$model</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">70</td>
-                    <td class="coverage">50<em>x</em></td>
+                    <td class="coverage">51<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  bad_models &lt;- setdiff(native_models, supported_models)</pre>
                     </td>
@@ -3014,7 +3007,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">72</td>
-                    <td class="coverage">50<em>x</em></td>
+                    <td class="coverage">51<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (length(bad_models) &gt; 0) {</pre>
                     </td>
@@ -3049,7 +3042,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">77</td>
-                    <td class="coverage">47<em>x</em></td>
+                    <td class="coverage">48<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(invisible(NULL))</pre>
                     </td>
@@ -3632,14 +3625,14 @@ table.table-condensed {
                     <td class="num">160</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' @param ... arguments to pass to \code{\link{train}}.  These arguments will determine which train method gets dispatched.</pre>
+                      <pre class="language-r">#' @param ... arguments to pass to \code{\link[caret]{train}}.  These arguments will determine which train method gets dispatched.</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">161</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' @param trControl a \code{\link{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.</pre>
+                      <pre class="language-r">#' @param trControl a \code{\link[caret]{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.</pre>
                     </td>
                   </tr>
                   <tr class="never">
@@ -3667,7 +3660,7 @@ table.table-condensed {
                     <td class="num">165</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' @return A list of \code{\link{train}} objects. If the model fails to build,</pre>
+                      <pre class="language-r">#' @return A list of \code{\link[caret]{train}} objects. If the model fails to build,</pre>
                     </td>
                   </tr>
                   <tr class="never">
@@ -3875,7 +3868,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">195</td>
-                    <td class="coverage">45<em>x</em></td>
+                    <td class="coverage">46<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(trControl)) {</pre>
                     </td>
@@ -3896,7 +3889,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">198</td>
-                    <td class="coverage">45<em>x</em></td>
+                    <td class="coverage">46<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(tuneList) &amp;&amp; is.null(methodList)) {</pre>
                     </td>
@@ -3917,7 +3910,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">201</td>
-                    <td class="coverage">44<em>x</em></td>
+                    <td class="coverage">45<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (!is.null(methodList) &amp;&amp; any(duplicated(methodList))) {</pre>
                     </td>
@@ -3959,14 +3952,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">207</td>
-                    <td class="coverage">44<em>x</em></td>
+                    <td class="coverage">45<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (!is.null(methodList)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">208</td>
-                    <td class="coverage">32<em>x</em></td>
+                    <td class="coverage">33<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    tuneList &lt;- c(tuneList, lapply(methodList, caretModelSpec))</pre>
                     </td>
@@ -3994,7 +3987,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">212</td>
-                    <td class="coverage">44<em>x</em></td>
+                    <td class="coverage">45<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  tuneList &lt;- tuneCheck(tuneList)</pre>
                     </td>
@@ -4015,7 +4008,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">215</td>
-                    <td class="coverage">43<em>x</em></td>
+                    <td class="coverage">44<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  global_args &lt;- list(...)</pre>
                     </td>
@@ -4036,7 +4029,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">218</td>
-                    <td class="coverage">43<em>x</em></td>
+                    <td class="coverage">44<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(trControl$index)) {</pre>
                     </td>
@@ -4078,7 +4071,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">224</td>
-                    <td class="coverage">43<em>x</em></td>
+                    <td class="coverage">44<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  global_args[["trControl"]] &lt;- trControl</pre>
                     </td>
@@ -4099,21 +4092,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">227</td>
-                    <td class="coverage">43<em>x</em></td>
+                    <td class="coverage">44<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  modelList &lt;- lapply(tuneList, function(m) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">228</td>
-                    <td class="coverage">95<em>x</em></td>
+                    <td class="coverage">97<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    model_args &lt;- c(global_args, m)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">229</td>
-                    <td class="coverage">95<em>x</em></td>
+                    <td class="coverage">97<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (continue_on_fail) {</pre>
                     </td>
@@ -4134,7 +4127,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">232</td>
-                    <td class="coverage">90<em>x</em></td>
+                    <td class="coverage">92<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      model &lt;- do.call(train, model_args)</pre>
                     </td>
@@ -4148,7 +4141,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">234</td>
-                    <td class="coverage">93<em>x</em></td>
+                    <td class="coverage">95<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    return(model)</pre>
                     </td>
@@ -4162,21 +4155,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">236</td>
-                    <td class="coverage">41<em>x</em></td>
+                    <td class="coverage">42<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  names(modelList) &lt;- names(tuneList)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">237</td>
-                    <td class="coverage">41<em>x</em></td>
+                    <td class="coverage">42<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  nulls &lt;- sapply(modelList, is.null)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">238</td>
-                    <td class="coverage">41<em>x</em></td>
+                    <td class="coverage">42<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  modelList &lt;- modelList[!nulls]</pre>
                     </td>
@@ -4190,7 +4183,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">240</td>
-                    <td class="coverage">41<em>x</em></td>
+                    <td class="coverage">42<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (length(modelList) == 0) {</pre>
                     </td>
@@ -4211,7 +4204,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">243</td>
-                    <td class="coverage">40<em>x</em></td>
+                    <td class="coverage">41<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  class(modelList) &lt;- c("caretList")</pre>
                     </td>
@@ -4225,7 +4218,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">245</td>
-                    <td class="coverage">40<em>x</em></td>
+                    <td class="coverage">41<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(modelList)</pre>
                     </td>
@@ -4757,7 +4750,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">321</td>
-                    <td class="coverage">108<em>x</em></td>
+                    <td class="coverage">110<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(newdata)) {</pre>
                     </td>
@@ -4813,14 +4806,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">329</td>
-                    <td class="coverage">107<em>x</em></td>
+                    <td class="coverage">109<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  apply_fun &lt;- sapply</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">330</td>
-                    <td class="coverage">107<em>x</em></td>
+                    <td class="coverage">109<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (verbose) {</pre>
                     </td>
@@ -4841,28 +4834,28 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">333</td>
-                    <td class="coverage">107<em>x</em></td>
+                    <td class="coverage">109<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  preds &lt;- apply_fun(object, function(x) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">334</td>
-                    <td class="coverage">356<em>x</em></td>
+                    <td class="coverage">360<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    type &lt;- x$modelType</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">335</td>
-                    <td class="coverage">356<em>x</em></td>
+                    <td class="coverage">360<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (type == "Classification") {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">336</td>
-                    <td class="coverage">200<em>x</em></td>
+                    <td class="coverage">204<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      if (x$control$classProbs) {</pre>
                     </td>
@@ -4883,7 +4876,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">339</td>
-                    <td class="coverage">194<em>x</em></td>
+                    <td class="coverage">198<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">        caret::predict.train(x, type = "prob", newdata = newdata, ...)[, getBinaryTargetLevel()]</pre>
                     </td>
@@ -4953,7 +4946,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">349</td>
-                    <td class="coverage">102<em>x</em></td>
+                    <td class="coverage">104<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (!inherits(preds, "matrix") &amp;&amp; !inherits(preds, "data.frame")) {</pre>
                     </td>
@@ -5002,7 +4995,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">356</td>
-                    <td class="coverage">102<em>x</em></td>
+                    <td class="coverage">104<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(names(object))) {</pre>
                     </td>
@@ -5072,7 +5065,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">366</td>
-                    <td class="coverage">100<em>x</em></td>
+                    <td class="coverage">102<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    colnames(preds) &lt;- names(object)</pre>
                     </td>
@@ -5093,7 +5086,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">369</td>
-                    <td class="coverage">102<em>x</em></td>
+                    <td class="coverage">104<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(preds)</pre>
                     </td>
@@ -5941,7 +5934,7 @@ table.table-condensed {
                     <td class="num">119</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' Extract a model accuracy metric from a \code{\link{train}} object.</pre>
+                      <pre class="language-r">#' Extract a model accuracy metric from a \code{\link[caret]{train}} object.</pre>
                     </td>
                   </tr>
                   <tr class="never">
@@ -6123,7 +6116,7 @@ table.table-condensed {
                     <td class="num">145</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' @description This function wraps the \code{\link{varImp}} function in the</pre>
+                      <pre class="language-r">#' @description This function wraps the \code{\link[caret]{varImp}} function in the</pre>
                     </td>
                   </tr>
                   <tr class="never">
@@ -8535,7 +8528,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">25</td>
-                    <td class="coverage">70<em>x</em></td>
+                    <td class="coverage">71<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  predobs &lt;- makePredObsMatrix(all.models)</pre>
                     </td>
@@ -8556,7 +8549,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">28</td>
-                    <td class="coverage">70<em>x</em></td>
+                    <td class="coverage">71<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  model &lt;- train(predobs$preds, predobs$obs, ...)</pre>
                     </td>
@@ -8577,21 +8570,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">31</td>
-                    <td class="coverage">70<em>x</em></td>
+                    <td class="coverage">71<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  out &lt;- list(models = all.models, ens_model = model, error = model$results)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">32</td>
-                    <td class="coverage">70<em>x</em></td>
+                    <td class="coverage">71<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  class(out) &lt;- "caretStack"</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">33</td>
-                    <td class="coverage">70<em>x</em></td>
+                    <td class="coverage">71<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(out)</pre>
                     </td>
@@ -8684,14 +8677,14 @@ table.table-condensed {
                     <td class="num">46</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' @param na.action the method for handling missing data passed to \code{\link{predict.train}}.</pre>
+                      <pre class="language-r">#' @param na.action the method for handling missing data passed to \code{\link[caret]{predict.train}}.</pre>
                     </td>
                   </tr>
                   <tr class="never">
                     <td class="num">47</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
-                      <pre class="language-r">#' @param ... arguments to pass to \code{\link{predict.train}}.</pre>
+                      <pre class="language-r">#' @param ... arguments to pass to \code{\link[caret]{predict.train}}.</pre>
                     </td>
                   </tr>
                   <tr class="never">
@@ -8857,14 +8850,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">71</td>
-                    <td class="coverage">85<em>x</em></td>
+                    <td class="coverage">87<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(is(object$models, "caretList"))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">72</td>
-                    <td class="coverage">85<em>x</em></td>
+                    <td class="coverage">87<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  type &lt;- extractModelTypes(object$models)</pre>
                     </td>
@@ -8878,21 +8871,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">74</td>
-                    <td class="coverage">85<em>x</em></td>
+                    <td class="coverage">87<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  preds &lt;- predict(object$models, newdata = newdata, na.action = na.action)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">75</td>
-                    <td class="coverage">81<em>x</em></td>
+                    <td class="coverage">83<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (type == "Classification") {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">76</td>
-                    <td class="coverage">44<em>x</em></td>
+                    <td class="coverage">46<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    out &lt;- predict(object$ens_model, newdata = preds, na.action = na.action, ...)</pre>
                     </td>
@@ -8906,7 +8899,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">78</td>
-                    <td class="coverage">44<em>x</em></td>
+                    <td class="coverage">46<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (inherits(out, c("data.frame", "matrix"))) {</pre>
                     </td>
@@ -8927,7 +8920,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">81</td>
-                    <td class="coverage">33<em>x</em></td>
+                    <td class="coverage">34<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      est &lt;- out[, getBinaryTargetLevel(), drop = TRUE]</pre>
                     </td>
@@ -8941,7 +8934,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">83</td>
-                    <td class="coverage">11<em>x</em></td>
+                    <td class="coverage">12<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      est &lt;- out</pre>
                     </td>
@@ -8983,7 +8976,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">89</td>
-                    <td class="coverage">81<em>x</em></td>
+                    <td class="coverage">83<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (se || return_weights) {</pre>
                     </td>
@@ -9081,14 +9074,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">103</td>
-                    <td class="coverage">80<em>x</em></td>
+                    <td class="coverage">82<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  out &lt;- est</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">104</td>
-                    <td class="coverage">80<em>x</em></td>
+                    <td class="coverage">82<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (se) {</pre>
                     </td>
@@ -9193,7 +9186,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">119</td>
-                    <td class="coverage">80<em>x</em></td>
+                    <td class="coverage">82<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (return_weights) {</pre>
                     </td>
@@ -9214,7 +9207,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">122</td>
-                    <td class="coverage">80<em>x</em></td>
+                    <td class="coverage">82<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  return(out)</pre>
                     </td>

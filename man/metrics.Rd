@@ -30,7 +30,7 @@ Extract accuracy metrics from a model
 
 Extract accuracy metrics SDs from a model
 
-Extract a model accuracy metric from a \code{\link{train}} object.
+Extract a model accuracy metric from a \code{\link[caret]{train}} object.
 
 Extract the standard deviation from resamples for an accuracy metric from a model object.
 }

@@ -16,7 +16,7 @@ A \code{\link{data.frame}} with one row per variable and one column
 per model in object
 }
 \description{
-This function wraps the \code{\link{varImp}} function in the
+This function wraps the \code{\link[caret]{varImp}} function in the
 \code{caret} package to provide a weighted estimate of the importance of
 variables in the ensembled models in a \code{caretEnsemble} object. Variable
 importance for each model is calculated and then averaged by the weight of the overall model

@@ -43,8 +43,8 @@ caretStack <- function(all.models, ...) {
 #' @param level tolerance/confidence level
 #' @param return_weights a logical indicating whether prediction weights for each model
 #' should be returned
-#' @param na.action the method for handling missing data passed to \code{\link{predict.train}}.
-#' @param ... arguments to pass to \code{\link{predict.train}}.
+#' @param na.action the method for handling missing data passed to \code{\link[caret]{predict.train}}.
+#' @param ... arguments to pass to \code{\link[caret]{predict.train}}.
 #' @export
 #' @details Prediction weights are defined as variable importance in the stacked
 #' caret model. This is not available for all cases such as where the library

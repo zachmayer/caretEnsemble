@@ -26,9 +26,9 @@
 \item{return_weights}{a logical indicating whether prediction weights for each model
 should be returned}
 
-\item{na.action}{the method for handling missing data passed to \code{\link{predict.train}}.}
+\item{na.action}{the method for handling missing data passed to \code{\link[caret]{predict.train}}.}
 
-\item{...}{arguments to pass to \code{\link{predict.train}}.}
+\item{...}{arguments to pass to \code{\link[caret]{predict.train}}.}
 }
 \description{
 Make predictions from a caretStack. This function passes the data to each function in
