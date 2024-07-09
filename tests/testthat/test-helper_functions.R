@@ -213,7 +213,6 @@ test_that("check_caretList_model_types stops when a classification model support
 
   test_that("Check errors in caretEnsemble for multiclass classification work", {
     skip_on_cran()
-    skip_if_not_installed("rpart")
     data(iris)
     myControl <- trainControl(method = "cv", number = 5, savePredictions = "final", index = createResample(iris[, 5], 5))
     model_list <- caretList(
@@ -253,13 +252,15 @@ test_that("check_caretList_model_types stops when a classification model support
       trControl = myControl
     )
 
-    setMulticlassExcludedLevel(0)
+    msg <- "multiclass excluded level must be > 0: 0 was given see setMulticlassExcludedLevel for more details"
+    expect_error(setMulticlassExcludedLevel(0L), msg)
+    invisible(caretStack(model_list, method = "knn"))
+    setMulticlassExcludedLevel(4L)
     expect_warning(caretStack(model_list, method = "knn"))
-    setMulticlassExcludedLevel(4)
-    expect_warning(caretStack(model_list, method = "knn"))
+    setMulticlassExcludedLevel(1L)
 
     # Check if we are actually excluding level 1 (setosa)
-    setMulticlassExcludedLevel(1)
+    setMulticlassExcludedLevel(1L)
     classes <- levels(iris[, 5])[-1]
     models <- c("rpart", "glmnet")
     class_model_combinations <- expand.grid(classes, models)
@@ -268,4 +269,39 @@ test_that("check_caretList_model_types stops when a classification model support
     model_stack <- caretStack(model_list, method = "knn")
     expect_identical(rownames(varImp(model_stack$ens_model)$importance), varImp_rownames)
   })
+})
+
+# Tests for validateMulticlassExcludedLevel function
+test_that("validateMulticlassExcludedLevel stops for non-numeric input", {
+  invalid_input <- "invalid"
+  err <- "multiclass excluded level must be numeric: invalid was given see setMulticlassExcludedLevel for more details"
+  expect_error(validateMulticlassExcludedLevel(invalid_input), err)
+})
+
+test_that("validateMulticlassExcludedLevel stops for non-finite input", {
+  invalid_input <- Inf
+  err <- "multiclass excluded level must be finite: Inf was given see setMulticlassExcludedLevel for more details"
+  expect_error(validateMulticlassExcludedLevel(invalid_input), err)
+})
+
+test_that("validateMulticlassExcludedLevel stops for non-positive input", {
+  invalid_input <- -1
+  err <- "multiclass excluded level must be > 0: -1 was given see setMulticlassExcludedLevel for more details"
+  expect_error(validateMulticlassExcludedLevel(invalid_input), err)
+})
+
+test_that("validateMulticlassExcludedLevel warns for non-integer input", {
+  warn <- "multiclass excluded level is not an integer 1.1 was given see setMulticlassExcludedLevel for more details"
+  expect_warning(
+    {
+      validated <- validateMulticlassExcludedLevel(1.1)
+    },
+    warn
+  )
+  expect_equal(validated, 1L)
+})
+
+test_that("validateMulticlassExcludedLevel passes for valid input", {
+  valid_input <- 3L
+  expect_equal(validateMulticlassExcludedLevel(valid_input), 3L)
 })

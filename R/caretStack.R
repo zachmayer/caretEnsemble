@@ -71,7 +71,6 @@ predict.caretStack <- function(
   stopifnot(is(object$models, "caretList"))
   type <- extractModelTypes(object$models)
 
-  # preds <- do.call(predict, c(list(object=object$models, newdata=newdata), modelList_predict_params)) TODO keep this around for future use
   preds <- predict(object$models, newdata = newdata, na.action = na.action)
 
   if (type == "Classification") {
@@ -81,10 +80,14 @@ predict.caretStack <- function(
     # of 1 to num_classes, exclude that class from the predictions.
     # Otherwise, include all classes.
     column_names <- colnames(preds)
+
+    # TODO: Validate that all object$models[ have the same obs
+    # TODO: Validate that all object$models[ have the same pred levels
     num_classes <- length(levels(object$models[[1]]$pred$obs))
     if (getMulticlassExcludedLevel() >= 1 && getMulticlassExcludedLevel() <= num_classes) {
       classes_included <- levels(object$models[[1]]$pred$obs)[-getMulticlassExcludedLevel()]
     } else {
+      warning("Invalid option forcaret.ensemble.multiclass.excluded.level. Returning all classes.")
       classes_included <- levels(object$models[[1]]$pred$obs)
     }
     pattern <- paste(classes_included, collapse = "|")

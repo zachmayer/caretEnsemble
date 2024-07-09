@@ -90,17 +90,32 @@ setMulticlassExcludedLevel <- function(level) {
 #' @param arg argument to potentially be used as new excluded level
 #' @return Multiclass excluded level (as integer)
 validateMulticlassExcludedLevel <- function(arg) {
-  val <- suppressWarnings(try(as.integer(arg), silent = TRUE))
-  if (!is.integer(val)) {
+  if (!is.numeric(arg)) {
     stop(paste0(
-      "Specified multiclass excluded level is not valid.  ",
-      "Value should be a integer but '", arg, "' was given ",
-      "(see caretEnsemble::setMulticlassExcludedLevel for more details)"
+      "multiclass excluded level must be numeric: ", arg, " was given ",
+      "see setMulticlassExcludedLevel for more details"
     ))
   }
-  val
+  if (!is.finite(arg)) {
+    stop(paste0(
+      "multiclass excluded level must be finite: ", arg, " was given ",
+      "see setMulticlassExcludedLevel for more details"
+    ))
+  }
+  if (arg <= 0) {
+    stop(paste0(
+      "multiclass excluded level must be > 0: ", arg, " was given ",
+      "see setMulticlassExcludedLevel for more details"
+    ))
+  }
+  if (!is.integer(arg)) {
+    warning(paste0(
+      "multiclass excluded level is not an integer ", arg, " was given ",
+      "see setMulticlassExcludedLevel for more details"
+    ))
+  }
+  return(as.integer(arg))
 }
-
 
 #####################################################
 # Misc. Functions

@@ -139,3 +139,40 @@ test_that("is.caretStack correctly identifies caretStack objects", {
   expect_true(is.caretStack(structure(list(), class = "caretStack")))
   expect_false(is.caretStack(list()))
 })
+
+test_that("predict.caretStack works correctly if the multiclass excluded level is too high", {
+  data(iris)
+
+  # Create a caretList
+  model_list <- caretList(
+    Species ~ .,
+    data = iris,
+    trControl = trainControl(
+      method = "cv", classProbs = TRUE, savePredictions = "final",
+      index = createResample(iris$Species)
+    ),
+    methodList = c("rpart", "rf")
+  )
+
+  # Create a caretStack
+  meta_model <- caretStack(
+    model_list,
+    method = "rpart",
+    trControl = trainControl(method = "cv")
+  )
+
+  # Make sure predictions still work if the exlcuded level is too high
+  options(caret.ensemble.multiclass.excluded.level = 4L)
+  expect_equal(getMulticlassExcludedLevel(), 4L)
+  expect_warning(
+    {
+      pred <- predict(meta_model, newdata = iris, type = "prob")
+    },
+    "Invalid option forcaret.ensemble.multiclass.excluded.level. Returning all classes."
+  )
+  options(caret.ensemble.multiclass.excluded.level = 1L)
+  expect_equal(nrow(pred), 150)
+  expect_equal(ncol(pred), 3)
+  expect_true(all(sapply(pred, is.finite)))
+  expect_equal(getMulticlassExcludedLevel(), 1L)
+})
