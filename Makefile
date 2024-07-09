@@ -1,9 +1,9 @@
 # Makefile for R project
 
-.PHONY: all install document update-test-fixtures test coverage-test check-cran fix-style lint clean
+.PHONY: all install document update-test-fixtures test coverage-test check-cran fix-style lint clean coverage
 
 # Default target
-all: fix-style install document test check-cran coverage-test
+all: clean fix-style install document test check-cran coverage
 
 # Install dependencies
 install:
@@ -54,6 +54,8 @@ coverage-test: coverage.rds
 		cov_num = as.numeric(covr::percent_coverage(cov)); \
 		testthat::expect_gte(cov_num, 100.0); \
 	"
+
+coverage: cobertura.xml coverage-report.html coverage-test
 
 # Run R CMD check as CRAN
 check-cran: document

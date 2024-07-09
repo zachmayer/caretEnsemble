@@ -157,12 +157,12 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #' Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
 #' function.
 #'
-#' @param ... arguments to pass to \code{\link{train}}.  These arguments will determine which train method gets dispatched.
-#' @param trControl a \code{\link{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.
+#' @param ... arguments to pass to \code{\link[caret]{train}}.  These arguments will determine which train method gets dispatched.
+#' @param trControl a \code{\link[caret]{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.
 #' @param methodList optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.
 #' @param tuneList optional, a NAMED list of caretModelSpec objects. This much more flexible than methodList and allows the specification of model-specific parameters (e.g. passing trace=FALSE to nnet)
 #' @param continue_on_fail, logical, should a valid caretList be returned that excludes models that fail, default is FALSE
-#' @return A list of \code{\link{train}} objects. If the model fails to build,
+#' @return A list of \code{\link[caret]{train}} objects. If the model fails to build,
 #' it is dropped from the list.
 #' @importFrom caret trainControl train
 #' @export

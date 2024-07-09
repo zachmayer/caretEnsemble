@@ -106,9 +106,6 @@ check_caretList_model_types <- function(list_of_models) {
       if (is.null(unique_obs)) {
         stop("No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.")
       }
-      if (length(unique_obs) != 2) {
-        stop("Not yet implemented for multiclass problems")
-      }
     }
   }
 
@@ -321,6 +318,8 @@ makePredObsMatrix <- function(list_of_models) {
   if (type == "Classification") {
     # Determine the string name for the positive class
     positive <- levels(modelLibrary$obs)[getBinaryTargetLevel()]
+
+    # TODO: For multiclass, use ALL PROBS.  Currently this is JUST positive class probs!
 
     # Use the string name for the positive class determined above to select
     # predictions from base estimators as predictors for ensemble model

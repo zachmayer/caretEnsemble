@@ -116,7 +116,7 @@ getMetricSD <- function(x, metric, ...) {
   UseMethod("getMetricSD")
 }
 
-#' Extract a model accuracy metric from a \code{\link{train}} object.
+#' Extract a model accuracy metric from a \code{\link[caret]{train}} object.
 #' @return A numeric representing the metric desired metric.
 #' @rdname metrics
 #' @export
@@ -142,7 +142,7 @@ getMetricSD.train <- function(x, metric, ...) {
 }
 
 #' @title Calculate the variable importance of variables in a caretEnsemble.
-#' @description This function wraps the \code{\link{varImp}} function in the
+#' @description This function wraps the \code{\link[caret]{varImp}} function in the
 #' \code{caret} package to provide a weighted estimate of the importance of
 #' variables in the ensembled models in a \code{caretEnsemble} object. Variable
 #' importance for each model is calculated and then averaged by the weight of the overall model
