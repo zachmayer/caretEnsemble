@@ -1,15 +1,19 @@
 # Makefile for R project
 
-.PHONY: all install document update-test-fixtures test coverage-test check-cran fix-style lint clean coverage
+.PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check-cran fix-style lint clean
 
 # Default target
-all: clean fix-style install document test check-cran coverage
+all: clean fix-style install document lint test check-cran coverage
 
 # Install dependencies
-install:
+install-deps:
 	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
 	Rscript -e "devtools::install_deps()"
 	Rscript -e "devtools::install_dev_deps()"
+
+# Install the whole package
+install: install-deps
+	Rscript -e "devtools::install()"
 
 # Generate documentation
 document:

@@ -288,13 +288,12 @@ check_multiclass_excluded_level <- function(excluded_level, num_classes) {
 #' @description Check that the problem is a binary classification problem
 #'
 #' @param list_of_models a list of caret models to check
+#' @export
 check_binary_classification <- function(list_of_models) {
   if (is.list(list_of_models) && length(list_of_models) > 1) {
     lapply(list_of_models, function(x) {
-      if (is(x, "train") &&
-        !is.null(x$pred$obs) &&
-        is.factor(x$pred$obs) # avoid regression models
-      && length(levels(x$pred$obs)) > 2) {
+      # avoid regression models
+      if (is(x, "train") && !is.null(x$pred$obs) && is.factor(x$pred$obs) && length(levels(x$pred$obs)) > 2) {
         stop("caretEnsemble only supports binary classification problems")
       }
     })

@@ -209,7 +209,7 @@ test_that("Ensembles using custom models work correctly", {
     # Add a non-custom model
     treebag = caretModelSpec(method = "treebag", tuneLength = 1)
   )
-  train.control <- trainControl(method = "cv", number = 2, classProbs = T)
+  train.control <- trainControl(method = "cv", number = 2, classProbs = TRUE)
   X.df <- as.data.frame(X.class)
 
   # Create an ensemble using the above models

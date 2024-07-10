@@ -32,3 +32,6 @@ caretEnsemble has changed a bit over the years, so the tags let you use older ve
 
 # Code of Conduct:
 Please note that this project is released with a [Contributor Code of Conduct](https://github.com/zachmayer/caretEnsemble/blob/master/.github/CONTRIBUTING.md). By participating in this project you agree to abide by its terms.
+
+# Package development
+This packages uses a Makefile.  Run `make all` to run linting, tests, test coverage, and R CMD CHECK.  This is helpful for locally debugging PR failures.
