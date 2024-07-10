@@ -168,7 +168,7 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
         trControl = trainControl(method = "cv")
       )
     },
-    "Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes."
+    "Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Using all classes to train meta-model."
   )
   # Predict with the caretStack
   expect_warning(
