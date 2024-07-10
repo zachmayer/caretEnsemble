@@ -171,6 +171,43 @@ test_that("as.caretList.list returns a caretList object", {
   expect_is(as.caretList(modelList), "caretList")
 })
 
+
+#############################################################
+context("Bad characters in variable names and model names")
+#############################################################
+test_that("Variable names with character | are not allowed", {
+  bad_iris <- iris[1:100, ]
+  bad_iris[, 5] <- gsub("versicolor", "versicolor|1", bad_iris[, 5])
+  bad_iris[, 5] <- gsub("setosa", "setosa|2", bad_iris[, 5])
+  bad_iris[, 5] <- as.factor(as.character(bad_iris[, 5]))
+
+  # Expect an error from caret
+  expect_error(model_list <- caretList(
+    x = bad_iris[, -5],
+    y = bad_iris[, 5],
+    methodList = c("rpart", "glmnet"),
+    trControl = trainControl(method = "cv", number = 2, classProbs = TRUE, savePredictions = "final", index = createFolds(bad_iris$Species, 2, list = TRUE, returnTrain = TRUE))
+  ))
+})
+
+test_that("Character | in model names is transformed into a point", {
+  reduced_iris <- iris[1:100, ]
+  reduced_iris[, 5] <- as.factor(as.character(reduced_iris[, 5]))
+
+  # Chack that specified model names are transformed with function make.names
+  model_list <- caretList(
+    x = reduced_iris[, -5],
+    y = reduced_iris[, 5],
+    tuneList = list(
+      "nnet|1" = caretModelSpec(method = "nnet", tuneGrid = expand.grid(.size = c(1, 3), .decay = 0.3), trace = FALSE),
+      "nnet|2" = caretModelSpec(method = "nnet", tuneGrid = expand.grid(.size = 3, .decay = c(0.1, 0.3)), trace = FALSE)
+    ),
+    trControl = trainControl(method = "cv", number = 2, classProbs = TRUE, savePredictions = "final", index = createFolds(reduced_iris$Species, 2, list = TRUE, returnTrain = TRUE))
+  )
+
+  expect_identical(names(model_list), c("nnet.1", "nnet.2"))
+})
+
 ###############################################
 context("We can fit models with a mix of methodList and tuneList")
 ################################################
