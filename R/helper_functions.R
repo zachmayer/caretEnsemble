@@ -414,6 +414,7 @@ makePredObsMatrix <- function(list_of_models) {
     if (getMulticlassExcludedLevel() >= 1 && getMulticlassExcludedLevel() <= num_classes) {
       classes_included <- levels(list_of_models[[1]]$pred$obs)[-getMulticlassExcludedLevel()]
     } else {
+      warning("Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes.")
       classes_included <- levels(list_of_models[[1]]$pred$obs)
     }
     class_model_combinations <- expand.grid(classes_included, names(modelLibrary))

@@ -154,21 +154,28 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
     methodList = c("rpart", "rf")
   )
 
-  # Create a caretStack
-  meta_model <- caretStack(
-    model_list,
-    method = "rpart",
-    trControl = trainControl(method = "cv")
-  )
+
 
   # Make sure predictions still work if the exlcuded level is too high
   options(caret.ensemble.multiclass.excluded.level = 4L)
   expect_equal(getMulticlassExcludedLevel(), 4L)
+  # Create a caretStack
+  expect_warning(
+    {
+      meta_model <- caretStack(
+        model_list,
+        method = "rpart",
+        trControl = trainControl(method = "cv")
+      )
+    },
+    "Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes."
+  )
+  # Predict with the caretStack
   expect_warning(
     {
       pred <- predict(meta_model, newdata = iris, type = "prob")
     },
-    "Invalid option forcaret.ensemble.multiclass.excluded.level. Returning all classes."
+    "Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes."
   )
   options(caret.ensemble.multiclass.excluded.level = 1L)
   expect_equal(nrow(pred), 150)

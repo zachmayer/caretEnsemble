@@ -87,7 +87,7 @@ predict.caretStack <- function(
     if (getMulticlassExcludedLevel() >= 1 && getMulticlassExcludedLevel() <= num_classes) {
       classes_included <- levels(object$models[[1]]$pred$obs)[-getMulticlassExcludedLevel()]
     } else {
-      warning("Invalid option forcaret.ensemble.multiclass.excluded.level. Returning all classes.")
+      warning("Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes.")
       classes_included <- levels(object$models[[1]]$pred$obs)
     }
     pattern <- paste(classes_included, collapse = "|")
