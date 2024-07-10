@@ -173,9 +173,9 @@ test_that("as.caretList.list returns a caretList object", {
 
 
 #############################################################
-context("Bad characters in variable names and model names")
+context("Bad characters in target variable names and model names")
 #############################################################
-test_that("Variable names with character | are not allowed", {
+test_that("Target variable names with character | are not allowed", {
   bad_iris <- iris[1:100, ]
   bad_iris[, 5] <- gsub("versicolor", "versicolor|1", bad_iris[, 5])
   bad_iris[, 5] <- gsub("setosa", "setosa|2", bad_iris[, 5])
