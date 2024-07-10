@@ -72,53 +72,76 @@ predict.caretStack <- function(
   type <- extractModelTypes(object$models)
 
   preds <- predict(object$models, newdata = newdata, na.action = na.action)
+
   if (type == "Classification") {
-    out <- predict(object$ens_model, newdata = preds, na.action = na.action, ...)
-    # Need a check here
-    if (inherits(out, c("data.frame", "matrix"))) {
-      # Return probability predictions for only one of the classes
-      # as determined by configured default response class level
-      est <- out[, getBinaryTargetLevel(), drop = TRUE]
+    # We have to use the same columns (variables) as the ones used
+    # to train the model.
+    # If the user has specified a class to exclude within the range
+    # of 1 to num_classes, exclude that class from the predictions.
+    # Otherwise, include all classes.
+    column_names <- colnames(preds)
+
+    # TODO: Validate that all object$models[ have the same obs
+    # TODO: Validate that all object$models[ have the same pred levels
+    num_classes <- length(levels(object$models[[1]]$pred$obs))
+    if (getMulticlassExcludedLevel() >= 1 && getMulticlassExcludedLevel() <= num_classes) {
+      classes_included <- levels(object$models[[1]]$pred$obs)[-getMulticlassExcludedLevel()]
     } else {
-      est <- out
+      warning("Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes.")
+      classes_included <- levels(object$models[[1]]$pred$obs)
     }
+    pattern <- paste(classes_included, collapse = "|")
+    # Remove columns that are associated with the class that was excluded
+    filtered_column_names <- grep(pattern, column_names, value = TRUE)
+    preds <- preds[, filtered_column_names, drop = FALSE]
+
+    est <- predict(object$ens_model, newdata = preds, na.action = na.action, ...)
   } else {
     est <- predict(object$ens_model, newdata = preds, ...)
   }
 
   if (se || return_weights) {
     imp <- varImp(object$ens_model)$importance
-    weights <- imp$Overall
-    weights[!is.finite(weights)] <- 0
-    weights <- weights / sum(weights)
-
-    names(weights) <- row.names(imp)
+    weights <- as.list(as.data.frame(imp))
     methods <- colnames(preds)
-
-    for (m in setdiff(methods, names(weights))) {
-      weights[m] <- 0
-    }
+    weights <- lapply(weights, function(class_weights) {
+      # ensure that we have a numeric vector
+      class_weights <- ifelse(is.finite(class_weights), class_weights, 0)
+      # normalize weights
+      class_weights <- class_weights / sum(class_weights)
+      names(class_weights) <- row.names(imp)
+      # set 0 weights for methods that are not present in varImp
+      for (m in setdiff(methods, names(class_weights))) {
+        class_weights[m] <- 0
+      }
+      class_weights
+    })
   }
 
-  out <- est
   if (se) {
-    if (!is.numeric(est)) {
+    if (!inherits(est, "numeric") || is.null(weights$Overall)) {
       message("Standard errors not available.")
       out <- est
     } else {
-      weights <- weights[methods]
-      std_error <- apply(preds, 1, wtd.sd, w = weights)
-      std_error <- (qnorm(level) * std_error)
+      methods <- colnames(preds)
+      overall_weights <- weights$Overall[methods]
+
+      # Use overall weights to calculate standard error in regression estimations
+      std_error <- apply(preds, 1, wtd.sd, w = overall_weights)
+      std_error <- qnorm(level) * std_error
       out <- data.frame(
         fit = est,
         lwr = est - std_error,
         upr = est + std_error
       )
     }
+  } else {
+    out <- est
   }
   if (return_weights) {
     attr(out, "weights") <- weights
   }
+
   return(out)
 }
 

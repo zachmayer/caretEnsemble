@@ -8,6 +8,7 @@ linters: linters_with_tags(
         ),
     line_length_linter(305),  # TODO — change to 120
     seq_linter = NULL,  # TODO - small refactor
-    cyclocomp_linter(complexity_limit = 16),  # TODO - small refactor
+    cyclocomp_linter(complexity_limit = 19),  # TODO - small refactor
+    object_length_linter(length = 31),
     object_name_linter = NULL # Probably never gonna remove this one
   )

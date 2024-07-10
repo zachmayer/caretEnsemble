@@ -30,6 +30,7 @@
 #' summary(ens)
 #' }
 caretEnsemble <- function(all.models, ...) {
+  check_binary_classification(all.models)
   out <- caretStack(all.models, method = "glm", ...)
   class(out) <- c("caretEnsemble", "caretStack")
   return(out)
@@ -157,31 +158,33 @@ getMetricSD.train <- function(x, metric, ...) {
 varImp.caretEnsemble <- function(object, ...) {
   # Extract and formal individual model importances
   # Todo, clean up this code!
-  a <- lapply(object$models, caret::varImp)
-  a <- lapply(a, clean_varImp)
+  coef_importance <- lapply(object$models, caret::varImp)
+  coef_importance <- lapply(coef_importance, clean_varImp)
 
   # Convert to data.frame
-  dat <- varImpFrame(a)
+  dat <- varImpFrame(coef_importance)
   dat[is.na(dat)] <- 0
-  names(dat) <- make.names(names(a))
+  names(dat) <- make.names(names(coef_importance))
 
   # Scale the importances
   norm_to_100 <- function(d) d / sum(d) * 100
-  dat[] <- lapply(dat, norm_to_100)
+  dat <- apply(dat, 2, norm_to_100)
 
-  # Calculated the overall importance
+  # Calculate overall importance
   weights <- coef(object$ens_model$finalModel)
-  weights <- weights[names(weights) %in% names(a)]
+  # In the case of 2 classes each method will
+  # have only one coef associated.
+  # The names of the weights keep the order of the
+  # models in the ensemble
+  names(weights) <- names(object$models)
+  weights <- weights[names(weights) %in% names(coef_importance)]
   weights <- abs(weights)
-  overall <- apply(dat, 1, weighted.mean, w = weights)
-  overall <- norm_to_100(overall)
-  dat <- data.frame(
-    overall = overall,
-    dat
-  )
+  overall <- norm_to_100(apply(dat, 1, weighted.mean, w = weights))
+  dat <- data.frame(overall = overall, dat)
 
-  # Order, and return
+  # Order by overall importance
   dat <- dat[order(dat[["overall"]]), ]
+
   return(dat)
 }
 
@@ -233,7 +236,7 @@ residuals.caretEnsemble <- function(object, ...) {
     resid <- y - yhat
     return(resid)
   } else if (object$modelType == "Classification") {
-    yhat <- predict(object, type = "prob")
+    yhat <- predict(object, type = "prob")[, getBinaryTargetLevel(), drop = TRUE]
     y <- as.character(object$models[[1]]$trainingData$.outcome)
     z <- table(y)
     prevOutcome <- names(z)[z == max(z)]
@@ -262,6 +265,16 @@ multiResiduals <- function(object, ...) {
     z <- table(y)
     prevOutcome <- names(z)[z == max(z)]
     y <- ifelse(y == prevOutcome, 0, 1)
+
+    # Extract probabilities asociated only with one of the classes
+    classes <- levels(object$models[[1]]$pred$obs)[getBinaryTargetLevel(), drop = TRUE]
+    modelnames <- names(object$models)
+    class_modelname_combinations <- expand.grid(classes, modelnames)
+
+    selected_colnames <- apply(class_modelname_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+    preds <- preds[, selected_colnames]
+    # Rename columns with model names
+    colnames(preds) <- modelnames
   }
   resid <- y - preds
   preds <- as.data.frame(preds)
@@ -298,7 +311,7 @@ fortify <- function(model, data = NULL, ...) {
     data$y <- as.numeric(data$y)
   }
   if (model$ens_model$modelType == "Classification") {
-    data$.fitted <- predict(model, type = "prob")
+    data$.fitted <- predict(model, type = "prob")[, getBinaryTargetLevel(), drop = TRUE]
   } else if (model$ens_model$modelType == "Regression") {
     data$.fitted <- predict(model)
   } else {
