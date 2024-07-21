@@ -108,31 +108,27 @@ test_that("predict results same regardless of verbose option", {
 
 context("Test weighted standard deviations")
 
-x <- rnorm(1000)
-x1 <- c(3, 5, 9, 3, 4, 6, 4)
-x2 <- c(10, 10, 20, 14, 2, 2, 40)
-y <- c(10, 10, 10, 20)
-w1 <- c(0.1, 0.1, 0.1, 0.7)
-
 test_that("wtd.sd applies weights correctly", {
-  expect_error(caretEnsemble:::wtd.sd(x))
+  x1 <- c(3, 5, 9, 3, 4, 6, 4)
+  x2 <- c(10, 10, 20, 14, 2, 2, 40)
+  x3 <- c(10, 10, 10, 20)
+  w1 <- c(0.1, 0.1, 0.1, 0.7)
+  expect_error(caretEnsemble:::wtd.sd(x1), 'argument "w" is missing, with no default')
   expect_false(sd(x1) == caretEnsemble:::wtd.sd(x1, w = x2))
   expect_false(sd(x1) == caretEnsemble:::wtd.sd(x1, w = x2))
-  expect_equal(caretEnsemble:::wtd.sd(y, w = w1), 7.84, tolerance = .001)
-  expect_equal(caretEnsemble:::wtd.sd(y, w = w1 * 100), caretEnsemble:::wtd.sd(y, w = w1))
+  expect_equal(caretEnsemble:::wtd.sd(x3, w = w1), 5.291503, tolerance = .001)
+  expect_equal(caretEnsemble:::wtd.sd(x3, w = w1 * 100), caretEnsemble:::wtd.sd(x3, w = w1))
 })
 
 test_that("wtd.sd handles NA values correctly", {
-  y <- c(10, 10, 10, 20, NA, NA)
+  x1 <- c(10, 10, 10, 20, NA, NA)
   w1 <- c(0.1, 0.1, 0.1, 0.7, NA, NA)
-  expect_true(is.na(caretEnsemble:::wtd.sd(y, w = w1)))
-  expect_true(is.na(sd(y)))
-  expect_true(!is.na(caretEnsemble:::wtd.sd(y, w = w1, na.rm = TRUE)))
-  expect_true(!is.na(sd(y, na.rm = TRUE)))
-  expect_true(is.na(caretEnsemble:::wtd.sd(y, w = w1)))
-  expect_true(!is.na(caretEnsemble:::wtd.sd(y, w = w1, na.rm = TRUE)))
-  w2 <- c(0.1, 0.1, NA, 0.7, NA, NA)
-  expect_true(is.na(caretEnsemble:::wtd.sd(y, w = w1, na.rm = TRUE) == caretEnsemble:::wtd.sd(y, w = w2, na.rm = TRUE)))
+  expect_true(is.na(caretEnsemble:::wtd.sd(x1, w = w1)))
+  expect_true(is.na(sd(x1)))
+  expect_true(!is.na(caretEnsemble:::wtd.sd(x1, w = w1, na.rm = TRUE)))
+  expect_true(!is.na(sd(x1, na.rm = TRUE)))
+  expect_true(is.na(caretEnsemble:::wtd.sd(x1, w = w1)))
+  expect_true(!is.na(caretEnsemble:::wtd.sd(x1, w = w1, na.rm = TRUE)))
 })
 
 test_that("Checks generate errors", {

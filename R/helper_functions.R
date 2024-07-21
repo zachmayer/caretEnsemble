@@ -127,13 +127,16 @@ validateMulticlassExcludedLevel <- function(arg) {
 #' @param w a vector of weights equal to length of x
 #' @param na.rm a logical indicating how to handle missing values, default = TRUE
 # https://stats.stackexchange.com/a/61285
-wtd.sd <- function(x, w, na.rm = TRUE) {
+wtd.sd <- function(x, w, na.rm = FALSE) {
   stopifnot(is.numeric(x))
   stopifnot(is.numeric(w))
+
   xWbar <- weighted.mean(x, w, na.rm = na.rm)
-  w = w/sum(w, na.rm = na.rm)
+  w <- w / mean(w, na.rm = na.rm)
+
   var <- sum((w * (x - xWbar)^2) / (sum(w, na.rm = na.rm) - 1), na.rm = na.rm)
   out <- sqrt(var)
+
   return(out)
 }
 
