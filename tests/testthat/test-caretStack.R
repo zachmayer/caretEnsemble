@@ -252,6 +252,9 @@ test_that("caretStack handles different metrics", {
 })
 
 test_that("caretStack handles imbalanced data", {
+  data(iris)
+  train_data <- iris
+
   imbalanced_data <- rbind(
     train_data[train_data$Species == "setosa", ],
     train_data[train_data$Species == "versicolor", ][1:10, ],

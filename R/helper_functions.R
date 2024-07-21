@@ -128,13 +128,14 @@ validateMulticlassExcludedLevel <- function(arg) {
 #' @param na.rm a logical indicating how to handle missing values, default = FALSE
 wtd.sd <- function(x, w = NULL, na.rm = FALSE) {
   if (na.rm) {
-    w <- w[i <- !is.na(x)]
+    i <- !is.na(x)
+    w <- w[i]
     x <- x[i]
   }
   n <- length(w)
   xWbar <- weighted.mean(x, w, na.rm = na.rm)
-  wbar <- mean(w)
-  out <- n / ((n - 1) * sum(w)^2) * (sum((w * x - wbar * xWbar)^2) - 2 * xWbar * sum((w - wbar) * (w * x - wbar * xWbar)) + xWbar^2 * sum((w - wbar)^2))
+  var <- sum((w * (x - xWbar)^2) / (sum(w) - 1), na.rm = na.rm)
+  out <- sqrt(var)
   return(out)
 }
 

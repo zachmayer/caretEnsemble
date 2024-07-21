@@ -305,3 +305,24 @@ test_that("validateMulticlassExcludedLevel passes for valid input", {
   valid_input <- 3L
   expect_equal(validateMulticlassExcludedLevel(valid_input), 3L)
 })
+
+########################################################################
+context("Helper function edge cases")
+########################################################################
+
+test_that("wtd.sd calculates weighted standard deviation correctly", {
+  x <- c(1, 2, 3, 4, 5)
+  w <- c(1, 1, 1, 1, 1)
+  expect_equal(wtd.sd(x, w), sd(x))
+
+  w <- c(2, 1, 1, 1, 1)
+  expect_true(wtd.sd(x, w) != sd(x))
+
+  # Test with NA values
+  x_na <- c(1, 2, NA, 4, 5)
+  expect_true(is.na(wtd.sd(x_na, w)))
+  expect_false(is.na(wtd.sd(x_na, w, na.rm = TRUE)))
+
+  # Test error for mismatched lengths
+  expect_error(wtd.sd(x, w[-1]))
+})
