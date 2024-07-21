@@ -123,18 +123,16 @@ validateMulticlassExcludedLevel <- function(arg) {
 #' @title Calculate a weighted standard deviation
 #' @description Used to weight deviations among ensembled model predictions
 #'
-#' @param x a vector of numerics
+#' @param x a numeric vector
 #' @param w a vector of weights equal to length of x
-#' @param na.rm a logical indicating how to handle missing values, default = FALSE
-wtd.sd <- function(x, w = NULL, na.rm = FALSE) {
-  if (na.rm) {
-    i <- !is.na(x)
-    w <- w[i]
-    x <- x[i]
-  }
-  n <- length(w)
+#' @param na.rm a logical indicating how to handle missing values, default = TRUE
+# https://stats.stackexchange.com/a/61285
+wtd.sd <- function(x, w, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  stopifnot(is.numeric(w))
   xWbar <- weighted.mean(x, w, na.rm = na.rm)
-  var <- sum((w * (x - xWbar)^2) / (sum(w) - 1), na.rm = na.rm)
+  w = w/sum(w, na.rm = na.rm)
+  var <- sum((w * (x - xWbar)^2) / (sum(w, na.rm = na.rm) - 1), na.rm = na.rm)
   out <- sqrt(var)
   return(out)
 }
@@ -350,12 +348,12 @@ validateCustomModel <- function(x) {
 #' @param list_of_models an object of class caretList
 extractModelTypes <- function(list_of_models) {
   types <- sapply(list_of_models, function(x) x$modelType)
-  type <- types[1]
+  type <- unique(types)
 
   # TODO: Maybe in the future we can combine reg and class models
-  # Also, this check is redundant, but I think that"s ok
-  stopifnot(all(types == type))
-  stopifnot(all(types %in% c("Classification", "Regression")))
+  # Also, this check is redundant, but I think that is ok
+  stopifnot(length(type) == 1)
+  stopifnot(type %in% c("Classification", "Regression"))
   return(type)
 }
 
