@@ -48,7 +48,7 @@ c.caretList <- function(...) {
   }), recursive = FALSE)
 
   # Make sure names are unique
-  names(new_model_list) <- paste0(names(new_model_list), 1:length(new_model_list))
+  names(new_model_list) <- make.names(names(new_model_list), unique = TRUE)
 
   # reset the class to caretList
   class(new_model_list) <- "caretList"
@@ -96,7 +96,7 @@ c.train <- function(...) {
   }), recursive = FALSE)
 
   # Make sure names are unique
-  names(new_model_list) <- paste0(names(new_model_list), 1:length(new_model_list))
+  names(new_model_list) <- make.names(names(new_model_list), unique = TRUE)
 
   # reset the class to caretList
   class(new_model_list) <- "caretList"
