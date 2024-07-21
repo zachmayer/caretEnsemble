@@ -184,10 +184,6 @@ test_that("We can make a confusion matrix", {
   expect_true(cm$overall["Accuracy"] > 0.9)
 })
 
-#############################################################################
-context("caretEnsemble not avaible for multiclass problems")
-#############################################################################
-
 test_that("Multiclass is not supported for caretEnsemble", {
   data(iris)
   data(models.class)
@@ -210,4 +206,155 @@ test_that("Multiclass is not supported for caretEnsemble", {
   )
 
   expect_error(caretEnsemble(model_list))
+})
+
+test_that("caretList and caretStack handle imbalanced multiclass data", {
+  set.seed(123)
+  n <- 1000
+  X <- data.frame(x1 = rnorm(n), x2 = rnorm(n))
+  y <- factor(c(rep("A", 700), rep("B", 200), rep("C", 100)))
+
+  my_control <- trainControl(
+    method = "cv",
+    number = 3,
+    savePredictions = "final",
+    classProbs = TRUE
+  )
+
+  expect_warning({
+    model_list <- caretList(
+      x = X,
+      y = y,
+      trControl = my_control,
+      methodList = c("rpart", "glmnet")
+    )
+  })
+
+  expect_s3_class(model_list, "caretList")
+  expect_length(model_list, 2)
+
+  stack <- caretStack(model_list, method = "glmnet")
+  expect_s3_class(stack, "caretStack")
+
+  preds <- predict(stack, newdata = X)
+  expect_true(all(levels(y) %in% levels(preds)))
+})
+
+test_that("caretList and caretStack handle a large number of classes", {
+  set.seed(123)
+  n <- 1000
+  X <- data.frame(x1 = rnorm(n), x2 = rnorm(n))
+  y <- factor(sample(paste0("Class", 1:100), n, replace = TRUE))
+
+  my_control <- trainControl(
+    method = "cv",
+    number = 2,
+    savePredictions = "final",
+    classProbs = TRUE
+  )
+
+  expect_warning({
+    model_list <- caretList(
+      x = X,
+      y = y,
+      trControl = my_control,
+      methodList = c("rpart")
+    )
+  })
+
+  expect_s3_class(model_list, "caretList")
+
+  stack <- caretStack(model_list, method = "rpart")
+  expect_s3_class(stack, "caretStack")
+
+  preds <- predict(stack, newdata = X, type = "prob")
+  expect_equal(ncol(preds), length(levels(y)))
+})
+
+test_that("caretList and caretStack handle ordinal multiclass data", {
+  data(Boston, package = "MASS")
+  Boston$chas <- as.factor(Boston$chas)
+  Boston$rad <- factor(paste0("rad_", Boston$rad), ordered = TRUE)
+
+  my_control <- trainControl(
+    method = "cv",
+    number = 2,
+    savePredictions = "final",
+    classProbs = TRUE
+  )
+  expect_warning({
+    model_list <- caretList(
+      rad ~ .,
+      data = Boston,
+      trControl = my_control,
+      methodList = c("rpart", "glmnet")
+    )
+  })
+
+  expect_s3_class(model_list, "caretList")
+
+  stack <- caretStack(model_list, method = "rpart")
+  expect_s3_class(stack, "caretStack")
+
+  preds <- predict(stack, newdata = Boston)
+  expect_true(is.ordered(preds))
+})
+
+test_that("caretList and caretStack produce consistent probability predictions", {
+  data(iris)
+
+  my_control <- trainControl(
+    method = "cv",
+    number = 3,
+    savePredictions = "final",
+    classProbs = TRUE
+  )
+
+  expect_warning({
+    model_list <- caretList(
+      x = iris[, -5],
+      y = iris[, 5],
+      trControl = my_control,
+      methodList = c("rpart", "glmnet")
+    )
+  })
+
+  stack <- caretStack(model_list, method = "rpart")
+
+  prob_preds <- predict(stack, newdata = iris[, -5], type = "prob")
+  expect_equal(nrow(prob_preds), nrow(iris))
+  expect_equal(ncol(prob_preds), length(levels(iris$Species)))
+  expect_true(all(rowSums(prob_preds) >= 0.99 & rowSums(prob_preds) <= 1.01))
+})
+
+test_that("caretList and caretStack handle new levels in prediction data", {
+  data(iris)
+  idx <- 1:nrow(iris)
+  idx_train <- sample(idx, 120)
+  idx_test <- setdiff(idx, idx_train)
+  train_data <- iris[idx_train, ]
+  test_data <- iris[idx_test, ]
+  test_data$Species <- factor(as.character(test_data$Species), levels = c(levels(iris$Species), "NewSpecies"))
+  test_data$Species[1] <- "NewSpecies"
+
+  my_control <- trainControl(
+    method = "cv",
+    number = 2,
+    savePredictions = "final",
+    classProbs = TRUE
+  )
+
+  expect_warning({
+    model_list <- caretList(
+      x = train_data[, -5],
+      y = train_data[, 5],
+      trControl = my_control,
+      methodList = c("rf", "rpart")
+    )
+  })
+
+  stack <- caretStack(model_list, method = "rpart")
+
+  preds <- predict(stack, newdata = test_data)
+  expect_true(all(levels(preds) %in% levels(train_data$Species)))
 })

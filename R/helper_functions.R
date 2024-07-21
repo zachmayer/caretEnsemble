@@ -246,7 +246,12 @@ check_bestpreds_preds <- function(modelLibrary) {
   # TODO: Regression models should be numeric, classification models should have numeric class probs
   pred <- lapply(modelLibrary, function(x) x[["pred"]])
   names(pred) <- names(modelLibrary)
-  classes <- unique(sapply(pred, class))
+
+  clases <- sapply(pred, class)
+  if (is.matrix(clases)) {
+    clases <- apply(clases, 2, paste, collapse = " ")
+  }
+  classes <- unique(clases)
   check <- length(classes)
   if (check != 1) {
     stop(
