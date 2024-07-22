@@ -1,4 +1,3 @@
-Encoding: UTF-8
 Package: caretEnsemble
 Type: Package
 Title: Ensembles of Caret Models
@@ -39,7 +38,8 @@ Suggests:
     klaR,
     rmarkdown,
     usethis,
-    sass
+    sass,
+    spelling
 Imports:
     methods,
     pbapply,
@@ -54,3 +54,5 @@ License: MIT + file LICENSE
 VignetteBuilder: knitr
 RoxygenNote: 7.3.2
 LazyData: true
+Language: en-US
+Encoding: UTF-8

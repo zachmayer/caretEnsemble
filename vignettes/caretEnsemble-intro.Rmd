@@ -186,5 +186,5 @@ colAUC(model_preds3, testing$Class)
 In this case, the sophisticated ensemble is no better than a simple weighted linear combination.  Non-linear ensembles seem to work best when you have:
 
 1. Lots of data.
-2. Lots of models with similar accuracies.
+2. Lots of models with similar accuracy.
 3. Your models are uncorrelated: each one seems to capture a different aspect of the data, and different models perform best on different subsets of the data.

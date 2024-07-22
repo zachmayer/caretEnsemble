@@ -24,7 +24,7 @@ test_that("caretModelSpec returns valid specs", {
     caretModelSpec(method = "rpart"),
     caretModelSpec(method = "knn", tuneLength = 10)
   )
-  tuneList <- caretEnsemble:::tuneCheck(tuneList)
+  tuneList <- caretEnsemble::tuneCheck(tuneList)
   expect_true(is.list(tuneList))
   expect_equal(length(tuneList), 4)
   expect_equal(sum(duplicated(names(tuneList))), 0)
@@ -101,8 +101,8 @@ test_that("caretList predictions", {
     )
   })
   suppressWarnings(p1 <- predict(models))
-  p2 <- predict(models, newdata = iris[100, c(1:2)])
-  p3 <- predict(models, newdata = iris[110, c(1:2)])
+  p2 <- predict(models, newdata = iris[100, 1:2])
+  p3 <- predict(models, newdata = iris[110, 1:2])
   expect_is(p1, "matrix")
   expect_is(p1[, 1], "character")
   expect_is(p1[, 2], "character")
@@ -129,7 +129,7 @@ test_that("caretList predictions", {
   })
 
   suppressWarnings(p2 <- predict(models))
-  p3 <- predict(models, newdata = iris[100, c(1:2)])
+  p3 <- predict(models, newdata = iris[100, 1:2])
   expect_is(p2, "matrix")
   expect_is(p2[, 1], "numeric")
   expect_is(p2[, 2], "numeric")
@@ -668,9 +668,7 @@ test_that("predict.caretList gives a warning and stops for missing training data
   class(mock_model) <- "caretList"
 
   expect_warning(
-    {
-      expect_error(predict.caretList(mock_model), "Could not find training data in the first model in the ensemble.")
-    },
+    expect_error(predict.caretList(mock_model), "Could not find training data in the first model in the ensemble."),
     "Predicting without new data is not well supported.  Attempting to predict on the training data."
   )
 })
@@ -724,7 +722,7 @@ test_that("caretList handles missing data correctly", {
   iris_with_na <- iris
   x <- iris_with_na[, 1:4]
   y <- iris_with_na[, 5]
-  x[sample(1:nrow(x), 10), sample(1:ncol(x), 2)] <- NA
+  x[sample(seq_len(nrow(x)), 10), sample(seq_len(ncol(x)), 2)] <- NA
 
   myControl <- trainControl(
     method = "cv", number = 3,
@@ -737,7 +735,7 @@ test_that("caretList handles missing data correctly", {
     models <- caretList(
       x = x,
       y = y,
-      methodList = c("rpart"),
+      methodList = "rpart",
       trControl = myControl
     )
   )
@@ -748,7 +746,7 @@ test_that("caretList handles missing data correctly", {
 
 test_that("caretList handles new factor levels in prediction", {
   data(iris)
-  idx <- 1:nrow(iris)
+  idx <- seq_len(nrow(iris))
   idx_train <- sample(idx, 100)
   idx_test <- setdiff(idx, idx_train)
   train_data <- iris[idx_train, ]

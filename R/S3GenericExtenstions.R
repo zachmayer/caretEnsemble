@@ -41,10 +41,8 @@ c.caretList <- function(...) {
       # assuming this is a single train object
       x <- list(x)
       names(x) <- x[[1]]$method
-      return(x)
-    } else {
-      return(x)
     }
+    x
   }), recursive = FALSE)
 
   # Make sure names are unique
@@ -53,7 +51,7 @@ c.caretList <- function(...) {
   # reset the class to caretList
   class(new_model_list) <- "caretList"
 
-  return(new_model_list)
+  new_model_list
 }
 
 
@@ -89,10 +87,9 @@ c.train <- function(...) {
       # assuming this is a single train object
       x <- list(x)
       names(x) <- x[[1]]$method
-      return(x)
-    } else {
-      return(x)
+      x
     }
+    x
   }), recursive = FALSE)
 
   # Make sure names are unique
@@ -101,5 +98,5 @@ c.train <- function(...) {
   # reset the class to caretList
   class(new_model_list) <- "caretList"
 
-  return(new_model_list)
+  new_model_list
 }

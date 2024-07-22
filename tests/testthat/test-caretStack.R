@@ -265,7 +265,7 @@ test_that("caretStack handles imbalanced data", {
     model_list <- caretList(
       x = imbalanced_data[, 1:4],
       y = imbalanced_data$Species,
-      methodList = c("rpart"),
+      methodList = "rpart",
       trControl = trainControl(
         method = "cv",
         number = 3,

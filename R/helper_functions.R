@@ -114,7 +114,7 @@ validateMulticlassExcludedLevel <- function(arg) {
       "see setMulticlassExcludedLevel for more details"
     ))
   }
-  return(as.integer(arg))
+  as.integer(arg)
 }
 
 #####################################################
@@ -126,6 +126,7 @@ validateMulticlassExcludedLevel <- function(arg) {
 #' @param x a numeric vector
 #' @param w a vector of weights equal to length of x
 #' @param na.rm a logical indicating how to handle missing values, default = TRUE
+#' @export
 # https://stats.stackexchange.com/a/61285
 wtd.sd <- function(x, w, na.rm = FALSE) {
   stopifnot(is.numeric(x))
@@ -134,10 +135,10 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
   xWbar <- weighted.mean(x, w, na.rm = na.rm)
   w <- w / mean(w, na.rm = na.rm)
 
-  var <- sum((w * (x - xWbar)^2) / (sum(w, na.rm = na.rm) - 1), na.rm = na.rm)
-  out <- sqrt(var)
+  variance <- sum((w * (x - xWbar)^2) / (sum(w, na.rm = na.rm) - 1), na.rm = na.rm)
+  out <- sqrt(variance)
 
-  return(out)
+  out
 }
 
 #####################################################
@@ -150,8 +151,8 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 check_caretList_classes <- function(list_of_models) {
   # Check that we have a list of train models
   stopifnot(is(list_of_models, "caretList"))
-  stopifnot(all(sapply(list_of_models, is, "train")))
-  return(invisible(NULL))
+  stopifnot(sapply(list_of_models, is, "train"))
+  invisible(NULL)
 }
 
 #' @title Checks that caretList models are all of the same type.
@@ -162,10 +163,10 @@ check_caretList_model_types <- function(list_of_models) {
   # Check that models have the same type
   types <- sapply(list_of_models, function(x) x$modelType)
   type <- types[1]
-  stopifnot(all(types == type)) # TODO: Maybe in the future we can combine reg and class models
+  stopifnot(types == type) # TODO: Maybe in the future we can combine reg and class models
 
   # Check that the model type is VALID
-  stopifnot(all(types %in% c("Classification", "Regression")))
+  stopifnot(types %in% c("Classification", "Regression"))
 
   # Warn that we have not yet implemented multiclass models
   # add a check that if this is null you did not set savePredictions in the trainControl
@@ -191,7 +192,7 @@ check_caretList_model_types <- function(list_of_models) {
       stop("Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs=TRUE")
     }
   }
-  return(invisible(NULL))
+  invisible(NULL)
 }
 
 #' @title Check resamples
@@ -206,7 +207,7 @@ check_bestpreds_resamples <- function(modelLibrary) {
   if (check != 1) {
     stop("Component models do not have the same re-sampling strategies")
   }
-  return(invisible(NULL))
+  invisible(NULL)
 }
 
 #' @title Check row indexes
@@ -221,7 +222,7 @@ check_bestpreds_indexes <- function(modelLibrary) {
   if (check != 1) {
     stop("Re-sampled predictions from each component model do not use the same rowIndexes from the origial dataset")
   }
-  return(invisible(NULL))
+  invisible(NULL)
 }
 
 #' @title Check observeds
@@ -236,7 +237,7 @@ check_bestpreds_obs <- function(modelLibrary) {
   if (check != 1) {
     stop("Observed values for each component model are not the same.  Please re-train the models with the same Y variable")
   }
-  return(invisible(NULL))
+  invisible(NULL)
 }
 
 #' @title Check predictions
@@ -264,7 +265,7 @@ check_bestpreds_preds <- function(modelLibrary) {
       )
     )
   }
-  return(invisible(NULL))
+  invisible(NULL)
 }
 
 #' @title Check multiclass excluded level
@@ -286,6 +287,7 @@ check_multiclass_excluded_level <- function(excluded_level, num_classes) {
       "\nAttempting to train a model with all classes included."
     ))
   }
+  invisible(NULL)
 }
 
 #####################################################
@@ -305,7 +307,7 @@ check_binary_classification <- function(list_of_models) {
       }
     })
   }
-  return(invisible(NULL))
+  invisible(NULL)
 }
 
 #####################################################
@@ -357,7 +359,7 @@ extractModelTypes <- function(list_of_models) {
   # Also, this check is redundant, but I think that is ok
   stopifnot(length(type) == 1)
   stopifnot(type %in% c("Classification", "Regression"))
-  return(type)
+  type
 }
 
 #' @title Extract the best predictions from a train object
@@ -372,7 +374,7 @@ bestPreds <- function(x) {
   b <- b[a, ]
   invisible(gc(reset = TRUE))
   setorderv(b, c("Resample", "rowIndex"))
-  return(b)
+  b
 }
 
 #' @title Extract the best predictions from a list of train objects
@@ -385,7 +387,7 @@ extractBestPreds <- function(list_of_models) {
     names(out) <- make.names(sapply(list_of_models, extractModelName), unique = TRUE)
   }
   invisible(gc(reset = TRUE))
-  return(out)
+  out
 }
 
 #' @title Make a prediction matrix from a list of models
@@ -469,5 +471,5 @@ makePredObsMatrix <- function(list_of_models) {
     data.table::setnames(modelLibrary, old = old_column_names, new = column_names)
   }
 
-  return(list(obs = modelLibrary$obs, preds = as.matrix(modelLibrary[, column_names, with = FALSE]), type = type))
+  list(obs = modelLibrary$obs, preds = as.matrix(modelLibrary[, column_names, with = FALSE]), type = type)
 }

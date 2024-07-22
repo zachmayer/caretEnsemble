@@ -1,15 +1,17 @@
 # Makefile for R project
 
-.PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check-cran fix-style lint clean
+.PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check-cran fix-style lint spell clean
 
 # Default target
-all: clean fix-style install document lint test check-cran coverage
+all: clean fix-style document install lint spell test check-cran coverage
 
 # Install dependencies
 install-deps:
 	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
 	Rscript -e "devtools::install_deps()"
 	Rscript -e "devtools::install_dev_deps()"
+	Rscript -e "devtools::update_packages()"
+	Rscript -e "devtools::install_github('r-lib/lintr')"
 
 # Install the whole package
 install: install-deps
@@ -26,6 +28,7 @@ update-test-fixtures:
 # Run unit tests
 test:
 	Rscript -e "Sys.setenv(NOT_CRAN='true'); devtools::test(stop_on_failure=TRUE, stop_on_warning=TRUE)"
+	rm -f caretEnsemble_test_plots.png
 
 # Run test coverage
 # Dunno why package_coverage makes the dir 'lib/'
@@ -72,7 +75,18 @@ fix-style:
 
 # Check the code for lint
 lint:
-	Rscript -e "lintr::lint_package()"
+	Rscript -e "Sys.setenv(LINTR_ERROR_ON_LINT='true'); lintr::lint_package()"
+
+# Check spelling
+spell:
+	Rscript -e " \
+		results = spelling::spell_check_package(); \
+		if(nrow(results) > 0) {; \
+			error = paste(results[['word']], collapse = ', '); \
+			error = paste('Potential spelling errors:', error); \
+			stop(error); \
+		}; \
+	"
 
 # Clean up generated files
 clean:
@@ -83,3 +97,4 @@ clean:
 	rm -f coverage-report.html
 	rm -f .Rhistory
 	rm -rf lib/
+	rm -f caretEnsemble_test_plots.png
