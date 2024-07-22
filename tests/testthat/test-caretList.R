@@ -718,3 +718,122 @@ test_that("predict.caretList works when the progress bar is turned off", {
   rmse <- sqrt(mean((y - pred)^2))
   expect_lt(rmse, noise_level)
 })
+
+test_that("caretList handles missing data correctly", {
+  data(iris)
+  iris_with_na <- iris
+  x <- iris_with_na[, 1:4]
+  y <- iris_with_na[, 5]
+  x[sample(1:nrow(x), 10), sample(1:ncol(x), 2)] <- NA
+
+  myControl <- trainControl(
+    method = "cv", number = 3,
+    p = 0.75, savePrediction = "final",
+    returnResamp = "final",
+    returnData = TRUE, verboseIter = FALSE
+  )
+
+  expect_warning(
+    models <- caretList(
+      x = x,
+      y = y,
+      methodList = c("rpart"),
+      trControl = myControl
+    )
+  )
+
+  expect_s3_class(models, "caretList")
+  expect_length(models, 1)
+})
+
+test_that("caretList handles new factor levels in prediction", {
+  data(iris)
+  idx <- 1:nrow(iris)
+  idx_train <- sample(idx, 100)
+  idx_test <- setdiff(idx, idx_train)
+  train_data <- iris[idx_train, ]
+  test_data <- iris[idx_test, ]
+  test_data$Species <- factor(as.character(test_data$Species), levels = c(levels(iris$Species), "NewSpecies"))
+  test_data$Species[1] <- "NewSpecies"
+
+  expect_warning({
+    models <- caretList(
+      x = train_data[, 1:4],
+      y = train_data[, 5],
+      methodList = c("rpart", "rf"),
+      trControl = trainControl(method = "cv", number = 2, allowParallel = FALSE)
+    )
+  })
+
+  pred <- predict(models, newdata = test_data)
+  expect_is(pred, "matrix")
+  expect_equal(nrow(pred), nrow(test_data))
+})
+
+test_that("caretList handles large number of predictors", {
+  set.seed(123)
+  n <- 100
+  p <- 1000
+  X <- data.frame(matrix(rnorm(n * p), n, p))
+  y <- factor(sample(c("A", "B"), n, replace = TRUE))
+
+  expect_warning(
+    models <- caretList(
+      x = X,
+      y = y,
+      methodList = c("glmnet", "rpart"),
+      trControl = trainControl(method = "cv", number = 2, allowParallel = FALSE)
+    )
+  )
+
+  expect_s3_class(models, "caretList")
+  expect_length(models, 2)
+})
+
+test_that("caretList handles imbalanced data", {
+  set.seed(123)
+  n <- 1000
+  X <- data.frame(x1 = rnorm(n), x2 = rnorm(n))
+  y <- factor(c(rep("A", 950), rep("B", 50)))
+
+  expect_warning({
+    models <- caretList(
+      x = X,
+      y = y,
+      methodList = c("glmnet", "rpart"),
+      trControl = trainControl(
+        method = "cv",
+        number = 2,
+        sampling = "down",
+        allowParallel = FALSE
+      )
+    )
+  })
+
+  expect_s3_class(models, "caretList")
+  expect_length(models, 2)
+})
+
+test_that("caretList handles custom performance metrics", {
+  data(iris)
+  custom_summary <- function(data, lev = NULL, model = NULL) {
+    c(default = mean(data$obs == data$pred))
+  }
+
+  expect_warning({
+    models <- caretList(
+      x = iris[, 1:4],
+      y = iris[, 5],
+      methodList = c("rpart", "rf"),
+      trControl = trainControl(
+        method = "cv",
+        number = 2,
+        summaryFunction = custom_summary,
+        allowParallel = FALSE
+      )
+    )
+  })
+
+  expect_s3_class(models, "caretList")
+  expect_true(all(sapply(models, function(m) "default" %in% colnames(m$results))))
+})

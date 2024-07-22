@@ -4,14 +4,14 @@
 \alias{wtd.sd}
 \title{Calculate a weighted standard deviation}
 \usage{
-wtd.sd(x, w = NULL, na.rm = FALSE)
+wtd.sd(x, w, na.rm = FALSE)
 }
 \arguments{
-\item{x}{a vector of numerics}
+\item{x}{a numeric vector}
 
 \item{w}{a vector of weights equal to length of x}
 
-\item{na.rm}{a logical indicating how to handle missing values, default = FALSE}
+\item{na.rm}{a logical indicating how to handle missing values, default = TRUE}
 }
 \description{
 Used to weight deviations among ensembled model predictions

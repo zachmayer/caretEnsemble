@@ -108,31 +108,27 @@ test_that("predict results same regardless of verbose option", {
 
 context("Test weighted standard deviations")
 
-x <- rnorm(1000)
-x1 <- c(3, 5, 9, 3, 4, 6, 4)
-x2 <- c(10, 10, 20, 14, 2, 2, 40)
-y <- c(10, 10, 10, 20)
-w1 <- c(0.1, 0.1, 0.1, 0.7)
-
 test_that("wtd.sd applies weights correctly", {
-  expect_error(caretEnsemble:::wtd.sd(x))
+  x1 <- c(3, 5, 9, 3, 4, 6, 4)
+  x2 <- c(10, 10, 20, 14, 2, 2, 40)
+  x3 <- c(10, 10, 10, 20)
+  w1 <- c(0.1, 0.1, 0.1, 0.7)
+  expect_error(caretEnsemble:::wtd.sd(x1), 'argument "w" is missing, with no default')
   expect_false(sd(x1) == caretEnsemble:::wtd.sd(x1, w = x2))
   expect_false(sd(x1) == caretEnsemble:::wtd.sd(x1, w = x2))
-  expect_equal(caretEnsemble:::wtd.sd(y, w = w1), 7.84, tolerance = .001)
-  expect_equal(caretEnsemble:::wtd.sd(y, w = w1 * 100), caretEnsemble:::wtd.sd(y, w = w1))
+  expect_equal(caretEnsemble:::wtd.sd(x3, w = w1), 5.291503, tolerance = .001)
+  expect_equal(caretEnsemble:::wtd.sd(x3, w = w1 * 100), caretEnsemble:::wtd.sd(x3, w = w1))
 })
 
 test_that("wtd.sd handles NA values correctly", {
-  y <- c(10, 10, 10, 20, NA, NA)
+  x1 <- c(10, 10, 10, 20, NA, NA)
   w1 <- c(0.1, 0.1, 0.1, 0.7, NA, NA)
-  expect_true(is.na(caretEnsemble:::wtd.sd(y, w = w1)))
-  expect_true(is.na(sd(y)))
-  expect_true(!is.na(caretEnsemble:::wtd.sd(y, w = w1, na.rm = TRUE)))
-  expect_true(!is.na(sd(y, na.rm = TRUE)))
-  expect_true(is.na(caretEnsemble:::wtd.sd(y, w = w1)))
-  expect_true(!is.na(caretEnsemble:::wtd.sd(y, w = w1, na.rm = TRUE)))
-  w2 <- c(0.1, 0.1, NA, 0.7, NA, NA)
-  expect_true(is.na(caretEnsemble:::wtd.sd(y, w = w1, na.rm = TRUE) == caretEnsemble:::wtd.sd(y, w = w2, na.rm = TRUE)))
+  expect_true(is.na(caretEnsemble:::wtd.sd(x1, w = w1)))
+  expect_true(is.na(sd(x1)))
+  expect_true(!is.na(caretEnsemble:::wtd.sd(x1, w = w1, na.rm = TRUE)))
+  expect_true(!is.na(sd(x1, na.rm = TRUE)))
+  expect_true(is.na(caretEnsemble:::wtd.sd(x1, w = w1)))
+  expect_true(!is.na(caretEnsemble:::wtd.sd(x1, w = w1, na.rm = TRUE)))
 })
 
 test_that("Checks generate errors", {
@@ -304,4 +300,160 @@ test_that("validateMulticlassExcludedLevel warns for non-integer input", {
 test_that("validateMulticlassExcludedLevel passes for valid input", {
   valid_input <- 3L
   expect_equal(validateMulticlassExcludedLevel(valid_input), 3L)
+})
+
+########################################################################
+context("Helper function edge cases")
+########################################################################
+
+test_that("wtd.sd calculates weighted standard deviation correctly", {
+  x <- c(1, 2, 3, 4, 5)
+  w <- c(1, 1, 1, 1, 1)
+  expect_equal(wtd.sd(x, w), sd(x))
+
+  w <- c(2, 1, 1, 1, 1)
+  expect_true(wtd.sd(x, w) != sd(x))
+
+  # Test with NA values
+  x_na <- c(1, 2, NA, 4, 5)
+  expect_true(is.na(wtd.sd(x_na, w)))
+  expect_false(is.na(wtd.sd(x_na, w, na.rm = TRUE)))
+
+  # Test error for mismatched lengths
+  expect_error(wtd.sd(x, w[-1]))
+})
+
+test_that("check_caretList_classes validates caretList correctly", {
+  expect_null(check_caretList_classes(models.class))
+  expect_null(check_caretList_classes(models.reg))
+
+  # Test error for non-caretList object
+  expect_error(check_caretList_classes(list(model = lm(Y.reg ~ ., data = as.data.frame(X.reg)))))
+})
+
+test_that("check_caretList_model_types validates model types correctly", {
+  expect_null(check_caretList_model_types(models.class))
+  expect_null(check_caretList_model_types(models.reg))
+
+  # Test error for mixed model types
+  mixed_list <- c(models.class, models.reg[1])
+  class(mixed_list) <- "caretList"
+  expect_error(check_caretList_model_types(mixed_list))
+})
+
+test_that("check_bestpreds_resamples validates resamples correctly", {
+  best_preds_class <- extractBestPreds(models.class)
+  best_preds_reg <- extractBestPreds(models.reg)
+
+  expect_null(check_bestpreds_resamples(best_preds_class))
+  expect_null(check_bestpreds_resamples(best_preds_reg))
+
+  # Test error for inconsistent resamples
+  best_preds_inconsistent <- best_preds_class
+  best_preds_inconsistent[[1]]$Resample <- sample(best_preds_inconsistent[[1]]$Resample)
+  expect_error(check_bestpreds_resamples(best_preds_inconsistent))
+})
+
+test_that("check_bestpreds_indexes validates row indexes correctly", {
+  best_preds_class <- extractBestPreds(models.class)
+  best_preds_reg <- extractBestPreds(models.reg)
+
+  expect_null(check_bestpreds_indexes(best_preds_class))
+  expect_null(check_bestpreds_indexes(best_preds_reg))
+
+  # Test error for inconsistent row indexes
+  best_preds_inconsistent <- best_preds_class
+  best_preds_inconsistent[[1]]$rowIndex <- sample(best_preds_inconsistent[[1]]$rowIndex)
+  expect_error(check_bestpreds_indexes(best_preds_inconsistent))
+})
+
+test_that("check_bestpreds_obs validates observed values correctly", {
+  best_preds_class <- extractBestPreds(models.class)
+  best_preds_reg <- extractBestPreds(models.reg)
+
+  expect_null(check_bestpreds_obs(best_preds_class))
+  expect_null(check_bestpreds_obs(best_preds_reg))
+
+  # Test error for inconsistent observed values
+  best_preds_inconsistent <- best_preds_class
+  best_preds_inconsistent[[1]]$obs <- sample(best_preds_inconsistent[[1]]$obs)
+  expect_error(check_bestpreds_obs(best_preds_inconsistent))
+})
+
+test_that("check_bestpreds_preds validates predictions correctly", {
+  best_preds_class <- extractBestPreds(models.class)
+  best_preds_reg <- extractBestPreds(models.reg)
+
+  expect_null(check_bestpreds_preds(best_preds_class))
+  expect_null(check_bestpreds_preds(best_preds_reg))
+
+  # Test error for inconsistent prediction types
+  best_preds_inconsistent <- best_preds_class
+  best_preds_inconsistent[[1]]$pred <- as.character(best_preds_inconsistent[[1]]$pred)
+  expect_error(check_bestpreds_preds(best_preds_inconsistent))
+})
+
+test_that("extractModelName extracts model names correctly", {
+  expect_equal(extractModelName(models.class[[1]]), "rf")
+  expect_equal(extractModelName(models.reg[[1]]), "rf")
+
+  # Test custom model
+  custom_model <- models.class[[1]]
+  custom_model$method <- list(method = "custom_rf")
+  expect_equal(extractModelName(custom_model), "custom_rf")
+})
+
+test_that("extractModelTypes extracts model types correctly", {
+  expect_equal(extractModelTypes(models.class), "Classification")
+  expect_equal(extractModelTypes(models.reg), "Regression")
+})
+
+test_that("bestPreds extracts best predictions correctly", {
+  best_preds_class <- bestPreds(models.class[[1]])
+  best_preds_reg <- bestPreds(models.reg[[1]])
+
+  expect_s3_class(best_preds_class, "data.frame")
+  expect_s3_class(best_preds_reg, "data.frame")
+  expect_true(all(c("Resample", "rowIndex", "pred", "obs") %in% names(best_preds_class)))
+  expect_true(all(c("Resample", "rowIndex", "pred", "obs") %in% names(best_preds_reg)))
+})
+
+test_that("extractBestPreds extracts best predictions for all models", {
+  best_preds_class <- extractBestPreds(models.class)
+  best_preds_reg <- extractBestPreds(models.reg)
+
+  expect_type(best_preds_class, "list")
+  expect_type(best_preds_reg, "list")
+  expect_length(best_preds_class, length(models.class))
+  expect_length(best_preds_reg, length(models.reg))
+  expect_true(all(sapply(best_preds_class, function(x) all(c("Resample", "rowIndex", "pred", "obs") %in% names(x)))))
+  expect_true(all(sapply(best_preds_reg, function(x) all(c("Resample", "rowIndex", "pred", "obs") %in% names(x)))))
+})
+
+test_that("makePredObsMatrix creates prediction-observation matrix correctly", {
+  pred_obs_matrix_class <- makePredObsMatrix(models.class)
+  pred_obs_matrix_reg <- makePredObsMatrix(models.reg)
+
+  expect_type(pred_obs_matrix_class, "list")
+  expect_type(pred_obs_matrix_reg, "list")
+  expect_true(all(c("obs", "preds", "type") %in% names(pred_obs_matrix_class)))
+  expect_true(all(c("obs", "preds", "type") %in% names(pred_obs_matrix_reg)))
+  expect_equal(nrow(pred_obs_matrix_class$preds), length(pred_obs_matrix_class$obs))
+  expect_equal(nrow(pred_obs_matrix_reg$preds), length(pred_obs_matrix_reg$obs))
+})
+
+test_that("check_multiclass_excluded_level validates excluded level correctly", {
+  expect_warning(check_multiclass_excluded_level(4, 3))
+  expect_warning(check_multiclass_excluded_level(0, 3))
+  expect_null(check_multiclass_excluded_level(2, 3))
+  expect_null(check_multiclass_excluded_level(1, 3))
+})
+
+test_that("validateMulticlassExcludedLevel validates excluded level correctly", {
+  expect_error(validateMulticlassExcludedLevel("a"))
+  expect_error(validateMulticlassExcludedLevel(0))
+  expect_error(validateMulticlassExcludedLevel(Inf))
+  expect_warning(validateMulticlassExcludedLevel(1.5))
+  txt <- "multiclass excluded level is not an integer 2 was given see setMulticlassExcludedLevel for more details"
+  expect_warning(expect_equal(validateMulticlassExcludedLevel(2), 2L), txt)
 })

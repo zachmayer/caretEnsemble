@@ -9,7 +9,6 @@ data(models.class)
 data(X.class)
 data(Y.class)
 
-
 context("Does stacking and prediction work?")
 
 test_that("We can stack regression models", {
@@ -182,4 +181,141 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
   expect_equal(ncol(pred), 3)
   expect_true(all(sapply(pred, is.finite)))
   expect_equal(getMulticlassExcludedLevel(), 1L)
+})
+
+
+context("caretStack edge cases")
+
+test_that("caretStack handles different stacking algorithms", {
+  for (x in list(list(models.reg, X.reg), list(models.class, X.class))) {
+    model_list <- x[[1]]
+    test_data <- x[[2]]
+
+    stack_methods <- c("glm", "rf", "gbm", "glmnet")
+
+    for (method in stack_methods) {
+      if (method == "gbm") {
+        stack <- caretStack(
+          model_list,
+          method = method,
+          trControl = trainControl(method = "cv", number = 3),
+          verbose = FALSE
+        )
+      } else {
+        stack <- caretStack(
+          model_list,
+          method = method,
+          trControl = trainControl(method = "cv", number = 3)
+        )
+      }
+
+      expect_s3_class(stack, "caretStack")
+      expect_equal(stack$ens_model$method, method)
+
+      predictions <- predict(stack, newdata = test_data)
+      expect_equal(length(predictions), nrow(test_data))
+    }
+  }
+})
+
+test_that("caretStack handles missing data in new data", {
+  models.class.subset <- models.class[c("rpart", "treebag")]
+
+  stack <- caretStack(
+    models.class.subset,
+    method = "rpart",
+    trControl = trainControl(method = "cv", number = 3)
+  )
+
+  test_data_with_na <- X.class
+  test_data_with_na[1:5, 1] <- NA
+
+  pred <- predict(stack, newdata = test_data_with_na)
+  expect_equal(length(pred), nrow(test_data_with_na))
+})
+
+test_that("caretStack handles different metrics", {
+  metrics <- c("ROC", "Sens", "Spec")
+  for (metric in metrics) {
+    stack <- caretStack(
+      models.class,
+      method = "glm",
+      metric = metric,
+      trControl = trainControl(
+        method = "cv", number = 3, classProbs = TRUE,
+        summaryFunction = twoClassSummary
+      )
+    )
+    expect_s3_class(stack, "caretStack")
+    expect_equal(stack$ens_model$metric, metric)
+  }
+})
+
+test_that("caretStack handles imbalanced data", {
+  data(iris)
+  train_data <- iris
+
+  imbalanced_data <- rbind(
+    train_data[train_data$Species == "setosa", ],
+    train_data[train_data$Species == "versicolor", ][1:10, ],
+    train_data[train_data$Species == "virginica", ][1:5, ]
+  )
+
+  expect_warning({
+    model_list <- caretList(
+      x = imbalanced_data[, 1:4],
+      y = imbalanced_data$Species,
+      methodList = c("rpart"),
+      trControl = trainControl(
+        method = "cv",
+        number = 3,
+        classProbs = TRUE,
+        sampling = "up",
+        savePredictions = "final"
+      )
+    )
+  })
+
+  stack <- caretStack(
+    model_list,
+    method = "rpart",
+    metric = "Kappa",
+    trControl = trainControl(method = "cv", number = 3)
+  )
+
+  expect_s3_class(stack, "caretStack")
+  pred <- predict(stack, newdata = imbalanced_data)
+  expect_equal(length(pred), nrow(imbalanced_data))
+})
+
+test_that("caretStack handles custom preprocessing", {
+  preprocess <- c("center", "scale", "pca")
+  for (model_list in list(models.class, models.reg)) {
+    stack <- caretStack(
+      model_list,
+      method = "glm",
+      preProcess = preprocess,
+      trControl = trainControl(method = "cv", number = 3)
+    )
+    expect_s3_class(stack, "caretStack")
+    expect_equal(names(stack$ens_model$preProcess$method), c(preprocess, "ignore"))
+  }
+})
+
+test_that("caretStack handles custom performance function", {
+  custom_summary <- function(data, lev = NULL, model = NULL) {
+    c(default = mean(data$obs == data$pred))
+  }
+
+  for (model_list in list(models.class, models.reg)) {
+    stack <- caretStack(
+      model_list,
+      method = "glm",
+      metric = "default",
+      trControl = trainControl(method = "cv", number = 3, summaryFunction = custom_summary)
+    )
+
+    expect_s3_class(stack, "caretStack")
+    expect_true("default" %in% names(stack$ens_model$results))
+  }
 })
