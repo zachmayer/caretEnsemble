@@ -127,7 +127,7 @@ predict.caretStack <- function(
       overall_weights <- weights$Overall[methods]
 
       # Use overall weights to calculate standard error in regression estimations
-      std_error <- apply(preds, 1, wtd.sd, w = overall_weights)
+      std_error <- apply(preds, 1, wtd.sd, w = overall_weights, na.rm = TRUE)
       std_error <- qnorm(level) * std_error
       out <- data.frame(
         fit = est,
