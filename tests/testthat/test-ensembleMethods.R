@@ -271,7 +271,7 @@ test_that("Prediction options are respected in regression and classification", {
   ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
   tests <- expand.grid(se = 0:1, return_weights = 0:1)
   tests <- data.frame(lapply(tests, as.logical))
-  for (i in 1:nrow(tests)) {
+  for (i in seq_len(nrow(tests))) {
     suppressWarnings({
       p <- predict(
         ens.reg,
@@ -299,7 +299,7 @@ test_that("Prediction options are respected in regression and classification", {
   ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   tests <- expand.grid(se = 0:1, return_weights = 0:1)
   tests <- data.frame(lapply(tests, as.logical))
-  for (i in 1:nrow(tests)) {
+  for (i in seq_len(nrow(tests))) {
     suppressWarnings({
       p <- predict(
         ens.class,

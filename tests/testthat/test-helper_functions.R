@@ -17,7 +17,7 @@ data(X.class)
 data(Y.class)
 
 test_that("Recycling generates a warning", {
-  expect_error(caretEnsemble:::wtd.sd(matrix(1:10, ncol = 2), w = 1))
+  expect_error(caretEnsemble::wtd.sd(matrix(1:10, ncol = 2), w = 1))
 })
 
 test_that("No predictions generates an error", {
@@ -42,7 +42,7 @@ test_that("No predictions generates an error", {
   new_model <- train(
     iris[, 1:2], factor(ifelse(iris[, 5] == "setosa", "Yes", "No")),
     tuneLength = 1,
-    method = c("glmnet"),
+    method = "glmnet",
     trControl = trainControl(method = "cv", number = 2, savePredictions = "none", classProbs = TRUE)
   )
   models2 <- c(new_model, models)
@@ -113,22 +113,22 @@ test_that("wtd.sd applies weights correctly", {
   x2 <- c(10, 10, 20, 14, 2, 2, 40)
   x3 <- c(10, 10, 10, 20)
   w1 <- c(0.1, 0.1, 0.1, 0.7)
-  expect_error(caretEnsemble:::wtd.sd(x1), 'argument "w" is missing, with no default')
-  expect_false(sd(x1) == caretEnsemble:::wtd.sd(x1, w = x2))
-  expect_false(sd(x1) == caretEnsemble:::wtd.sd(x1, w = x2))
-  expect_equal(caretEnsemble:::wtd.sd(x3, w = w1), 5.291503, tolerance = .001)
-  expect_equal(caretEnsemble:::wtd.sd(x3, w = w1 * 100), caretEnsemble:::wtd.sd(x3, w = w1))
+  expect_error(caretEnsemble::wtd.sd(x1), 'argument "w" is missing, with no default')
+  expect_false(sd(x1) == caretEnsemble::wtd.sd(x1, w = x2))
+  expect_false(sd(x1) == caretEnsemble::wtd.sd(x1, w = x2))
+  expect_equal(caretEnsemble::wtd.sd(x3, w = w1), 5.291503, tolerance = .001)
+  expect_equal(caretEnsemble::wtd.sd(x3, w = w1 * 100), caretEnsemble::wtd.sd(x3, w = w1))
 })
 
 test_that("wtd.sd handles NA values correctly", {
   x1 <- c(10, 10, 10, 20, NA, NA)
   w1 <- c(0.1, 0.1, 0.1, 0.7, NA, NA)
-  expect_true(is.na(caretEnsemble:::wtd.sd(x1, w = w1)))
+  expect_true(is.na(caretEnsemble::wtd.sd(x1, w = w1)))
   expect_true(is.na(sd(x1)))
-  expect_true(!is.na(caretEnsemble:::wtd.sd(x1, w = w1, na.rm = TRUE)))
+  expect_true(!is.na(caretEnsemble::wtd.sd(x1, w = w1, na.rm = TRUE)))
   expect_true(!is.na(sd(x1, na.rm = TRUE)))
-  expect_true(is.na(caretEnsemble:::wtd.sd(x1, w = w1)))
-  expect_true(!is.na(caretEnsemble:::wtd.sd(x1, w = w1, na.rm = TRUE)))
+  expect_true(is.na(caretEnsemble::wtd.sd(x1, w = w1)))
+  expect_true(!is.na(caretEnsemble::wtd.sd(x1, w = w1, na.rm = TRUE)))
 })
 
 test_that("Checks generate errors", {
@@ -144,7 +144,7 @@ test_that("Checks generate errors", {
     )
   )
   modelLibrary <- extractBestPreds(x)
-  modelLibrary$nn <- modelLibrary$lm[sample(1:nrow(modelLibrary$lm), nrow(modelLibrary$lm)), ]
+  modelLibrary$nn <- modelLibrary$lm[sample(seq_len(nrow(modelLibrary$lm)), nrow(modelLibrary$lm)), ]
 
   expect_error(check_bestpreds_resamples(modelLibrary))
   expect_error(check_bestpreds_indexes(modelLibrary))

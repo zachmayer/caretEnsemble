@@ -33,7 +33,7 @@ caretEnsemble <- function(all.models, ...) {
   check_binary_classification(all.models)
   out <- caretStack(all.models, method = "glm", ...)
   class(out) <- c("caretEnsemble", "caretStack")
-  return(out)
+  out
 }
 
 #' @title Check if an object is a caretEnsemble object
@@ -76,10 +76,10 @@ summary.caretEnsemble <- function(object, ...) {
 #' @param ensemble a caretEnsemble to make predictions from.
 extractModRes <- function(ensemble) {
   stopifnot(is.caretEnsemble(ensemble))
-  methods <- names(ensemble$models)
+  model_methods <- names(ensemble$models)
   metric <- ensemble$ens_model$metric
   modRes <- data.frame(
-    method = methods,
+    method = model_methods,
     metric = unlist(
       lapply(
         ensemble$models,
@@ -97,7 +97,7 @@ extractModRes <- function(ensemble) {
     stringsAsFactors = FALSE
   )
   names(modRes)[2:3] <- c(metric, paste0(metric, "SD"))
-  return(modRes)
+  modRes
 }
 
 #' Extract accuracy metrics from a model
@@ -171,21 +171,21 @@ varImp.caretEnsemble <- function(object, ...) {
   dat <- apply(dat, 2, norm_to_100)
 
   # Calculate overall importance
-  weights <- coef(object$ens_model$finalModel)
+  model_weights <- coef(object$ens_model$finalModel)
   # In the case of 2 classes each method will
   # have only one coef associated.
   # The names of the weights keep the order of the
   # models in the ensemble
-  names(weights) <- names(object$models)
-  weights <- weights[names(weights) %in% names(coef_importance)]
-  weights <- abs(weights)
-  overall <- norm_to_100(apply(dat, 1, weighted.mean, w = weights))
+  names(model_weights) <- names(object$models)
+  model_weights <- model_weights[names(model_weights) %in% names(coef_importance)]
+  model_weights <- abs(model_weights)
+  overall <- norm_to_100(apply(dat, 1, weighted.mean, w = model_weights))
   dat <- data.frame(overall = overall, dat)
 
   # Order by overall importance
   dat <- dat[order(dat[["overall"]]), ]
 
-  return(dat)
+  dat
 }
 
 #' @keywords internal
@@ -193,7 +193,7 @@ varImp.caretEnsemble <- function(object, ...) {
 clean_varImp <- function(x) {
   names(x$importance)[1] <- "Overall"
   x$importance <- x$importance[, "Overall", drop = FALSE]
-  return(x$importance)
+  x$importance
 }
 
 #' @keywords internal
@@ -217,7 +217,7 @@ varImpFrame <- function(x) {
     idvar = "var", timevar = "model"
   )
   row.names(dat) <- dat[, 1]
-  return(dat[, -1])
+  dat[, -1]
 }
 
 #' @title Calculate the residuals from a caretEnsemble.
@@ -233,17 +233,16 @@ residuals.caretEnsemble <- function(object, ...) {
   if (object$modelType == "Regression") {
     yhat <- predict(object)
     y <- object$models[[1]]$trainingData$.outcome
-    resid <- y - yhat
-    return(resid)
+    model_resid <- y - yhat
   } else if (object$modelType == "Classification") {
     yhat <- predict(object, type = "prob")[, getBinaryTargetLevel(), drop = TRUE]
     y <- as.character(object$models[[1]]$trainingData$.outcome)
     z <- table(y)
     prevOutcome <- names(z)[z == max(z)]
     y <- ifelse(y == prevOutcome, 0, 1)
-    resid <- y - yhat
-    return(resid)
+    model_resid <- y - yhat
   }
+  model_resid
 }
 
 #' @title Calculate the residuals from all component models of a caretEnsemble.
@@ -266,7 +265,7 @@ multiResiduals <- function(object, ...) {
     prevOutcome <- names(z)[z == max(z)]
     y <- ifelse(y == prevOutcome, 0, 1)
 
-    # Extract probabilities asociated only with one of the classes
+    # Extract probabilities associated only with one of the classes
     classes <- levels(object$models[[1]]$pred$obs)[getBinaryTargetLevel(), drop = TRUE]
     modelnames <- names(object$models)
     class_modelname_combinations <- expand.grid(classes, modelnames)
@@ -276,20 +275,20 @@ multiResiduals <- function(object, ...) {
     # Rename columns with model names
     colnames(preds) <- modelnames
   }
-  resid <- y - preds
+
+  model_resid <- data.frame(y - preds)
   preds <- as.data.frame(preds)
-  resid <- as.data.frame(resid)
-  resid <- reshape(resid,
-    direction = "long", varying = names(resid),
-    v.names = "resid", timevar = "method", times = names(resid)
+  model_resid <- reshape(model_resid,
+    direction = "long", varying = names(model_resid),
+    v.names = "resid", timevar = "method", times = names(model_resid)
   )
   preds <- reshape(preds,
     direction = "long", varying = names(preds),
     v.names = "yhat", timevar = "method", times = names(preds)
   )
-  out <- merge(preds, resid)
+  out <- merge(preds, model_resid)
   out$y <- out$yhat + out$resid
-  return(out)
+  out
 }
 
 #' @title Supplement the data fitted to a caret ensemble model with model fit statistics
@@ -301,6 +300,10 @@ multiResiduals <- function(object, ...) {
 #' @param ... additional arguments to pass to fortify
 #' @return The original data with extra columns for fitted values and residuals
 fortify <- function(model, data = NULL, ...) {
+  if (!is(model, "caretEnsemble")) {
+    stop("model must be a caretEnsemble")
+  }
+
   data <- extractModFrame(model)
   data$y <- model$models[[1]]$trainingData$.outcome
   if (!inherits(data$y, "numeric")) {
@@ -319,7 +322,7 @@ fortify <- function(model, data = NULL, ...) {
   }
 
   data$.resid <- residuals(model)
-  return(data)
+  data
 }
 
 #' @title Extract a dataframe of all predictors used in a caretEnsemble object.
@@ -331,12 +334,12 @@ fortify <- function(model, data = NULL, ...) {
 #' @importFrom digest digest
 extractModFrame <- function(model) {
   datList <- vector("list", length = length(model$models))
-  for (i in 1:length(model$models)) {
+  for (i in seq_along(model$models)) {
     datList[[i]] <- model$models[[i]]$trainingData
   }
   modelFrame <- do.call(cbind, datList)
   modelFrame <- modelFrame[!duplicated(lapply(modelFrame, digest))]
-  return(modelFrame)
+  modelFrame
 }
 
 #' @title Plot Diagnostics for an caretEnsemble Object
@@ -377,7 +380,7 @@ plot.caretEnsemble <- function(x, ...) {
     plt <- plt +
       geom_hline(linetype = 2, linewidth = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
   }
-  return(plt)
+  plt
 }
 
 
@@ -414,7 +417,7 @@ plot.caretEnsemble <- function(x, ...) {
 #' ens <- caretEnsemble(models)
 #' autoplot(ens)
 #' }
-autoplot <- function(object, which = c(1:6), mfrow = c(3, 2),
+autoplot <- function(object, which = 1:6, mfrow = c(3, 2),
                      xvars = NULL, ...) {
   plotdf <- suppressMessages(fortify(object))
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")

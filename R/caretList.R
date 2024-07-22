@@ -8,19 +8,20 @@
 #' caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
 caretModelSpec <- function(method = "rf", ...) {
   out <- c(list(method = method), list(...))
-  return(out)
+  out
 }
 
 #' @title Check that the tuning parameters list supplied by the user is valid
 #' @description This function makes sure the tuning parameters passed by the user are valid and have the proper naming, etc.
 #' @param x a list of user-supplied tuning parameters and methods
 #' @return NULL
+#' @export
 tuneCheck <- function(x) {
   # Check model methods
   stopifnot(is.list(x))
 
-  methods <- lapply(x, function(m) m$method)
-  methodCheck(methods)
+  model_methods <- lapply(x, function(m) m$method)
+  methodCheck(model_methods)
   method_names <- sapply(x, extractModelName)
 
   # Name models
@@ -34,8 +35,8 @@ tuneCheck <- function(x) {
   names(x) <- make.names(names(x), unique = TRUE)
 
   # Check params
-  stopifnot(all(sapply(x, is.list)))
-  return(x)
+  stopifnot(sapply(x, is.list))
+  x
 }
 
 #' @title Check that the methods supplied by the user are valid caret methods
@@ -74,7 +75,7 @@ methodCheck <- function(x) {
     stop(paste("The following models are not valid caret models:", msg))
   }
 
-  return(invisible(NULL))
+  invisible(NULL)
 }
 
 #' @title Check that the trainControl object supplied by the user is valid and has defined re-sampling indexes.
@@ -86,11 +87,6 @@ methodCheck <- function(x) {
 trControlCheck <- function(x, y) {
   if (!length(x$savePredictions) == 1) {
     stop("Please pass exactly 1 argument to savePredictions, e.g. savePredictions='final'")
-  }
-
-  if (x$savePredictions %in% c(TRUE)) {
-    warning("x$savePredictions == TRUE is depreciated. Setting to 'final' instead.")
-    x$savePredictions <- "final"
   }
 
   if (!(x$savePredictions %in% c("all", "final"))) {
@@ -120,7 +116,7 @@ trControlCheck <- function(x, y) {
       stop(paste0("caretList does not currently know how to handle cross-validation method='", x$method, "'. Please specify trControl$index manually"))
     }
   }
-  return(x)
+  x
 }
 
 #' @title Extracts the target variable from a set of arguments headed to the caret::train function.
@@ -137,7 +133,7 @@ extractCaretTarget <- function(...) {
 #' @param ... ignored
 #' @method extractCaretTarget default
 extractCaretTarget.default <- function(x, y, ...) {
-  return(y)
+  y
 }
 
 #' @title Extracts the target variable from a set of arguments headed to the caret::train.formula function.
@@ -149,7 +145,7 @@ extractCaretTarget.default <- function(x, y, ...) {
 extractCaretTarget.formula <- function(form, data, ...) {
   y <- model.response(model.frame(form, data))
   names(y) <- NULL
-  return(y)
+  y
 }
 
 #' Create a list of several train models from the caret package
@@ -231,7 +227,7 @@ caretList <- function(
     } else {
       model <- do.call(train, model_args)
     }
-    return(model)
+    model
   })
   names(modelList) <- names(tuneList)
   nulls <- sapply(modelList, is.null)
@@ -240,9 +236,9 @@ caretList <- function(
   if (length(modelList) == 0) {
     stop("caret:train failed for all models.  Please inspect your data.")
   }
-  class(modelList) <- c("caretList")
+  class(modelList) <- "caretList"
 
-  return(modelList)
+  modelList
 }
 
 #' @title Check if an object is a caretList object
@@ -289,9 +285,9 @@ as.caretList.list <- function(object) {
     stop("object requires all elements of list to be caret models")
   }
 
-  class(object) <- c("caretList")
+  class(object) <- "caretList"
 
-  return(object)
+  object
 }
 
 #' @title Index a caretList
@@ -301,7 +297,7 @@ as.caretList.list <- function(object) {
 #' @export
 `[.caretList` <- function(object, index) {
   newObj <- `[.listof`(object, index)
-  return(newObj)
+  newObj
 }
 
 #' @title Create a matrix of predictions for each of the models in a caretList
@@ -403,5 +399,5 @@ predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE) {
     colnames(preds) <- modelnames
   }
 
-  return(preds)
+  preds
 }

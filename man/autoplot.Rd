@@ -4,7 +4,7 @@
 \alias{autoplot}
 \title{Convenience function for more in-depth diagnostic plots of caretEnsemble objects}
 \usage{
-autoplot(object, which = c(1:6), mfrow = c(3, 2), xvars = NULL, ...)
+autoplot(object, which = 1:6, mfrow = c(3, 2), xvars = NULL, ...)
 }
 \arguments{
 \item{object}{a \code{caretEnsemble} object}

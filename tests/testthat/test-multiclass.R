@@ -258,7 +258,7 @@ test_that("caretList and caretStack handle a large number of classes", {
       x = X,
       y = y,
       trControl = my_control,
-      methodList = c("rpart")
+      methodList = "rpart"
     )
   })
 
@@ -329,7 +329,7 @@ test_that("caretList and caretStack produce consistent probability predictions",
 
 test_that("caretList and caretStack handle new levels in prediction data", {
   data(iris)
-  idx <- 1:nrow(iris)
+  idx <- seq_len(nrow(iris))
   idx_train <- sample(idx, 120)
   idx_test <- setdiff(idx, idx_train)
   train_data <- iris[idx_train, ]

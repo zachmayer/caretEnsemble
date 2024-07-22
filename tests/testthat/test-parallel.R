@@ -11,7 +11,7 @@ test_that("predict.caretEnsemble works in parallel", {
   # Basic
   suppressWarnings(pred_reg <- predict(ens_reg, newdata = X_reg))
   suppressWarnings(pred_reg2 <- predict(ens_reg, newdata = X_reg_big))
-  pred_reg2 <- pred_reg2[1:length(pred_reg)]
+  pred_reg2 <- pred_reg2[seq_along(pred_reg)]
 
   pred_reg <- unname(pred_reg)
   pred_reg2 <- unname(pred_reg2)
@@ -22,7 +22,7 @@ test_that("predict.caretEnsemble works in parallel", {
   suppressWarnings(pred_reg2 <- predict(ens_reg, newdata = X_reg_big, se = TRUE))
   row.names(pred_reg) <- NULL
   row.names(pred_reg2) <- NULL
-  expect_equal(pred_reg, pred_reg2[1:nrow(pred_reg), ])
+  expect_equal(pred_reg, pred_reg2[seq_len(nrow(pred_reg)), ])
 
   # Return weights
   suppressWarnings(pred_reg <- predict(ens_reg, newdata = X_reg, se = TRUE, return_weights = TRUE))
@@ -34,5 +34,5 @@ test_that("predict.caretEnsemble works in parallel", {
   )
   row.names(pred_reg) <- NULL
   row.names(pred_reg2) <- NULL
-  expect_equal(pred_reg$fit, pred_reg2$fit[1:length(pred_reg$fit)])
+  expect_equal(pred_reg$fit, pred_reg2$fit[seq_along(pred_reg$fit)])
 })

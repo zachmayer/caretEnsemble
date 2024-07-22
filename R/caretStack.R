@@ -30,7 +30,7 @@ caretStack <- function(all.models, ...) {
   # Return final model
   out <- list(models = all.models, ens_model = model, error = model$results)
   class(out) <- "caretStack"
-  return(out)
+  out
 }
 
 #' @title Make predictions from a caretStack
@@ -102,16 +102,16 @@ predict.caretStack <- function(
 
   if (se || return_weights) {
     imp <- varImp(object$ens_model)$importance
-    weights <- as.list(as.data.frame(imp))
-    methods <- colnames(preds)
-    weights <- lapply(weights, function(class_weights) {
+    model_weights <- as.list(as.data.frame(imp))
+    model_methods <- colnames(preds)
+    model_weights <- lapply(model_weights, function(class_weights) {
       # ensure that we have a numeric vector
       class_weights <- ifelse(is.finite(class_weights), class_weights, 0)
       # normalize weights
       class_weights <- class_weights / sum(class_weights)
       names(class_weights) <- row.names(imp)
       # set 0 weights for methods that are not present in varImp
-      for (m in setdiff(methods, names(class_weights))) {
+      for (m in setdiff(model_methods, names(class_weights))) {
         class_weights[m] <- 0
       }
       class_weights
@@ -119,12 +119,12 @@ predict.caretStack <- function(
   }
 
   if (se) {
-    if (!inherits(est, "numeric") || is.null(weights$Overall)) {
+    if (!inherits(est, "numeric") || is.null(model_weights$Overall)) {
       message("Standard errors not available.")
       out <- est
     } else {
-      methods <- colnames(preds)
-      overall_weights <- weights$Overall[methods]
+      model_methods <- colnames(preds)
+      overall_weights <- model_weights$Overall[model_methods]
 
       # Use overall weights to calculate standard error in regression estimations
       std_error <- apply(preds, 1, wtd.sd, w = overall_weights, na.rm = TRUE)
@@ -139,10 +139,10 @@ predict.caretStack <- function(
     out <- est
   }
   if (return_weights) {
-    attr(out, "weights") <- weights
+    attr(out, "weights") <- model_weights
   }
 
-  return(out)
+  out
 }
 
 #' @title Check if an object is a caretStack object
