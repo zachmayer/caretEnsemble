@@ -22,15 +22,14 @@
 #' )
 #' caretStack(models, method = "glm")
 #' }
-caretStack <- function(all.models, excluded_class_id=1L, ...) {
-
+caretStack <- function(all.models, excluded_class_id = 1L, ...) {
   # Validators
-  excluded_class_id = validateExcludedClass(excluded_class_id)
+  excluded_class_id <- validateExcludedClass(excluded_class_id)
   check_caretList_classes(all.models)
   check_caretList_model_types(all.models)
 
   # Extract each model's cross-validated predictions and check them
-  predobs = extractBestPredsAndObs(all.models)
+  predobs <- extractBestPredsAndObs(all.models)
 
   # Build a caret model
   model <- train(predobs$preds, predobs$obs, ...)
@@ -75,7 +74,6 @@ predict.caretStack <- function(
     se = FALSE, level = 0.95,
     return_weights = FALSE,
     ...) {
-  
   # Check if the object is a caretStack
   stopifnot(is(object$models, "caretList"))
 
@@ -83,13 +81,13 @@ predict.caretStack <- function(
   type <- extractModelTypes(object$models)
 
   # If the excluded class wasn't set at train time, set it
-  if (type == 'Classification'){
-    if (is.null(object[['excluded_class_id']])) {
+  if (type == "Classification") {
+    if (is.null(object[["excluded_class_id"]])) {
       object.excluded_class_id <- 1L
-      warning('No excluded_class_id set.  Setting to 1L.')
+      warning("No excluded_class_id set.  Setting to 1L.")
     }
   }
-  
+
   preds <- predict(object$models, newdata = newdata, excluded_class_id = object.excluded_class_id, ...)
   meta_preds <- predict(object$ens_model, newdata = preds, ...)
 

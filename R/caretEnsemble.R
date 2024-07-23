@@ -260,27 +260,27 @@ plot.caretEnsemble <- function(x, ...) {
 }
 
 #' @title Extract the best predictions and observations from a train object
-#' @description This function extracts the best predictions and observations from a train object 
+#' @description This function extracts the best predictions and observations from a train object
 #' and then calculates residuals.  It only uses one class for classificaiton models, by default class 2.
 #' @param object a \code{train} object
 #' @param show_class_id For classificaiton only: which class level to use for residuals
 #' @return a data.table with predictions, observeds, and residuals
 #' @importFrom data.table data.table
-extractPredObsResid <- function(object, show_class_id = 2L){
-  stopifnot(is(object, 'train'))
-  type = object$modelType
+extractPredObsResid <- function(object, show_class_id = 2L) {
+  stopifnot(is(object, "train"))
+  type <- object$modelType
   predobs <- extractBestPredsAndObs(list(object))
-  pred = predobs$pred
-  obs = predobs$obs
-  id = predobs$rowIndex
-  if(type == 'Regression') {
-    pred = pred[[1]]
+  pred <- predobs$pred
+  obs <- predobs$obs
+  id <- predobs$rowIndex
+  if (type == "Regression") {
+    pred <- pred[[1]]
   } else {
-    show_class = levels(object)[show_class_id]
+    show_class <- levels(object)[show_class_id]
     pred <- pred[[show_class]]
     obs <- as.integer(obs == show_class)
   }
-  resid = obs - pred
+  resid <- obs - pred
   out <- data.table::data.table(pred, obs, resid, id)
   out
 }
@@ -316,11 +316,11 @@ extractPredObsResid <- function(object, show_class_id = 2L){
 #' )
 #' ens <- caretEnsemble(models)
 #' autoplot(ens)
-autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars = NULL, show_class_id=2L, ...) {
-  stopifnot(is(object, 'caretEnsemble'))
-  ensemble_data = extractPredObsResid(object$ens_model, show_class_id =  show_class_id)
+autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars = NULL, show_class_id = 2L, ...) {
+  stopifnot(is(object, "caretEnsemble"))
+  ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
   data.table::setkey(ensemble_data, id)
-  
+
   # Performance metrics by model
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
 
@@ -344,11 +344,11 @@ autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars =
 
   # Disagreement in sub-model residuals
   sub_model_data <- lapply(object$models, extractPredObsResid, show_class_id = show_class_id)
-  for(model_name in names(sub_model_data)){
+  for (model_name in names(sub_model_data)) {
     data.table::set(sub_model_data[[model_name]], j = "model", value = model_name)
   }
   sub_model_data <- data.table::rbindlist(sub_model_data)
-  sub_model_summary <- sub_model_data[,list(ymin = min(resid), ymax = max(resid), yavg = median(resid), yhat = pred[1]), by = id]
+  sub_model_summary <- sub_model_data[, list(ymin = min(resid), ymax = max(resid), yavg = median(resid), yhat = pred[1]), by = id]
   g4 <- ggplot2::ggplot(sub_model_summary, ggplot2::aes(x = yhat, ymin = ymin, ymax = ymax, y = yavg)) +
     ggplot2::geom_linerange(alpha = I(0.5)) +
     ggplot2::geom_point(size = I(3), alpha = I(0.8)) +
@@ -363,14 +363,14 @@ autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars =
     )
 
   # Residuals vs X variables
-  x_data = data.table::data.table(object$models[[1]]$trainingData)
+  x_data <- data.table::data.table(object$models[[1]]$trainingData)
   if (is.null(xvars)) {
-    xvars = names(x_data)
-    xvars = setdiff(xvars, c(".outcome", ".weights", "(Intercept)"))
+    xvars <- names(x_data)
+    xvars <- setdiff(xvars, c(".outcome", ".weights", "(Intercept)"))
     xvars <- sample(xvars, 2)
   }
   data.table::set(x_data, j = "id", value = 1:nrow(x_data))
-  plotdf = merge(ensemble_data, x_data, by = "id")
+  plotdf <- merge(ensemble_data, x_data, by = "id")
   g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1]]], resid)) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +

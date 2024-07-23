@@ -316,7 +316,6 @@ as.caretList.list <- function(object) {
 #' @export
 #' @method predict caretList
 predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...) {
-
   # New data check
   if (is.null(newdata)) {
     newdata <- extractTrainingData(object)
@@ -336,16 +335,16 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
     if (type == "Classification") {
       # use caret::levels.train to extract the levels of the target from each model
       # and then drop the excluded class if needed
-      pred = caret::predict.train(x, type = "prob", newdata = newdata, ... = ...)
-      pred = data.table::as.data.table(pred)
-      pred = dropExcludedClass(pred, all_classes = levels(x), excluded_class_id = excluded_class_id)
+      pred <- caret::predict.train(x, type = "prob", newdata = newdata, ... = ...)
+      pred <- data.table::as.data.table(pred)
+      pred <- dropExcludedClass(pred, all_classes = levels(x), excluded_class_id = excluded_class_id)
 
-    # predict for reg
+      # predict for reg
     } else if (type == "Regression") {
-      pred = caret::predict.train(x, type = "raw", newdata = newdata, ... = ...)
-      pred = data.table::as.data.table(pred)
-    
-    # Error
+      pred <- caret::predict.train(x, type = "raw", newdata = newdata, ... = ...)
+      pred <- data.table::as.data.table(pred)
+
+      # Error
     } else {
       stop(paste("Unknown model type:", type))
     }
@@ -365,7 +364,7 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
 
   # Turn a list of data tables into one data.table
   # Note that data.table will name the columns based off the names of the list and the names of each data.table
-  preds = data.table::as.data.table(preds)
+  preds <- data.table::as.data.table(preds)
 
   # Return
   preds

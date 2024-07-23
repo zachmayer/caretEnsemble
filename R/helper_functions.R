@@ -8,8 +8,8 @@
 #' @return integer
 validateExcludedClass <- function(arg) {
   if (is.null(arg)) {
-    arg = 1L
-    warning('No excluded_class_id set. Setting to 1L.')
+    arg <- 1L
+    warning("No excluded_class_id set. Setting to 1L.")
   }
   if (!is.integer(arg)) {
     warning(paste0(
@@ -24,7 +24,7 @@ validateExcludedClass <- function(arg) {
   }
   if (!is.finite(arg)) {
     stop(paste0(
-      "multiclass excluded level must be finite: ", arg 
+      "multiclass excluded level must be finite: ", arg
     ))
   }
   if (arg < 0) {
@@ -44,11 +44,11 @@ validateExcludedClass <- function(arg) {
 dropExcludedClass <- function(x, all_classes, excluded_class_id) {
   stopifnot(is(x, "data.table"))
   stopifnot(is.character(all_classes))
-  excluded_class_id = validateExcludedClass(excluded_class_id)
-  if (length(all_classes) > 1){
-    excluded_class = all_classes[excluded_class_id]  # Note that if excluded_class_id is 0, no class will be excludede
+  excluded_class_id <- validateExcludedClass(excluded_class_id)
+  if (length(all_classes) > 1) {
+    excluded_class <- all_classes[excluded_class_id] # Note that if excluded_class_id is 0, no class will be excludede
     classes_included <- setdiff(all_classes, excluded_class)
-    x = x[, classes_included, drop = FALSE, with = FALSE]
+    x <- x[, classes_included, drop = FALSE, with = FALSE]
   }
   x
 }
@@ -80,7 +80,6 @@ extractModelName <- function(x) {
 #' @param x a train object
 #' @importFrom data.table data.table setorderv set
 extractBestPreds <- function(x) {
-
   # Checks
   stopifnot(is(x, "train"))
   stopifnot(x$control$savePredictions %in% c("all", "final", TRUE))
@@ -93,7 +92,7 @@ extractBestPreds <- function(x) {
   b <- b[a, ]
 
   # Remove some columns we don't need and order
-  for(var in names(x$bestTune)){
+  for (var in names(x$bestTune)) {
     data.table::set(b, j = var, value = NULL)
   }
   data.table::setorderv(b, c("Resample", "rowIndex"))
@@ -125,12 +124,12 @@ extractModelType <- function(list_of_models) {
 #' @title Extract the training data from a caretList
 #' @description Extract the training data from a caretList
 #' @param x a caretList object
-extractTrainingData <- function(x){
+extractTrainingData <- function(x) {
   stopifnot(is(x, "caretList"))
-  data_list = lapply(x, function(x) x$trainingData)
-  dims = sapply(data_list, nrow)
-  stopifnot(nrow == nrow[1], 'Models have different training rows')
-  stopifnot(!is.null(data_list[[1]]), 'No training data found')
+  data_list <- lapply(x, function(x) x$trainingData)
+  dims <- sapply(data_list, nrow)
+  stopifnot(nrow == nrow[1], "Models have different training rows")
+  stopifnot(!is.null(data_list[[1]]), "No training data found")
   data_list[[1]]
 }
 
@@ -141,21 +140,20 @@ extractObsLevels <- function(list_of_models) {
   all_levels <- lapply(list_of_models, levels)
   all_levels <- unique(all_levels)
   stopifnot(length(all_levels) == 1)
-  all_levels = all_levels[[1]]
+  all_levels <- all_levels[[1]]
   all_levels
 }
 
 #' @title Extract the best predictions (and observeds) from a list of train objects
 #' @description Extract predictions (and observeds) for the best tune from a list of caret models. This function extracts
-#' the raw preds from regression models and the class probs from classification models.  
+#' the raw preds from regression models and the class probs from classification models.
 #' Note that it extract preds and obs in one go, rather than separately. This is because caret can save the internal
-#' preds/obs from all resamples rather than just the final.  So we subset the internal pred/obs to just the best tuning 
+#' preds/obs from all resamples rather than just the final.  So we subset the internal pred/obs to just the best tuning
 #' (from caret) and return the pred and obs for that tune.
 #' @param list_of_models an object of class caretList or a list of caret models
 #' @importFrom pbapply pblapply
 #' @importFrom data.table set as.data.table
 extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
-
   # Determine the type and observed levels
   type <- extractModelType(list_of_models)
   obs_levels <- extractObsLevels(list_of_models)
@@ -171,24 +169,24 @@ extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
 
   # Extract the preds
   if (type == "Classification") {
-    keep_cols = extractObsLevels(list_of_models)
+    keep_cols <- extractObsLevels(list_of_models)
   } else if (type == "Regression") {
-    keep_cols = "pred"
+    keep_cols <- "pred"
   } else {
     stop("Unknown model type")
   }
-  preds = lapply(preds_and_obs, function(x) x[, keep_cols, drop = FALSE, with = FALSE])
+  preds <- lapply(preds_and_obs, function(x) x[, keep_cols, drop = FALSE, with = FALSE])
 
   # Drop the excluded level from the preds
   if (type == "Classification") {
-    preds = lapply(preds, dropExcludedClass, all_classes = obs_levels, excluded_class_id = excluded_class_id)
+    preds <- lapply(preds, dropExcludedClass, all_classes = obs_levels, excluded_class_id = excluded_class_id)
   }
 
   # Convert list of data.tables into one data.table
-  preds = data.table::as.data.table(preds)
+  preds <- data.table::as.data.table(preds)
 
   # Return
-  out = list(
+  out <- list(
     preds = preds,
     obs = preds_and_obs[[1]][["obs"]],
     rowIndex = preds_and_obs[[1]][["rowIndex"]],

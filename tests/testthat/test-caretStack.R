@@ -154,7 +154,8 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
   )
 
   # Make sure predictions still work if the exlcuded level is too high
-  expect_warning({
+  expect_warning(
+    {
       meta_model <- caretStack(
         model_list,
         method = "rpart",
@@ -164,7 +165,8 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
     },
     "Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Using all classes to train meta-model."
   )
-  expect_warning({
+  expect_warning(
+    {
       pred <- predict(meta_model, newdata = iris, type = "prob")
     },
     "Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes."
