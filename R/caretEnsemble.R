@@ -280,8 +280,7 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
     pred <- pred[[show_class]]
     obs <- as.integer(obs == show_class)
   }
-  resid <- obs - pred
-  out <- data.table::data.table(pred, obs, resid, id)
+  out <- data.table::data.table(pred, obs, resid = obs - pred, id)
   out
 }
 
@@ -325,7 +324,7 @@ autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars =
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
 
   # Residuals vs Fitted
-  g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(pred, resid)) +
+  g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(ensemble_data$pred, ensemble_data$resid)) +
     geom_point() +
     geom_smooth(se = FALSE) +
     scale_x_continuous("Fitted Values") +
@@ -348,8 +347,18 @@ autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars =
     data.table::set(sub_model_data[[model_name]], j = "model", value = model_name)
   }
   sub_model_data <- data.table::rbindlist(sub_model_data)
-  sub_model_summary <- sub_model_data[, list(ymin = min(resid), ymax = max(resid), yavg = median(resid), yhat = pred[1]), by = id]
-  g4 <- ggplot2::ggplot(sub_model_summary, ggplot2::aes(x = yhat, ymin = ymin, ymax = ymax, y = yavg)) +
+  sub_model_summary <- sub_model_data[, list(
+    ymin = min(data.table::.SD$resid),
+    ymax = max(data.table::.SD$resid),
+    yavg = median(data.table::.SD$resid),
+    yhat = data.table::.SD$pred[1]
+  ), by = "id"]
+  g4 <- ggplot2::ggplot(sub_model_summary, ggplot2::aes(
+    x = sub_model_summary$yhat,
+    ymin = sub_model_summary$ymin,
+    ymax = sub_model_summary$ymax,
+    y = sub_model_summary$yavg
+  )) +
     ggplot2::geom_linerange(alpha = I(0.5)) +
     ggplot2::geom_point(size = I(3), alpha = I(0.8)) +
     ggplot2::theme_bw() +
@@ -369,16 +378,16 @@ autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars =
     xvars <- setdiff(xvars, c(".outcome", ".weights", "(Intercept)"))
     xvars <- sample(xvars, 2)
   }
-  data.table::set(x_data, j = "id", value = 1:nrow(x_data))
+  data.table::set(x_data, j = "id", value = seq_len(nrow(x_data)))
   plotdf <- merge(ensemble_data, x_data, by = "id")
-  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(rlang::.data[[xvars[1]]], resid)) +
+  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(plotdf[[xvars[1]]], plotdf$resid)) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
     ggplot2::scale_x_continuous(xvars[1]) +
     ggplot2::scale_y_continuous("Residuals") +
     ggplot2::labs(title = paste0("Residuals Against ", xvars[1])) +
     ggplot2::theme_bw()
-  g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(rlang::.data[[xvars[2]]], resid)) +
+  g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(plotdf[[xvars[2]]], plotdf$resid)) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
     ggplot2::scale_x_continuous(xvars[2]) +

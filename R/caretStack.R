@@ -78,14 +78,12 @@ predict.caretStack <- function(
   stopifnot(is(object$models, "caretList"))
 
   # Extract model types
-  type <- extractModelTypes(object$models)
+  type <- extractModelType(object$models)
 
   # If the excluded class wasn't set at train time, set it
-  if (type == "Classification") {
-    if (is.null(object[["excluded_class_id"]])) {
-      object.excluded_class_id <- 1L
-      warning("No excluded_class_id set.  Setting to 1L.")
-    }
+  if (type == "Classification" && is.null(object[["excluded_class_id"]])) {
+    object.excluded_class_id <- 1L
+    warning("No excluded_class_id set.  Setting to 1L.")
   }
 
   preds <- predict(object$models, newdata = newdata, excluded_class_id = object.excluded_class_id, ...)

@@ -127,8 +127,8 @@ extractModelType <- function(list_of_models) {
 extractTrainingData <- function(x) {
   stopifnot(is(x, "caretList"))
   data_list <- lapply(x, function(x) x$trainingData)
-  dims <- sapply(data_list, nrow)
-  stopifnot(nrow == nrow[1], "Models have different training rows")
+  all_rows <- sapply(data_list, nrow)
+  stopifnot(all_rows == all_rows[1], "Models have different training rows")
   stopifnot(!is.null(data_list[[1]]), "No training data found")
   data_list[[1]]
 }
