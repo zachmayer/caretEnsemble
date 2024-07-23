@@ -169,9 +169,6 @@ extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
   check_bestpreds_preds(preds_and_obs)
   check_bestpreds_obs(preds_and_obs)
 
-  # Extract obs
-  obs = preds_and_obs[[1]][["obs"]]
-
   # Extract the preds
   if (type == "Classification") {
     keep_cols = extractObsLevels(list_of_models)
@@ -193,7 +190,9 @@ extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
   # Return
   out = list(
     preds = preds,
-    obs = obs,
+    obs = preds_and_obs[[1]][["obs"]],
+    rowIndex = preds_and_obs[[1]][["rowIndex"]],
+    Resample = preds_and_obs[[1]][["Resample"]],
     type = type
   )
   invisible(gc(reset = TRUE))
