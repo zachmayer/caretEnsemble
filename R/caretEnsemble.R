@@ -261,9 +261,9 @@ plot.caretEnsemble <- function(x, ...) {
 
 #' @title Extract the best predictions and observations from a train object
 #' @description This function extracts the best predictions and observations from a train object
-#' and then calculates residuals.  It only uses one class for classificaiton models, by default class 2.
+#' and then calculates residuals.  It only uses one class for classification models, by default class 2.
 #' @param object a \code{train} object
-#' @param show_class_id For classificaiton only: which class level to use for residuals
+#' @param show_class_id For classification only: which class level to use for residuals
 #' @return a data.table with predictions, observeds, and residuals
 #' @importFrom data.table data.table
 extractPredObsResid <- function(object, show_class_id = 2L) {
@@ -291,7 +291,7 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #' @param which an integer index for which of the plots to print.  DOES NOTHING.
 #' @param mfrow an integer vector of length 2 specifying the number of rows and columns for plots
 #' @param xvars a vector of the names of x variables to plot against residuals
-#' @param show_class_id For classificaiton only: which class level to show on the plot
+#' @param show_class_id For classification only: which class level to show on the plot
 #' @param ... additional arguments to pass to autoplot
 #' @return A grid of diagnostic plots. Top left is the range of the performance
 #' metric across each component model along with its standard deviation. Top right
