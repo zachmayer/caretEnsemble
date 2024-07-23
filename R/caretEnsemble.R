@@ -228,7 +228,7 @@ varImpFrame <- function(x) {
 #' @return A numeric of the residuals.
 residuals.caretEnsemble <- function(object, ...) {
   if (is.null(object$modelType)) {
-    object$modelType <- extractModelTypes(object$models)[1]
+    object$modelType <- extractModelType(object$models)[1]
   }
   if (object$modelType == "Regression") {
     yhat <- predict(object)
@@ -255,7 +255,7 @@ residuals.caretEnsemble <- function(object, ...) {
 #' y for the observed value.
 multiResiduals <- function(object, ...) {
   stopifnot(is(object$models, "caretList"))
-  modtype <- extractModelTypes(object$models)
+  modtype <- extractModelType(object$models)
   preds <- predict(object$models, ...)
   if (modtype == "Regression") {
     y <- object$models[[1]]$trainingData$.outcome

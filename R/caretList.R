@@ -337,21 +337,20 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
       # use caret::levels.train to extract the levels of the target from each model
       # and then drop the excluded class if needed
       pred = caret::predict.train(x, type = "prob", newdata = newdata, ... = ...)
+      pred = data.table::as.data.table((pred)
       pred = dropExcludedClass(pred, all_classes = levels(x), excluded_class_id = excluded_class_id)
 
     # predict for reg
     } else if (type == "Regression") {
       pred = caret::predict.train(x, type = "raw", newdata = newdata, ... = ...)
+      pred = data.table::as.data.table((pred
     
     # Error
     } else {
       stop(paste("Unknown model type:", type))
     }
 
-    # Convert to a data.table
-    if (!inherits(pred, "data.table")) {
-      pred <- data.table::as.data.table(pred)
-    }
+    # Return
     pred
   })
 

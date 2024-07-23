@@ -42,13 +42,13 @@ validateExcludedClass <- function(arg) {
 #' @param all_classes
 #' @param excluded_class_id
 dropExcludedClass <- function(x, all_classes, excluded_class_id) {
-  stopifnot(is(x, "data.frame") || is(x, "matrix"))
+  stopifnot(is(x, "data.table"))
   stopifnot(is.character(all_classes))
   excluded_class_id = validateExcludedClass(excluded_class_id)
   if (length(all_classes) > 1){
     excluded_class = all_classes[excluded_class_id]  # Note that if excluded_class_id is 0, no class will be excludede
     classes_included <- setdiff(all_classes, excluded_class)
-    x = x[, classes_included, drop = FALSE]
+    x = x[, classes_included, drop = FALSE, with = FALSE]
   }
   x
 }
@@ -220,8 +220,9 @@ check_binary_classification <- function(list_of_models) {
 }
 
 #####################################################
-# Extraction functions
+# Extraction functions - train
 #####################################################
+
 #' @title Extract the method name associated with a single train object
 #' @description Extracts the method name associated with a single train object. Note
 #' that for standard models (i.e. those already prespecified by caret), the
@@ -256,38 +257,14 @@ validateCustomModel <- function(x) {
   x
 }
 
-#' @title Extracts the model types from a list of train model
-#' @description Extracts the model types from a list of train model
-#'
-#' @param list_of_models an object of class caretList
-extractModelTypes <- function(list_of_models) {
-  types <- sapply(list_of_models, function(x) x$modelType)
-  type <- unique(types)
-
-  # TODO: Maybe in the future we can combine reg and class models
-  # Also, this check is redundant, but I think that is ok
-  stopifnot(length(type) == 1)
-  stopifnot(type %in% c("Classification", "Regression"))
-  type
-}
-
-#' @title Extract the training data from a caretList
-#' @description Extract the training data from a caretList
-#' @param x a caretList object
-extractTrainingData <- function(x){
-  stopifnot(is(x, "caretList"))
-  data_list = lapply(x, function(x) x$trainingData)
-  dims = sapply(data_list, nrow)
-  stopifnot(nrow == nrow[1], 'Models have different training rows')
-  stopifnot(!is.null(data_list[[1]]), 'No training data found')
-  data_list[[1]]
-}
-
+#####################################################
+# Extraction functions - caretList
+#####################################################
 #' @title Extract the best predictions from a train object
 #' @description Extract predictions for the best tune from a model
 #' @param x a train object
 #' @importFrom data.table data.table setorderv set
-bestPreds <- function(x) {
+extractBestPreds <- function(x) {
 
   # Checks
   stopifnot(is(x, "train"))
@@ -311,43 +288,83 @@ bestPreds <- function(x) {
   b
 }
 
+#' @title Extracts the model type from a list of train models
+#' @description Extracts the model types from a list of train models
+#'
+#' @param list_of_models an object of class caretList
+extractModelType <- function(list_of_models) {
+  types <- sapply(list_of_models, function(x) x$modelType)
+  type <- unique(types)
+
+  # TODO: Maybe in the future we can combine reg and class models
+  # Also, this check is redundant, but I think that is ok
+  stopifnot(length(type) == 1)
+  stopifnot(type %in% c("Classification", "Regression"))
+  type
+}
+
+#' @title Extract the training data from a caretList
+#' @description Extract the training data from a caretList
+#' @param x a caretList object
+extractTrainingData <- function(x){
+  stopifnot(is(x, "caretList"))
+  data_list = lapply(x, function(x) x$trainingData)
+  dims = sapply(data_list, nrow)
+  stopifnot(nrow == nrow[1], 'Models have different training rows')
+  stopifnot(!is.null(data_list[[1]]), 'No training data found')
+  data_list[[1]]
+}
+
+#' @title Extract the observed levels from a list of models
+#' @description Extract the observed levels from a list of models
+#' @param list_of_models an object of class caretList
+extractObsLevels <- function(list_of_models) {
+  all_levels <- lapply(list_of_models, levels)
+  all_levels <- unique(all_levels)
+  stopifnot(length(all_levels) == 1)
+  all_levels = all_levels[[1]]
+  all_levels
+}
+
 #' @title Extract the best predictions (and observeds) from a list of train objects
-#' @description Extract predictions (and observeds)  for the best tune from a list of caret models
+#' @description Extract predictions (and observeds) for the best tune from a list of caret models. This function extracts
+#' the raw preds from regression models and the class probs from classification models.  
+#' Note that it extract preds and obs in one go, rather than separately. This is because caret can save the internal
+#' preds/obs from all resamples rather than just the final.  So we subset the internal pred/obs to just the best tuning 
+#' (from caret) and return the pred and obs for that tune.
 #' @param list_of_models an object of class caretList or a list of caret models
 #' @importFrom pbapply pblapply
 #' @importFrom data.table set as.data.table
-extractBestPredsObs <- function(list_of_models) {
+extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
 
-  # Determine the type
-  type <- extractModelTypes(list_of_models) 
+  # Determine the type and observed levels
+  type <- extractModelType(list_of_models)
+  obs_levels <- extractObsLevels(list_of_models)
 
   # Extraxt best preds based on the tuning information
-  preds <- lapply(list_of_models, bestPreds)
+  preds_and_obs <- lapply(list_of_models, bestPreds)
 
-  # Check them
-  check_bestpreds_resamples(preds)
-  check_bestpreds_indexes(preds)
-  check_bestpreds_preds(preds)
-  check_bestpreds_obs(preds)
+  # Check the extracted data
+  check_bestpreds_resamples(preds_and_obs)
+  check_bestpreds_indexes(preds_and_obs)
+  check_bestpreds_preds(preds_and_obs)
+  check_bestpreds_obs(preds_and_obs)
 
   # Extract obs
-  obs = preds[[1]][["obs"]]
+  obs = preds_and_obs[[1]][["obs"]]
 
-  # Remove columns we don't need
-  drop_vars = c('rowIndex', 'Resample', 'obs')
-  for(p in preds){
-    for(var in drop_vars){
-      data.table::set(p, j = var, value = NULL)
-    }
-  }
-
-  # For classification, check that all models were trained with class probs
-  # Then, drop the pred column, which is redundant with the class probs
+  # Extract the preds
   if (type == "Classification") {
-
+    keep_cols = extractObsLevels(list_of_models)
+  } else if (type == "Regression") {
+    keep_cols = "pred"
+  } else {
+    stop("Unknown model type")
   }
+  preds = lapply(preds_and_obs, function(x) x[, keep_cols, drop = FALSE, with = FALSE])
 
-  # Drop the excluded class
+  # Drop the excluded level from the preds
+  preds = lapply(preds, dropExcludedClass, all_classes = obs_levels, excluded_class_id = excluded_class_id)
 
   # Convert list of data.tables into one data.table
   preds = data.table::as.data.table(preds)
@@ -355,86 +372,9 @@ extractBestPredsObs <- function(list_of_models) {
   # Return
   out = list(
     preds = preds,
-    obs = obs
+    obs = obs,
+    type = type
   )
   invisible(gc(reset = TRUE))
   out
-}
-
-#' @title Make a prediction matrix from a list of models
-#' @description Extract obs from one models, and a matrix of predictions from all other model
-#'
-#' @param  list_of_models an object of class caretList
-#' @importFrom data.table set rbindlist dcast.data.table
-makePredObsMatrix <- function(list_of_models) {
-  # caretList Checks
-  check_caretList_classes(list_of_models)
-  check_caretList_model_types(list_of_models)
-
-  # Make a list of models
-  modelLibrary <- extractBestPreds(list_of_models)
-
-
-  # Extract model type (class or reg)
-  type <- extractModelTypes(list_of_models)
-
-  if (type == "Classification") {
-    # The names of the columns of the final matrix will consist of a
-    # concatenation of the model name and the class name for
-    # which the probability is provided.
-    # Remove at least one class to avoid colineality problems
-    num_classes <- length(levels(list_of_models[[1]]$pred$obs))
-    check_multiclass_excluded_level(getMulticlassExcludedLevel(), num_classes)
-    if (getMulticlassExcludedLevel() >= 1 && getMulticlassExcludedLevel() <= num_classes) {
-      classes_included <- levels(list_of_models[[1]]$pred$obs)[-getMulticlassExcludedLevel()]
-    } else {
-      warning("Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Using all classes to train meta-model.")
-      classes_included <- levels(list_of_models[[1]]$pred$obs)
-    }
-    class_model_combinations <- expand.grid(classes_included, names(modelLibrary))
-    old_column_names <- apply(class_model_combinations, 1, function(x) paste(x[1], x[2], sep = "_"))
-    column_names <- apply(class_model_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
-  } else {
-    # Otherwise, just use the model names
-    column_names <- names(modelLibrary)
-  }
-
-  # Add names column
-  for (i in seq_along(modelLibrary)) {
-    set(modelLibrary[[i]], j = "modelname", value = names(modelLibrary)[[i]])
-  }
-
-  # Remove parameter columns
-  keep <- Reduce(intersect, lapply(modelLibrary, names))
-  for (i in seq_along(modelLibrary)) {
-    rem <- setdiff(names(modelLibrary[[i]]), keep)
-    if (length(rem) > 0) {
-      for (r in rem) {
-        set(modelLibrary[[i]], j = r, value = NULL)
-      }
-    }
-  }
-  modelLibrary <- rbindlist(modelLibrary, fill = TRUE)
-
-  # For classification models that produce probs, use the probs as preds
-  # Otherwise, just use class predictions
-  if (type == "Classification") {
-    value.var <- c(levels(modelLibrary$obs), "pred")
-  } else {
-    value.var <- "pred"
-  }
-
-  # Reshape wide for meta-modeling
-  modelLibrary <- dcast.data.table(
-    modelLibrary,
-    obs + rowIndex + Resample ~ modelname,
-    value.var = value.var
-  )
-
-  if (type == "Classification") {
-    # Rename columns asociated with probabilities to modelname_classname
-    data.table::setnames(modelLibrary, old = old_column_names, new = column_names)
-  }
-
-  list(obs = modelLibrary$obs, preds = as.matrix(modelLibrary[, column_names, with = FALSE]), type = type)
 }

@@ -30,7 +30,7 @@ caretStack <- function(all.models, excluded_class_id=1L, ...) {
   check_caretList_model_types(all.models)
 
   # Extract each model's cross-validated predictions and check them
-  predobs = extractBestPredsObs(all.models)
+  predobs = extractBestPredsAndObs(all.models)
 
   # Build a caret model
   model <- train(predobs$preds, predobs$obs, ...)
