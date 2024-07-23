@@ -1,120 +1,56 @@
 #####################################################
-# Configuration Functions
+# Functions for dropping one level from classification problems
 #####################################################
-#' @title Return the configured target binary class level
-#' @description For binary classification problems, ensemble
-#' stacks and certain performance measures require an awareness
-#' of which class in a two-factor outcome is the "target" class.
-#' By default, this class will be assumed to be the first level in
-#' an outcome factor but that setting can be overridden using
-#' \code{setBinaryTargetLevel(2L)}.
-#' @seealso setBinaryTargetLevel
-#' @return Currently configured binary target level (as integer equal to 1 or 2)
-#' @export
-getBinaryTargetLevel <- function() {
-  arg <- getOption("caret.ensemble.binary.target.level", default = 1L)
-  validateBinaryTargetLevel(arg)
-}
 
-#' @title Set the target binary class level
-#' @description For binary classification problems, ensemble
-#' stacks and certain performance measures require an awareness
-#' of which class in a two-factor outcome is the "target" class.
-#' By default, the first level in an outcome factor is used but
-#' this value can be overridden using \code{setBinaryTargetLevel(2L)}
-#' @param level an integer in \{1, 2\} to be used as target outcome level
-#' @seealso getBinaryTargetLevel
-#' @export
-setBinaryTargetLevel <- function(level) {
-  level <- validateBinaryTargetLevel(level)
-  options(caret.ensemble.binary.target.level = level)
-}
-
-#' @title Validate arguments given as binary target level
-#' @description Helper function used to ensure that target
-#' binary class levels given by clients can be coerced to an integer
-#' and that the resulting integer is in \{1, 2\}.
-#' @param arg argument to potentially be used as new target level
-#' @return Binary target level (as integer equal to 1 or 2)
-validateBinaryTargetLevel <- function(arg) {
-  val <- suppressWarnings(try(as.integer(arg), silent = TRUE))
-  if (!is.integer(val) || !val %in% c(1L, 2L)) {
+#' @title Validate the excluded class
+#' @description Helper function to ensure that the excluded level for classification is an integer or NULL.
+#' @param arg The value to check
+#' @return integer or NULL
+validateExcludedClass <- function(arg) {
+  if (length(arg) != 1) {
     stop(paste0(
-      "Specified target binary class level is not valid.  ",
-      "Value should be either 1 or 2 but '", arg, "' was given ",
-      "(see caretEnsemble::setBinaryTargetLevel for more details)"
+      "classification excluded level must have a length of 1: length=", length(arg)
     ))
   }
-  val
-}
-
-#' @title Return the configured multiclass excluded level
-#' @description To train a model using probability outputs
-#' provided by other models in a classification problem, it is
-#' necessary to exclude one of the classes. By default, this class
-#' is assumed to be the first level in an outcome factor,
-#' but this setting can be overridden using
-#' \code{setMulticlassTargetLevel(3L)} if the classification
-#' problem has at least 3 classes.
-#' @seealso setMulticlassTargetLevel
-#' @return Currently configured multiclass excluded level (as integer)
-#' @export
-getMulticlassExcludedLevel <- function() {
-  arg <- getOption("caret.ensemble.multiclass.excluded.level", default = 1L)
-  validateMulticlassExcludedLevel(arg)
-}
-
-#' @title Set the multiclass excluded level
-#' @description To train a model using probability outputs
-#' provided by other models in a classification problem, it is
-#' necessary to exclude one of the classes. By default, this class
-#' is assumed to be the first level in an outcome factor,
-#' but this setting can be overridden using
-#' \code{setMulticlassTargetLevel(3L)} if the classification
-#' problem has at least 3 classes.
-#' @note Setting this value outside the range between 1 and
-#' the number of classes will cause caretStack to train the model
-#' with the probabilities associated with ALL classes, leading to
-#' potential collinearity issues.
-#' @param level an integer to be used as excluded
-#' @seealso getMulticlassExcludedLevel
-#' @export
-setMulticlassExcludedLevel <- function(level) {
-  level <- validateMulticlassExcludedLevel(level)
-  options(caret.ensemble.multiclass.excluded.level = level)
-}
-
-#' @title Validate arguments given as multiclass excluded level
-#' @description Helper function used to ensure that excluded
-#' multiclass levels given by clients can be coerced to an integer.
-#' @param arg argument to potentially be used as new excluded level
-#' @return Multiclass excluded level (as integer)
-validateMulticlassExcludedLevel <- function(arg) {
   if (!is.numeric(arg)) {
     stop(paste0(
-      "multiclass excluded level must be numeric: ", arg, " was given ",
-      "see setMulticlassExcludedLevel for more details"
+      "classification excluded level must be numeric: ", arg
     ))
   }
   if (!is.finite(arg)) {
     stop(paste0(
-      "multiclass excluded level must be finite: ", arg, " was given ",
-      "see setMulticlassExcludedLevel for more details"
+      "multiclass excluded level must be finite: ", arg 
     ))
   }
-  if (arg <= 0) {
+  if (arg < 0) {
     stop(paste0(
-      "multiclass excluded level must be > 0: ", arg, " was given ",
-      "see setMulticlassExcludedLevel for more details"
+      "multiclass excluded level must be >= 0: ", arg
     ))
   }
   if (!is.integer(arg)) {
     warning(paste0(
-      "multiclass excluded level is not an integer ", arg, " was given ",
-      "see setMulticlassExcludedLevel for more details"
+      "multiclass excluded level is not an integer ", arg
     ))
   }
-  as.integer(arg)
+  arg <- as.integer(arg)
+  arg
+}
+
+#' @title Drop Excluded Class
+#' @description Drop the excluded class from a prediction data.frame
+#' @param x
+#' @param all_classes
+#' @param excluded_class_id
+dropExcludedClass <- function(x, all_classes, excluded_class_id) {
+  stopifnot(is(x, "data.frame") || is(x, "matrix"))
+  stopifnot(is.character(all_classes))
+  excluded_class_id = validateExcludedClass(excluded_class_id)
+  if (length(all_classes) > 1){
+    excluded_class = all_classes[excluded_class_id]  # Note that if excluded_class_id is 0, no class will be excludede
+    classes_included <- setdiff(all_classes, excluded_class)
+    x = x[, classes_included, drop = FALSE]
+  }
+  x
 }
 
 #####################################################
@@ -175,13 +111,12 @@ check_caretList_model_types <- function(list_of_models) {
     for (model in list_of_models) {
       unique_obs <- unique(model$pred$obs)
       if (is.null(unique_obs)) {
-        stop("No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.")
+        stop("No predictions saved by train. Please re-run models with trainControl set with savePredictions = 'final'.")
       }
     }
   }
 
   # Check that classification models saved probabilities
-  # TODO: ALLOW NON PROB MODELS!
   if (type == "Classification") {
     probModels <- sapply(list_of_models, function(x) is.function(x$modelInfo$prob))
     if (!all(probModels)) stop("All models for classification must be able to generate class probabilities.")
@@ -189,7 +124,7 @@ check_caretList_model_types <- function(list_of_models) {
     if (!all(classProbs)) {
       bad_models <- names(list_of_models)[!classProbs]
       bad_models <- paste(bad_models, collapse = ", ")
-      stop("Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs=TRUE")
+      stop("Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs = TRUE")
     }
   }
   invisible(NULL)
@@ -200,7 +135,6 @@ check_caretList_model_types <- function(list_of_models) {
 #'
 #' @param modelLibrary a list of predictions from caret models
 check_bestpreds_resamples <- function(modelLibrary) {
-  # TODO: ID which model(s) have bad row indexes
   resamples <- lapply(modelLibrary, function(x) x[["Resample"]])
   names(resamples) <- names(modelLibrary)
   check <- length(unique(resamples))
@@ -215,7 +149,6 @@ check_bestpreds_resamples <- function(modelLibrary) {
 #'
 #' @param modelLibrary a list of predictions from caret models
 check_bestpreds_indexes <- function(modelLibrary) {
-  # TODO: ID which model(s) have bad row indexes
   rows <- lapply(modelLibrary, function(x) x[["rowIndex"]])
   names(rows) <- names(modelLibrary)
   check <- length(unique(rows))
@@ -230,7 +163,6 @@ check_bestpreds_indexes <- function(modelLibrary) {
 #'
 #' @param modelLibrary a list of predictions from caret models
 check_bestpreds_obs <- function(modelLibrary) {
-  # TODO: ID which model(s) have bad row indexes
   obs <- lapply(modelLibrary, function(x) x[["obs"]])
   names(obs) <- names(modelLibrary)
   check <- length(unique(obs))
@@ -245,7 +177,6 @@ check_bestpreds_obs <- function(modelLibrary) {
 #'
 #' @param modelLibrary a list of predictions from caret models
 check_bestpreds_preds <- function(modelLibrary) {
-  # TODO: ID which model(s) have bad preds
   # TODO: Regression models should be numeric, classification models should have numeric class probs
   pred <- lapply(modelLibrary, function(x) x[["pred"]])
   names(pred) <- names(modelLibrary)
@@ -264,28 +195,6 @@ check_bestpreds_preds <- function(modelLibrary) {
         "."
       )
     )
-  }
-  invisible(NULL)
-}
-
-#' @title Check multiclass excluded level
-#' @description Verifies that the multiclass excluded level is
-#' within the range of the number of classes.
-#'
-#' @param excluded_level the level to exclude
-#' @param num_classes the number of classes
-check_multiclass_excluded_level <- function(excluded_level, num_classes) {
-  if (excluded_level < 1 || excluded_level > num_classes) {
-    warning(paste0(
-      "The excluded level must be between 1 and the number of classes (",
-      num_classes,
-      "). ",
-      "Provided value was ",
-      excluded_level,
-      ". ",
-      "\nThis value can be changed using setMulticlassExcludedLevel(). ",
-      "\nAttempting to train a model with all classes included."
-    ))
   }
   invisible(NULL)
 }
@@ -362,37 +271,98 @@ extractModelTypes <- function(list_of_models) {
   type
 }
 
+#' @title Extract the training data from a caretList
+#' @description Extract the training data from a caretList
+#' @param x a caretList object
+extractTrainingData <- function(x){
+  stopifnot(is(x, "caretList"))
+  data_list = lapply(x, function(x) x$trainingData)
+  dims = sapply(data_list, nrow)
+  stopifnot(nrow == nrow[1], 'Models have different training rows')
+  stopifnot(!is.null(data_list[[1]]), 'No training data found')
+  data_list[[1]]
+}
+
 #' @title Extract the best predictions from a train object
 #' @description Extract predictions for the best tune from a model
 #' @param x a train object
-#' @importFrom data.table data.table setorderv
+#' @importFrom data.table data.table setorderv set
 bestPreds <- function(x) {
+
+  # Checks
   stopifnot(is(x, "train"))
   stopifnot(x$control$savePredictions %in% c("all", "final", TRUE))
-  a <- data.table(x$bestTune, key = names(x$bestTune))
-  b <- data.table(x$pred, key = names(x$bestTune))
+
+  # Extract the best tune and the pred data
+  a <- data.table::data.table(x$bestTune, key = names(x$bestTune))
+  b <- data.table::data.table(x$pred, key = names(x$bestTune))
+
+  # Subset pred data to the best tune only
   b <- b[a, ]
+
+  # Remove some columns we don't need and order
+  for(var in names(x$bestTune)){
+    data.table::set(b, j = var, value = NULL)
+  }
+  data.table::setorderv(b, c("Resample", "rowIndex"))
+
+  # Returb
   invisible(gc(reset = TRUE))
-  setorderv(b, c("Resample", "rowIndex"))
   b
 }
 
-#' @title Extract the best predictions from a list of train objects
-#' @description Extract predictions for the best tune from a list of caret models
+#' @title Extract the best predictions (and observeds) from a list of train objects
+#' @description Extract predictions (and observeds)  for the best tune from a list of caret models
 #' @param list_of_models an object of class caretList or a list of caret models
 #' @importFrom pbapply pblapply
-extractBestPreds <- function(list_of_models) {
-  out <- lapply(list_of_models, bestPreds)
-  if (is.null(names(out))) {
-    names(out) <- make.names(sapply(list_of_models, extractModelName), unique = TRUE)
+#' @importFrom data.table set as.data.table
+extractBestPredsObs <- function(list_of_models) {
+
+  # Determine the type
+  type <- extractModelTypes(list_of_models) 
+
+  # Extraxt best preds based on the tuning information
+  preds <- lapply(list_of_models, bestPreds)
+
+  # Check them
+  check_bestpreds_resamples(preds)
+  check_bestpreds_indexes(preds)
+  check_bestpreds_preds(preds)
+  check_bestpreds_obs(preds)
+
+  # Extract obs
+  obs = preds[[1]][["obs"]]
+
+  # Remove columns we don't need
+  drop_vars = c('rowIndex', 'Resample', 'obs')
+  for(p in preds){
+    for(var in drop_vars){
+      data.table::set(p, j = var, value = NULL)
+    }
   }
+
+  # For classification, check that all models were trained with class probs
+  # Then, drop the pred column, which is redundant with the class probs
+  if (type == "Classification") {
+
+  }
+
+  # Drop the excluded class
+
+  # Convert list of data.tables into one data.table
+  preds = data.table::as.data.table(preds)
+
+  # Return
+  out = list(
+    preds = preds,
+    obs = obs
+  )
   invisible(gc(reset = TRUE))
   out
 }
 
 #' @title Make a prediction matrix from a list of models
-#' @description Extract obs from one models, and a matrix of predictions from all other models, a
-#' helper function
+#' @description Extract obs from one models, and a matrix of predictions from all other model
 #'
 #' @param  list_of_models an object of class caretList
 #' @importFrom data.table set rbindlist dcast.data.table
@@ -404,11 +374,6 @@ makePredObsMatrix <- function(list_of_models) {
   # Make a list of models
   modelLibrary <- extractBestPreds(list_of_models)
 
-  # Model library checks
-  check_bestpreds_resamples(modelLibrary) # Re-write with data.table?
-  check_bestpreds_indexes(modelLibrary) # Re-write with data.table?
-  check_bestpreds_obs(modelLibrary) # Re-write with data.table?
-  check_bestpreds_preds(modelLibrary) # Re-write with data.table?
 
   # Extract model type (class or reg)
   type <- extractModelTypes(list_of_models)

@@ -6,6 +6,7 @@
 #' @details Check the models, and make a matrix of obs and preds
 #'
 #' @param all.models a list of caret models to ensemble.
+#' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.  If 0, will include all levels.
 #' @param ... additional arguments to pass to the optimization function
 #' @return S3 caretStack object
 #' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004). Ensemble Selection from Libraries of Models. \url{https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf}
@@ -21,14 +22,21 @@
 #' )
 #' caretStack(models, method = "glm")
 #' }
-caretStack <- function(all.models, ...) {
-  predobs <- makePredObsMatrix(all.models)
+caretStack <- function(all.models, excluded_class_id=1L, ...) {
+
+  # Validators
+  excluded_class_id = validateExcludedClass(excluded_class_id)
+  check_caretList_classes(all.models)
+  check_caretList_model_types(all.models)
+
+  # Extract each model's cross-validated predictions and check them
+  predobs = extractBestPredsObs(all.models)
 
   # Build a caret model
   model <- train(predobs$preds, predobs$obs, ...)
 
   # Return final model
-  out <- list(models = all.models, ens_model = model, error = model$results)
+  out <- list(models = all.models, ens_model = model, error = model$results, excluded_class_id = excluded_class_id)
   class(out) <- "caretStack"
   out
 }
@@ -72,33 +80,7 @@ predict.caretStack <- function(
   type <- extractModelTypes(object$models)
 
   preds <- predict(object$models, newdata = newdata, na.action = na.action)
-
-  if (type == "Classification") {
-    # We have to use the same columns (variables) as the ones used
-    # to train the model.
-    # If the user has specified a class to exclude within the range
-    # of 1 to num_classes, exclude that class from the predictions.
-    # Otherwise, include all classes.
-    column_names <- colnames(preds)
-
-    # TODO: Validate that all object$models[ have the same obs
-    # TODO: Validate that all object$models[ have the same pred levels
-    num_classes <- length(levels(object$models[[1]]$pred$obs))
-    if (getMulticlassExcludedLevel() >= 1 && getMulticlassExcludedLevel() <= num_classes) {
-      classes_included <- levels(object$models[[1]]$pred$obs)[-getMulticlassExcludedLevel()]
-    } else {
-      warning("Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes.")
-      classes_included <- levels(object$models[[1]]$pred$obs)
-    }
-    pattern <- paste(classes_included, collapse = "|")
-    # Remove columns that are associated with the class that was excluded
-    filtered_column_names <- grep(pattern, column_names, value = TRUE)
-    preds <- preds[, filtered_column_names, drop = FALSE]
-
-    est <- predict(object$ens_model, newdata = preds, na.action = na.action, ...)
-  } else {
-    est <- predict(object$ens_model, newdata = preds, ...)
-  }
+  est <- predict(object$ens_model, newdata = preds, na.action = na.action, ...)
 
   if (se || return_weights) {
     imp <- varImp(object$ens_model)$importance
