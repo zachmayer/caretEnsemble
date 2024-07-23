@@ -371,14 +371,14 @@ autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars =
   }
   data.table::set(x_data, j = "id", value = 1:nrow(x_data))
   plotdf <- merge(ensemble_data, x_data, by = "id")
-  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1]]], resid)) +
+  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(rlang::.data[[xvars[1]]], resid)) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
     ggplot2::scale_x_continuous(xvars[1]) +
     ggplot2::scale_y_continuous("Residuals") +
     ggplot2::labs(title = paste0("Residuals Against ", xvars[1])) +
     ggplot2::theme_bw()
-  g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[2]]], resid)) +
+  g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(rlang::.data[[xvars[2]]], resid)) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
     ggplot2::scale_x_continuous(xvars[2]) +
