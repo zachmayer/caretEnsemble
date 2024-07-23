@@ -52,7 +52,7 @@ methodCheck <- function(x) {
   # are specified as strings or model info lists (ie custom models)
   models <- lapply(x, function(m) {
     if (is.list(m)) {
-      validateCustomModel(m)
+      checkCustomModel(m)
       data.frame(type = "custom", model = m$method)
     } else if (is.character(m)) {
       data.frame(type = "native", model = m)
@@ -337,13 +337,13 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
       # use caret::levels.train to extract the levels of the target from each model
       # and then drop the excluded class if needed
       pred = caret::predict.train(x, type = "prob", newdata = newdata, ... = ...)
-      pred = data.table::as.data.table((pred)
+      pred = data.table::as.data.table(pred)
       pred = dropExcludedClass(pred, all_classes = levels(x), excluded_class_id = excluded_class_id)
 
     # predict for reg
     } else if (type == "Regression") {
       pred = caret::predict.train(x, type = "raw", newdata = newdata, ... = ...)
-      pred = data.table::as.data.table((pred
+      pred = data.table::as.data.table(pred)
     
     # Error
     } else {

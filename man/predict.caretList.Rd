@@ -4,19 +4,21 @@
 \alias{predict.caretList}
 \title{Create a matrix of predictions for each of the models in a caretList}
 \usage{
-\method{predict}{caretList}(object, newdata = NULL, ..., verbose = FALSE)
+\method{predict}{caretList}(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...)
 }
 \arguments{
 \item{object}{an object of class caretList}
 
 \item{newdata}{New data for predictions.  It can be NULL, but this is ill-advised.}
 
+\item{verbose}{Logical. If FALSE no progress bar is printed if TRUE a progress
+bar is shown. Default FALSE.}
+
+\item{excluded_class_id}{Integer.  The class id to drop when predicting for multiclass}
+
 \item{...}{additional arguments to pass to predict.train. Pass the \code{newdata}
 argument here, DO NOT PASS the "type" argument.  Classification models will
 return probabilities if possible, and regression models will return "raw".}
-
-\item{verbose}{Logical. If FALSE no progress bar is printed if TRUE a progress
-bar is shown. Default FALSE.}
 }
 \description{
 Make a matrix of predictions from a list of caret models

@@ -37,7 +37,7 @@ caretStack <- function(all.models, excluded_class_id=1L, ...) {
 
   # Return final model
   out <- list(models = all.models, ens_model = model, error = model$results, excluded_class_id = excluded_class_id)
-  class(out) <- "caretStack"
+  class(out) <- c("caretStack", "train")
   out
 }
 
@@ -74,13 +74,24 @@ predict.caretStack <- function(
     object, newdata = NULL,
     se = FALSE, level = 0.95,
     return_weights = FALSE,
-    na.action = na.omit,
     ...) {
+  
+  # Check if the object is a caretStack
   stopifnot(is(object$models, "caretList"))
+
+  # Extract model types
   type <- extractModelTypes(object$models)
 
-  preds <- predict(object$models, newdata = newdata, na.action = na.action)
-  est <- predict(object$ens_model, newdata = preds, na.action = na.action, ...)
+  # If the excluded class wasn't set at train time, set it
+  if (type == 'Classification'){
+    if (is.null(object[['excluded_class_id']])) {
+      object.excluded_class_id <- 1L
+      warning('No excluded_class_id set.  Setting to 1L.')
+    }
+  }
+  
+  preds <- predict(object$models, newdata = newdata, excluded_class_id = object.excluded_class_id, ...)
+  meta_preds <- predict(object$ens_model, newdata = preds, ...)
 
   if (se || return_weights) {
     imp <- varImp(object$ens_model)$importance
@@ -101,9 +112,9 @@ predict.caretStack <- function(
   }
 
   if (se) {
-    if (!inherits(est, "numeric") || is.null(model_weights$Overall)) {
+    if (!inherits(meta_preds, "numeric") || is.null(model_weights$Overall)) {
       message("Standard errors not available.")
-      out <- est
+      out <- meta_preds
     } else {
       model_methods <- colnames(preds)
       overall_weights <- model_weights$Overall[model_methods]
@@ -112,13 +123,13 @@ predict.caretStack <- function(
       std_error <- apply(preds, 1, wtd.sd, w = overall_weights, na.rm = TRUE)
       std_error <- qnorm(level) * std_error
       out <- data.frame(
-        fit = est,
-        lwr = est - std_error,
-        upr = est + std_error
+        fit = meta_preds,
+        lwr = meta_preds - std_error,
+        upr = meta_preds + std_error
       )
     }
   } else {
-    out <- est
+    out <- meta_preds
   }
   if (return_weights) {
     attr(out, "weights") <- model_weights

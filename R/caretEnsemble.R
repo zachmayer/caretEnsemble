@@ -32,7 +32,7 @@
 caretEnsemble <- function(all.models, ...) {
   check_binary_classification(all.models)
   out <- caretStack(all.models, method = "glm", ...)
-  class(out) <- c("caretEnsemble", "caretStack")
+  class(out) <- c("caretEnsemble", "caretStack", "train")
   out
 }
 
@@ -226,36 +226,48 @@ varImpFrame <- function(x) {
 #' @param object a \code{caretEnsemble} to make predictions from.
 #' @param ... other arguments to be passed to residuals
 #' @return A numeric of the residuals.
-residuals.caretEnsemble <- function(object, ...) {
-  if (is.null(object$modelType)) {
-    object$modelType <- extractModelType(object$models)[1]
+#' @importFrom stats model.matrix
+#' @importFrom data.table data.table
+residuals.train <- function(object, ...) {
+
+  # Checks
+  stopifnot(is(object, "caretStack"))
+  check_caretList_model_types(list(object$ens_model))
+  type <- extractModelType(list(ens=object$ens_model))
+
+  # Extract bests preds/obs
+  obs_levels <- levels(object$ens_model)
+  preds_and_obs <- extractBestPredsAndObs(list(pred=object$ens_model))
+  pred <- preds_and_obs$pred
+
+  # Munge the obs into the same format as the preds
+  obs <- stats::model.matrix(~ . - 1, data = data.frame(REMOVE=preds_and_obs$obs))
+  obs <- data.table::data.table(obs)
+  setnames(obs, gsub(names(obs), pattern = "REMOVE", replacement = "", fixed = TRUE))
+  if(type=='Classification') {
+    obs <- dropExcludedClass(obs, all_classes = obs_levels, excluded_class_id = object[['excluded_class_id']])
+  } else {
+    setnames(obs, 'obs')
   }
-  if (object$modelType == "Regression") {
-    yhat <- predict(object)
-    y <- object$models[[1]]$trainingData$.outcome
-    model_resid <- y - yhat
-  } else if (object$modelType == "Classification") {
-    yhat <- predict(object, type = "prob")[, getBinaryTargetLevel(), drop = TRUE]
-    y <- as.character(object$models[[1]]$trainingData$.outcome)
-    z <- table(y)
-    prevOutcome <- names(z)[z == max(z)]
-    y <- ifelse(y == prevOutcome, 0, 1)
-    model_resid <- y - yhat
+
+  model_resid <- obs - pred
+  if(ncol(model_resid) == 1){
+    model_resid <- model_resid[[1]]
   }
   model_resid
 }
 
-#' @title Calculate the residuals from all component models of a caretEnsemble.
+#' @title Calculate the residuals from all component models of a caretList
 #' @description This function calculates raw residuals for both regression and
-#' classification \code{train} objects within a \code{\link{caretEnsemble}}.
-#' @param object a \code{caretEnsemble} to make predictions from.
+#' classification \code{train} objects within a \code{\link{caretList}}.
+#' @param object a \code{caretList} to make predictions from.
 #' @param ... other arguments to be passed to residuals
 #' @return A data.frame in the long format with columns for the model method,
 #' the observation id, yhat for the fitted values, resid for the residuals, and
 #' y for the observed value.
-multiResiduals <- function(object, ...) {
-  stopifnot(is(object$models, "caretList"))
-  modtype <- extractModelType(object$models)
+residuals.caretList <- function(object, ...) {
+  stopifnot(is(object, "caretList"))
+  modtype <- extractModelType(object)
   preds <- predict(object$models, ...)
   if (modtype == "Regression") {
     y <- object$models[[1]]$trainingData$.outcome
@@ -417,7 +429,7 @@ plot.caretEnsemble <- function(x, ...) {
 #' ens <- caretEnsemble(models)
 #' autoplot(ens)
 #' }
-autoplot <- function(object, which = 1:6, mfrow = c(3, 2),
+meplot <- function(object, which = 1:6, mfrow = c(3, 2),
                      xvars = NULL, ...) {
   plotdf <- suppressMessages(fortify(object))
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")

@@ -143,7 +143,7 @@ test_that("Checks generate errors", {
       trControl = myControl
     )
   )
-  modelLibrary <- extractBestPreds(x)
+  modelLibrary <- extractBestPredsAndObsAndObs(x)
   modelLibrary$nn <- modelLibrary$lm[sample(seq_len(nrow(modelLibrary$lm)), nrow(modelLibrary$lm)), ]
 
   expect_error(check_bestpreds_resamples(modelLibrary))
@@ -165,7 +165,7 @@ test_that("Checks generate errors", {
   check_caretList_classes(x)
   expect_error(check_caretList_model_types(x))
 
-  m <- extractBestPreds(x)
+  m <- extractBestPredsAndObsAndObs(x)
   expect_error(check_bestpreds_preds(m))
 
   set.seed(42)
@@ -342,8 +342,8 @@ test_that("check_caretList_model_types validates model types correctly", {
 })
 
 test_that("check_bestpreds_resamples validates resamples correctly", {
-  best_preds_class <- extractBestPreds(models.class)
-  best_preds_reg <- extractBestPreds(models.reg)
+  best_preds_class <- extractBestPredsAndObsAndObs(models.class)
+  best_preds_reg <- extractBestPredsAndObsAndObs(models.reg)
 
   expect_null(check_bestpreds_resamples(best_preds_class))
   expect_null(check_bestpreds_resamples(best_preds_reg))
@@ -355,8 +355,8 @@ test_that("check_bestpreds_resamples validates resamples correctly", {
 })
 
 test_that("check_bestpreds_indexes validates row indexes correctly", {
-  best_preds_class <- extractBestPreds(models.class)
-  best_preds_reg <- extractBestPreds(models.reg)
+  best_preds_class <- extractBestPredsAndObsAndObs(models.class)
+  best_preds_reg <- extractBestPredsAndObsAndObs(models.reg)
 
   expect_null(check_bestpreds_indexes(best_preds_class))
   expect_null(check_bestpreds_indexes(best_preds_reg))
@@ -368,8 +368,8 @@ test_that("check_bestpreds_indexes validates row indexes correctly", {
 })
 
 test_that("check_bestpreds_obs validates observed values correctly", {
-  best_preds_class <- extractBestPreds(models.class)
-  best_preds_reg <- extractBestPreds(models.reg)
+  best_preds_class <- extractBestPredsAndObsAndObs(models.class)
+  best_preds_reg <- extractBestPredsAndObs(models.reg)
 
   expect_null(check_bestpreds_obs(best_preds_class))
   expect_null(check_bestpreds_obs(best_preds_reg))
@@ -381,8 +381,8 @@ test_that("check_bestpreds_obs validates observed values correctly", {
 })
 
 test_that("check_bestpreds_preds validates predictions correctly", {
-  best_preds_class <- extractBestPreds(models.class)
-  best_preds_reg <- extractBestPreds(models.reg)
+  best_preds_class <- extractBestPredsAndObs(models.class)
+  best_preds_reg <- extractBestPredsAndObs(models.reg)
 
   expect_null(check_bestpreds_preds(best_preds_class))
   expect_null(check_bestpreds_preds(best_preds_reg))
@@ -408,9 +408,9 @@ test_that("extractModelTypes extracts model types correctly", {
   expect_equal(extractModelTypes(models.reg), "Regression")
 })
 
-test_that("bestPreds extracts best predictions correctly", {
-  best_preds_class <- bestPreds(models.class[[1]])
-  best_preds_reg <- bestPreds(models.reg[[1]])
+test_that("extractBestPreds extracts best predictions correctly", {
+  best_preds_class <- extractBestPreds(models.class[[1]])
+  best_preds_reg <- extractBestPreds(models.reg[[1]])
 
   expect_s3_class(best_preds_class, "data.frame")
   expect_s3_class(best_preds_reg, "data.frame")
@@ -418,9 +418,9 @@ test_that("bestPreds extracts best predictions correctly", {
   expect_true(all(c("Resample", "rowIndex", "pred", "obs") %in% names(best_preds_reg)))
 })
 
-test_that("extractBestPreds extracts best predictions for all models", {
-  best_preds_class <- extractBestPreds(models.class)
-  best_preds_reg <- extractBestPreds(models.reg)
+test_that("extractBestPredsAndObs extracts best predictions for all models", {
+  best_preds_class <- extractBestPredsAndObs(models.class)
+  best_preds_reg <- extractBestPredsAndObs(models.reg)
 
   expect_type(best_preds_class, "list")
   expect_type(best_preds_reg, "list")
