@@ -288,8 +288,6 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #' @description This function provides a more robust series of diagnostic plots
 #' for a caretEnsemble object.
 #' @param object a \code{caretEnsemble} object
-#' @param which an integer index for which of the plots to print.  DOES NOTHING.
-#' @param mfrow an integer vector of length 2 specifying the number of rows and columns for plots
 #' @param xvars a vector of the names of x variables to plot against residuals
 #' @param show_class_id For classification only: which class level to show on the plot
 #' @param ... additional arguments to pass to autoplot
@@ -300,9 +298,9 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #' right is the disagreement in the residuals of the component models (unweighted)
 #' across the fitted values. Bottom left and bottom right are the plots of the
 #' residuals against two random or user specified variables.
-#' @importFrom ggplot2 ggplot aes geom_point geom_smooth scale_x_continuous
-#' @importFrom ggplot2 scale_y_continuous theme_bw geom_bar labs geom_linerange aes_string
-#' @importFrom data.table data.table set rbindlist setkey
+#' @importFrom ggplot2 ggplot aes geom_point geom_smooth geom_bar geom_linerange
+#' @importFrom ggplot2 scale_x_continuous scale_y_continuous labs theme_bw autoplot
+#' @importFrom data.table data.table set rbindlist setkey .SD
 #' @importFrom gridExtra grid.arrange
 #' @export
 #' @examples
@@ -315,7 +313,7 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #' )
 #' ens <- caretEnsemble(models)
 #' autoplot(ens)
-autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars = NULL, show_class_id = 2L, ...) {
+autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(is(object, "caretEnsemble"))
   ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
   data.table::setkey(ensemble_data, id)
@@ -324,7 +322,7 @@ autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars =
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
 
   # Residuals vs Fitted
-  g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(ensemble_data$pred, ensemble_data$resid)) +
+  g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(ensemble_data[["pred"]], ensemble_data[["resid"]])) +
     geom_point() +
     geom_smooth(se = FALSE) +
     scale_x_continuous("Fitted Values") +
@@ -347,19 +345,21 @@ autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars =
     data.table::set(sub_model_data[[model_name]], j = "model", value = model_name)
   }
   sub_model_data <- data.table::rbindlist(sub_model_data)
+  utils::globalVariables(".SD")  # TODO FIXME
   sub_model_summary <- sub_model_data[, list(
-    ymin = min(data.table::.SD$resid),
-    ymax = max(data.table::.SD$resid),
-    yavg = median(data.table::.SD$resid),
-    yhat = data.table::.SD$pred[1]
+    ymin = min(.SD$resid),
+    ymax = max(.SD$resid),
+    yavg = median(.SD$resid),
+    yhat = .SD$pred[1]
   ), by = "id"]
   g4 <- ggplot2::ggplot(sub_model_summary, ggplot2::aes(
     x = sub_model_summary$yhat,
-    ymin = sub_model_summary$ymin,
-    ymax = sub_model_summary$ymax,
     y = sub_model_summary$yavg
   )) +
-    ggplot2::geom_linerange(alpha = I(0.5)) +
+    ggplot2::geom_linerange(alpha = I(0.5), ggplot2::aes(
+      ymin = sub_model_summary$ymin,
+      ymax = sub_model_summary$ymax
+    )) +
     ggplot2::geom_point(size = I(3), alpha = I(0.8)) +
     ggplot2::theme_bw() +
     ggplot2::geom_smooth(
@@ -394,5 +394,5 @@ autoplot.caretEnsemble <- function(object, which = 1:6, mfrow = c(3, 2), xvars =
     ggplot2::scale_y_continuous("Residuals") +
     ggplot2::labs(title = paste0("Residuals Against ", xvars[2])) +
     ggplot2::theme_bw()
-  gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2)
+  suppressMessages(gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2))
 }

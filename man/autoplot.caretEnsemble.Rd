@@ -4,21 +4,10 @@
 \alias{autoplot.caretEnsemble}
 \title{Convenience function for more in-depth diagnostic plots of caretEnsemble objects}
 \usage{
-autoplot.caretEnsemble(
-  object,
-  which = 1:6,
-  mfrow = c(3, 2),
-  xvars = NULL,
-  show_class_id = 2L,
-  ...
-)
+\method{autoplot}{caretEnsemble}(object, xvars = NULL, show_class_id = 2L, ...)
 }
 \arguments{
 \item{object}{a \code{caretEnsemble} object}
-
-\item{which}{an integer index for which of the plots to print.  DOES NOTHING.}
-
-\item{mfrow}{an integer vector of length 2 specifying the number of rows and columns for plots}
 
 \item{xvars}{a vector of the names of x variables to plot against residuals}
 

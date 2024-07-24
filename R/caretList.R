@@ -333,6 +333,14 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
     apply_fun <- pbapply::pblapply
   }
 
+  # Check data
+  if (is.null(newdata)) {
+    train_data_nulls <- sapply((object), function(x) is.null(x[["trainingData"]]))
+    if (any(train_data_nulls)) {
+      stop("newdata is NULL and trainingData is NULL for some models. Please pass newdata or retrain with returnData=TRUE.")
+    }
+  }
+
   # Loop over the models and make predictions
   preds <- apply_fun(object, function(x) {
     type <- x$modelType

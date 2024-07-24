@@ -666,7 +666,7 @@ test_that("predict.caretList gives a warning and stops for missing training data
   mock_model <- list(structure(list(trainingData = NULL), class = "train"))
   class(mock_model) <- "caretList"
 
-  expect_error(predict.caretList(mock_model), "Could not find training data in the first model in the ensemble.")
+  expect_error(predict.caretList(mock_model), "newdata is NULL and trainingData is NULL for some models. Please pass newdata or retrain with returnData=TRUE.")
 })
 
 test_that("extractModelName handles custom models correctly", {

@@ -155,10 +155,10 @@ test_that("No errors are thrown by a generics for ensembles", {
 
   test_plot_file <- "caretEnsemble_test_plots.png"
   png(test_plot_file)
-  suppressWarnings(p1 <- autoplot(ens.class))
-  suppressWarnings(p2 <- autoplot(ens.reg))
-  suppressWarnings(p3 <- autoplot(ens.class, xvars = c("Petal.Length", "Petal.Width")))
-  suppressWarnings(p4 <- autoplot(ens.reg, xvars = c("Petal.Length", "Petal.Width")))
+  suppressWarnings(autoplot(ens.class))
+  suppressWarnings(autoplot(ens.reg))
+  suppressWarnings(autoplot(ens.class, xvars = c("Petal.Length", "Petal.Width")))
+  suppressWarnings(autoplot(ens.reg, xvars = c("Petal.Length", "Petal.Width")))
   expect_error(autoplot(ens.reg$models[[1]]))
   dev.off()
   expect_true(file.exists(test_plot_file))
