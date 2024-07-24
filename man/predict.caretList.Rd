@@ -4,7 +4,7 @@
 \alias{predict.caretList}
 \title{Create a matrix of predictions for each of the models in a caretList}
 \usage{
-\method{predict}{caretList}(object, newdata = NULL, verbose = FALSE, excluded_class_id = 0L)
+\method{predict}{caretList}(object, newdata = NULL, verbose = FALSE, excluded_class_id = 0L, ...)
 }
 \arguments{
 \item{object}{an object of class caretList}
@@ -14,7 +14,9 @@
 \item{verbose}{Logical. If FALSE no progress bar is printed if TRUE a progress
 bar is shown. Default FALSE.}
 
-\item{excluded_class_id}{Integer.  The class id to drop when predicting for multiclass}
+\item{excluded_class_id}{Integer. The class id to drop when predicting for multiclass}
+
+\item{...}{Other arguments to pass to \code{\link{predict.train}}}
 }
 \description{
 Make a matrix of predictions from a list of caret models

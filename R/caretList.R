@@ -321,12 +321,13 @@ as.caretList.list <- function(object) {
 #' @param newdata New data for predictions.  It can be NULL, but this is ill-advised.
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
-#' @param excluded_class_id Integer.  The class id to drop when predicting for multiclass
+#' @param excluded_class_id Integer. The class id to drop when predicting for multiclass
+#' @param ... Other arguments to pass to \code{\link{predict.train}}
 #' @importFrom pbapply pblapply
 #' @importFrom data.table as.data.table setnames
 #' @export
 #' @method predict caretList
-predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 0L) {
+predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 0L, ...) {
   # Decided whether to be verbose or quiet
   apply_fun <- lapply
   if (verbose) {
@@ -349,7 +350,7 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
     if (type == "Classification") {
       # use caret::levels.train to extract the levels of the target from each model
       # and then drop the excluded class if needed
-      pred <- caret::predict.train(x, type = "prob", newdata = newdata)
+      pred <- caret::predict.train(x, type = "prob", newdata = newdata, ...)
       pred <- data.table::as.data.table(pred)
       pred <- dropExcludedClass(pred, all_classes = levels(x), excluded_class_id = excluded_class_id)
 

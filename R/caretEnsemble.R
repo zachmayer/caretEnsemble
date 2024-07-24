@@ -305,14 +305,14 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #' @export
 #' @examples
 #' set.seed(42)
-#' models <- caretList(
-#'   iris[1:50, 1:2],
-#'   iris[1:50, 3],
-#'   trControl = trainControl(method = "cv"),
-#'   methodList = c("glm", "rpart")
+#' data(models.reg)
+#' ens <- caretEnsemble(
+#'   models.reg,
+#'   trControl = caret::trainControl(
+#'     method = "cv", savePredictions = "final"
+#'   )
 #' )
-#' ens <- caretEnsemble(models)
-#' autoplot(ens)
+#' suppressWarnings(autoplot(ens))
 autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(is(object, "caretEnsemble"))
   ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)

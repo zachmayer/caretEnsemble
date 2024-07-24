@@ -30,12 +30,12 @@ for a caretEnsemble object.
 }
 \examples{
 set.seed(42)
-models <- caretList(
-  iris[1:50, 1:2],
-  iris[1:50, 3],
-  trControl = trainControl(method = "cv"),
-  methodList = c("glm", "rpart")
+data(models.reg)
+ens <- caretEnsemble(
+  models.reg,
+  trControl = caret::trainControl(
+    method = "cv", savePredictions = "final"
+  )
 )
-ens <- caretEnsemble(models)
-autoplot(ens)
+suppressWarnings(autoplot(ens))
 }

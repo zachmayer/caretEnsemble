@@ -8,6 +8,8 @@ extractBestPredsAndObs(list_of_models, excluded_class_id = 1L)
 }
 \arguments{
 \item{list_of_models}{an object of class caretList or a list of caret models}
+
+\item{excluded_class_id}{an integer indicating the class to exclude for classification models}
 }
 \description{
 Extract predictions (and observeds) for the best tune from a list of caret models. This function extracts

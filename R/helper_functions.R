@@ -164,6 +164,7 @@ extractObsLevels <- function(list_of_models) {
 #' preds/obs from all resamples rather than just the final.  So we subset the internal pred/obs to just the best tuning
 #' (from caret) and return the pred and obs for that tune.
 #' @param list_of_models an object of class caretList or a list of caret models
+#' @param excluded_class_id an integer indicating the class to exclude for classification models
 #' @importFrom pbapply pblapply
 #' @importFrom data.table set as.data.table
 extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
