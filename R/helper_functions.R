@@ -41,9 +41,9 @@ validateExcludedClass <- function(arg) {
   } else {
     warning(paste0("classification excluded level is not an integer: ", arg))
     if (is.numeric(arg)) {
-      arg <- floor(arg)
+      out <- floor(arg)
     }
-    suppressWarnings(out <- as.integer(arg))
+    suppressWarnings(out <- as.integer(out))
   }
 
   # Check the output
@@ -142,7 +142,9 @@ extractModelType <- function(list_of_models) {
   # TODO: Maybe in the future we can combine reg and class models
   # Also, this check is redundant, but I think that is ok
   stopifnot(length(type) == 1)
-  stopifnot(type %in% c("Classification", "Regression"))
+  if (!type %in% c("Classification", "Regression")) {
+    stop(paste("Unknown model type:", type))
+  }
   type
 }
 
@@ -186,8 +188,6 @@ extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
     keep_cols <- extractObsLevels(list_of_models)
   } else if (type == "Regression") {
     keep_cols <- "pred"
-  } else {
-    stop("Unknown model type")
   }
   preds <- lapply(preds_and_obs, function(x) x[, keep_cols, drop = FALSE, with = FALSE])
 

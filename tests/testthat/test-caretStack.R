@@ -301,3 +301,15 @@ test_that("caretStack handles custom performance function", {
     expect_true("default" %in% names(stack$ens_model$results))
   }
 })
+
+test_that("predict.caretStack works if excluded_class_id is not set", {
+  ens <- caretStack(models.class)
+  ens[["excluded_class_id"]] <- NULL
+  expect_warning(pred <- predict(ens, X.class, type = "prob"), "No excluded_class_id set.  Setting to 1L.")
+
+  # Note that we don't exclude the class from the ensemble predictions, but merely from the preprocessing
+  expect_is(pred, "data.frame") # caret returns data.frame
+  expect_equal(nrow(pred), nrow(X.class))
+  expect_equal(ncol(pred), 2)
+  expect_equal(names(pred), c("No", "Yes"))
+})

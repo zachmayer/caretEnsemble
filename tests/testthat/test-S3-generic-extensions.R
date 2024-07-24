@@ -193,6 +193,18 @@ test_that("as.caretList.list fails for invalid inputs", {
   expect_error(as.caretList(list(a = 1, b = 2)), "object requires all elements of list to be caret models")
 })
 
+test_that("as.caretList.list names lists without names", {
+  models.no.name <- models.class
+  names(models.no.name) <- NULL
+  class(models.no.name) <- "list"
+  expect_null(names(models.no.name))
+  cl <- as.caretList(models.no.name)
+  expect_equal(names(cl), unname(sapply(models.class, "[[", "method")))
+})
+test_that("as.caretList fails on non-list", {
+  expect_error(as.caretList(1L), "object must be a list")
+})
+
 test_that("predict.caretList works for classification and regression", {
   class_preds <- predict(models.class, newdata = X.class)
   reg_preds <- predict(models.reg, newdata = X.reg)

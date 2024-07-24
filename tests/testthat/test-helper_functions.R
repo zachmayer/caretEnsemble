@@ -436,12 +436,22 @@ test_that("extractBestPredsAndObs creates prediction-observation data correctly"
   expect_equal(nrow(pred_obs_matrix_reg$preds), length(pred_obs_matrix_reg$obs))
 })
 
+test_that("extractBestPredsAndObs fails on new model types", {
+  models.class.new <- models.class
+  for (idx in seq_along(models.class.new)) {
+    models.class.new[[idx]]$modelType <- "ObjectDetection"
+  }
+  expect_error(extractBestPredsAndObs(models.class.new), "Unknown model type: ObjectDetection")
+})
+
 test_that("validateExcludedClass validates excluded level correctly", {
-  expect_error(validateExcludedClass("a"))
-  expect_warning(expect_error(validateExcludedClass(-1)))
-  expect_warning(expect_error(validateExcludedClass(-0.000001)))
-  expect_warning(expect_error(validateExcludedClass(Inf)))
-  expect_warning(validateExcludedClass(1.5))
+  expect_warning(validateExcludedClass(NULL), "No excluded_class_id set. Setting to 1L.")
+  expect_error(validateExcludedClass(c(1L, 2L)), "classification excluded level must have a length of 1: length=2")
+  expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
+  expect_warning(expect_error(validateExcludedClass(-1), "classification excluded level must be >= 0: -1"))
+  expect_warning(expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"))
+  expect_warning(expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"))
+  expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
   txt <- "classification excluded level is not an integer: 2"
   expect_warning(expect_equal(validateExcludedClass(2), 2L), txt)
 })

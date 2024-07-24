@@ -236,7 +236,7 @@ caretList <- function(
   if (length(modelList) == 0) {
     stop("caret:train failed for all models.  Please inspect your data.")
   }
-  class(modelList) <- "caretList"
+  class(modelList) <- c("caretList", "list")
 
   modelList
 }
@@ -267,7 +267,7 @@ as.caretList <- function(object) {
 #' @return NA
 #' @export
 as.caretList.default <- function(object) {
-  # nothing yet, future dreams go here
+  stop("object must be a list")
 }
 
 #' @title Convert list to caretList
