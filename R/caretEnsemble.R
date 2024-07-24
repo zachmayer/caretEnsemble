@@ -64,8 +64,8 @@ summary.caretEnsemble <- function(object, ...) {
   val <- getMetric.train(object$ens_model)
   cat(paste0("The following models were ensembled: ", types, " \n"))
   cat("They were weighted: \n")
-  cat(paste0(paste0(round(wghts, 4), collapse = " "), "\n"))
-  cat(paste0("The resulting ", metric, " is: ", round(val, 4), "\n"))
+  cat(paste0(paste0(round(wghts, 4L), collapse = " "), "\n"))
+  cat(paste0("The resulting ", metric, " is: ", round(val, 4L), "\n"))
 
   # Add code to compare ensemble to individual models
   cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
@@ -96,7 +96,7 @@ extractModRes <- function(ensemble) {
     ),
     stringsAsFactors = FALSE
   )
-  names(modRes)[2:3] <- c(metric, paste0(metric, "SD"))
+  names(modRes)[2L:3L] <- c(metric, paste0(metric, "SD"))
   modRes
 }
 
@@ -163,12 +163,12 @@ varImp.caretEnsemble <- function(object, ...) {
 
   # Convert to data.frame
   dat <- varImpFrame(coef_importance)
-  dat[is.na(dat)] <- 0
+  dat[is.na(dat)] <- 0L
   names(dat) <- make.names(names(coef_importance))
 
   # Scale the importances
-  norm_to_100 <- function(d) d / sum(d) * 100
-  dat <- apply(dat, 2, norm_to_100)
+  norm_to_100 <- function(d) d / sum(d) * 100.0
+  dat <- apply(dat, 2L, norm_to_100)
 
   # Calculate overall importance
   model_weights <- coef(object$ens_model$finalModel)
@@ -179,7 +179,7 @@ varImp.caretEnsemble <- function(object, ...) {
   names(model_weights) <- names(object$models)
   model_weights <- model_weights[names(model_weights) %in% names(coef_importance)]
   model_weights <- abs(model_weights)
-  overall <- norm_to_100(apply(dat, 1, weighted.mean, w = model_weights))
+  overall <- norm_to_100(apply(dat, 1L, weighted.mean, w = model_weights))
   dat <- data.frame(overall = overall, dat)
 
   # Order by overall importance
@@ -191,7 +191,7 @@ varImp.caretEnsemble <- function(object, ...) {
 #' @keywords internal
 # This function only gets called once, in varImp.caretEnsemble
 clean_varImp <- function(x) {
-  names(x$importance)[1] <- "Overall"
+  names(x$importance)[1L] <- "Overall"
   x$importance <- x$importance[, "Overall", drop = FALSE]
   x$importance
 }
@@ -206,18 +206,18 @@ varImpFrame <- function(x) {
   dat$id <- row.names(dat)
   dat$model <- sub("\\.[^\n]*", "", dat$id)
   dat$var <- sub("^[^.]*", "", dat$id)
-  dat$var <- substr(dat$var, 2, nchar(dat$var))
+  dat$var <- substr(dat$var, 2L, nchar(dat$var))
 
   # Parse intercept variables
-  dat$var[grep("Inter", dat$var)] <- "Intercept"
+  dat$var[grep("Inter", dat$var, fixed = TRUE)] <- "Intercept"
   dat$id <- NULL
   row.names(dat) <- NULL
   dat <- reshape(dat,
     direction = "wide", v.names = "Overall",
     idvar = "var", timevar = "model"
   )
-  row.names(dat) <- dat[, 1]
-  dat[, -1]
+  row.names(dat) <- dat[, 1L]
+  dat[, -1L]
 }
 
 #' @title Plot Diagnostics for an caretEnsemble Object
@@ -252,9 +252,9 @@ plot.caretEnsemble <- function(x, ...) {
     theme_bw() +
     labs(x = "Individual Model Method", y = metricLab)
 
-  if (nrow(x$error) > 0) {
+  if (nrow(x$error) > 0L) {
     plt <- plt +
-      geom_hline(linetype = 2, linewidth = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
+      geom_hline(linetype = 2L, linewidth = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
   }
   plt
 }
@@ -274,7 +274,7 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
   obs <- predobs$obs
   id <- predobs$rowIndex
   if (type == "Regression") {
-    pred <- pred[[1]]
+    pred <- pred[[1L]]
   } else {
     show_class <- levels(object)[show_class_id]
     pred <- pred[[show_class]]
@@ -361,11 +361,11 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
       ymin = .data[["ymin"]],
       ymax = .data[["ymax"]]
     )) +
-    ggplot2::geom_point(size = I(3), alpha = I(0.8)) +
+    ggplot2::geom_point(size = I(3L), alpha = I(0.8)) +
     ggplot2::theme_bw() +
     ggplot2::geom_smooth(
       method = "lm", se = FALSE,
-      linewidth = I(1.1), color = I("red"), linetype = 2
+      linewidth = I(1.1), color = I("red"), linetype = 2L
     ) +
     ggplot2::labs(
       x = "Fitted Values", y = "Range of Resid.",
@@ -377,24 +377,24 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   if (is.null(xvars)) {
     xvars <- names(x_data)
     xvars <- setdiff(xvars, c(".outcome", ".weights", "(Intercept)"))
-    xvars <- sample(xvars, 2)
+    xvars <- sample(xvars, 2L)
   }
   data.table::set(x_data, j = "id", value = seq_len(nrow(x_data)))
   plotdf <- merge(ensemble_data, x_data, by = "id")
   g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1]]], .data[["resid"]])) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
-    ggplot2::scale_x_continuous(xvars[1]) +
+    ggplot2::scale_x_continuous(xvars[1L]) +
     ggplot2::scale_y_continuous("Residuals") +
-    ggplot2::labs(title = paste0("Residuals Against ", xvars[1])) +
+    ggplot2::labs(title = paste0("Residuals Against ", xvars[1L])) +
     ggplot2::theme_bw()
-  g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[2]]], .data[["resid"]])) +
+  g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[2L]]], .data[["resid"]])) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
     ggplot2::scale_x_continuous(xvars[2]) +
     ggplot2::scale_y_continuous("Residuals") +
-    ggplot2::labs(title = paste0("Residuals Against ", xvars[2])) +
+    ggplot2::labs(title = paste0("Residuals Against ", xvars[2L])) +
     ggplot2::theme_bw()
   # nolint end: object_usage_linter
-  suppressMessages(gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2))
+  suppressMessages(gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2L))
 }

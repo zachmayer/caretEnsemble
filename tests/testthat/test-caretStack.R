@@ -12,44 +12,44 @@ data(Y.class)
 context("Does stacking and prediction work?")
 
 test_that("We can stack regression models", {
-  set.seed(96367)
+  set.seed(96367L)
   ens.reg <- caretStack(
     models.reg,
     method = "lm", preProcess = "pca",
-    trControl = trainControl(number = 2, allowParallel = FALSE)
+    trControl = trainControl(number = 2L, allowParallel = FALSE)
   )
   expect_that(ens.reg, is_a("caretStack"))
   expect_is(summary(ens.reg), "summary.lm")
   invisible(capture.output(print(ens.reg)))
   pred.reg <- predict(ens.reg, newdata = X.reg)
-  expect_true(is.numeric(pred.reg))
-  expect_true(length(pred.reg) == 150)
+  expect_type(pred.reg, "double")
+  expect_length(pred.reg, 150L)
 })
 
 test_that("We can stack classification models", {
-  set.seed(42)
+  set.seed(42L)
   ens.class <- caretStack(
     models.class,
     method = "glm",
-    trControl = trainControl(number = 2, allowParallel = FALSE)
+    trControl = trainControl(number = 2L, allowParallel = FALSE)
   )
   expect_that(ens.class, is_a("caretStack"))
   expect_is(summary(ens.class), "summary.glm")
   invisible(capture.output(print(ens.class)))
   pred.class <- predict(ens.class, X.class, type = "prob")
   expect_true(all(sapply(pred.class, is.numeric)))
-  expect_true(nrow(pred.class) == 150)
+  expect_identical(nrow(pred.class), 150L)
   raw.class <- predict(ens.class, X.class, type = "raw")
-  expect_true(is.factor(raw.class))
-  expect_true(length(raw.class) == 150)
+  expect_s3_class(raw.class, "factor")
+  expect_length(raw.class, 150L)
 })
 
 test_that("caretStack plots", {
   test_plot_file <- "caretEnsemble_test_plots.png"
   ens.reg <- caretStack(
     models.reg,
-    method = "gbm", tuneLength = 2, verbose = FALSE,
-    trControl = trainControl(number = 2, allowParallel = FALSE)
+    method = "gbm", tuneLength = 2L, verbose = FALSE,
+    trControl = trainControl(number = 2L, allowParallel = FALSE)
   )
   png(filename = test_plot_file)
   plot(ens.reg)
@@ -65,7 +65,7 @@ test_that("Failure to calculate se occurs gracefully", {
   ens.class <- caretStack(
     models.class,
     method = "glm",
-    trControl = trainControl(number = 2, allowParallel = FALSE)
+    trControl = trainControl(number = 2L, allowParallel = FALSE)
   )
 
   predict(ens.class, X.class, type = "raw", se = TRUE)
@@ -78,7 +78,7 @@ test_that("Failure to calculate se occurs gracefully", {
   ens.reg <- caretStack(
     models.reg,
     method = "lm", preProcess = "pca",
-    trControl = trainControl(number = 2, allowParallel = FALSE)
+    trControl = trainControl(number = 2L, allowParallel = FALSE)
   )
   expect_is(predict(ens.reg, X.reg, se = TRUE), "data.frame")
 
@@ -118,14 +118,14 @@ test_that("Failure to calculate se occurs gracefully", {
 })
 
 test_that("Test na.action pass through", {
-  set.seed(1337)
+  set.seed(1337L)
 
   # drop the first model because it does not support na.pass
-  ens.reg <- caretStack(models.reg[2:3], method = "lm")
+  ens.reg <- caretStack(models.reg[2L:3L], method = "lm")
 
   X_reg_na <- X.reg
   # introduce random NA values into a column
-  X_reg_na[sample(seq_len(nrow(X_reg_na)), 20), sample(seq_len(ncol(X_reg_na) - 1), 1)] <- NA
+  X_reg_na[sample.int(nrow(X_reg_na), 20L), sample.int(ncol(X_reg_na) - 1L, 1L)] <- NA
 
   pred.reg <- predict(ens.reg, newdata = X_reg_na, na.action = na.pass)
   expect_length(pred.reg, nrow(X_reg_na))
@@ -161,8 +161,8 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
     excluded_class_id = 4L
   )
   pred <- predict(meta_model, newdata = iris, type = "prob")
-  expect_equal(nrow(pred), 150)
-  expect_equal(ncol(pred), 3)
+  expect_equal(nrow(pred), 150L)
+  expect_equal(ncol(pred), 3L)
   expect_true(all(sapply(pred, is.finite)))
 })
 
@@ -170,8 +170,8 @@ context("caretStack edge cases")
 
 test_that("caretStack handles different stacking algorithms", {
   for (x in list(list(models.reg, X.reg), list(models.class, X.class))) {
-    model_list <- x[[1]]
-    test_data <- x[[2]]
+    model_list <- x[[1L]]
+    test_data <- x[[2L]]
 
     stack_methods <- c("glm", "rf", "gbm", "glmnet")
 
@@ -180,14 +180,14 @@ test_that("caretStack handles different stacking algorithms", {
         stack <- caretStack(
           model_list,
           method = method,
-          trControl = trainControl(method = "cv", number = 3),
+          trControl = trainControl(method = "cv", number = 3L),
           verbose = FALSE
         )
       } else {
         stack <- caretStack(
           model_list,
           method = method,
-          trControl = trainControl(method = "cv", number = 3)
+          trControl = trainControl(method = "cv", number = 3L)
         )
       }
 
@@ -195,7 +195,7 @@ test_that("caretStack handles different stacking algorithms", {
       expect_equal(stack$ens_model$method, method)
 
       predictions <- predict(stack, newdata = test_data)
-      expect_equal(length(predictions), nrow(test_data))
+      expect_length(predictions, nrow(test_data))
     }
   }
 })
@@ -206,14 +206,14 @@ test_that("caretStack handles missing data in new data", {
   stack <- caretStack(
     models.class.subset,
     method = "rpart",
-    trControl = trainControl(method = "cv", number = 3)
+    trControl = trainControl(method = "cv", number = 3L)
   )
 
   test_data_with_na <- X.class
-  test_data_with_na[1:5, 1] <- NA
+  test_data_with_na[1L:5L, 1L] <- NA
 
   pred <- predict(stack, newdata = test_data_with_na)
-  expect_equal(length(pred), nrow(test_data_with_na))
+  expect_length(pred, nrow(test_data_with_na))
 })
 
 test_that("caretStack handles different metrics", {
@@ -224,7 +224,7 @@ test_that("caretStack handles different metrics", {
       method = "glm",
       metric = metric,
       trControl = trainControl(
-        method = "cv", number = 3, classProbs = TRUE,
+        method = "cv", number = 3L, classProbs = TRUE,
         summaryFunction = twoClassSummary
       )
     )
@@ -239,18 +239,18 @@ test_that("caretStack handles imbalanced data", {
 
   imbalanced_data <- rbind(
     train_data[train_data$Species == "setosa", ],
-    train_data[train_data$Species == "versicolor", ][1:10, ],
-    train_data[train_data$Species == "virginica", ][1:5, ]
+    train_data[train_data$Species == "versicolor", ][1L:10L, ],
+    train_data[train_data$Species == "virginica", ][1L:5L, ]
   )
 
   expect_warning({
     model_list <- caretList(
-      x = imbalanced_data[, 1:4],
+      x = imbalanced_data[, 1L:4L],
       y = imbalanced_data$Species,
       methodList = "rpart",
       trControl = trainControl(
         method = "cv",
-        number = 3,
+        number = 3L,
         classProbs = TRUE,
         sampling = "up",
         savePredictions = "final"
@@ -262,12 +262,12 @@ test_that("caretStack handles imbalanced data", {
     model_list,
     method = "rpart",
     metric = "Kappa",
-    trControl = trainControl(method = "cv", number = 3)
+    trControl = trainControl(method = "cv", number = 3L)
   )
 
   expect_s3_class(stack, "caretStack")
   pred <- predict(stack, newdata = imbalanced_data)
-  expect_equal(length(pred), nrow(imbalanced_data))
+  expect_length(pred, nrow(imbalanced_data))
 })
 
 test_that("caretStack handles custom preprocessing", {
@@ -277,10 +277,10 @@ test_that("caretStack handles custom preprocessing", {
       model_list,
       method = "glm",
       preProcess = preprocess,
-      trControl = trainControl(method = "cv", number = 3)
+      trControl = trainControl(method = "cv", number = 3L)
     )
     expect_s3_class(stack, "caretStack")
-    expect_equal(names(stack$ens_model$preProcess$method), c(preprocess, "ignore"))
+    expect_named(stack$ens_model$preProcess$method, c(preprocess, "ignore"))
   }
 })
 
@@ -294,7 +294,7 @@ test_that("caretStack handles custom performance function", {
       model_list,
       method = "glm",
       metric = "default",
-      trControl = trainControl(method = "cv", number = 3, summaryFunction = custom_summary)
+      trControl = trainControl(method = "cv", number = 3L, summaryFunction = custom_summary)
     )
 
     expect_s3_class(stack, "caretStack")
@@ -310,6 +310,6 @@ test_that("predict.caretStack works if excluded_class_id is not set", {
   # Note that we don't exclude the class from the ensemble predictions, but merely from the preprocessing
   expect_is(pred, "data.frame") # caret returns data.frame
   expect_equal(nrow(pred), nrow(X.class))
-  expect_equal(ncol(pred), 2)
-  expect_equal(names(pred), c("No", "Yes"))
+  expect_equal(ncol(pred), 2L)
+  expect_named(pred, c("No", "Yes"))
 })

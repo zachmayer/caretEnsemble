@@ -5,14 +5,14 @@ library(caretEnsemble)
 library(testthat)
 
 # Load and prepare data for subsequent tests
-seed <- 2239
+seed <- 2239L
 set.seed(seed)
 data(models.class)
 data(X.class)
 data(Y.class)
 
 # Create 80/20 train/test split
-index <- createDataPartition(Y.class, p = .8)[[1]]
+index <- createDataPartition(Y.class, p = 0.8)[[1L]]
 X.train <- X.class[index, ]
 X.test <- X.class[-index, ]
 Y.train <- Y.class[index]
@@ -22,11 +22,11 @@ Y.test <- Y.class[-index]
 context("Do classifier predictions use the correct target classes?")
 #############################################################################
 
-runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1) {
+runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # Extract levels of response input data
   Y.levels <- levels(Y.train)
   expect_identical(Y.levels, levels(Y.test))
-  expect_equal(length(Y.levels), 2)
+  expect_length(Y.levels, 2L)
 
   # Manually generate fold indexes.  Note that this must be
   # done explicitly because using built-in caret functions like
@@ -35,9 +35,9 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1) {
   # needs to prove invariance to).  This happens because createFolds uses
   # the base table function to create class frequency counts and that table
   # command sorts results alphabetically.
-  k <- 3
+  k <- 3L
   folds <- sample(seq_along(Y.train))
-  folds <- setNames(split(folds, seq_along(folds) %% k), sprintf("Fold%s", 1:k))
+  folds <- setNames(split(folds, seq_along(folds) %% k), sprintf("Fold%s", 1L:k))
   folds <- lapply(folds, function(x) setdiff(seq_along(Y.train), x))
   fold.idx <- sort(unique(unlist(folds)))
   expect_true(all(fold.idx == seq_along(Y.train)), "CV indexes not generated correctly")
@@ -56,8 +56,8 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1) {
   # level in the original data (i.e. Y.class).  This check exists to
   # avoid regressions to bugs like this:
   # https://github.com/zachmayer/caretEnsemble/pull/190
-  unique.levels <- unique(sapply(model.ens$models, function(x) levels(x$pred$obs)[1]))
-  expect_identical(unique.levels, Y.levels[1])
+  unique.levels <- unique(sapply(model.ens$models, function(x) levels(x$pred$obs)[1L]))
+  expect_identical(unique.levels, Y.levels[1L])
 
   # Verify that the training data given to the ensemble model has the
   # same levels in the response as the original, raw data
@@ -67,7 +67,14 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1) {
   # generated from probability predictions using a .5 cutoff
   Y.pred <- predict(model.ens, newdata = X.test, type = "raw")
   Y.prob <- predict(model.ens, newdata = X.test, type = "prob")
-  Y.cutoff <- factor(ifelse(Y.prob[, Y.levels[pos.level]] > .5, Y.levels[pos.level], Y.levels[-pos.level]), levels = Y.levels)
+  Y.cutoff <- factor(
+    ifelse(
+      Y.prob[, Y.levels[pos.level]] > 0.5,
+      Y.levels[pos.level],
+      Y.levels[-pos.level]
+    ),
+    levels = Y.levels
+  )
 
   # Create confusion matricies for each class prediction vector
   cmat.pred <- confusionMatrix(Y.pred, Y.test, positive = Y.levels[pos.level])
@@ -94,7 +101,7 @@ test_that("Ensembled classifiers do not rearrange outcome factor levels", {
   # First run the level selection test using the default levels
   # of the response (i.e. c('No', 'Yes'))
   set.seed(seed)
-  runBinaryLevelValidation(Y.train, Y.test, pos.level = 1)
+  runBinaryLevelValidation(Y.train, Y.test, pos.level = 1L)
 
   # Now reverse the assigment of the response labels as well as
   # the levels of the response factor.  Reversing the assignment
@@ -106,7 +113,7 @@ test_that("Ensembled classifiers do not rearrange outcome factor levels", {
   Y.levels <- levels(Y.train)
   refactor <- function(d) {
     factor(
-      ifelse(d == Y.levels[1], Y.levels[2], Y.levels[1]),
+      ifelse(d == Y.levels[1L], Y.levels[2L], Y.levels[1L]),
       levels = rev(Y.levels)
     )
   }

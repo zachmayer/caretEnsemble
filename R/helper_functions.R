@@ -14,7 +14,8 @@ utils::globalVariables(c(".SD", ".data")) # Disables warnings from R CMD CHECk, 
 #####################################################
 
 #' @title Validate the excluded class
-#' @description Helper function to ensure that the excluded level for classification is an integer.  Set to 0L to exclude no class.
+#' @description Helper function to ensure that the excluded level for classification is an integer.
+#' Set to 0L to exclude no class.
 #' @param arg The value to check
 #' @return integer
 validateExcludedClass <- function(arg) {
@@ -29,7 +30,7 @@ validateExcludedClass <- function(arg) {
       "classification excluded level must be numeric: ", arg
     ))
   }
-  if (length(arg) != 1) {
+  if (length(arg) != 1L) {
     stop(paste0(
       "classification excluded level must have a length of 1: length=", length(arg)
     ))
@@ -52,7 +53,7 @@ validateExcludedClass <- function(arg) {
       "classification excluded level must be finite: ", arg
     ))
   }
-  if (out < 0) {
+  if (out < 0L) {
     stop(paste0(
       "classification excluded level must be >= 0: ", arg
     ))
@@ -67,10 +68,9 @@ validateExcludedClass <- function(arg) {
 #' @param all_classes a character vector of all classes
 #' @param excluded_class_id an integer indicating the class to exclude
 dropExcludedClass <- function(x, all_classes, excluded_class_id) {
-  stopifnot(is(x, "data.table"))
-  stopifnot(is.character(all_classes))
+  stopifnot(is(x, "data.table"), is.character(all_classes))
   excluded_class_id <- validateExcludedClass(excluded_class_id)
-  if (length(all_classes) > 1) {
+  if (length(all_classes) > 1L) {
     excluded_class <- all_classes[excluded_class_id] # Note that if excluded_class_id is 0, no class will be excludede
     classes_included <- setdiff(all_classes, excluded_class)
     x <- x[, classes_included, drop = FALSE, with = FALSE]
@@ -106,8 +106,10 @@ extractModelName <- function(x) {
 #' @importFrom data.table data.table setorderv set
 extractBestPreds <- function(x) {
   # Checks
-  stopifnot(is(x, "train"))
-  stopifnot(x$control$savePredictions %in% c("all", "final", TRUE))
+  stopifnot(
+    is(x, "train"),
+    x$control$savePredictions %in% c("all", "final", TRUE)
+  )
 
   # Extract the best tune and the pred data
   a <- data.table::data.table(x$bestTune, key = names(x$bestTune))
@@ -141,7 +143,7 @@ extractModelType <- function(list_of_models) {
 
   # TODO: Maybe in the future we can combine reg and class models
   # Also, this check is redundant, but I think that is ok
-  stopifnot(length(type) == 1)
+  stopifnot(length(type) == 1L)
   if (!type %in% c("Classification", "Regression")) {
     stop(paste("Unknown model type:", type))
   }
@@ -154,14 +156,14 @@ extractModelType <- function(list_of_models) {
 extractObsLevels <- function(list_of_models) {
   all_levels <- lapply(list_of_models, levels)
   all_levels <- unique(all_levels)
-  stopifnot(length(all_levels) == 1)
-  all_levels <- all_levels[[1]]
+  stopifnot(length(all_levels) == 1L)
+  all_levels <- all_levels[[1L]]
   all_levels
 }
 
 #' @title Extract the best predictions (and observeds) from a list of train objects
-#' @description Extract predictions (and observeds) for the best tune from a list of caret models. This function extracts
-#' the raw preds from regression models and the class probs from classification models.
+#' @description Extract predictions (and observeds) for the best tune from a list of caret models.
+#' This function extracts the raw preds from regression models and the class probs from classification models.
 #' Note that it extract preds and obs in one go, rather than separately. This is because caret can save the internal
 #' preds/obs from all resamples rather than just the final.  So we subset the internal pred/obs to just the best tuning
 #' (from caret) and return the pred and obs for that tune.
@@ -200,16 +202,18 @@ extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
   preds <- data.table::as.data.table(preds)
 
   # Return
-  # TODO: make this a data.table
-  # TODO: make Classifciaiton pull from each sub-model
-  # TODO: aggregate by row index and sort by row inde3x
-  # TODO: merge with all possible IDs, warn on NAs and fill with 0
-  # TODO: allow different models, different methods, different resamples, different types.  Only require a common set of rows
+  # TODO:
+  # - make this a data.table
+  # - make Classifciaiton pull from each sub-model
+  # - aggregate by row index and sort by row inde3x
+  # - merge with all possible IDs, warn on NAs and fill with 0
+  # - allow different models, different methods, different resamples, different types.
+  # - Only require a common set of rows
   out <- list(
     preds = preds,
-    obs = preds_and_obs[[1]][["obs"]],
-    rowIndex = preds_and_obs[[1]][["rowIndex"]],
-    Resample = preds_and_obs[[1]][["Resample"]],
+    obs = preds_and_obs[[1L]][["obs"]],
+    rowIndex = preds_and_obs[[1L]][["rowIndex"]],
+    Resample = preds_and_obs[[1L]][["Resample"]],
     type = type
   )
   invisible(gc(reset = TRUE))
@@ -243,8 +247,10 @@ checkCustomModel <- function(x) {
 #' @param list_of_models a list of caret models to check
 check_caretList_classes <- function(list_of_models) {
   # Check that we have a list of train models
-  stopifnot(is(list_of_models, "caretList"))
-  stopifnot(sapply(list_of_models, is, "train"))
+  stopifnot(
+    is(list_of_models, "caretList"),
+    sapply(list_of_models, is, "train")
+  )
   invisible(NULL)
 }
 
@@ -260,7 +266,7 @@ check_caretList_model_types <- function(list_of_models) {
     for (model in list_of_models) {
       unique_obs <- unique(model$pred$obs)
       if (is.null(unique_obs)) {
-        stop("No predictions saved by train. Please re-run models with trainControl set with savePredictions = 'final'.")
+        stop("No predictions saved by train. Please re-run models with trainControl savePredictions = 'final'")
       }
     }
   }
@@ -273,7 +279,10 @@ check_caretList_model_types <- function(list_of_models) {
     if (!all(classProbs)) {
       bad_models <- names(list_of_models)[!classProbs]
       bad_models <- paste(bad_models, collapse = ", ")
-      stop("Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs = TRUE: ", bad_models)
+      stop(
+        "Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs = TRUE: ",
+        bad_models
+      )
     }
   }
   invisible(NULL)
@@ -287,7 +296,7 @@ check_bestpreds_resamples <- function(modelLibrary) {
   resamples <- lapply(modelLibrary, function(x) x[["Resample"]])
   names(resamples) <- names(modelLibrary)
   check <- length(unique(resamples))
-  if (check != 1) {
+  if (check != 1L) {
     stop("Component models do not have the same re-sampling strategies")
   }
   invisible(NULL)
@@ -301,7 +310,7 @@ check_bestpreds_indexes <- function(modelLibrary) {
   rows <- lapply(modelLibrary, function(x) x[["rowIndex"]])
   names(rows) <- names(modelLibrary)
   check <- length(unique(rows))
-  if (check != 1) {
+  if (check != 1L) {
     stop("Re-sampled predictions from each component model do not use the same rowIndexes from the origial dataset")
   }
   invisible(NULL)
@@ -315,8 +324,8 @@ check_bestpreds_obs <- function(modelLibrary) {
   obs <- lapply(modelLibrary, function(x) x[["obs"]])
   names(obs) <- names(modelLibrary)
   check <- length(unique(obs))
-  if (check != 1) {
-    stop("Observed values for each component model are not the same.  Please re-train the models with the same Y variable")
+  if (check != 1L) {
+    stop("Observed values for each component model are not the same. Re-train the models with the same Y variable")
   }
   invisible(NULL)
 }
@@ -332,11 +341,11 @@ check_bestpreds_preds <- function(modelLibrary) {
 
   clases <- sapply(pred, class)
   if (is.matrix(clases)) {
-    clases <- apply(clases, 2, paste, collapse = " ")
+    clases <- apply(clases, 2L, paste, collapse = " ")
   }
   classes <- unique(clases)
   check <- length(classes)
-  if (check != 1) {
+  if (check != 1L) {
     stop(
       paste0(
         "Component models do not all have the same type of predicitons.  Predictions are a mix of ",
@@ -354,10 +363,10 @@ check_bestpreds_preds <- function(modelLibrary) {
 #' @param list_of_models a list of caret models to check
 #' @export
 check_binary_classification <- function(list_of_models) {
-  if (is.list(list_of_models) && length(list_of_models) > 1) {
+  if (is.list(list_of_models) && length(list_of_models) > 1L) {
     lapply(list_of_models, function(x) {
       # avoid regression models
-      if (is(x, "train") && !is.null(x$pred$obs) && is.factor(x$pred$obs) && length(levels(x$pred$obs)) > 2) {
+      if (is(x, "train") && !is.null(x$pred$obs) && is.factor(x$pred$obs) && nlevels(x$pred$obs) > 2L) {
         stop("caretEnsemble only supports binary classification problems")
       }
     })
@@ -377,13 +386,12 @@ check_binary_classification <- function(list_of_models) {
 #' @export
 # https://stats.stackexchange.com/a/61285
 wtd.sd <- function(x, w, na.rm = FALSE) {
-  stopifnot(is.numeric(x))
-  stopifnot(is.numeric(w))
+  stopifnot(is.numeric(x), is.numeric(w))
 
   xWbar <- weighted.mean(x, w, na.rm = na.rm)
   w <- w / mean(w, na.rm = na.rm)
 
-  variance <- sum((w * (x - xWbar)^2) / (sum(w, na.rm = na.rm) - 1), na.rm = na.rm)
+  variance <- sum((w * (x - xWbar)^2L) / (sum(w, na.rm = na.rm) - 1L), na.rm = na.rm)
   out <- sqrt(variance)
 
   out

@@ -35,14 +35,15 @@
 #'
 c.caretList <- function(...) {
   new_model_list <- unlist(lapply(list(...), function(x) {
-    if (!inherits(x, "caretList")) {
-      if (!inherits(x, "train")) stop("class of modelList1 must be 'caretList' or 'train'")
-
-      # assuming this is a single train object
+    if (inherits(x, "caretList")) {
+      x
+    } else if (inherits(x, "train")) {
       x <- list(x)
-      names(x) <- x[[1]]$method
+      names(x) <- x[[1L]]$method
+      x
+    } else {
+      stop("class of modelList1 must be 'caretList' or 'train'")
     }
-    x
   }), recursive = FALSE)
 
   # Make sure names are unique
@@ -81,15 +82,15 @@ c.caretList <- function(...) {
 #'
 c.train <- function(...) {
   new_model_list <- unlist(lapply(list(...), function(x) {
-    if (!inherits(x, "caretList")) {
-      if (!inherits(x, "train")) stop("class of modelList1 must be 'caretList' or 'train'")
-
-      # assuming this is a single train object
-      x <- list(x)
-      names(x) <- x[[1]]$method
+    if (inherits(x, "caretList")) {
       x
+    } else if (inherits(x, "train")) {
+      x <- list(x)
+      names(x) <- x[[1L]]$method
+      x
+    } else {
+      stop("class of modelList1 must be 'caretList' or 'train'")
     }
-    x
   }), recursive = FALSE)
 
   # Make sure names are unique

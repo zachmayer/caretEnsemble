@@ -1,5 +1,6 @@
 #' @title Generate a specification for fitting a caret model
-#' @description A caret model specification consists of 2 parts: a model (as a string) and the arguments to the train call for fitting that model
+#' @description A caret model specification consists of 2 parts: a model (as a string) and
+#' the arguments to the train call for fitting that model
 #' @param method the modeling method to pass to caret::train
 #' @param ... Other arguments that will eventually be passed to caret::train
 #' @export
@@ -12,7 +13,8 @@ caretModelSpec <- function(method = "rf", ...) {
 }
 
 #' @title Check that the tuning parameters list supplied by the user is valid
-#' @description This function makes sure the tuning parameters passed by the user are valid and have the proper naming, etc.
+#' @description This function makes sure the tuning parameters passed by the user
+#' are valid and have the proper naming, etc.
 #' @param x a list of user-supplied tuning parameters and methods
 #' @return NULL
 #' @export
@@ -40,7 +42,8 @@ tuneCheck <- function(x) {
 }
 
 #' @title Check that the methods supplied by the user are valid caret methods
-#' @description This function uses modelLookup from caret to ensure the list of methods supplied by the user are all models caret can fit.
+#' @description This function uses modelLookup from caret to ensure the list of
+#' methods supplied by the user are all models caret can fit.
 #' @param x a list of user-supplied tuning parameters and methods
 #' @importFrom caret modelLookup
 #' @return NULL
@@ -53,9 +56,9 @@ methodCheck <- function(x) {
   models <- lapply(x, function(m) {
     if (is.list(m)) {
       checkCustomModel(m)
-      data.frame(type = "custom", model = m$method)
+      data.frame(type = "custom", model = m$method, stringsAsFactors = FALSE)
     } else if (is.character(m)) {
-      data.frame(type = "native", model = m)
+      data.frame(type = "native", model = m, stringsAsFactors = FALSE)
     } else {
       stop(paste0(
         "Method \"", m, "\" is invalid.  Methods must either be character names ",
@@ -70,7 +73,7 @@ methodCheck <- function(x) {
   native_models <- subset(models, get("type") == "native")$model
   bad_models <- setdiff(native_models, supported_models)
 
-  if (length(bad_models) > 0) {
+  if (length(bad_models) > 0L) {
     msg <- paste(bad_models, collapse = ", ")
     stop(paste("The following models are not valid caret models:", msg))
   }
@@ -79,13 +82,16 @@ methodCheck <- function(x) {
 }
 
 #' @title Check that the trainControl object supplied by the user is valid and has defined re-sampling indexes.
-#' @description This function checks the user-supplied trainControl object and makes sure it has all the required fields.  If the resampling indexes are missing, it adds them to the model.  If savePredictions=FALSE or "none", this function sets it to "final".
+#' @description This function checks the user-supplied trainControl object and makes
+#' sure it has all the required fields.
+#' If the resampling indexes are missing, it adds them to the model.
+#' If savePredictions=FALSE or "none", this function sets it to "final".
 #' @param x a trainControl object.
 #' @param y the target for the model.  Used to determine resampling indexes.
 #' @importFrom caret createResample createFolds createMultiFolds createDataPartition
 #' @return NULL
 trControlCheck <- function(x, y) {
-  if (!length(x$savePredictions) == 1) {
+  if (length(x$savePredictions) != 1L) {
     stop("Please pass exactly 1 argument to savePredictions, e.g. savePredictions='final'")
   }
 
@@ -95,9 +101,12 @@ trControlCheck <- function(x, y) {
   }
 
   if (is.null(x$index)) {
-    warning("indexes not defined in trControl.  Attempting to set them ourselves, so each model in the ensemble will have the same resampling indexes.")
+    # So each model in the ensemble will have the same resampling indexes
+    warning("indexes not defined in trControl.  Attempting to set them ourselves.")
     if (x$method == "none") {
-      stop("Models that aren't resampled cannot be ensembled.  All good ensemble methods rely on out-of sample data.  If you really need to ensemble without re-sampling, try the median or mean of the model's predictions.")
+      # All good ensemble methods rely on out-of sample data.
+      # If you really need to ensemble without re-sampling, try the median or mean of the model's predictions.
+      stop("Models that aren't resampled cannot be ensembled.")
     } else if (x$method == "boot" || x$method == "adaptive_boot") {
       x$index <- createResample(y, times = x$number, list = TRUE)
     } else if (x$method == "cv" || x$method == "adaptive_cv") {
@@ -110,17 +119,18 @@ trControlCheck <- function(x, y) {
         times = x$number,
         p = 0.5,
         list = TRUE,
-        groups = min(5, length(y))
+        groups = min(5L, length(y))
       )
     } else {
-      stop(paste0("caretList does not currently know how to handle cross-validation method='", x$method, "'. Please specify trControl$index manually"))
+      stop(paste0("caretList can't handle cv method='", x$method, "'. Please specify trControl$index manually"))
     }
   }
   x
 }
 
 #' @title Extracts the target variable from a set of arguments headed to the caret::train function.
-#' @description This function extracts the y variable from a set of arguments headed to a caret::train model.  Since there are 2 methods to call caret::train, this function also has 2 methods.
+#' @description This function extracts the y variable from a set of arguments headed to a caret::train model.
+#' Since there are 2 methods to call caret::train, this function also has 2 methods.
 #' @param ... a set of arguments, as in the caret::train function
 extractCaretTarget <- function(...) {
   UseMethod("extractCaretTarget")
@@ -128,7 +138,8 @@ extractCaretTarget <- function(...) {
 
 #' @title Extracts the target variable from a set of arguments headed to the caret::train.default function.
 #' @description This function extracts the y variable from a set of arguments headed to a caret::train.default model.
-#' @param x an object where samples are in rows and features are in columns. This could be a simple matrix, data frame or other type (e.g. sparse matrix). See Details below.
+#' @param x an object where samples are in rows and features are in columns. This could be a simple matrix, data frame
+#' or other type (e.g. sparse matrix). See Details below.
 #' @param y a numeric or factor vector containing the outcome for each sample.
 #' @param ... ignored
 #' @method extractCaretTarget default
@@ -153,11 +164,18 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #' Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
 #' function.
 #'
-#' @param ... arguments to pass to \code{\link[caret]{train}}.  These arguments will determine which train method gets dispatched.
-#' @param trControl a \code{\link[caret]{trainControl}} object.  We are going to intercept this object check that it has the "index" slot defined, and define the indexes if they are not.
-#' @param methodList optional, a character vector of caret models to ensemble.  One of methodList or tuneList must be specified.
-#' @param tuneList optional, a NAMED list of caretModelSpec objects. This much more flexible than methodList and allows the specification of model-specific parameters (e.g. passing trace=FALSE to nnet)
-#' @param continue_on_fail, logical, should a valid caretList be returned that excludes models that fail, default is FALSE
+#' @param ... arguments to pass to \code{\link[caret]{train}}.
+#' These arguments will determine which train method gets dispatched.
+#' @param trControl a \code{\link[caret]{trainControl}} object.
+#' We are going to intercept this object check that it has the
+#' "index" slot defined, and define the indexes if they are not.
+#' @param methodList optional, a character vector of caret models to ensemble.
+#' One of methodList or tuneList must be specified.
+#' @param tuneList optional, a NAMED list of caretModelSpec objects.
+#' This much more flexible than methodList and allows the
+#' specification of model-specific parameters (e.g. passing trace=FALSE to nnet)
+#' @param continue_on_fail, logical, should a valid caretList be returned that
+#' excludes models that fail, default is FALSE
 #' @return A list of \code{\link[caret]{train}} objects. If the model fails to build,
 #' it is dropped from the list.
 #' @importFrom caret trainControl train
@@ -194,7 +212,7 @@ caretList <- function(
   if (is.null(tuneList) && is.null(methodList)) {
     stop("Please either define a methodList or tuneList")
   }
-  if (!is.null(methodList) && any(duplicated(methodList))) {
+  if (!is.null(methodList) && anyDuplicated(methodList) > 0L) {
     warning("Duplicate entries in methodList.  Using unqiue methodList values.")
     methodList <- unique(methodList)
   }
@@ -233,7 +251,7 @@ caretList <- function(
   nulls <- sapply(modelList, is.null)
   modelList <- modelList[!nulls]
 
-  if (length(modelList) == 0) {
+  if (length(modelList) == 0L) {
     stop("caret:train failed for all models.  Please inspect your data.")
   }
   class(modelList) <- c("caretList", "list")
@@ -338,7 +356,7 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   if (is.null(newdata)) {
     train_data_nulls <- sapply((object), function(x) is.null(x[["trainingData"]]))
     if (any(train_data_nulls)) {
-      stop("newdata is NULL and trainingData is NULL for some models. Please pass newdata or retrain with returnData=TRUE.")
+      stop("newdata is NULL and trainingData is NULL for some models. Use newdata or retrain with returnData=TRUE.")
     }
   }
 

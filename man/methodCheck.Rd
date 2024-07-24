@@ -10,5 +10,6 @@ methodCheck(x)
 \item{x}{a list of user-supplied tuning parameters and methods}
 }
 \description{
-This function uses modelLookup from caret to ensure the list of methods supplied by the user are all models caret can fit.
+This function uses modelLookup from caret to ensure the list of
+methods supplied by the user are all models caret can fit.
 }

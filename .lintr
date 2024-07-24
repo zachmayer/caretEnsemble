@@ -1,36 +1,31 @@
 linters: linters_with_tags(
     tags = c(
+        "best_practices", 
+        "common_mistakes", 
+        "consistency", 
+        "correctness", 
         "default", 
-        "best_practices",
-        "common_mistakes",
-        "correctness",
-        "executing"
-        ),
+        "efficiency", 
+        "executing",
+        "package_development",
+        "pkg_testthat",
+        "readability",
+        "regex", 
+        "robustness", 
+        "style", 
+        "tidy_design"
+    ),
     return_linter(),
     object_overwrite_linter(),
-    unnecessary_concatenation_linter(),
-    cyclocomp_linter(complexity_limit = 19),  # TODO small refactor
-    implicit_integer_linter = NULL,  # TODO refactor
-    library_call_linter = NULL, # TODO refactor
+    object_length_linter(),
+    line_length_linter(120),
+    todo_comment_linter = NULL, # TODO refactor
     implicit_assignment_linter = NULL, # TODO refactor
-    length_levels_linter = NULL, # TODO refactor
-    any_duplicated_linter = NULL, # TODO refactor
-    expect_length_linter = NULL, # TODO refactor
-    expect_comparison_linter = NULL, # TODO refactor
-    expect_null_linter = NULL, # TODO refactor
-    expect_not_linter = NULL, # TODO refactor
-    expect_named_linter = NULL, # TODO refactor
-    expect_type_linter = NULL, # TODO refactor
-    expect_s3_class_linter = NULL, # TODO refactor
-    fixed_regex_linter = NULL, # TODO refactor
-    redundant_ifelse_linter = NULL, #TODO refactor
+    expect_identical_linter = NULL, # TODO big refactor
     undesirable_function_linter = NULL, # TODO big refactor
-    line_length_linter(305),  # TODO change to 120 - big refactor
-    object_length_linter(length = 31),  # May or may not refactor
     nzchar_linter = NULL, # Whats the point of this lintr?
     condition_message_linter = NULL, # Whats the point of this lintr?
     condition_call_linter = NULL, # Whats the point of this lintr?
     paste_linter = NULL, # Probably never gonna remove this one
     object_name_linter = NULL # Probably never gonna remove this one
   )
-

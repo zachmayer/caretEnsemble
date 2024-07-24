@@ -1,6 +1,5 @@
 # test-S3-generic-extensions
-
-set.seed(107)
+set.seed(107L)
 suppressMessages({
   library(testthat)
   library(caret)
@@ -19,15 +18,15 @@ data(Sonar)
 
 ctrl1 <- trainControl(
   method = "boot",
-  number = 3,
+  number = 3L,
   savePredictions = "final",
   summaryFunction = twoClassSummary,
   classProbs = TRUE,
   verboseIter = FALSE,
-  index = createResample(Sonar$Class, 3)
+  index = createResample(Sonar$Class, 3L)
 )
 
-ens_ctrl <- trainControl(number = 2)
+ens_ctrl <- trainControl(number = 2L)
 
 # a model of class caretList
 suppressWarnings({
@@ -47,7 +46,7 @@ suppressWarnings({
 rfTrain <- train(
   Class ~ .,
   data = Sonar,
-  tuneLength = 2,
+  tuneLength = 2L,
   metric = "ROC",
   trControl = ctrl1,
   method = "rf"
@@ -62,8 +61,8 @@ test_that("c.caretEnsemble can bind two caretList objects", {
     data = Sonar,
     trControl = ctrl1,
     tuneList = list(
-      glm = caretModelSpec(method = "rpart", tuneLength = 2),
-      rpart = caretModelSpec(method = "rf", tuneLength = 2)
+      glm = caretModelSpec(method = "rpart", tuneLength = 2L),
+      rpart = caretModelSpec(method = "rf", tuneLength = 2L)
     ),
     metric = "ROC"
   )
@@ -73,8 +72,8 @@ test_that("c.caretEnsemble can bind two caretList objects", {
 
   expect_is(bigList, "caretList")
   expect_is(ens1, "caretEnsemble")
-  expect_true((length(names(bigList)) == length(unique(names(bigList)))))
-  expect_equal(length(unique(names(bigList))), 4)
+  expect_identical(anyDuplicated(names(bigList)), 0L)
+  expect_length(unique(names(bigList)), 4L)
 })
 
 test_that("c.caretEnsemble can bind a caretList and train object", {
@@ -83,8 +82,8 @@ test_that("c.caretEnsemble can bind a caretList and train object", {
 
   expect_is(bigList, "caretList")
   expect_is(ens1, "caretEnsemble")
-  expect_true((length(names(bigList)) == length(unique(names(bigList)))))
-  expect_equal(length(unique(names(bigList))), 3)
+  expect_identical(anyDuplicated(names(bigList)), 0L)
+  expect_length(unique(names(bigList)), 3L)
 })
 
 test_that("c.caretEnsemble can bind two objects of class train", {
@@ -103,8 +102,8 @@ test_that("c.caretEnsemble can bind two objects of class train", {
   expect_is(bigList, "caretList")
   expect_is(ens1, "caretEnsemble")
 
-  expect_true((length(names(bigList)) == length(unique(names(bigList)))))
-  expect_equal(length(unique(names(bigList))), 2)
+  expect_identical(anyDuplicated(names(bigList)), 0L)
+  expect_length(unique(names(bigList)), 2L)
 })
 
 test_that("c.caretList stops for invalid class", {
@@ -121,76 +120,76 @@ context("Edge cases for caretList S3 Generic Functions Extensions")
 
 test_that("c.caretList combines caretList objects correctly", {
   # Split models.class into two parts
-  models_class1 <- models.class[1:2]
-  models_class2 <- models.class[3:4]
+  models_class1 <- models.class[1L:2L]
+  models_class2 <- models.class[3L:4L]
   class(models_class1) <- class(models_class2) <- "caretList"
 
   combined_models <- c(models_class1, models_class2)
 
   expect_s3_class(combined_models, "caretList")
-  expect_equal(length(combined_models), length(models.class))
+  expect_length(combined_models, length(models.class))
   expect_true(all(names(combined_models) %in% names(models.class)))
 })
 
 test_that("c.caretList combines caretList and train objects correctly", {
-  models_class1 <- models.class[1:2]
+  models_class1 <- models.class[1L:2L]
   class(models_class1) <- "caretList"
-  single_model <- models.class[[3]]
+  single_model <- models.class[[3L]]
 
   combined_models <- c(models_class1, single_model)
 
   expect_s3_class(combined_models, "caretList")
-  expect_equal(length(combined_models), 3)
+  expect_length(combined_models, 3L)
   expect_true(all(names(combined_models) %in% names(models.class)))
 })
 
 test_that("c.train combines train objects correctly", {
-  model1 <- models.class[[1]]
-  model2 <- models.class[[2]]
+  model1 <- models.class[[1L]]
+  model2 <- models.class[[2L]]
 
   combined_models <- c(model1, model2)
 
   expect_s3_class(combined_models, "caretList")
-  expect_equal(length(combined_models), 2)
-  expect_true(all(names(combined_models) %in% names(models.class)[1:2]))
+  expect_length(combined_models, 2L)
+  expect_true(all(names(combined_models) %in% names(models.class)[1L:2L]))
 })
 
 test_that("c.caretList handles duplicate names", {
-  models_class1 <- models.class[1:2]
-  models_class2 <- models.class[1:2]
+  models_class1 <- models.class[1L:2L]
+  models_class2 <- models.class[1L:2L]
   class(models_class1) <- class(models_class2) <- "caretList"
 
   combined_models <- c(models_class1, models_class2)
 
   expect_s3_class(combined_models, "caretList")
-  expect_equal(length(combined_models), 4)
-  expect_true(all(make.names(rep(names(models_class1), 2), unique = TRUE) %in% names(combined_models)))
+  expect_length(combined_models, 4L)
+  expect_true(all(make.names(rep(names(models_class1), 2L), unique = TRUE) %in% names(combined_models)))
 })
 
 test_that("c.caretList and c.train fail for invalid inputs", {
-  expect_error(c.caretList(list(a = 1, b = 2)), "class of modelList1 must be 'caretList' or 'train'")
-  expect_error(c.train(list(a = 1, b = 2)), "class of modelList1 must be 'caretList' or 'train'")
+  expect_error(c.caretList(list(a = 1L, b = 2L)), "class of modelList1 must be 'caretList' or 'train'")
+  expect_error(c.train(list(a = 1L, b = 2L)), "class of modelList1 must be 'caretList' or 'train'")
 })
 
 test_that("[.caretList subsets caretList objects correctly", {
-  subset_models <- models.class[1:2]
+  subset_models <- models.class[1L:2L]
 
   expect_s3_class(subset_models, "caretList")
-  expect_equal(length(subset_models), 2)
-  expect_true(all(names(subset_models) %in% names(models.class)[1:2]))
+  expect_length(subset_models, 2L)
+  expect_true(all(names(subset_models) %in% names(models.class)[1L:2L]))
 })
 
 test_that("as.caretList.list converts list to caretList", {
-  model_list <- list(model1 = models.class[[1]], model2 = models.class[[2]])
+  model_list <- list(model1 = models.class[[1L]], model2 = models.class[[2L]])
   caretlist_object <- as.caretList(model_list)
 
   expect_s3_class(caretlist_object, "caretList")
-  expect_equal(length(caretlist_object), 2)
+  expect_length(caretlist_object, 2L)
   expect_true(all(names(caretlist_object) %in% names(model_list)))
 })
 
 test_that("as.caretList.list fails for invalid inputs", {
-  expect_error(as.caretList(list(a = 1, b = 2)), "object requires all elements of list to be caret models")
+  expect_error(as.caretList(list(a = 1L, b = 2L)), "object requires all elements of list to be caret models")
 })
 
 test_that("as.caretList.list names lists without names", {
@@ -199,7 +198,7 @@ test_that("as.caretList.list names lists without names", {
   class(models.no.name) <- "list"
   expect_null(names(models.no.name))
   cl <- as.caretList(models.no.name)
-  expect_equal(names(cl), unname(sapply(models.class, "[[", "method")))
+  expect_named(cl, unname(sapply(models.class, "[[", "method")))
 })
 test_that("as.caretList fails on non-list", {
   expect_error(as.caretList(1L), "object must be a list")
@@ -213,7 +212,7 @@ test_that("predict.caretList works for classification and regression", {
   expect_is(reg_preds, "data.table")
   expect_equal(nrow(class_preds), nrow(X.class))
   expect_equal(nrow(reg_preds), nrow(X.reg))
-  expect_equal(ncol(class_preds), length(models.class) * 2)
+  expect_equal(ncol(class_preds), length(models.class) * 2L)
   expect_equal(ncol(reg_preds), length(models.reg))
 })
 
@@ -221,5 +220,5 @@ test_that("predict.caretList handles type='prob' for classification", {
   class_probs <- predict(models.class, newdata = X.class)
   expect_is(class_probs, "data.table")
   expect_equal(nrow(class_probs), nrow(X.class))
-  expect_equal(ncol(class_probs), length(models.class) * length(levels(Y.class)))
+  expect_equal(ncol(class_probs), length(models.class) * nlevels(Y.class))
 })

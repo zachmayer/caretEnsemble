@@ -12,8 +12,8 @@ extractBestPredsAndObs(list_of_models, excluded_class_id = 1L)
 \item{excluded_class_id}{an integer indicating the class to exclude for classification models}
 }
 \description{
-Extract predictions (and observeds) for the best tune from a list of caret models. This function extracts
-the raw preds from regression models and the class probs from classification models.
+Extract predictions (and observeds) for the best tune from a list of caret models.
+This function extracts the raw preds from regression models and the class probs from classification models.
 Note that it extract preds and obs in one go, rather than separately. This is because caret can save the internal
 preds/obs from all resamples rather than just the final.  So we subset the internal pred/obs to just the best tuning
 (from caret) and return the pred and obs for that tune.

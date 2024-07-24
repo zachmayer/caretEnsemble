@@ -6,10 +6,13 @@
 #' @details Check the models, and make a matrix of obs and preds
 #'
 #' @param all.models a list of caret models to ensemble.
-#' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.  If 0, will include all levels.
+#' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
+#' If 0, will include all levels.
 #' @param ... additional arguments to pass to the optimization function
 #' @return S3 caretStack object
-#' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004). Ensemble Selection from Libraries of Models. \url{https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf}
+#' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).
+#'   Ensemble Selection from Libraries of Models.
+#'   \url{https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf}
 #' @export
 #' @examples
 #' \dontrun{
@@ -91,7 +94,12 @@ predict.caretStack <- function(
     warning("No excluded_class_id set.  Setting to 1L.")
   }
 
-  preds <- predict(object$models, newdata = newdata, verbose = verbose, excluded_class_id = object[["excluded_class_id"]])
+  preds <- predict(
+    object$models,
+    newdata = newdata,
+    verbose = verbose,
+    excluded_class_id = object[["excluded_class_id"]]
+  )
   meta_preds <- predict(object$ens_model, newdata = preds, type = type, ...)
 
   if (se || return_weights) {
@@ -100,13 +108,13 @@ predict.caretStack <- function(
     model_methods <- colnames(preds)
     model_weights <- lapply(model_weights, function(class_weights) {
       # ensure that we have a numeric vector
-      class_weights <- ifelse(is.finite(class_weights), class_weights, 0)
+      class_weights <- ifelse(is.finite(class_weights), class_weights, 0L)
       # normalize weights
       class_weights <- class_weights / sum(class_weights)
       names(class_weights) <- row.names(imp)
       # set 0 weights for methods that are not present in varImp
       for (m in setdiff(model_methods, names(class_weights))) {
-        class_weights[m] <- 0
+        class_weights[m] <- 0L
       }
       class_weights
     })
@@ -121,7 +129,7 @@ predict.caretStack <- function(
       overall_weights <- model_weights$Overall[model_methods]
 
       # Use overall weights to calculate standard error in regression estimations
-      std_error <- apply(preds, 1, wtd.sd, w = overall_weights, na.rm = TRUE)
+      std_error <- apply(preds, 1L, wtd.sd, w = overall_weights, na.rm = TRUE)
       std_error <- qnorm(level) * std_error
       out <- data.frame(
         fit = meta_preds,
@@ -216,8 +224,9 @@ plot.caretStack <- function(x, ...) {
 }
 
 #' @title Comparison dotplot for a caretStack object
-#' @description This is a function to make a dotplot from a caretStack.  It uses dotplot from the caret package on all the models in the ensemble, excluding the final ensemble model.
-#' At the moment, this function only works if the ensembling model has the same number of resamples as the component models.
+#' @description This is a function to make a dotplot from a caretStack.  It uses dotplot from the
+#' caret package on all the models in the ensemble, excluding the final ensemble model.At the moment,
+#' this function only works if the ensembling model has the same number of resamples as the component models.
 #' @param x An object of class caretStack
 #' @param ... passed to dotplot
 #' @importFrom lattice dotplot

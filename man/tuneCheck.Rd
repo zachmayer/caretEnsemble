@@ -10,5 +10,6 @@ tuneCheck(x)
 \item{x}{a list of user-supplied tuning parameters and methods}
 }
 \description{
-This function makes sure the tuning parameters passed by the user are valid and have the proper naming, etc.
+This function makes sure the tuning parameters passed by the user
+are valid and have the proper naming, etc.
 }
