@@ -346,56 +346,39 @@ test_that("check_caretList_model_types validates model types correctly", {
   expect_error(check_caretList_model_types(mixed_list))
 })
 
-test_that("check_bestpreds_resamples validates resamples correctly", {
+test_that("extractBestPredsAndObs works", {
   best_preds_class <- extractBestPredsAndObs(models.class)
   best_preds_reg <- extractBestPredsAndObs(models.reg)
 
-  expect_null(check_bestpreds_resamples(best_preds_class))
-  expect_null(check_bestpreds_resamples(best_preds_reg))
+  expect_is(best_preds_class, "list")
+  expect_is(best_preds_reg, "list")
 
-  # Test error for inconsistent resamples
-  best_preds_inconsistent <- best_preds_class
-  best_preds_inconsistent[[1]]$Resample <- sample(best_preds_inconsistent[[1]]$Resample)
-  expect_error(check_bestpreds_resamples(best_preds_inconsistent))
+  expect_equal(names(best_preds_class$preds), names(models.class))
+  expect_equal(names(best_preds_reg$preds), names(models.reg))
 })
 
-test_that("check_bestpreds_indexes validates row indexes correctly", {
-  best_preds_class <- extractBestPredsAndObs(models.class)
-  best_preds_reg <- extractBestPredsAndObs(models.reg)
-
-  expect_null(check_bestpreds_indexes(best_preds_class))
-  expect_null(check_bestpreds_indexes(best_preds_reg))
-
-  # Test error for inconsistent row indexes
-  best_preds_inconsistent <- best_preds_class
-  best_preds_inconsistent[[1]]$rowIndex <- sample(best_preds_inconsistent[[1]]$rowIndex)
-  expect_error(check_bestpreds_indexes(best_preds_inconsistent))
+test_that("extractBestPredsAndObs errors on inconsistent resamples", {
+  models.class.inconsistent <- models.class
+  models.class.inconsistent[[1]]$pred$Resample <- "BAD_SAMPLE"
+  expect_error(extractBestPredsAndObs(models.class.inconsistent), "Component models do not have the same re-sampling strategies")
 })
 
-test_that("check_bestpreds_obs validates observed values correctly", {
-  best_preds_class <- extractBestPredsAndObs(models.class)
-  best_preds_reg <- extractBestPredsAndObs(models.reg)
-
-  expect_null(check_bestpreds_obs(best_preds_class))
-  expect_null(check_bestpreds_obs(best_preds_reg))
-
-  # Test error for inconsistent observed values
-  best_preds_inconsistent <- best_preds_class
-  best_preds_inconsistent[[1]]$obs <- sample(best_preds_inconsistent[[1]]$obs)
-  expect_error(check_bestpreds_obs(best_preds_inconsistent))
+test_that("extractBestPredsAndObs errors on inconsistent row indexes", {
+  models.class.inconsistent <- models.class
+  models.class.inconsistent[[1]]$pred$rowIndex <- 0
+  expect_error(extractBestPredsAndObs(models.class.inconsistent), "Re-sampled predictions from each component model do not use the same rowIndexes from the origial dataset")
 })
 
-test_that("check_bestpreds_preds validates predictions correctly", {
-  best_preds_class <- extractBestPredsAndObs(models.class)
-  best_preds_reg <- extractBestPredsAndObs(models.reg)
+test_that("extractBestPredsAndObs errors on inconsistent obs", {
+  models.class.inconsistent <- models.class
+  models.class.inconsistent[[1]]$pred$obs <- -Inf
+  expect_error(extractBestPredsAndObs(models.class.inconsistent), "Observed values for each component model are not the same.  Please re-train the models with the same Y variable")
+})
 
-  expect_null(check_bestpreds_preds(best_preds_class))
-  expect_null(check_bestpreds_preds(best_preds_reg))
-
-  # Test error for inconsistent prediction types
-  best_preds_inconsistent <- best_preds_class
-  best_preds_inconsistent[[1]]$pred <- as.character(best_preds_inconsistent[[1]]$pred)
-  expect_error(check_bestpreds_preds(best_preds_inconsistent))
+test_that("extractBestPredsAndObs errors on inconsistent pred", {
+  models.class.inconsistent <- models.class
+  models.class.inconsistent[[1]]$pred$pred <- "BAD_PRED"
+  expect_error(extractBestPredsAndObs(models.class.inconsistent), "Component models do not all have the same type of predicitons.  Predictions are a mix of character, factor")
 })
 
 test_that("extractModelName extracts model names correctly", {

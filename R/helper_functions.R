@@ -326,7 +326,7 @@ check_bestpreds_obs <- function(modelLibrary) {
 #' @param modelLibrary a list of predictions from caret models
 check_bestpreds_preds <- function(modelLibrary) {
   # TODO: Regression models should be numeric, classification models should have numeric class probs
-  pred <- lapply(modelLibrary, function(x) x[["preds"]])
+  pred <- lapply(modelLibrary, function(x) x[["pred"]])
   names(pred) <- names(modelLibrary)
 
   clases <- sapply(pred, class)

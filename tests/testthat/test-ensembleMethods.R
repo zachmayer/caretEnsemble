@@ -182,6 +182,8 @@ test_that("Do model results in caretEnsemble match component models - classifica
   ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2))
   modres1 <- extractModRes(ens.class)
   modres2 <- extractModRes(ens.reg)
+  expect_is(modres2, "data.frame")
+  expect_equal(modres2$method, names(models.subset))
 })
 
 test_that("Do model results in caretEnsemble match component models - regression", {
