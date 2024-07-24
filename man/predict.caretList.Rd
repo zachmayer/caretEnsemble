@@ -16,7 +16,7 @@ bar is shown. Default FALSE.}
 
 \item{excluded_class_id}{Integer. The class id to drop when predicting for multiclass}
 
-\item{...}{Other arguments to pass to \code{\link{predict.train}}}
+\item{...}{Other arguments to pass to \code{\link[caret]{predict.train}}}
 }
 \description{
 Make a matrix of predictions from a list of caret models

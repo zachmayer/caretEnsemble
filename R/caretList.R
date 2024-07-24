@@ -322,7 +322,7 @@ as.caretList.list <- function(object) {
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
 #' @param excluded_class_id Integer. The class id to drop when predicting for multiclass
-#' @param ... Other arguments to pass to \code{\link{predict.train}}
+#' @param ... Other arguments to pass to \code{\link[caret]{predict.train}}
 #' @importFrom pbapply pblapply
 #' @importFrom data.table as.data.table setnames
 #' @export
