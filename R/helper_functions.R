@@ -1,4 +1,15 @@
 #####################################################
+# Globals
+#####################################################
+
+#' @importFrom utils globalVariables
+#' @importFrom data.table .SD
+#' @importFrom rlang .data
+NULL
+
+utils::globalVariables(c(".SD", ".data"))
+
+#####################################################
 # Functions for dropping one level from classification problems
 #####################################################
 

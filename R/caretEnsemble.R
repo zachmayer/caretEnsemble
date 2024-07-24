@@ -322,7 +322,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
 
   # Residuals vs Fitted
-  g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(ensemble_data[["pred"]], ensemble_data[["resid"]])) +
+  g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(.data[["pred"]], .data[["resid"]])) +
     geom_point() +
     geom_smooth(se = FALSE) +
     scale_x_continuous("Fitted Values") +
@@ -334,7 +334,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   wghtFrame <- as.data.frame(coef(object$ens_model$finalModel))
   wghtFrame$method <- row.names(wghtFrame)
   names(wghtFrame) <- c("weights", "method")
-  g3 <- ggplot2::ggplot(wghtFrame, ggplot2::aes(method, weights)) +
+  g3 <- ggplot2::ggplot(wghtFrame, ggplot2::aes(.data[["method"]], .data[["weights"]])) +
     ggplot2::geom_bar(stat = "identity", fill = I("gray50"), color = I("black")) +
     ggplot2::labs(title = "Model Weights", x = "Method", y = "Weights") +
     ggplot2::theme_bw()
@@ -345,20 +345,19 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     data.table::set(sub_model_data[[model_name]], j = "model", value = model_name)
   }
   sub_model_data <- data.table::rbindlist(sub_model_data)
-  utils::globalVariables(".SD")  # TODO FIXME
   sub_model_summary <- sub_model_data[, list(
-    ymin = min(.SD$resid),
-    ymax = max(.SD$resid),
-    yavg = median(.SD$resid),
-    yhat = .SD$pred[1]
+    ymin = min(.SD[["resid"]]),
+    ymax = max(.SD[["resid"]]),
+    yavg = median(.SD[["resid"]]),
+    yhat = .SD[["pred"]][1]
   ), by = "id"]
   g4 <- ggplot2::ggplot(sub_model_summary, ggplot2::aes(
-    x = sub_model_summary$yhat,
-    y = sub_model_summary$yavg
+    x = .data[["yhat"]],
+    y = .data[["yavg"]]
   )) +
     ggplot2::geom_linerange(alpha = I(0.5), ggplot2::aes(
-      ymin = sub_model_summary$ymin,
-      ymax = sub_model_summary$ymax
+      ymin = .data[["ymin"]],
+      ymax = .data[["ymax"]],
     )) +
     ggplot2::geom_point(size = I(3), alpha = I(0.8)) +
     ggplot2::theme_bw() +
@@ -380,14 +379,14 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   }
   data.table::set(x_data, j = "id", value = seq_len(nrow(x_data)))
   plotdf <- merge(ensemble_data, x_data, by = "id")
-  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(plotdf[[xvars[1]]], plotdf$resid)) +
+  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1]]], .data[["resid"]])) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
     ggplot2::scale_x_continuous(xvars[1]) +
     ggplot2::scale_y_continuous("Residuals") +
     ggplot2::labs(title = paste0("Residuals Against ", xvars[1])) +
     ggplot2::theme_bw()
-  g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(plotdf[[xvars[2]]], plotdf$resid)) +
+  g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[2]]], .data[["resid"]])) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
     ggplot2::scale_x_continuous(xvars[2]) +
