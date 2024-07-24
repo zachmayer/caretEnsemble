@@ -132,7 +132,6 @@ test_that("wtd.sd handles NA values correctly", {
 })
 
 test_that("Checks generate errors", {
-  skip_on_cran()
   set.seed(42)
   myControl <- trainControl(method = "cv", number = 5, savePredictions = "final")
   expect_warning(
@@ -144,7 +143,7 @@ test_that("Checks generate errors", {
     )
   )
   modelLibrary <- extractBestPredsAndObs(x)
-  modelLibrary$nn <- modelLibrary$lm[sample(seq_len(nrow(modelLibrary$lm)), nrow(modelLibrary$lm)), ]
+  modelLibrary$preds$nn <- modelLibrary$preds$lm[sample(seq_along(modelLibrary$preds$lm), length(modelLibrary$preds$lm))]
 
   expect_error(check_bestpreds_resamples(modelLibrary))
   expect_error(check_bestpreds_indexes(modelLibrary))
@@ -158,15 +157,10 @@ test_that("Checks generate errors", {
   expect_error(check_caretList_classes(x$glm$finalModel))
 
   x$rpart <- train(Species ~ Sepal.Width, iris, method = "rpart", trControl = myControl)
-  # This has to be changed because train gives this error if dataset is truncated in
-  # newest version of caret:
-  # Error in train.default(x, y, weights = w, ...) :
-  #    One or more factor levels in the outcome has no data: 'virginica'
   check_caretList_classes(x)
   expect_error(check_caretList_model_types(x))
 
-  m <- extractBestPredsAndObs(x)
-  expect_error(check_bestpreds_preds(m))
+  expect_error(m <- extractBestPredsAndObs(x))
 
   set.seed(42)
   myControl2 <- trainControl(
@@ -297,7 +291,7 @@ test_that("validateExcludedClass stops for non-finite input", {
 test_that("validateExcludedClass stops for non-positive input", {
   invalid_input <- -1
   err <- "classification excluded level must be >= 0: -1"
-  expect_error(validateExcludedClass(invalid_input), err)
+  expect_warning(expect_error(validateExcludedClass(invalid_input), err))
 })
 
 test_that("validateExcludedClass warns for non-integer input", {

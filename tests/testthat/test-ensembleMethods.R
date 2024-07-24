@@ -169,7 +169,6 @@ test_that("No errors are thrown by a generics for ensembles", {
 context("Are ensembles construct accurately")
 
 test_that("Do model results in caretEnsemble match component models - classification", {
-  skip_on_cran()
   set.seed(2239)
   ens.class <- caretEnsemble(
     models.class,
@@ -186,7 +185,6 @@ test_that("Do model results in caretEnsemble match component models - classifica
 })
 
 test_that("Do model results in caretEnsemble match component models - regression", {
-  skip_on_cran()
   ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
   ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   newDat <- ens.class$models[[3]]$trainingData
