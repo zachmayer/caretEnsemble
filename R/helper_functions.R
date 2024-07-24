@@ -7,7 +7,7 @@
 #' @importFrom rlang .data
 NULL
 
-utils::globalVariables(c(".SD", ".data"))
+utils::globalVariables(c(".SD", ".data"))  # Disables warnings from R CMD CHECk, but NOT the linter
 
 #####################################################
 # Functions for dropping one level from classification problems

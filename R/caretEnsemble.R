@@ -322,6 +322,8 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
 
   # Residuals vs Fitted
+  # Disable the object usage linter in here — it raises false positives for .SD and .data
+  # nolint start: object_usage_linter
   g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(.data[["pred"]], .data[["resid"]])) +
     geom_point() +
     geom_smooth(se = FALSE) +
@@ -357,7 +359,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   )) +
     ggplot2::geom_linerange(alpha = I(0.5), ggplot2::aes(
       ymin = .data[["ymin"]],
-      ymax = .data[["ymax"]],
+      ymax = .data[["ymax"]]
     )) +
     ggplot2::geom_point(size = I(3), alpha = I(0.8)) +
     ggplot2::theme_bw() +
@@ -393,5 +395,6 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     ggplot2::scale_y_continuous("Residuals") +
     ggplot2::labs(title = paste0("Residuals Against ", xvars[2])) +
     ggplot2::theme_bw()
+  # nolint end: object_usage_linter
   suppressMessages(gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2))
 }
