@@ -9,12 +9,12 @@ extractPredObsResid(object, show_class_id = 2L)
 \arguments{
 \item{object}{a \code{train} object}
 
-\item{show_class_id}{For classificaiton only: which class level to use for residuals}
+\item{show_class_id}{For classification only: which class level to use for residuals}
 }
 \value{
 a data.table with predictions, observeds, and residuals
 }
 \description{
 This function extracts the best predictions and observations from a train object
-and then calculates residuals.  It only uses one class for classificaiton models, by default class 2.
+and then calculates residuals.  It only uses one class for classification models, by default class 2.
 }

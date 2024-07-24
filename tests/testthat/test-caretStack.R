@@ -21,7 +21,7 @@ test_that("We can stack regression models", {
   expect_that(ens.reg, is_a("caretStack"))
   expect_is(summary(ens.reg), "summary.lm")
   invisible(capture.output(print(ens.reg)))
-  pred.reg <- predict(ens.reg, newdata = X.reg) # In the past this expected a warning, I do not know why. I think is caused by the used method (lm)
+  pred.reg <- predict(ens.reg, newdata = X.reg)
   expect_true(is.numeric(pred.reg))
   expect_true(length(pred.reg) == 150)
 })
@@ -154,23 +154,13 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
   )
 
   # Make sure predictions still work if the exlcuded level is too high
-  expect_warning(
-    {
-      meta_model <- caretStack(
-        model_list,
-        method = "rpart",
-        trControl = trainControl(method = "cv"),
-        excluded_class_id = 4L
-      )
-    },
-    "Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Using all classes to train meta-model."
+  meta_model <- caretStack(
+    model_list,
+    method = "rpart",
+    trControl = trainControl(method = "cv"),
+    excluded_class_id = 4L
   )
-  expect_warning(
-    {
-      pred <- predict(meta_model, newdata = iris, type = "prob")
-    },
-    "Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes."
-  )
+  pred <- predict(meta_model, newdata = iris, type = "prob")
   expect_equal(nrow(pred), 150)
   expect_equal(ncol(pred), 3)
   expect_true(all(sapply(pred, is.finite)))

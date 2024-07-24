@@ -32,7 +32,7 @@
 caretEnsemble <- function(all.models, ...) {
   check_binary_classification(all.models)
   out <- caretStack(all.models, method = "glm", ...)
-  class(out) <- c("caretEnsemble", "caretStack", "train")
+  class(out) <- c("caretEnsemble", "caretStack")
   out
 }
 

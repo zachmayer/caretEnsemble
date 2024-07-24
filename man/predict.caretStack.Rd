@@ -10,6 +10,8 @@
   se = FALSE,
   level = 0.95,
   return_weights = FALSE,
+  verbose = FALSE,
+  type = "raw",
   ...
 )
 }
@@ -25,9 +27,11 @@
 \item{return_weights}{a logical indicating whether prediction weights for each model
 should be returned}
 
-\item{...}{arguments to pass to \code{\link[caret]{predict.train}}.}
+\item{verbose}{a logical indicating whether to print progress}
 
-\item{na.action}{the method for handling missing data passed to \code{\link[caret]{predict.train}}.}
+\item{type}{the type of prediction to return.  "raw" or "prob", as with caret.}
+
+\item{...}{arguments to pass to \code{\link[caret]{predict.train}}.}
 }
 \description{
 Make predictions from a caretStack. This function passes the data to each function in

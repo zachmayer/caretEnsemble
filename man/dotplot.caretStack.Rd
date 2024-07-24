@@ -4,17 +4,16 @@
 \alias{dotplot.caretStack}
 \title{Comparison dotplot for a caretStack object}
 \usage{
-\method{dotplot}{caretStack}(x, data = NULL, ...)
+\method{dotplot}{caretStack}(x, ...)
 }
 \arguments{
 \item{x}{An object of class caretStack}
 
-\item{data}{passed to dotplot}
-
 \item{...}{passed to dotplot}
 }
 \description{
-This is a function to make a dotplot from a caretStack.  It uses dotplot from the caret package on all the models in the ensemble, excluding the final ensemble model.  At the moment, this function only works if the ensembling model has the same number of resamples as the component models.
+This is a function to make a dotplot from a caretStack.  It uses dotplot from the caret package on all the models in the ensemble, excluding the final ensemble model.
+At the moment, this function only works if the ensembling model has the same number of resamples as the component models.
 }
 \examples{
 \dontrun{

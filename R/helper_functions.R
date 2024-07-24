@@ -7,33 +7,47 @@
 #' @param arg The value to check
 #' @return integer
 validateExcludedClass <- function(arg) {
+  # Handle the null case (usually old object where the missing level was not defined)
   if (is.null(arg)) {
     arg <- 1L
     warning("No excluded_class_id set. Setting to 1L.")
   }
-  if (!is.integer(arg)) {
-    warning(paste0(
-      "multiclass excluded level is not an integer ", arg
+  # Check the input
+  if (!is.numeric(arg)) {
+    stop(paste0(
+      "classification excluded level must be numeric: ", arg
     ))
-    arg <- as.integer(arg)
   }
   if (length(arg) != 1) {
     stop(paste0(
       "classification excluded level must have a length of 1: length=", length(arg)
     ))
   }
-  if (!is.finite(arg)) {
+
+  # Convert to integer if possible
+  if (is.integer(arg)) {
+    out <- arg
+  } else {
+    warning(paste0("classification excluded level is not an integer: ", arg))
+    if (is.numeric(arg)) {
+      arg <- floor(arg)
+    }
+    suppressWarnings(out <- as.integer(arg))
+  }
+
+  # Check the output
+  if (!is.finite(out)) {
     stop(paste0(
-      "multiclass excluded level must be finite: ", arg
+      "classification excluded level must be finite: ", arg
     ))
   }
-  if (arg < 0) {
+  if (out < 0) {
     stop(paste0(
-      "multiclass excluded level must be >= 0: ", arg
+      "classification excluded level must be >= 0: ", arg
     ))
   }
 
-  arg
+  out
 }
 
 #' @title Drop Excluded Class
@@ -119,18 +133,6 @@ extractModelType <- function(list_of_models) {
   stopifnot(length(type) == 1)
   stopifnot(type %in% c("Classification", "Regression"))
   type
-}
-
-#' @title Extract the training data from a caretList
-#' @description Extract the training data from a caretList
-#' @param x a caretList object
-extractTrainingData <- function(x) {
-  stopifnot(is(x, "caretList"))
-  data_list <- lapply(x, function(x) x$trainingData)
-  all_rows <- sapply(data_list, nrow)
-  stopifnot(all_rows == all_rows[1], "Models have different training rows")
-  stopifnot(!is.null(data_list[[1]]), "No training data found")
-  data_list[[1]]
 }
 
 #' @title Extract the observed levels from a list of models

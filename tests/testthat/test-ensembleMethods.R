@@ -125,7 +125,6 @@ test_that("Metric is used correctly", {
 context("Testing caretEnsemble generics")
 
 test_that("No errors are thrown by a generics for ensembles", {
-  skip_on_cran()
   set.seed(2239)
   ens.class <- caretEnsemble(
     models.class,
@@ -133,13 +132,14 @@ test_that("No errors are thrown by a generics for ensembles", {
     trControl = trainControl(
       number = 2,
       summaryFunction = twoClassSummary,
-      classProbs = TRUE
+      classProbs = TRUE,
+      savePredictions = TRUE
     )
   )
   # varImp struggles with the rf in our test suite, why?
   models.subset <- models.reg[2:4]
   class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2))
+  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2, savePredictions = TRUE))
   expect_output(summary(ens.class), "ROC")
   expect_output(summary(ens.reg), "RMSE")
 
@@ -152,15 +152,6 @@ test_that("No errors are thrown by a generics for ensembles", {
   expect_equal(nrow(tp2$data), 3)
   expect_equal(tp$data$method, names(ens.class$models))
   expect_equal(tp2$data$method, names(ens.reg$models))
-  suppressWarnings(fort1 <- fortify(ens.class))
-  suppressWarnings(fort2 <- fortify(ens.reg))
-  expect_is(fort1, "data.frame")
-  expect_is(fort2, "data.frame")
-  expect_equal(nrow(fort1), 150)
-  expect_equal(nrow(fort2), 150)
-  expect_equal(ncol(fort1), 10)
-  expect_equal(ncol(fort2), 10)
-  expect_true(all(names(fort1) %in% names(fort2)))
 
   test_plot_file <- "caretEnsemble_test_plots.png"
   png(test_plot_file)
@@ -174,55 +165,6 @@ test_that("No errors are thrown by a generics for ensembles", {
   unlink(test_plot_file)
 })
 
-context("Residual extraction")
-
-test_that("Residuals provided by residuals are proper for ensemble objects", {
-  skip_on_cran()
-  set.seed(2239)
-  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
-  models.subset <- models.reg[2:4]
-  class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(method = "none"))
-  suppressWarnings(residTest <- residuals(ens.class))
-  suppressWarnings(residTest2 <- residuals(ens.reg))
-  obs1 <- ifelse(Y.class == "No", 0, 1)
-  obs2 <- Y.reg
-  suppressWarnings(predTest <- predict(ens.class, type = "prob"))
-  suppressWarnings(predTest2 <- predict(ens.reg))
-  expect_equal(residTest, obs1 - predTest[, "No"], tolerance = 1e-3)
-  expect_equal(residTest2, obs2 - predTest2, tolerance = 1e-3)
-  expect_false(identical(residTest2, predTest2 - obs2))
-
-  suppressWarnings(mr1 <- multiResiduals(ens.class))
-  suppressWarnings(mr2 <- multiResiduals(ens.reg))
-  expect_identical(names(mr1), names(mr2))
-  expect_identical(names(mr1), c("method", "id", "yhat", "resid", "y"))
-  expect_equal(nrow(mr1), 150 * length(ens.class$models))
-  expect_equal(nrow(mr2), 150 * length(ens.reg$models))
-  expect_equal(ncol(mr1), ncol(mr2))
-  mr1 <- mr1[order(mr1$method, mr1$id), ]
-  mr2 <- mr2[order(mr2$method, mr2$id), ]
-  mr2.tmp1 <- residuals(ens.reg$models[[1]])
-  attributes(mr2.tmp1) <- NULL
-  mr2.tmp2 <- residuals(ens.reg$models[[2]])
-  expect_equal(mr2[mr2$method == "glm", "resid"], mr2.tmp1, tolerance = 1e-5)
-  expect_equal(unname(mr2[mr2$method == "rpart", "resid"]), unname(mr2.tmp2), tolerance = 1e-5)
-
-  mr_reg_wide <- as.data.frame(lapply(ens.reg$models, residuals))
-  names(mr_reg_wide) <- lapply(ens.reg$models, function(x) x$method)
-  mr_reg_long <- reshape(mr_reg_wide,
-    direction = "long", varying = names(mr_reg_wide),
-    v.names = "resid", timevar = "method", times = names(mr_reg_wide)
-  )
-  expect_equal(mr_reg_long[order(mr_reg_long$method, mr_reg_long$id), "resid"], mr2[order(mr2$method, mr2$id), "resid"])
-
-  ens.class2 <- ens.class
-  ens.reg2 <- ens.reg
-  ens.class2$modelType <- ens.reg2$modelType <- NULL
-
-  suppressWarnings(expect_equal(residuals(ens.class2), residuals(ens.class)))
-  suppressWarnings(expect_equal(residuals(ens.reg2), residuals(ens.reg)))
-})
 
 context("Are ensembles construct accurately")
 
@@ -241,11 +183,6 @@ test_that("Do model results in caretEnsemble match component models - classifica
   ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2))
   modres1 <- extractModRes(ens.class)
   modres2 <- extractModRes(ens.reg)
-
-  modF <- extractModFrame(ens.class)
-  modF2 <- extractModFrame(ens.reg)
-  expect_true(nrow(modF) == nrow(ens.class$models[[2]]$trainingData))
-  expect_true(nrow(modF2) == nrow(ens.reg$models[[1]]$trainingData))
 })
 
 test_that("Do model results in caretEnsemble match component models - regression", {

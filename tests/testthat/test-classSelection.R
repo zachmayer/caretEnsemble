@@ -91,9 +91,6 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1) {
 }
 
 test_that("Ensembled classifiers do not rearrange outcome factor levels", {
-  skip_on_cran()
-
-
   # First run the level selection test using the default levels
   # of the response (i.e. c('No', 'Yes'))
   set.seed(seed)
@@ -116,29 +113,19 @@ test_that("Ensembled classifiers do not rearrange outcome factor levels", {
 
   set.seed(seed)
   runBinaryLevelValidation(refactor(Y.train), refactor(Y.test))
-
-  # Set the target binary level back to what it was before this test
-  setBinaryTargetLevel(bin.level, pos.level = 1)
 })
 
 test_that("Target class selection configuration works", {
-  skip_on_cran()
+  # No error
+  excluded_class <- validateExcludedClass(1L)
+  excluded_class <- validateExcludedClass(2L)
 
-  # Get the current target binary level
-  bin.level <- getBinaryTargetLevel()
+  # Should error
+  expect_error(validateExcludedClass("x"))
 
-  # Verify binary target level argument validation
-  expect_error(setBinaryTargetLevel("x"))
-
-  # Configure caret ensemble to use the second class as the target
-  setBinaryTargetLevel(2L)
-
+  # Check that we can exclude the first class
   Y.levels <- levels(Y.train)
   refactor <- function(d) factor(as.character(d), levels = rev(Y.levels))
-
   set.seed(seed)
-  runBinaryLevelValidation(refactor(Y.train), refactor(Y.test), pos.level = 2)
-
-  # Set the target binary level back to what it was before this test
-  setBinaryTargetLevel(bin.level)
+  runBinaryLevelValidation(refactor(Y.train), refactor(Y.test), pos.level = 1L)
 })

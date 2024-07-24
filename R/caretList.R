@@ -277,16 +277,30 @@ as.caretList.default <- function(object) {
 #' @export
 #' @method as.caretList list
 as.caretList.list <- function(object) {
+  # Check that the object is a list
   if (!inherits(object, "list")) {
     stop("object must be a list of caret models")
   }
+
   # Check that each element in the list is of class train
   if (!all(sapply(object, is, "train"))) {
     stop("object requires all elements of list to be caret models")
   }
 
+  # Make sure the class is named
+  if (is.null(names(object))) {
+    # If the model list used for predictions is not currently named,
+    # then exctract the model names from each model individually.
+    names(object) <- sapply(object, extractModelName)
+  }
+
+  # Make sure the names are valid
+  names(object) <- make.names(names(object), unique = TRUE, allow_ = TRUE)
+
+  # Apply the class
   class(object) <- "caretList"
 
+  # Return
   object
 }
 
@@ -308,19 +322,11 @@ as.caretList.list <- function(object) {
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
 #' @param excluded_class_id Integer.  The class id to drop when predicting for multiclass
-#' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
-#' argument here, DO NOT PASS the "type" argument.  Classification models will
-#' return probabilities if possible, and regression models will return "raw".
 #' @importFrom pbapply pblapply
 #' @importFrom data.table as.data.table setnames
 #' @export
 #' @method predict caretList
-predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...) {
-  # New data check
-  if (is.null(newdata)) {
-    newdata <- extractTrainingData(object)
-  }
-
+predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 0L) {
   # Decided whether to be verbose or quiet
   apply_fun <- lapply
   if (verbose) {
@@ -335,13 +341,13 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
     if (type == "Classification") {
       # use caret::levels.train to extract the levels of the target from each model
       # and then drop the excluded class if needed
-      pred <- caret::predict.train(x, type = "prob", newdata = newdata, ... = ...)
+      pred <- caret::predict.train(x, type = "prob", newdata = newdata)
       pred <- data.table::as.data.table(pred)
       pred <- dropExcludedClass(pred, all_classes = levels(x), excluded_class_id = excluded_class_id)
 
       # predict for reg
     } else if (type == "Regression") {
-      pred <- caret::predict.train(x, type = "raw", newdata = newdata, ... = ...)
+      pred <- caret::predict.train(x, type = "raw", newdata = newdata)
       pred <- data.table::as.data.table(pred)
 
       # Error
@@ -352,15 +358,6 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
     # Return
     pred
   })
-
-  # Name the prediction columns
-  if (is.null(names(preds))) {
-    # If the model list used for predictions is not currently named,
-    # then exctract the model names from each model individually.
-    # Note that this should only be possible when caretList objects
-    # are created manually
-    names(preds) <- make.names(sapply(object, extractModelName), unique = TRUE)
-  }
 
   # Turn a list of data tables into one data.table
   # Note that data.table will name the columns based off the names of the list and the names of each data.table

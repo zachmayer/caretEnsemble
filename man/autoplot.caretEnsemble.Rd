@@ -22,7 +22,7 @@ autoplot.caretEnsemble(
 
 \item{xvars}{a vector of the names of x variables to plot against residuals}
 
-\item{show_class_id}{For classificaiton only: which class level to show on the plot}
+\item{show_class_id}{For classification only: which class level to show on the plot}
 
 \item{...}{additional arguments to pass to autoplot}
 }

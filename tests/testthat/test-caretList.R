@@ -90,30 +90,30 @@ test_that("caretList errors for bad models", {
 test_that("caretList predictions", {
   suppressWarnings({
     models <- caretList(
-      iris[, 1:2], iris[, 5],
+      iris[, 1:2], iris[, 3],
       tuneLength = 1, verbose = FALSE,
       methodList = "rf", tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
       trControl = trainControl(
         method = "cv",
         number = 2, savePredictions = "final",
-        classProbs = FALSE
+        classProbs = TRUE
       )
     )
   })
-  suppressWarnings(p1 <- predict(models))
+  p1 <- predict(models)
   p2 <- predict(models, newdata = iris[100, 1:2])
   p3 <- predict(models, newdata = iris[110, 1:2])
-  expect_is(p1, "matrix")
-  expect_is(p1[, 1], "character")
-  expect_is(p1[, 2], "character")
+  expect_is(p1, "data.table")
+  expect_is(p1[[1]], "numeric")
+  expect_is(p1[[2]], "numeric")
   expect_equal(names(models), colnames(p1))
-  expect_is(p2, "matrix")
-  expect_is(p2[, 1], "character")
-  expect_is(p2[, 2], "character")
+  expect_is(p2, "data.table")
+  expect_is(p2[[1]], "numeric")
+  expect_is(p2[[2]], "numeric")
   expect_equal(names(models), colnames(p2))
-  expect_is(p3, "matrix")
-  expect_is(p3[, 1], "character")
-  expect_is(p3[, 2], "character")
+  expect_is(p3, "data.table")
+  expect_is(p3[[1]], "numeric")
+  expect_is(p3[[2]], "numeric")
   expect_equal(names(models), colnames(p3))
 
   suppressWarnings({
@@ -128,18 +128,18 @@ test_that("caretList predictions", {
     )
   })
 
-  suppressWarnings(p2 <- predict(models))
+  p2 <- predict(models)
   p3 <- predict(models, newdata = iris[100, 1:2])
-  expect_is(p2, "matrix")
-  expect_is(p2[, 1], "numeric")
-  expect_is(p2[, 2], "numeric")
-  expect_is(p2[, 3], "numeric")
-  expect_is(p2[, 4], "numeric")
-  expect_is(p3, "matrix")
-  expect_is(p3[, 1], "numeric")
-  expect_is(p3[, 2], "numeric")
-  expect_is(p3[, 3], "numeric")
-  expect_is(p3[, 4], "numeric")
+  expect_is(p2, "data.table")
+  expect_is(p2[[1]], "numeric")
+  expect_is(p2[[2]], "numeric")
+  expect_is(p2[[3]], "numeric")
+  expect_is(p2[[4]], "numeric")
+  expect_is(p3, "data.table")
+  expect_is(p3[[1]], "numeric")
+  expect_is(p3[[2]], "numeric")
+  expect_is(p3[[3]], "numeric")
+  expect_is(p3[[4]], "numeric")
   expect_equal(
     length(names(models)) * length(levels(as.factor(iris[, 5]))),
     length(colnames(p3))
@@ -148,7 +148,7 @@ test_that("caretList predictions", {
   modelnames <- names(models)
   classes <- levels(iris[, 5])
   combinations <- expand.grid(classes, modelnames)
-  correct_colnames <- apply(combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+  correct_colnames <- apply(combinations, 1, function(x) paste(x[2], x[1], sep = "."))
   expect_equal(
     correct_colnames,
     colnames(p3)
@@ -170,7 +170,6 @@ test_that("as.caretList.list returns a caretList object", {
 
   expect_is(as.caretList(modelList), "caretList")
 })
-
 
 #############################################################
 context("Bad characters in target variable names and model names")
@@ -667,10 +666,7 @@ test_that("predict.caretList gives a warning and stops for missing training data
   mock_model <- list(structure(list(trainingData = NULL), class = "train"))
   class(mock_model) <- "caretList"
 
-  expect_warning(
-    expect_error(predict.caretList(mock_model), "Could not find training data in the first model in the ensemble."),
-    "Predicting without new data is not well supported.  Attempting to predict on the training data."
-  )
+  expect_error(predict.caretList(mock_model), "Could not find training data in the first model in the ensemble.")
 })
 
 test_that("extractModelName handles custom models correctly", {
@@ -712,7 +708,7 @@ test_that("predict.caretList works when the progress bar is turned off", {
       index = createFolds(y, k = 2)
     )
   )
-  pred <- predict(models, X, verbose = FALSE)
+  pred <- predict(models, X, verbose = FALSE)[["lm"]]
   rmse <- sqrt(mean((y - pred)^2))
   expect_lt(rmse, noise_level)
 })
@@ -764,7 +760,7 @@ test_that("caretList handles new factor levels in prediction", {
   })
 
   pred <- predict(models, newdata = test_data)
-  expect_is(pred, "matrix")
+  expect_is(pred, "data.table")
   expect_equal(nrow(pred), nrow(test_data))
 })
 

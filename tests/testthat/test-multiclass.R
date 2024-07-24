@@ -18,7 +18,7 @@ test_that("We can predict with caretList and caretStack multiclass problems", {
   )
 
   p <- predict(model_list, newdata = iris[, -5])
-  expect_is(p, "matrix")
+  expect_is(p, "data.table")
   expect_equal(nrow(p), nrow(iris))
 
   ens <- caretStack(model_list, method = "rpart")
