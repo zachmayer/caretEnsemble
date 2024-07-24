@@ -7,7 +7,7 @@
 #' @importFrom rlang .data
 NULL
 
-utils::globalVariables(c(".SD", ".data"))  # Disables warnings from R CMD CHECk, but NOT the linter
+utils::globalVariables(c(".SD", ".data")) # Disables warnings from R CMD CHECk, but NOT the linterco
 
 #####################################################
 # Functions for dropping one level from classification problems
@@ -199,6 +199,11 @@ extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
   preds <- data.table::as.data.table(preds)
 
   # Return
+  # TODO: make this a data.table
+  # TODO: make Classifciaiton pull from each sub-model
+  # TODO: aggregate by row index and sort by row inde3x
+  # TODO: merge with all possible IDs, warn on NAs and fill with 0
+  # TODO: allow different models, different methods, different resamples, different types.  Only require a common set of rows
   out <- list(
     preds = preds,
     obs = preds_and_obs[[1]][["obs"]],
@@ -321,7 +326,7 @@ check_bestpreds_obs <- function(modelLibrary) {
 #' @param modelLibrary a list of predictions from caret models
 check_bestpreds_preds <- function(modelLibrary) {
   # TODO: Regression models should be numeric, classification models should have numeric class probs
-  pred <- lapply(modelLibrary, function(x) x[["pred"]])
+  pred <- lapply(modelLibrary, function(x) x[["preds"]])
   names(pred) <- names(modelLibrary)
 
   clases <- sapply(pred, class)

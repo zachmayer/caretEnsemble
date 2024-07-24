@@ -197,8 +197,8 @@ test_that("predict.caretList works for classification and regression", {
   class_preds <- predict(models.class, newdata = X.class)
   reg_preds <- predict(models.reg, newdata = X.reg)
 
-  expect_true(is.matrix(class_preds))
-  expect_true(is.matrix(reg_preds))
+  expect_is(class_preds, "data.table")
+  expect_is(reg_preds, "data.table")
   expect_equal(nrow(class_preds), nrow(X.class))
   expect_equal(nrow(reg_preds), nrow(X.reg))
   expect_equal(ncol(class_preds), length(models.class) * 2)
@@ -207,7 +207,7 @@ test_that("predict.caretList works for classification and regression", {
 
 test_that("predict.caretList handles type='prob' for classification", {
   class_probs <- predict(models.class, newdata = X.class)
-  expect_true(is.matrix(class_probs))
+  expect_is(class_probs, "data.table")
   expect_equal(nrow(class_probs), nrow(X.class))
   expect_equal(ncol(class_probs), length(models.class) * length(levels(Y.class)))
 })
