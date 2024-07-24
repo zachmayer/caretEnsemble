@@ -4,10 +4,12 @@
 \alias{caretStack}
 \title{Combine several predictive models via stacking}
 \usage{
-caretStack(all.models, ...)
+caretStack(all.models, excluded_class_id = 1L, ...)
 }
 \arguments{
 \item{all.models}{a list of caret models to ensemble.}
+
+\item{excluded_class_id}{The integer level to exclude from binary classification or multiclass problems.  If 0, will include all levels.}
 
 \item{...}{additional arguments to pass to the optimization function}
 }

@@ -6,6 +6,7 @@
 #' @details Check the models, and make a matrix of obs and preds
 #'
 #' @param all.models a list of caret models to ensemble.
+#' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.  If 0, will include all levels.
 #' @param ... additional arguments to pass to the optimization function
 #' @return S3 caretStack object
 #' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004). Ensemble Selection from Libraries of Models. \url{https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf}
@@ -21,14 +22,20 @@
 #' )
 #' caretStack(models, method = "glm")
 #' }
-caretStack <- function(all.models, ...) {
-  predobs <- makePredObsMatrix(all.models)
+caretStack <- function(all.models, excluded_class_id = 1L, ...) {
+  # Validators
+  excluded_class_id <- validateExcludedClass(excluded_class_id)
+  check_caretList_classes(all.models)
+  check_caretList_model_types(all.models)
+
+  # Extract each model's cross-validated predictions and check them
+  predobs <- extractBestPredsAndObs(all.models)
 
   # Build a caret model
   model <- train(predobs$preds, predobs$obs, ...)
 
   # Return final model
-  out <- list(models = all.models, ens_model = model, error = model$results)
+  out <- list(models = all.models, ens_model = model, error = model$results, excluded_class_id = excluded_class_id)
   class(out) <- "caretStack"
   out
 }
@@ -43,7 +50,8 @@ caretStack <- function(all.models, ...) {
 #' @param level tolerance/confidence level
 #' @param return_weights a logical indicating whether prediction weights for each model
 #' should be returned
-#' @param na.action the method for handling missing data passed to \code{\link[caret]{predict.train}}.
+#' @param verbose a logical indicating whether to print progress
+#' @param type the type of prediction to return.  "raw" or "prob", as with caret.
 #' @param ... arguments to pass to \code{\link[caret]{predict.train}}.
 #' @export
 #' @details Prediction weights are defined as variable importance in the stacked
@@ -63,42 +71,28 @@ caretStack <- function(all.models, ...) {
 #' RMSE(predict(meta_model, iris[101:150, 1:2]), iris[101:150, 3])
 #' }
 predict.caretStack <- function(
-    object, newdata = NULL,
-    se = FALSE, level = 0.95,
+    object,
+    newdata = NULL,
+    se = FALSE,
+    level = 0.95,
     return_weights = FALSE,
-    na.action = na.omit,
+    verbose = FALSE,
+    type = "raw",
     ...) {
+  # Check if the object is a caretStack
   stopifnot(is(object$models, "caretList"))
-  type <- extractModelTypes(object$models)
 
-  preds <- predict(object$models, newdata = newdata, na.action = na.action)
+  # Extract model types
+  model_type <- extractModelType(object$models)
 
-  if (type == "Classification") {
-    # We have to use the same columns (variables) as the ones used
-    # to train the model.
-    # If the user has specified a class to exclude within the range
-    # of 1 to num_classes, exclude that class from the predictions.
-    # Otherwise, include all classes.
-    column_names <- colnames(preds)
-
-    # TODO: Validate that all object$models[ have the same obs
-    # TODO: Validate that all object$models[ have the same pred levels
-    num_classes <- length(levels(object$models[[1]]$pred$obs))
-    if (getMulticlassExcludedLevel() >= 1 && getMulticlassExcludedLevel() <= num_classes) {
-      classes_included <- levels(object$models[[1]]$pred$obs)[-getMulticlassExcludedLevel()]
-    } else {
-      warning("Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes.")
-      classes_included <- levels(object$models[[1]]$pred$obs)
-    }
-    pattern <- paste(classes_included, collapse = "|")
-    # Remove columns that are associated with the class that was excluded
-    filtered_column_names <- grep(pattern, column_names, value = TRUE)
-    preds <- preds[, filtered_column_names, drop = FALSE]
-
-    est <- predict(object$ens_model, newdata = preds, na.action = na.action, ...)
-  } else {
-    est <- predict(object$ens_model, newdata = preds, ...)
+  # If the excluded class wasn't set at train time, set it
+  if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
+    object[["excluded_class_id"]] <- 1L
+    warning("No excluded_class_id set.  Setting to 1L.")
   }
+
+  preds <- predict(object$models, newdata = newdata, verbose = verbose, excluded_class_id = object[["excluded_class_id"]])
+  meta_preds <- predict(object$ens_model, newdata = preds, type = type, ...)
 
   if (se || return_weights) {
     imp <- varImp(object$ens_model)$importance
@@ -119,9 +113,9 @@ predict.caretStack <- function(
   }
 
   if (se) {
-    if (!inherits(est, "numeric") || is.null(model_weights$Overall)) {
+    if (!inherits(meta_preds, "numeric") || is.null(model_weights$Overall)) {
       message("Standard errors not available.")
-      out <- est
+      out <- meta_preds
     } else {
       model_methods <- colnames(preds)
       overall_weights <- model_weights$Overall[model_methods]
@@ -130,13 +124,13 @@ predict.caretStack <- function(
       std_error <- apply(preds, 1, wtd.sd, w = overall_weights, na.rm = TRUE)
       std_error <- qnorm(level) * std_error
       out <- data.frame(
-        fit = est,
-        lwr = est - std_error,
-        upr = est + std_error
+        fit = meta_preds,
+        lwr = meta_preds - std_error,
+        upr = meta_preds + std_error
       )
     }
   } else {
-    out <- est
+    out <- meta_preds
   }
   if (return_weights) {
     attr(out, "weights") <- model_weights
@@ -222,9 +216,9 @@ plot.caretStack <- function(x, ...) {
 }
 
 #' @title Comparison dotplot for a caretStack object
-#' @description This is a function to make a dotplot from a caretStack.  It uses dotplot from the caret package on all the models in the ensemble, excluding the final ensemble model.  At the moment, this function only works if the ensembling model has the same number of resamples as the component models.
+#' @description This is a function to make a dotplot from a caretStack.  It uses dotplot from the caret package on all the models in the ensemble, excluding the final ensemble model.
+#' At the moment, this function only works if the ensembling model has the same number of resamples as the component models.
 #' @param x An object of class caretStack
-#' @param data passed to dotplot
 #' @param ... passed to dotplot
 #' @importFrom lattice dotplot
 #' @importFrom caret resamples
@@ -241,6 +235,7 @@ plot.caretStack <- function(x, ...) {
 #' meta_model <- caretStack(models, method = "lm", trControl = trainControl(method = "cv"))
 #' dotplot.caretStack(meta_model)
 #' }
-dotplot.caretStack <- function(x, data = NULL, ...) {
-  dotplot(resamples(x$models), data = data, ...)
+dotplot.caretStack <- function(x, ...) {
+  resamps <- caret::resamples(x$models)
+  dotplot(resamps, ...)
 }

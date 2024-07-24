@@ -19,8 +19,6 @@ dotplot
 ensembled
 ensembling
 et
-getBinaryTargetLevel
-getMulticlassExcludedLevel
 github
 glm
 importances
@@ -33,13 +31,14 @@ multiclass
 nnet
 observeds
 optimizers
+pred
 preds
+prob
+probs
 resid
 roxygen
 rpart
 savePredictions
-setBinaryTargetLevel
-setMulticlassTargetLevel
 trainControl
 travis
 tuneGrid

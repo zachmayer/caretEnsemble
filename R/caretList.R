@@ -52,7 +52,7 @@ methodCheck <- function(x) {
   # are specified as strings or model info lists (ie custom models)
   models <- lapply(x, function(m) {
     if (is.list(m)) {
-      validateCustomModel(m)
+      checkCustomModel(m)
       data.frame(type = "custom", model = m$method)
     } else if (is.character(m)) {
       data.frame(type = "native", model = m)
@@ -236,7 +236,7 @@ caretList <- function(
   if (length(modelList) == 0) {
     stop("caret:train failed for all models.  Please inspect your data.")
   }
-  class(modelList) <- "caretList"
+  class(modelList) <- c("caretList", "list")
 
   modelList
 }
@@ -267,7 +267,7 @@ as.caretList <- function(object) {
 #' @return NA
 #' @export
 as.caretList.default <- function(object) {
-  # nothing yet, future dreams go here
+  stop("object must be a list")
 }
 
 #' @title Convert list to caretList
@@ -277,16 +277,30 @@ as.caretList.default <- function(object) {
 #' @export
 #' @method as.caretList list
 as.caretList.list <- function(object) {
+  # Check that the object is a list
   if (!inherits(object, "list")) {
     stop("object must be a list of caret models")
   }
+
   # Check that each element in the list is of class train
   if (!all(sapply(object, is, "train"))) {
     stop("object requires all elements of list to be caret models")
   }
 
+  # Make sure the class is named
+  if (is.null(names(object))) {
+    # If the model list used for predictions is not currently named,
+    # then exctract the model names from each model individually.
+    names(object) <- sapply(object, extractModelName)
+  }
+
+  # Make sure the names are valid
+  names(object) <- make.names(names(object), unique = TRUE, allow_ = TRUE)
+
+  # Apply the class
   class(object) <- "caretList"
 
+  # Return
   object
 }
 
@@ -304,100 +318,60 @@ as.caretList.list <- function(object) {
 #' @description Make a matrix of predictions from a list of caret models
 #'
 #' @param object an object of class caretList
+#' @param newdata New data for predictions.  It can be NULL, but this is ill-advised.
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
-#' @param newdata New data for predictions.  It can be NULL, but this is ill-advised.
-#' @param ... additional arguments to pass to predict.train. Pass the \code{newdata}
-#' argument here, DO NOT PASS the "type" argument.  Classification models will
-#' return probabilities if possible, and regression models will return "raw".
-#' @importFrom pbapply pbsapply
+#' @param excluded_class_id Integer. The class id to drop when predicting for multiclass
+#' @param ... Other arguments to pass to \code{\link[caret]{predict.train}}
+#' @importFrom pbapply pblapply
+#' @importFrom data.table as.data.table setnames
 #' @export
 #' @method predict caretList
-predict.caretList <- function(object, newdata = NULL, ..., verbose = FALSE) {
+predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 0L, ...) {
+  # Decided whether to be verbose or quiet
+  apply_fun <- lapply
+  if (verbose) {
+    apply_fun <- pbapply::pblapply
+  }
+
+  # Check data
   if (is.null(newdata)) {
-    warning("Predicting without new data is not well supported.  Attempting to predict on the training data.")
-    newdata <- object[[1]]$trainingData
-    if (is.null(newdata)) {
-      stop("Could not find training data in the first model in the ensemble.")
+    train_data_nulls <- sapply((object), function(x) is.null(x[["trainingData"]]))
+    if (any(train_data_nulls)) {
+      stop("newdata is NULL and trainingData is NULL for some models. Please pass newdata or retrain with returnData=TRUE.")
     }
   }
 
-  apply_fun <- sapply
-  if (verbose) {
-    apply_fun <- pbsapply
-  }
+  # Loop over the models and make predictions
   preds <- apply_fun(object, function(x) {
     type <- x$modelType
+
+    # predict for class
     if (type == "Classification") {
-      if (x$control$classProbs) {
-        # Return probability predictions for only one of the classes
-        caret::predict.train(x, type = "prob", newdata = newdata, ...)
-      } else {
-        caret::predict.train(x, type = "raw", newdata = newdata, ...)
-      }
+      # use caret::levels.train to extract the levels of the target from each model
+      # and then drop the excluded class if needed
+      pred <- caret::predict.train(x, type = "prob", newdata = newdata, ...)
+      pred <- data.table::as.data.table(pred)
+      pred <- dropExcludedClass(pred, all_classes = levels(x), excluded_class_id = excluded_class_id)
+
+      # predict for reg
     } else if (type == "Regression") {
-      caret::predict.train(x, type = "raw", newdata = newdata, ...)
+      pred <- caret::predict.train(x, type = "raw", newdata = newdata)
+      pred <- data.table::as.data.table(pred)
+
+      # Error
     } else {
       stop(paste("Unknown model type:", type))
     }
+
+    # Return
+    pred
   })
-  if (!inherits(preds, "matrix") && !inherits(preds, "data.frame")) {
-    if (inherits(preds, "character") || inherits(preds, "factor")) {
-      preds <- as.character(preds) # drop factorization
-    }
-    preds <- as.matrix(t(preds))
-  }
 
-  if (is.null(names(object))) {
-    # If the model list used for predictions is not currently named,
-    # then exctract the model names from each model individually.
-    # Note that this should only be possible when caretList objects
-    # are created manually
-    modelnames <- make.names(sapply(object, extractModelName), unique = TRUE)
-  } else {
-    # Otherwise, assign the names of the prediction columns
-    # using the names in the given model list
-    modelnames <- names(object)
-  }
+  # Turn a list of data tables into one data.table
+  # Note that data.table will name the columns based off the names of the list and the names of each data.table
+  preds <- data.table::as.data.table(preds)
 
-  if (object[[1]]$modelType == "Classification" && object[[1]]$control$classProbs) {
-    # list of data.frames containing probabilities associated to each model
-    probs_model_list <- list()
-    # create indexes to reshape later
-    indexes <- seq_len(nrow(newdata))
-    classes <- levels(object[[1]]$pred$obs)
-
-    for (j in seq_len(ncol(preds))) {
-      modelname <- rep(modelnames[j], length(indexes))
-      class_probabilities <- data.frame(preds[, j])
-      probs_model_list[[modelnames[j]]] <- data.table::data.table(
-        index = indexes, class_probabilities, modelname = modelname
-      )
-    }
-    probs <- data.table::rbindlist(probs_model_list)
-
-    # reshape data from long to wide
-    probs <- data.table::dcast(
-      data = probs,
-      formula = index ~ modelname,
-      value.var = classes
-    )
-
-    probs <- probs[, 2:ncol(probs)] # remove index column
-    # Build old and new column names
-    class_model_combinations <- expand.grid(classes, modelnames)
-    old_colnames <- apply(class_model_combinations, 1, function(x) paste(x[1], x[2], sep = "_"))
-    new_colnames <- apply(class_model_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
-
-    # Rename columns from classname_modelname to modelname_classname
-    data.table::setnames(probs, old = old_colnames, new = new_colnames)
-    # Order columns by model first and then by class
-    data.table::setcolorder(probs, new_colnames)
-
-    preds <- as.matrix(probs) # return probabilities in matrix format
-  } else {
-    colnames(preds) <- modelnames
-  }
-
+  # Return
   preds
 }

@@ -10,7 +10,8 @@
   se = FALSE,
   level = 0.95,
   return_weights = FALSE,
-  na.action = na.omit,
+  verbose = FALSE,
+  type = "raw",
   ...
 )
 }
@@ -26,7 +27,9 @@
 \item{return_weights}{a logical indicating whether prediction weights for each model
 should be returned}
 
-\item{na.action}{the method for handling missing data passed to \code{\link[caret]{predict.train}}.}
+\item{verbose}{a logical indicating whether to print progress}
+
+\item{type}{the type of prediction to return.  "raw" or "prob", as with caret.}
 
 \item{...}{arguments to pass to \code{\link[caret]{predict.train}}.}
 }

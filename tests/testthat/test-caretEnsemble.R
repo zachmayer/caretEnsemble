@@ -43,17 +43,6 @@ test_that("We can extract metrics", {
   expect_equal(m1, m2)
 })
 
-test_that("We can extract resdiuals from caretEnsemble objects", {
-  ens <- caretEnsemble(models.class)
-  suppressWarnings(r <- residuals(ens))
-  expect_is(r, "numeric")
-  expect_equal(length(r), 150)
-
-  ens <- caretEnsemble(models.reg)
-  suppressWarnings(r <- residuals(ens))
-  expect_is(r, "numeric")
-  expect_equal(length(r), 150)
-})
 
 test_that("We can extract resdiuals from train regression objects", {
   data(iris)
@@ -76,33 +65,33 @@ context("Does ensembling and prediction work?")
 test_that("We can ensemble regression models", {
   ens.reg <- caretEnsemble(models.reg, trControl = trainControl(number = 2))
   expect_that(ens.reg, is_a("caretEnsemble"))
-  expect_warning(pred.reg <- predict(ens.reg))
-  expect_warning(pred.reg2 <- predict(ens.reg, se = TRUE))
+  pred.reg <- predict(ens.reg)
+  pred.reg2 <- predict(ens.reg, se = TRUE)
 
   expect_true(all(pred.reg == pred.reg2$fit))
 
-  expect_warning(expect_error(predict(ens.reg, return_weights = "BOGUS")))
+  expect_error(predict(ens.reg, return_weights = "BOGUS"))
 
   expect_true(is.numeric(pred.reg))
   expect_true(length(pred.reg) == 150)
   ens.class <- caretEnsemble(models.class, trControl = trainControl(number = 2))
   expect_that(ens.class, is_a("caretEnsemble"))
-  expect_warning(pred.class <- predict(ens.class, type = "prob"))
+  pred.class <- predict(ens.class, type = "prob")
   expect_true(is.data.frame(pred.class))
   expect_true(nrow(pred.class) == 150)
 
   # Check different cases
-  expect_warning(p1 <- predict(ens.reg, return_weights = TRUE, se = FALSE))
+  p1 <- predict(ens.reg, return_weights = TRUE, se = FALSE)
   expect_is(unlist(attr(p1, which = "weights")), "numeric")
   expect_is(p1, "numeric")
 
-  expect_warning(p2 <- predict(ens.reg, return_weights = TRUE, se = TRUE))
+  p2 <- predict(ens.reg, return_weights = TRUE, se = TRUE)
   expect_is(unlist(attr(p2, which = "weights")), "numeric")
   expect_is(p2, "data.frame")
   expect_equal(ncol(p2), 3)
   expect_identical(names(p2), c("fit", "lwr", "upr"))
 
-  expect_warning(p3 <- predict(ens.reg, return_weights = FALSE, se = FALSE))
+  p3 <- predict(ens.reg, return_weights = FALSE, se = FALSE)
   expect_is(p3, "numeric")
   expect_true(all(p1 == p3))
   expect_false(identical(p1, p3))
@@ -117,7 +106,6 @@ context("Does ensembling work with models with differing predictors")
 #############################################################################
 
 test_that("We can ensemble models of different predictors", {
-  skip_on_cran()
   data(iris)
   Y.reg <- iris[, 1]
   X.reg <- model.matrix(~., iris[, -1])
@@ -138,10 +126,18 @@ test_that("We can ensemble models of different predictors", {
   set.seed(482)
   glm4 <- train(x = X.reg[, c(-1, -4, -6)], y = Y.reg, method = "glm", trControl = myControl)
 
-  nestedList <- list(glm1, glm2, glm3, glm4)
-  class(nestedList) <- "caretList"
+  nestedList <- list(glm1 = glm1, glm2 = glm2, glm3 = glm3, glm4 = glm4)
+  nestedList <- as.caretList(nestedList)
+
+  # Can we predict from the list
+  pred_list <- predict(nestedList, newdata = X.reg)
+  expect_s3_class(pred_list, "data.table")
+  expect_equal(nrow(pred_list), 150)
+  expect_equal(ncol(pred_list), length(nestedList))
+
+  # Can we predict from the ensemble
   ensNest <- caretEnsemble(nestedList, trControl = trainControl(number = 2))
-  expect_is(ensNest, "caretEnsemble")
+  expect_s3_class(ensNest, "caretEnsemble")
   pred.nest <- predict(ensNest, newdata = X.reg)
   expect_true(is.numeric(pred.nest))
   expect_true(length(pred.nest) == 150)
@@ -174,7 +170,7 @@ test_that("It works for classification models", {
   set.seed(1234)
   ens.class <- caretEnsemble(models.class, trControl = trainControl(number = 2))
   expect_that(ens.class, is_a("caretEnsemble"))
-  expect_warning(pred.class <- predict(ens.class, type = "prob"))
+  pred.class <- predict(ens.class, type = "prob")
   newPreds1 <- as.data.frame(X.class)
   pred.classb <- predict(ens.class, newdata = newPreds1, type = "prob")
   pred.classc <- predict(ens.class, newdata = newPreds1[2, ], type = "prob")
@@ -222,7 +218,7 @@ test_that("Ensembles using custom models work correctly", {
   expect_equal(sort(names(cs$models)), c("custom.rf", "myrpart", "treebag"))
 
   # Validate ensemble predictions
-  expect_warning(pred.classa <- predict(cs, type = "prob"))
+  pred.classa <- predict(cs, type = "prob")
   expect_silent(pred.classb <- predict(cs, newdata = X.df, type = "prob"))
   expect_silent(pred.classc <- predict(cs, newdata = X.df[2, ], type = "prob"))
   expect_true(is.data.frame(pred.classa))
@@ -242,18 +238,4 @@ test_that("Ensembles using custom models work correctly", {
   )
   msg <- "Custom models must be defined with a \"method\" attribute"
   expect_error(caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control), regexp = msg)
-})
-
-
-#############################################################################
-context("Other tests to get to 100% coverage")
-#############################################################################
-
-test_that("fortify stops for unknown model type", {
-  mock_model <- list(
-    ens_model = list(modelType = "Unknown"),
-    models = list(list(trainingData = data.frame(.outcome = 1:10)))
-  )
-  class(mock_model) <- "caretEnsemble"
-  expect_error(fortify(mock_model), "Uknown model type Unknown")
 })

@@ -21,7 +21,7 @@ test_that("We can stack regression models", {
   expect_that(ens.reg, is_a("caretStack"))
   expect_is(summary(ens.reg), "summary.lm")
   invisible(capture.output(print(ens.reg)))
-  pred.reg <- predict(ens.reg, newdata = X.reg) # In the past this expected a warning, I do not know why. I think is caused by the used method (lm)
+  pred.reg <- predict(ens.reg, newdata = X.reg)
   expect_true(is.numeric(pred.reg))
   expect_true(length(pred.reg) == 150)
 })
@@ -153,36 +153,18 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
     methodList = c("rpart", "rf")
   )
 
-
-
   # Make sure predictions still work if the exlcuded level is too high
-  options(caret.ensemble.multiclass.excluded.level = 4L)
-  expect_equal(getMulticlassExcludedLevel(), 4L)
-  # Create a caretStack
-  expect_warning(
-    {
-      meta_model <- caretStack(
-        model_list,
-        method = "rpart",
-        trControl = trainControl(method = "cv")
-      )
-    },
-    "Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Using all classes to train meta-model."
+  meta_model <- caretStack(
+    model_list,
+    method = "rpart",
+    trControl = trainControl(method = "cv"),
+    excluded_class_id = 4L
   )
-  # Predict with the caretStack
-  expect_warning(
-    {
-      pred <- predict(meta_model, newdata = iris, type = "prob")
-    },
-    "Value for caret.ensemble.multiclass.excluded.level is outside the range between 1 and the number of classes. Returning all classes."
-  )
-  options(caret.ensemble.multiclass.excluded.level = 1L)
+  pred <- predict(meta_model, newdata = iris, type = "prob")
   expect_equal(nrow(pred), 150)
   expect_equal(ncol(pred), 3)
   expect_true(all(sapply(pred, is.finite)))
-  expect_equal(getMulticlassExcludedLevel(), 1L)
 })
-
 
 context("caretStack edge cases")
 
@@ -318,4 +300,16 @@ test_that("caretStack handles custom performance function", {
     expect_s3_class(stack, "caretStack")
     expect_true("default" %in% names(stack$ens_model$results))
   }
+})
+
+test_that("predict.caretStack works if excluded_class_id is not set", {
+  ens <- caretStack(models.class)
+  ens[["excluded_class_id"]] <- NULL
+  expect_warning(pred <- predict(ens, X.class, type = "prob"), "No excluded_class_id set.  Setting to 1L.")
+
+  # Note that we don't exclude the class from the ensemble predictions, but merely from the preprocessing
+  expect_is(pred, "data.frame") # caret returns data.frame
+  expect_equal(nrow(pred), nrow(X.class))
+  expect_equal(ncol(pred), 2)
+  expect_equal(names(pred), c("No", "Yes"))
 })

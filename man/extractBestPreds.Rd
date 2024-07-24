@@ -2,13 +2,13 @@
 % Please edit documentation in R/helper_functions.R
 \name{extractBestPreds}
 \alias{extractBestPreds}
-\title{Extract the best predictions from a list of train objects}
+\title{Extract the best predictions from a train object}
 \usage{
-extractBestPreds(list_of_models)
+extractBestPreds(x)
 }
 \arguments{
-\item{list_of_models}{an object of class caretList or a list of caret models}
+\item{x}{a train object}
 }
 \description{
-Extract predictions for the best tune from a list of caret models
+Extract predictions for the best tune from a model
 }

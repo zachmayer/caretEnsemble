@@ -92,6 +92,7 @@ spell:
 clean:
 	rm -rf *.Rcheck
 	rm -f *.tar.gz
+	rm -f man/*.Rd
 	rm -f coverage.rds
 	rm -f cobertura.xml
 	rm -f coverage-report.html

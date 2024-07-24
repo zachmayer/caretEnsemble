@@ -53,15 +53,15 @@ test_that("No predictions generates an error", {
 })
 
 test_that("We can make the predobs matrix", {
-  out <- makePredObsMatrix(models.reg)
+  out <- extractBestPredsAndObs(models.reg)
   expect_is(out, "list")
   expect_true(length(out$obs) == 150)
   expect_true(all(dim(out$preds) == c(150, 4)))
 })
 
 test_that("We can predict", {
-  out <- predict(models.reg, "reg", newdata = X.reg)
-  expect_is(out, "matrix")
+  out <- predict(models.reg, newdata = X.reg)
+  expect_is(out, "data.table")
   expect_true(all(dim(out) == c(150, 4)))
   expect_true(all(colnames(out) == c("rf", "glm", "rpart", "treebag")))
 })
@@ -71,21 +71,21 @@ context("Do the helper functions work for classification objects?")
 ########################################################################
 
 test_that("We can make the predobs matrix", {
-  out <- makePredObsMatrix(models.class)
+  out <- extractBestPredsAndObs(models.class)
   expect_that(out, is_a("list"))
   expect_true(length(out$obs) == 150)
   expect_true(all(dim(out$preds) == c(150, 4 * 1))) # number of models * (number of classes-1)
 })
 
 test_that("We can predict", {
-  out <- predict(models.class, "Classification", newdata = X.class)
-  expect_is(out, "matrix")
+  out <- predict(models.class, newdata = X.class)
+  expect_is(out, "data.table")
   expect_true(all(dim(out) == c(150, 4 * 2)))
   model_names <- c("rf", "glm", "rpart", "treebag")
   class_names <- c("No", "Yes")
   combinations <- expand.grid(class_names, model_names)
-  expect_true(all(colnames(out) == paste(combinations$Var2, combinations$Var1, sep = "_")))
-  out2 <- predict(models.reg, "Regression", newdata = X.reg)
+  expect_true(all(colnames(out) == paste(combinations$Var2, combinations$Var1, sep = ".")))
+  out2 <- predict(models.reg, newdata = X.reg)
   expect_true(all(dim(out2) == c(150, 4)))
   expect_true(all(colnames(out2) == c("rf", "glm", "rpart", "treebag")))
 })
@@ -93,15 +93,15 @@ test_that("We can predict", {
 test_that("predict results same regardless of verbose option", {
   invisible(capture.output({
     suppressWarnings({
-      expect_is(predict(models.class, "Classification", newdata = X.class), "matrix")
-      out1 <- predict(models.class, "Classification", newdata = X.class)
-      out2 <- predict(models.class, "Classification", verbose = TRUE, newdata = X.class)
+      expect_is(predict(models.class, newdata = X.class), "data.table")
+      out1 <- predict(models.class, newdata = X.class)
+      out2 <- predict(models.class, verbose = TRUE, newdata = X.class)
       expect_identical(out1, out2)
     })
 
-    expect_is(predict(models.reg, "Regression", newdata = X.reg), "matrix")
-    out1 <- predict(models.reg, "Regression", newdata = X.reg)
-    out2 <- predict(models.reg, "Regression", verbose = TRUE, newdata = X.reg)
+    expect_is(predict(models.reg, newdata = X.reg), "data.table")
+    out1 <- predict(models.reg, newdata = X.reg)
+    out2 <- predict(models.reg, verbose = TRUE, newdata = X.reg)
     expect_identical(out1, out2)
   }))
 })
@@ -132,7 +132,6 @@ test_that("wtd.sd handles NA values correctly", {
 })
 
 test_that("Checks generate errors", {
-  skip_on_cran()
   set.seed(42)
   myControl <- trainControl(method = "cv", number = 5, savePredictions = "final")
   expect_warning(
@@ -143,8 +142,8 @@ test_that("Checks generate errors", {
       trControl = myControl
     )
   )
-  modelLibrary <- extractBestPreds(x)
-  modelLibrary$nn <- modelLibrary$lm[sample(seq_len(nrow(modelLibrary$lm)), nrow(modelLibrary$lm)), ]
+  modelLibrary <- extractBestPredsAndObs(x)
+  modelLibrary$preds$nn <- modelLibrary$preds$lm[sample(seq_along(modelLibrary$preds$lm), length(modelLibrary$preds$lm))]
 
   expect_error(check_bestpreds_resamples(modelLibrary))
   expect_error(check_bestpreds_indexes(modelLibrary))
@@ -158,15 +157,10 @@ test_that("Checks generate errors", {
   expect_error(check_caretList_classes(x$glm$finalModel))
 
   x$rpart <- train(Species ~ Sepal.Width, iris, method = "rpart", trControl = myControl)
-  # This has to be changed because train gives this error if dataset is truncated in
-  # newest version of caret:
-  # Error in train.default(x, y, weights = w, ...) :
-  #    One or more factor levels in the outcome has no data: 'virginica'
   check_caretList_classes(x)
   expect_error(check_caretList_model_types(x))
 
-  m <- extractBestPreds(x)
-  expect_error(check_bestpreds_preds(m))
+  expect_error(m <- extractBestPredsAndObs(x))
 
   set.seed(42)
   myControl2 <- trainControl(
@@ -191,7 +185,7 @@ test_that("Checks generate errors", {
 test_that("check_caretList_model_types stops when there are no predictions saved", {
   model_list <- models.class
   model_list[[1]]$pred <- NULL
-  expect_error(check_caretList_model_types(model_list), "No predictions saved by train. Please re-run models with trainControl set with savePredictions = TRUE.")
+  expect_error(check_caretList_model_types(model_list), "No predictions saved by train. Please re-run models with trainControl set with savePredictions = 'final'.")
 })
 
 test_that("check_caretList_model_types stops when a classification model support probabilities", {
@@ -203,7 +197,7 @@ test_that("check_caretList_model_types stops when a classification model support
 test_that("check_caretList_model_types stops when a classification model supports probabilities but did not save them", {
   model_list <- models.class
   model_list[[1]]$control$classProbs <- FALSE
-  m <- "Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs=TRUE"
+  m <- "Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs = TRUE: rf"
   expect_error(check_caretList_model_types(model_list), m)
   context("Test helper functions for multiclass classification")
 
@@ -230,15 +224,25 @@ test_that("check_caretList_model_types stops when a classification model support
   })
 
   test_that("Configuration function for excluded level work", {
-    expect_warning(check_multiclass_excluded_level(4, 3))
-    expect_warning(check_multiclass_excluded_level(0, 3))
-    expect_true(is.null(check_multiclass_excluded_level(3, 3)))
-    expect_true(is.null(check_multiclass_excluded_level(1, 3)))
+    # Integers work
+    expect_equal(validateExcludedClass(0L), 0L)
+    expect_equal(validateExcludedClass(1L), 1L)
+    expect_equal(validateExcludedClass(4L), 4L)
 
+    # Decimals work with a warning
+    expect_warning(expect_equal(validateExcludedClass(0.0), 0L))
+    expect_warning(expect_equal(validateExcludedClass(1.0), 1L))
+    expect_warning(expect_equal(validateExcludedClass(4.0), 4L))
+
+    # Less than 0 will error
+    expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
+
+    # Make a model list
     data(iris)
     myControl <- trainControl(
       method = "cv", number = 5,
-      savePredictions = "final", index = createResample(iris[, 5], 5),
+      savePredictions = "final",
+      index = createResample(iris[, 5], 5),
       classProbs = TRUE
     )
     model_list <- caretList(
@@ -248,58 +252,59 @@ test_that("check_caretList_model_types stops when a classification model support
       trControl = myControl
     )
 
-    msg <- "multiclass excluded level must be > 0: 0 was given see setMulticlassExcludedLevel for more details"
-    expect_error(setMulticlassExcludedLevel(0L), msg)
-    invisible(caretStack(model_list, method = "knn"))
-    setMulticlassExcludedLevel(4L)
-    expect_warning(caretStack(model_list, method = "knn"))
-    setMulticlassExcludedLevel(1L)
+    # Stacking with the excluded level should work
+    invisible(caretStack(model_list, method = "knn", excluded_class_id = 1L))
+
+    # Stacking with too great of a level should work.  No error or warning.
+    # TODO: maybe caretStack should raise a warning if excluded_class_id is too high?
+    # Should also validate it?
+    stack <- caretStack(model_list, method = "knn", excluded_class_id = 4L)
+    invisible(predict(stack, iris[, -5]))
 
     # Check if we are actually excluding level 1 (setosa)
-    setMulticlassExcludedLevel(1L)
     classes <- levels(iris[, 5])[-1]
     models <- c("rpart", "glmnet")
     class_model_combinations <- expand.grid(classes, models)
-    varImp_rownames <- apply(class_model_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+    varImp_rownames <- apply(class_model_combinations, 1, function(x) paste(x[2], x[1], sep = "."))
 
-    model_stack <- caretStack(model_list, method = "knn")
+    model_stack <- caretStack(model_list, method = "knn", excluded_class_id = 1L)
     expect_identical(rownames(varImp(model_stack$ens_model)$importance), varImp_rownames)
   })
 })
 
-# Tests for validateMulticlassExcludedLevel function
-test_that("validateMulticlassExcludedLevel stops for non-numeric input", {
+# Tests for validateExcludedClass function
+test_that("validateExcludedClass stops for non-numeric input", {
   invalid_input <- "invalid"
-  err <- "multiclass excluded level must be numeric: invalid was given see setMulticlassExcludedLevel for more details"
-  expect_error(validateMulticlassExcludedLevel(invalid_input), err)
+  err <- "classification excluded level must be numeric: invalid"
+  expect_error(validateExcludedClass(invalid_input), err)
 })
 
-test_that("validateMulticlassExcludedLevel stops for non-finite input", {
+test_that("validateExcludedClass stops for non-finite input", {
   invalid_input <- Inf
-  err <- "multiclass excluded level must be finite: Inf was given see setMulticlassExcludedLevel for more details"
-  expect_error(validateMulticlassExcludedLevel(invalid_input), err)
-})
-
-test_that("validateMulticlassExcludedLevel stops for non-positive input", {
-  invalid_input <- -1
-  err <- "multiclass excluded level must be > 0: -1 was given see setMulticlassExcludedLevel for more details"
-  expect_error(validateMulticlassExcludedLevel(invalid_input), err)
-})
-
-test_that("validateMulticlassExcludedLevel warns for non-integer input", {
-  warn <- "multiclass excluded level is not an integer 1.1 was given see setMulticlassExcludedLevel for more details"
+  err <- "classification excluded level must be finite: Inf"
   expect_warning(
-    {
-      validated <- validateMulticlassExcludedLevel(1.1)
-    },
-    warn
+    expect_error(validateExcludedClass(invalid_input), err),
+    "classification excluded level is not an integer: Inf"
+  )
+})
+
+test_that("validateExcludedClass stops for non-positive input", {
+  invalid_input <- -1
+  err <- "classification excluded level must be >= 0: -1"
+  expect_warning(expect_error(validateExcludedClass(invalid_input), err))
+})
+
+test_that("validateExcludedClass warns for non-integer input", {
+  expect_warning(
+    validated <- validateExcludedClass(1.1),
+    "classification excluded level is not an integer: 1.1"
   )
   expect_equal(validated, 1L)
 })
 
-test_that("validateMulticlassExcludedLevel passes for valid input", {
+test_that("validateExcludedClass passes for valid input", {
   valid_input <- 3L
-  expect_equal(validateMulticlassExcludedLevel(valid_input), 3L)
+  expect_equal(validateExcludedClass(valid_input), 3L)
 })
 
 ########################################################################
@@ -341,56 +346,39 @@ test_that("check_caretList_model_types validates model types correctly", {
   expect_error(check_caretList_model_types(mixed_list))
 })
 
-test_that("check_bestpreds_resamples validates resamples correctly", {
-  best_preds_class <- extractBestPreds(models.class)
-  best_preds_reg <- extractBestPreds(models.reg)
+test_that("extractBestPredsAndObs works", {
+  best_preds_class <- extractBestPredsAndObs(models.class)
+  best_preds_reg <- extractBestPredsAndObs(models.reg)
 
-  expect_null(check_bestpreds_resamples(best_preds_class))
-  expect_null(check_bestpreds_resamples(best_preds_reg))
+  expect_is(best_preds_class, "list")
+  expect_is(best_preds_reg, "list")
 
-  # Test error for inconsistent resamples
-  best_preds_inconsistent <- best_preds_class
-  best_preds_inconsistent[[1]]$Resample <- sample(best_preds_inconsistent[[1]]$Resample)
-  expect_error(check_bestpreds_resamples(best_preds_inconsistent))
+  expect_equal(names(best_preds_class$preds), names(models.class))
+  expect_equal(names(best_preds_reg$preds), names(models.reg))
 })
 
-test_that("check_bestpreds_indexes validates row indexes correctly", {
-  best_preds_class <- extractBestPreds(models.class)
-  best_preds_reg <- extractBestPreds(models.reg)
-
-  expect_null(check_bestpreds_indexes(best_preds_class))
-  expect_null(check_bestpreds_indexes(best_preds_reg))
-
-  # Test error for inconsistent row indexes
-  best_preds_inconsistent <- best_preds_class
-  best_preds_inconsistent[[1]]$rowIndex <- sample(best_preds_inconsistent[[1]]$rowIndex)
-  expect_error(check_bestpreds_indexes(best_preds_inconsistent))
+test_that("extractBestPredsAndObs errors on inconsistent resamples", {
+  models.class.inconsistent <- models.class
+  models.class.inconsistent[[1]]$pred$Resample <- "BAD_SAMPLE"
+  expect_error(extractBestPredsAndObs(models.class.inconsistent), "Component models do not have the same re-sampling strategies")
 })
 
-test_that("check_bestpreds_obs validates observed values correctly", {
-  best_preds_class <- extractBestPreds(models.class)
-  best_preds_reg <- extractBestPreds(models.reg)
-
-  expect_null(check_bestpreds_obs(best_preds_class))
-  expect_null(check_bestpreds_obs(best_preds_reg))
-
-  # Test error for inconsistent observed values
-  best_preds_inconsistent <- best_preds_class
-  best_preds_inconsistent[[1]]$obs <- sample(best_preds_inconsistent[[1]]$obs)
-  expect_error(check_bestpreds_obs(best_preds_inconsistent))
+test_that("extractBestPredsAndObs errors on inconsistent row indexes", {
+  models.class.inconsistent <- models.class
+  models.class.inconsistent[[1]]$pred$rowIndex <- 0
+  expect_error(extractBestPredsAndObs(models.class.inconsistent), "Re-sampled predictions from each component model do not use the same rowIndexes from the origial dataset")
 })
 
-test_that("check_bestpreds_preds validates predictions correctly", {
-  best_preds_class <- extractBestPreds(models.class)
-  best_preds_reg <- extractBestPreds(models.reg)
+test_that("extractBestPredsAndObs errors on inconsistent obs", {
+  models.class.inconsistent <- models.class
+  models.class.inconsistent[[1]]$pred$obs <- -Inf
+  expect_error(extractBestPredsAndObs(models.class.inconsistent), "Observed values for each component model are not the same.  Please re-train the models with the same Y variable")
+})
 
-  expect_null(check_bestpreds_preds(best_preds_class))
-  expect_null(check_bestpreds_preds(best_preds_reg))
-
-  # Test error for inconsistent prediction types
-  best_preds_inconsistent <- best_preds_class
-  best_preds_inconsistent[[1]]$pred <- as.character(best_preds_inconsistent[[1]]$pred)
-  expect_error(check_bestpreds_preds(best_preds_inconsistent))
+test_that("extractBestPredsAndObs errors on inconsistent pred", {
+  models.class.inconsistent <- models.class
+  models.class.inconsistent[[1]]$pred$pred <- "BAD_PRED"
+  expect_error(extractBestPredsAndObs(models.class.inconsistent), "Component models do not all have the same type of predicitons.  Predictions are a mix of character, factor")
 })
 
 test_that("extractModelName extracts model names correctly", {
@@ -403,14 +391,14 @@ test_that("extractModelName extracts model names correctly", {
   expect_equal(extractModelName(custom_model), "custom_rf")
 })
 
-test_that("extractModelTypes extracts model types correctly", {
-  expect_equal(extractModelTypes(models.class), "Classification")
-  expect_equal(extractModelTypes(models.reg), "Regression")
+test_that("extractModelType extracts model types correctly", {
+  expect_equal(extractModelType(models.class), "Classification")
+  expect_equal(extractModelType(models.reg), "Regression")
 })
 
-test_that("bestPreds extracts best predictions correctly", {
-  best_preds_class <- bestPreds(models.class[[1]])
-  best_preds_reg <- bestPreds(models.reg[[1]])
+test_that("extractBestPreds extracts best predictions correctly", {
+  best_preds_class <- extractBestPreds(models.class[[1]])
+  best_preds_reg <- extractBestPreds(models.reg[[1]])
 
   expect_s3_class(best_preds_class, "data.frame")
   expect_s3_class(best_preds_reg, "data.frame")
@@ -418,21 +406,27 @@ test_that("bestPreds extracts best predictions correctly", {
   expect_true(all(c("Resample", "rowIndex", "pred", "obs") %in% names(best_preds_reg)))
 })
 
-test_that("extractBestPreds extracts best predictions for all models", {
-  best_preds_class <- extractBestPreds(models.class)
-  best_preds_reg <- extractBestPreds(models.reg)
+test_that("extractBestPredsAndObs extracts best predictions for all models", {
+  best_preds_class <- extractBestPredsAndObs(models.class)
+  best_preds_reg <- extractBestPredsAndObs(models.reg)
 
   expect_type(best_preds_class, "list")
   expect_type(best_preds_reg, "list")
-  expect_length(best_preds_class, length(models.class))
-  expect_length(best_preds_reg, length(models.reg))
-  expect_true(all(sapply(best_preds_class, function(x) all(c("Resample", "rowIndex", "pred", "obs") %in% names(x)))))
-  expect_true(all(sapply(best_preds_reg, function(x) all(c("Resample", "rowIndex", "pred", "obs") %in% names(x)))))
+
+  expect_equal(ncol(best_preds_class$preds), length(models.class))
+  expect_equal(ncol(best_preds_reg$preds), length(models.reg))
+
+  expect_equal(names(best_preds_class$pred), names(models.class))
+  expect_equal(names(best_preds_reg$pred), names(models.reg))
+
+  expected_names <- c("preds", "obs", "rowIndex", "Resample", "type")
+  expect_equal(names(best_preds_class), expected_names)
+  expect_equal(names(best_preds_reg), expected_names)
 })
 
-test_that("makePredObsMatrix creates prediction-observation matrix correctly", {
-  pred_obs_matrix_class <- makePredObsMatrix(models.class)
-  pred_obs_matrix_reg <- makePredObsMatrix(models.reg)
+test_that("extractBestPredsAndObs creates prediction-observation data correctly", {
+  pred_obs_matrix_class <- extractBestPredsAndObs(models.class)
+  pred_obs_matrix_reg <- extractBestPredsAndObs(models.reg)
 
   expect_type(pred_obs_matrix_class, "list")
   expect_type(pred_obs_matrix_reg, "list")
@@ -442,18 +436,22 @@ test_that("makePredObsMatrix creates prediction-observation matrix correctly", {
   expect_equal(nrow(pred_obs_matrix_reg$preds), length(pred_obs_matrix_reg$obs))
 })
 
-test_that("check_multiclass_excluded_level validates excluded level correctly", {
-  expect_warning(check_multiclass_excluded_level(4, 3))
-  expect_warning(check_multiclass_excluded_level(0, 3))
-  expect_null(check_multiclass_excluded_level(2, 3))
-  expect_null(check_multiclass_excluded_level(1, 3))
+test_that("extractBestPredsAndObs fails on new model types", {
+  models.class.new <- models.class
+  for (idx in seq_along(models.class.new)) {
+    models.class.new[[idx]]$modelType <- "ObjectDetection"
+  }
+  expect_error(extractBestPredsAndObs(models.class.new), "Unknown model type: ObjectDetection")
 })
 
-test_that("validateMulticlassExcludedLevel validates excluded level correctly", {
-  expect_error(validateMulticlassExcludedLevel("a"))
-  expect_error(validateMulticlassExcludedLevel(0))
-  expect_error(validateMulticlassExcludedLevel(Inf))
-  expect_warning(validateMulticlassExcludedLevel(1.5))
-  txt <- "multiclass excluded level is not an integer 2 was given see setMulticlassExcludedLevel for more details"
-  expect_warning(expect_equal(validateMulticlassExcludedLevel(2), 2L), txt)
+test_that("validateExcludedClass validates excluded level correctly", {
+  expect_warning(validateExcludedClass(NULL), "No excluded_class_id set. Setting to 1L.")
+  expect_error(validateExcludedClass(c(1L, 2L)), "classification excluded level must have a length of 1: length=2")
+  expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
+  expect_warning(expect_error(validateExcludedClass(-1), "classification excluded level must be >= 0: -1"))
+  expect_warning(expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"))
+  expect_warning(expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"))
+  expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
+  txt <- "classification excluded level is not an integer: 2"
+  expect_warning(expect_equal(validateExcludedClass(2), 2L), txt)
 })

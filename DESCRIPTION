@@ -35,6 +35,7 @@ Suggests:
     mlbench,
     MASS,
     gbm,
+    plyr,
     klaR,
     rmarkdown,
     usethis,
@@ -45,11 +46,11 @@ Imports:
     pbapply,
     ggplot2,
     digest,
-    plyr,
     lattice,
     gridExtra,
     data.table,
-    caret
+    caret,
+    rlang
 License: MIT + file LICENSE
 VignetteBuilder: knitr
 RoxygenNote: 7.3.2

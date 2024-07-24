@@ -18,7 +18,7 @@ test_that("We can predict with caretList and caretStack multiclass problems", {
   )
 
   p <- predict(model_list, newdata = iris[, -5])
-  expect_is(p, "matrix")
+  expect_is(p, "data.table")
   expect_equal(nrow(p), nrow(iris))
 
   ens <- caretStack(model_list, method = "rpart")
@@ -61,7 +61,7 @@ test_that("Columns for caretList predictions are correct and ordered", {
   methods <- names(model_list)
   classes <- levels(iris$Species)
   class_method_combinations <- expand.grid(classes, methods)
-  ordered_colnames <- apply(class_method_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+  ordered_colnames <- apply(class_method_combinations, 1, function(x) paste(x[2], x[1], sep = "."))
 
   # Check the names of the columns are correct
   expect_true(all(colnames(p) %in% ordered_colnames))
@@ -105,7 +105,7 @@ test_that("Columns for caretStack are correct", {
   expect_equal(colnames(p_prob), classes)
 })
 
-test_that("Underscores are supported in method and class names in caretList and caretStack", {
+test_that("Periods are supported in method and class names in caretList and caretStack", {
   data(iris)
   # Rename values and levels to have underscores
   levels(iris[, 5]) <- c("setosa_1", "versicolor_2", "virginica_3")
@@ -135,7 +135,7 @@ test_that("Underscores are supported in method and class names in caretList and 
   p <- predict(model_list, newdata = iris[, -5])
 
   class_method_combinations <- expand.grid(classes, methods)
-  ordered_colnames <- apply(class_method_combinations, 1, function(x) paste(x[2], x[1], sep = "_"))
+  ordered_colnames <- apply(class_method_combinations, 1, function(x) paste(x[2], x[1], sep = "."))
   expect_equal(colnames(p), ordered_colnames)
 
   model_stack <- caretStack(model_list, method = "knn")
