@@ -1,15 +1,4 @@
 #####################################################
-# Globals
-#####################################################
-
-#' @importFrom utils globalVariables
-#' @importFrom data.table .SD
-#' @importFrom rlang .data
-NULL
-
-utils::globalVariables(c(".SD", ".data")) # Disables warnings from R CMD CHECk, but NOT the linterco
-
-#####################################################
 # Functions for dropping one level from classification problems
 #####################################################
 

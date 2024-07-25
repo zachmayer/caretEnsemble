@@ -227,6 +227,7 @@ varImpFrame <- function(x) {
 #' @param ... additional arguments to pass to plot
 #' @return A plot
 #' @importFrom ggplot2 ggplot aes geom_pointrange theme_bw labs geom_hline
+#' @importFrom rlang .data
 #' @export
 #' @method plot caretEnsemble
 #' @examples
@@ -241,11 +242,13 @@ plot.caretEnsemble <- function(x, ...) {
   metricLab <- x$ens_model$metric
   dat$metric <- dat[[metricLab]]
   dat$metricSD <- dat[[paste0(metricLab, "SD")]]
+  dat$lower <- dat$metric - dat$metricSD
+  dat$upper <- dat$metric + dat$metricSD
   plt <- ggplot(
     dat, aes(
-      x = method, y = metric,
-      ymin = metric - metricSD,
-      ymax = metric + metricSD
+      x = .data[["method"]], y = .data[["metric"]],
+      ymin = .data[["metric"]] - .data[["metricSD"]],
+      ymax = .data[["metric"]] + .data[["metricSD"]]
     )
   ) +
     geom_pointrange() +
@@ -300,7 +303,8 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #' residuals against two random or user specified variables.
 #' @importFrom ggplot2 ggplot aes geom_point geom_smooth geom_bar geom_linerange
 #' @importFrom ggplot2 scale_x_continuous scale_y_continuous labs theme_bw autoplot
-#' @importFrom data.table data.table set rbindlist setkey .SD
+#' @importFrom data.table data.table set rbindlist setkeyv .SD
+#' @importFrom rlang .data
 #' @importFrom gridExtra grid.arrange
 #' @export
 #' @examples
@@ -318,14 +322,13 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(is(object, "caretEnsemble"))
   ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
-  data.table::setkey(ensemble_data, id)
+  data.table::setkeyv(ensemble_data, "id")
 
   # Performance metrics by model
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
 
   # Residuals vs Fitted
   # Disable the object usage linter in here — it raises false positives for .SD and .data
-  # nolint start: object_usage_linter
   g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(.data[["pred"]], .data[["resid"]])) +
     geom_point() +
     geom_smooth(se = FALSE) +
@@ -353,7 +356,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     ymin = min(.SD[["resid"]]),
     ymax = max(.SD[["resid"]]),
     yavg = median(.SD[["resid"]]),
-    yhat = .SD[["pred"]][1]
+    yhat = .SD[["pred"]][1L]
   ), by = "id"]
   g4 <- ggplot2::ggplot(sub_model_summary, ggplot2::aes(
     x = .data[["yhat"]],
@@ -375,7 +378,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     )
 
   # Residuals vs X variables
-  x_data <- data.table::data.table(object$models[[1]]$trainingData)
+  x_data <- data.table::data.table(object$models[[1L]]$trainingData)
   if (is.null(xvars)) {
     xvars <- names(x_data)
     xvars <- setdiff(xvars, c(".outcome", ".weights", "(Intercept)"))
@@ -383,7 +386,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   }
   data.table::set(x_data, j = "id", value = seq_len(nrow(x_data)))
   plotdf <- merge(ensemble_data, x_data, by = "id")
-  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1]]], .data[["resid"]])) +
+  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1L]]], .data[["resid"]])) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
     ggplot2::scale_x_continuous(xvars[1L]) +
@@ -393,10 +396,9 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[2L]]], .data[["resid"]])) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
-    ggplot2::scale_x_continuous(xvars[2]) +
+    ggplot2::scale_x_continuous(xvars[2L]) +
     ggplot2::scale_y_continuous("Residuals") +
     ggplot2::labs(title = paste0("Residuals Against ", xvars[2L])) +
     ggplot2::theme_bw()
-  # nolint end: object_usage_linter
   suppressMessages(gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2L))
 }
