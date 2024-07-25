@@ -74,6 +74,9 @@ getMetric <- function(x, metric = NULL, return_sd = FALSE) {
 
 #' Extract the model accuracy metrics of the individual models in an ensemble object.
 #' @param ensemble a caretEnsemble to make predictions from.
+#' @param metric a character string representing the metric to extract.
+#' If NULL, each model will return the metric it was trained on.
+#' If not NULL, the specified metric must be present for EVERY trained model.
 #' @impotFrom data.table data.table setorderv
 extractModelMetrics <- function(ensemble, metric = NULL) {
   stopifnot(is.caretEnsemble(ensemble))
@@ -209,7 +212,7 @@ plot.caretEnsemble <- function(x, ...) {
   dat <- extractModelMetrics(x)
   plt <- ggplot(
     dat, aes(
-      x = .data[["model_name"]], 
+      x = .data[["model_name"]],
       y = .data[["value"]],
       ymin = .data[["value"]] - .data[["sd"]],
       ymax = .data[["value"]] + .data[["sd"]],
@@ -218,7 +221,7 @@ plot.caretEnsemble <- function(x, ...) {
   ) +
     geom_pointrange() +
     theme_bw() +
-    labs(x = "Individual Model Method", y = 'Metric Value')
+    labs(x = "Individual Model Method", y = "Metric Value")
 
   if (nrow(x$error) > 0L) {
     plt <- plt +

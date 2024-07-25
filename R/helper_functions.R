@@ -209,7 +209,6 @@ extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
   out
 }
 
-
 #####################################################
 # check functions
 #####################################################

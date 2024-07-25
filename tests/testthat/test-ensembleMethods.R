@@ -154,8 +154,8 @@ test_that("No errors are thrown by a generics for ensembles", {
   tp2 <- plot(ens.reg)
   expect_equal(nrow(tp$data), 4L)
   expect_equal(nrow(tp2$data), 3L)
-  expect_equal(tp$data$method, names(ens.class$models))
-  expect_equal(tp2$data$method, names(ens.reg$models))
+  expect_equal(tp$data$model_name, names(ens.class$models))
+  expect_equal(tp2$data$model_name, names(ens.reg$models))
 
   test_plot_file <- "caretEnsemble_test_plots.png"
   png(test_plot_file)
@@ -184,10 +184,10 @@ test_that("Do model results in caretEnsemble match component models - classifica
   models.subset <- models.reg[2L:4L]
   class(models.subset) <- "caretList"
   ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2L))
-  modres1 <- extractModRes(ens.class)
-  modres2 <- extractModRes(ens.reg)
+  modres1 <- extractModelMetrics(ens.class)
+  modres2 <- extractModelMetrics(ens.reg)
   expect_is(modres2, "data.frame")
-  expect_equal(modres2$method, names(models.subset))
+  expect_equal(modres2$model_name, names(models.subset))
 })
 
 test_that("Do model results in caretEnsemble match component models - regression", {
