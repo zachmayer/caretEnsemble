@@ -44,6 +44,48 @@ is.caretEnsemble <- function(object) {
   is(object, "caretEnsemble")
 }
 
+#' @title Extract accuracy metrics from a \code{\link[caret]{train}} model
+#' @description Extract the cross-validated accuracy metrics or their SDs from caret.
+#' @param x a train object
+#' @param metric a character string representing the metric to extract
+#' @param return_sd a boolean indicating whether to return the SD of the metric instead of the average.
+#' @return A numeric representing the metric desired metric.
+#' @export
+getMetric <- function(x, metric = NULL, return_sd = FALSE) {
+  # Load the metric used by train by default
+  if (is.null(metric)) {
+    metric <- x$metric
+  }
+
+  # Get the metric and its min or max
+  stopifnot(metric %in% names(x$results))
+  val <- x$results[[metric]]
+  idx <- ifelse(x$maximize, which.max(val), which.min(val))
+
+  # If SD, get the SD of the metric instead
+  if (return_sd) {
+    SD <- x$results[[paste0(metric, "SD")]]
+    out <- SD[idx]
+  } else {
+    out <- val[idx]
+  }
+  out
+}
+
+#' Extract the model accuracy metrics of the individual models in an ensemble object.
+#' @param ensemble a caretEnsemble to make predictions from.
+#' @impotFrom data.table data.table setorderv
+extractModelMetrics <- function(ensemble, metric = NULL) {
+  stopifnot(is.caretEnsemble(ensemble))
+  model_metrics <- data.table(
+    model_name = names(ensemble$models),
+    metric = sapply(ensemble$models, "[[", "metric"),
+    value = sapply(ensemble$models, getMetric, return_sd = FALSE),
+    sd = sapply(ensemble$models, getMetric, return_sd = TRUE)
+  )
+  model_metrics
+}
+
 #' @title Summarize the results of caretEnsemble for the user.
 #' @description Summarize a caretEnsemble
 #' @param object a \code{\link{caretEnsemble}} to make predictions from.
@@ -69,64 +111,31 @@ summary.caretEnsemble <- function(object, ...) {
 
   # Add code to compare ensemble to individual models
   cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
-  print(extractModRes(object), row.names = FALSE)
+  print(extractModelMetrics(object), row.names = FALSE)
 }
 
-#' Extract the model accuracy metrics of the individual models in an ensemble object.
-#' @param ensemble a caretEnsemble to make predictions from.
-extractModRes <- function(ensemble) {
-  stopifnot(is.caretEnsemble(ensemble))
-  model_methods <- names(ensemble$models)
-  metric <- ensemble$ens_model$metric
-  modRes <- data.frame(
-    method = model_methods,
-    metric = unlist(
-      lapply(
-        ensemble$models,
-        getMetric,
-        metric = metric,
-        return_sd = FALSE
-      )
-    ),
-    metricSD = unlist(
-      lapply(
-        ensemble$models,
-        getMetric,
-        metric = metric,
-        return_sd = TRUE
-      )
-    ),
-    stringsAsFactors = FALSE
+#' @keywords internal
+# This function only gets called once, in varImp.caretEnsemble
+varImpFrame <- function(x) {
+  dat <- do.call(rbind.data.frame, x)
+  dat <- dat[!duplicated(lapply(dat, summary))]
+
+  # Parse frame
+  dat$id <- row.names(dat)
+  dat$model <- sub("\\.[^\n]*", "", dat$id)
+  dat$var <- sub("^[^.]*", "", dat$id)
+  dat$var <- substr(dat$var, 2L, nchar(dat$var))
+
+  # Parse intercept variables
+  dat$var[grep("Inter", dat$var, fixed = TRUE)] <- "Intercept"
+  dat$id <- NULL
+  row.names(dat) <- NULL
+  dat <- reshape(dat,
+    direction = "wide", v.names = "Overall",
+    idvar = "var", timevar = "model"
   )
-  names(modRes)[2L:3L] <- c(metric, paste0(metric, "SD"))
-  modRes
-}
-
-#' @title Extract accuracy metrics from a \code{\link[caret]{train}} model
-#' @description Extract the cross-validated accuracy metrics or their SDs from caret.
-#' @param x a train object
-#' @param metric a character string representing the metric to extract
-#' @param return_sd a boolean indicating whether to return the SD of the metric instead of the average.
-#' @return A numeric representing the metric desired metric.
-#' @export
-getMetric <- function(x, metric = NULL, return_sd = FALSE) {
-  # Load the metric used by train by default
-  if (is.null(metric)) {
-    metric <- x$metric
-  }
-
-  # Get the metric and its min or max
-  stopifnot(metric %in% names(x$results))
-  val <- x$results[[metric]]
-  idx <- ifelse(x$maximize, which.max(val), which.min(val))
-  out <- val[idx]
-
-  # If SD, get the SD of the metric instead
-  if (return_sd) {
-    SD <- x$results[[paste0(metric, "SD")]]
-    out <- SD[idx]
-  }
-  out
+  row.names(dat) <- dat[, 1L]
+  dat[, -1L]
 }
 
 #' @title Calculate the variable importance of variables in a caretEnsemble.
@@ -144,9 +153,13 @@ getMetric <- function(x, metric = NULL, return_sd = FALSE) {
 #' @export
 varImp.caretEnsemble <- function(object, ...) {
   # Extract and formal individual model importances
-  # Todo, clean up this code!
+  # Todo, clean up this code!  Make varImp.caretList
   coef_importance <- lapply(object$models, caret::varImp)
-  coef_importance <- lapply(coef_importance, clean_varImp)
+  coef_importance <- lapply(coef_importance, function(x) {
+    names(x$importance)[1L] <- "Overall"
+    x$importance <- x$importance[, "Overall", drop = FALSE]
+    x$importance
+  })
 
   # Convert to data.frame
   dat <- varImpFrame(coef_importance)
@@ -175,38 +188,6 @@ varImp.caretEnsemble <- function(object, ...) {
   dat
 }
 
-#' @keywords internal
-# This function only gets called once, in varImp.caretEnsemble
-clean_varImp <- function(x) {
-  names(x$importance)[1L] <- "Overall"
-  x$importance <- x$importance[, "Overall", drop = FALSE]
-  x$importance
-}
-
-#' @keywords internal
-# This function only gets called once, in varImp.caretEnsemble
-varImpFrame <- function(x) {
-  dat <- do.call(rbind.data.frame, x)
-  dat <- dat[!duplicated(lapply(dat, summary))]
-
-  # Parse frame
-  dat$id <- row.names(dat)
-  dat$model <- sub("\\.[^\n]*", "", dat$id)
-  dat$var <- sub("^[^.]*", "", dat$id)
-  dat$var <- substr(dat$var, 2L, nchar(dat$var))
-
-  # Parse intercept variables
-  dat$var[grep("Inter", dat$var, fixed = TRUE)] <- "Intercept"
-  dat$id <- NULL
-  row.names(dat) <- NULL
-  dat <- reshape(dat,
-    direction = "wide", v.names = "Overall",
-    idvar = "var", timevar = "model"
-  )
-  row.names(dat) <- dat[, 1L]
-  dat[, -1L]
-}
-
 #' @title Plot Diagnostics for an caretEnsemble Object
 #' @description This function makes a short plot of the performance of the component
 #' models of a \code{caretEnsemble} object on the AUC or RMSE metric
@@ -225,26 +206,23 @@ varImpFrame <- function(x) {
 #' plot(ens)
 #' }
 plot.caretEnsemble <- function(x, ...) {
-  dat <- extractModRes(x)
-  metricLab <- x$ens_model$metric
-  dat$metric <- dat[[metricLab]]
-  dat$metricSD <- dat[[paste0(metricLab, "SD")]]
-  dat$lower <- dat$metric - dat$metricSD
-  dat$upper <- dat$metric + dat$metricSD
+  dat <- extractModelMetrics(x)
   plt <- ggplot(
     dat, aes(
-      x = .data[["method"]], y = .data[["metric"]],
-      ymin = .data[["metric"]] - .data[["metricSD"]],
-      ymax = .data[["metric"]] + .data[["metricSD"]]
+      x = .data[["model_name"]], 
+      y = .data[["value"]],
+      ymin = .data[["value"]] - .data[["sd"]],
+      ymax = .data[["value"]] + .data[["sd"]],
+      color = .data[["metric"]]
     )
   ) +
     geom_pointrange() +
     theme_bw() +
-    labs(x = "Individual Model Method", y = metricLab)
+    labs(x = "Individual Model Method", y = 'Metric Value')
 
   if (nrow(x$error) > 0L) {
     plt <- plt +
-      geom_hline(linetype = 2L, linewidth = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
+      geom_hline(linetype = 2L, linewidth = 0.2, yintercept = min(x$error[[x$ens_model$metric]]), color = I("red"))
   }
   plt
 }
