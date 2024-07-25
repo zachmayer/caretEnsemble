@@ -44,6 +44,51 @@ is.caretEnsemble <- function(object) {
   is(object, "caretEnsemble")
 }
 
+#' @title Extract accuracy metrics from a \code{\link[caret]{train}} model
+#' @description Extract the cross-validated accuracy metrics or their SDs from caret.
+#' @param x a train object
+#' @param metric a character string representing the metric to extract
+#' @param return_sd a boolean indicating whether to return the SD of the metric instead of the average.
+#' @return A numeric representing the metric desired metric.
+#' @export
+getMetric <- function(x, metric = NULL, return_sd = FALSE) {
+  # Load the metric used by train by default
+  if (is.null(metric)) {
+    metric <- x$metric
+  }
+
+  # Get the metric and its min or max
+  stopifnot(metric %in% names(x$results))
+  val <- x$results[[metric]]
+  idx <- ifelse(x$maximize, which.max(val), which.min(val))
+
+  # If SD, get the SD of the metric instead
+  if (return_sd) {
+    SD <- x$results[[paste0(metric, "SD")]]
+    out <- SD[idx]
+  } else {
+    out <- val[idx]
+  }
+  out
+}
+
+#' Extract the model accuracy metrics of the individual models in an ensemble object.
+#' @param ensemble a caretEnsemble to make predictions from.
+#' @param metric a character string representing the metric to extract.
+#' If NULL, each model will return the metric it was trained on.
+#' If not NULL, the specified metric must be present for EVERY trained model.
+#' @impotFrom data.table data.table setorderv
+extractModelMetrics <- function(ensemble, metric = NULL) {
+  stopifnot(is.caretEnsemble(ensemble))
+  model_metrics <- data.table(
+    model_name = names(ensemble$models),
+    metric = sapply(ensemble$models, "[[", "metric"),
+    value = sapply(ensemble$models, getMetric, return_sd = FALSE),
+    sd = sapply(ensemble$models, getMetric, return_sd = TRUE)
+  )
+  model_metrics
+}
+
 #' @title Summarize the results of caretEnsemble for the user.
 #' @description Summarize a caretEnsemble
 #' @param object a \code{\link{caretEnsemble}} to make predictions from.
@@ -61,7 +106,7 @@ summary.caretEnsemble <- function(object, ...) {
   types <- paste(types, collapse = ", ")
   wghts <- coef(object$ens_model$finalModel)
   metric <- object$ens_model$metric
-  val <- getMetric.train(object$ens_model)
+  val <- getMetric(object$ens_model)
   cat(paste0("The following models were ensembled: ", types, " \n"))
   cat("They were weighted: \n")
   cat(paste0(paste0(round(wghts, 4L), collapse = " "), "\n"))
@@ -69,77 +114,31 @@ summary.caretEnsemble <- function(object, ...) {
 
   # Add code to compare ensemble to individual models
   cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
-  print(extractModRes(object), row.names = FALSE)
+  print(extractModelMetrics(object), row.names = FALSE)
 }
 
-#' Extract the model accuracy metrics of the individual models in an ensemble object.
-#' @param ensemble a caretEnsemble to make predictions from.
-extractModRes <- function(ensemble) {
-  stopifnot(is.caretEnsemble(ensemble))
-  model_methods <- names(ensemble$models)
-  metric <- ensemble$ens_model$metric
-  modRes <- data.frame(
-    method = model_methods,
-    metric = unlist(
-      lapply(
-        ensemble$models,
-        getMetric.train,
-        metric = metric
-      )
-    ),
-    metricSD = unlist(
-      lapply(
-        ensemble$models,
-        getMetricSD.train,
-        metric = metric
-      )
-    ),
-    stringsAsFactors = FALSE
+#' @keywords internal
+# This function only gets called once, in varImp.caretEnsemble
+varImpFrame <- function(x) {
+  dat <- do.call(rbind.data.frame, x)
+  dat <- dat[!duplicated(lapply(dat, summary))]
+
+  # Parse frame
+  dat$id <- row.names(dat)
+  dat$model <- sub("\\.[^\n]*", "", dat$id)
+  dat$var <- sub("^[^.]*", "", dat$id)
+  dat$var <- substr(dat$var, 2L, nchar(dat$var))
+
+  # Parse intercept variables
+  dat$var[grep("Inter", dat$var, fixed = TRUE)] <- "Intercept"
+  dat$id <- NULL
+  row.names(dat) <- NULL
+  dat <- reshape(dat,
+    direction = "wide", v.names = "Overall",
+    idvar = "var", timevar = "model"
   )
-  names(modRes)[2L:3L] <- c(metric, paste0(metric, "SD"))
-  modRes
-}
-
-#' Extract accuracy metrics from a model
-#' @param x a train object
-#' @param metric which metric to get
-#' @param ... passed through
-#' @rdname metrics
-#' @export
-getMetric <- function(x, metric, ...) {
-  UseMethod("getMetric")
-}
-
-#' Extract accuracy metrics SDs from a model
-#' @rdname metrics
-#' @export
-getMetricSD <- function(x, metric, ...) {
-  UseMethod("getMetricSD")
-}
-
-#' Extract a model accuracy metric from a \code{\link[caret]{train}} object.
-#' @return A numeric representing the metric desired metric.
-#' @rdname metrics
-#' @export
-getMetric.train <- function(x, metric = NULL, ...) {
-  if (is.null(metric)) {
-    metric <- x$metric
-  }
-  stopifnot(metric %in% names(x$results))
-  val <- x$results[[metric]]
-  val <- ifelse(x$maximize, max(val, na.rm = TRUE), min(val, na.rm = TRUE))
-  val
-}
-
-#' Extract the standard deviation from resamples for an accuracy metric from a model object.
-#' @rdname metrics
-#' @export
-getMetricSD.train <- function(x, metric, ...) {
-  stopifnot(metric %in% names(x$results))
-  val <- x$results[[metric]]
-  SD <- x$results[[paste0(metric, "SD")]]
-  idx <- ifelse(x$maximize, which.max(val), which.min(val))
-  SD[idx]
+  row.names(dat) <- dat[, 1L]
+  dat[, -1L]
 }
 
 #' @title Calculate the variable importance of variables in a caretEnsemble.
@@ -157,9 +156,13 @@ getMetricSD.train <- function(x, metric, ...) {
 #' @export
 varImp.caretEnsemble <- function(object, ...) {
   # Extract and formal individual model importances
-  # Todo, clean up this code!
+  # Todo, clean up this code!  Make varImp.caretList
   coef_importance <- lapply(object$models, caret::varImp)
-  coef_importance <- lapply(coef_importance, clean_varImp)
+  coef_importance <- lapply(coef_importance, function(x) {
+    names(x$importance)[1L] <- "Overall"
+    x$importance <- x$importance[, "Overall", drop = FALSE]
+    x$importance
+  })
 
   # Convert to data.frame
   dat <- varImpFrame(coef_importance)
@@ -188,38 +191,6 @@ varImp.caretEnsemble <- function(object, ...) {
   dat
 }
 
-#' @keywords internal
-# This function only gets called once, in varImp.caretEnsemble
-clean_varImp <- function(x) {
-  names(x$importance)[1L] <- "Overall"
-  x$importance <- x$importance[, "Overall", drop = FALSE]
-  x$importance
-}
-
-#' @keywords internal
-# This function only gets called once, in varImp.caretEnsemble
-varImpFrame <- function(x) {
-  dat <- do.call(rbind.data.frame, x)
-  dat <- dat[!duplicated(lapply(dat, summary))]
-
-  # Parse frame
-  dat$id <- row.names(dat)
-  dat$model <- sub("\\.[^\n]*", "", dat$id)
-  dat$var <- sub("^[^.]*", "", dat$id)
-  dat$var <- substr(dat$var, 2L, nchar(dat$var))
-
-  # Parse intercept variables
-  dat$var[grep("Inter", dat$var, fixed = TRUE)] <- "Intercept"
-  dat$id <- NULL
-  row.names(dat) <- NULL
-  dat <- reshape(dat,
-    direction = "wide", v.names = "Overall",
-    idvar = "var", timevar = "model"
-  )
-  row.names(dat) <- dat[, 1L]
-  dat[, -1L]
-}
-
 #' @title Plot Diagnostics for an caretEnsemble Object
 #' @description This function makes a short plot of the performance of the component
 #' models of a \code{caretEnsemble} object on the AUC or RMSE metric
@@ -227,6 +198,7 @@ varImpFrame <- function(x) {
 #' @param ... additional arguments to pass to plot
 #' @return A plot
 #' @importFrom ggplot2 ggplot aes geom_pointrange theme_bw labs geom_hline
+#' @importFrom rlang .data
 #' @export
 #' @method plot caretEnsemble
 #' @examples
@@ -237,24 +209,23 @@ varImpFrame <- function(x) {
 #' plot(ens)
 #' }
 plot.caretEnsemble <- function(x, ...) {
-  dat <- extractModRes(x)
-  metricLab <- x$ens_model$metric
-  dat$metric <- dat[[metricLab]]
-  dat$metricSD <- dat[[paste0(metricLab, "SD")]]
+  dat <- extractModelMetrics(x)
   plt <- ggplot(
     dat, aes(
-      x = method, y = metric,
-      ymin = metric - metricSD,
-      ymax = metric + metricSD
+      x = .data[["model_name"]],
+      y = .data[["value"]],
+      ymin = .data[["value"]] - .data[["sd"]],
+      ymax = .data[["value"]] + .data[["sd"]],
+      color = .data[["metric"]]
     )
   ) +
     geom_pointrange() +
     theme_bw() +
-    labs(x = "Individual Model Method", y = metricLab)
+    labs(x = "Individual Model Method", y = "Metric Value")
 
   if (nrow(x$error) > 0L) {
     plt <- plt +
-      geom_hline(linetype = 2L, linewidth = 0.2, yintercept = min(x$error[[metricLab]]), color = I("red"))
+      geom_hline(linetype = 2L, linewidth = 0.2, yintercept = min(x$error[[x$ens_model$metric]]), color = I("red"))
   }
   plt
 }
@@ -300,7 +271,8 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #' residuals against two random or user specified variables.
 #' @importFrom ggplot2 ggplot aes geom_point geom_smooth geom_bar geom_linerange
 #' @importFrom ggplot2 scale_x_continuous scale_y_continuous labs theme_bw autoplot
-#' @importFrom data.table data.table set rbindlist setkey .SD
+#' @importFrom data.table data.table set rbindlist setkeyv .SD
+#' @importFrom rlang .data
 #' @importFrom gridExtra grid.arrange
 #' @export
 #' @examples
@@ -318,14 +290,13 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(is(object, "caretEnsemble"))
   ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
-  data.table::setkey(ensemble_data, id)
+  data.table::setkeyv(ensemble_data, "id")
 
   # Performance metrics by model
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
 
   # Residuals vs Fitted
   # Disable the object usage linter in here — it raises false positives for .SD and .data
-  # nolint start: object_usage_linter
   g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(.data[["pred"]], .data[["resid"]])) +
     geom_point() +
     geom_smooth(se = FALSE) +
@@ -353,7 +324,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     ymin = min(.SD[["resid"]]),
     ymax = max(.SD[["resid"]]),
     yavg = median(.SD[["resid"]]),
-    yhat = .SD[["pred"]][1]
+    yhat = .SD[["pred"]][1L]
   ), by = "id"]
   g4 <- ggplot2::ggplot(sub_model_summary, ggplot2::aes(
     x = .data[["yhat"]],
@@ -375,7 +346,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     )
 
   # Residuals vs X variables
-  x_data <- data.table::data.table(object$models[[1]]$trainingData)
+  x_data <- data.table::data.table(object$models[[1L]]$trainingData)
   if (is.null(xvars)) {
     xvars <- names(x_data)
     xvars <- setdiff(xvars, c(".outcome", ".weights", "(Intercept)"))
@@ -383,7 +354,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   }
   data.table::set(x_data, j = "id", value = seq_len(nrow(x_data)))
   plotdf <- merge(ensemble_data, x_data, by = "id")
-  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1]]], .data[["resid"]])) +
+  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1L]]], .data[["resid"]])) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
     ggplot2::scale_x_continuous(xvars[1L]) +
@@ -393,10 +364,9 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[2L]]], .data[["resid"]])) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
-    ggplot2::scale_x_continuous(xvars[2]) +
+    ggplot2::scale_x_continuous(xvars[2L]) +
     ggplot2::scale_y_continuous("Residuals") +
     ggplot2::labs(title = paste0("Residuals Against ", xvars[2L])) +
     ggplot2::theme_bw()
-  # nolint end: object_usage_linter
   suppressMessages(gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2L))
 }

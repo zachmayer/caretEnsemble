@@ -1,15 +1,4 @@
 #####################################################
-# Globals
-#####################################################
-
-#' @importFrom utils globalVariables
-#' @importFrom data.table .SD
-#' @importFrom rlang .data
-NULL
-
-utils::globalVariables(c(".SD", ".data")) # Disables warnings from R CMD CHECk, but NOT the linterco
-
-#####################################################
 # Functions for dropping one level from classification problems
 #####################################################
 
@@ -219,7 +208,6 @@ extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
   invisible(gc(reset = TRUE))
   out
 }
-
 
 #####################################################
 # check functions

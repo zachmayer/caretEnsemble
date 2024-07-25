@@ -19,6 +19,8 @@ linters: linters_with_tags(
     object_overwrite_linter(),
     object_length_linter(),
     line_length_linter(120),
+    object_usage_linter(),
+    object_name_linter(),
     todo_comment_linter = NULL, # TODO refactor
     implicit_assignment_linter = NULL, # TODO refactor
     expect_identical_linter = NULL, # TODO big refactor
