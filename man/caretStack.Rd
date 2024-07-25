@@ -9,7 +9,8 @@ caretStack(all.models, excluded_class_id = 1L, ...)
 \arguments{
 \item{all.models}{a list of caret models to ensemble.}
 
-\item{excluded_class_id}{The integer level to exclude from binary classification or multiclass problems.  If 0, will include all levels.}
+\item{excluded_class_id}{The integer level to exclude from binary classification or multiclass problems.
+If 0, will include all levels.}
 
 \item{...}{additional arguments to pass to the optimization function}
 }
@@ -36,5 +37,7 @@ caretStack(models, method = "glm")
 }
 }
 \references{
-Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004). Ensemble Selection from Libraries of Models. \url{https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf}
+Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).
+  Ensemble Selection from Libraries of Models.
+  \url{https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf}
 }

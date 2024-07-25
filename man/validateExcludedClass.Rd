@@ -13,5 +13,6 @@ validateExcludedClass(arg)
 integer
 }
 \description{
-Helper function to ensure that the excluded level for classification is an integer.  Set to 0L to exclude no class.
+Helper function to ensure that the excluded level for classification is an integer.
+Set to 0L to exclude no class.
 }

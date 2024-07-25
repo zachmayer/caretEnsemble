@@ -7,7 +7,8 @@
 \method{extractCaretTarget}{default}(x, y, ...)
 }
 \arguments{
-\item{x}{an object where samples are in rows and features are in columns. This could be a simple matrix, data frame or other type (e.g. sparse matrix). See Details below.}
+\item{x}{an object where samples are in rows and features are in columns. This could be a simple matrix, data frame
+or other type (e.g. sparse matrix). See Details below.}
 
 \item{y}{a numeric or factor vector containing the outcome for each sample.}
 
