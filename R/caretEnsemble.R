@@ -304,6 +304,7 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #' @importFrom gridExtra grid.arrange
 #' @export
 #' @examples
+#' \dontrun{
 #' set.seed(42)
 #' data(models.reg)
 #' ens <- caretEnsemble(
@@ -313,6 +314,7 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #'   )
 #' )
 #' suppressWarnings(autoplot(ens))
+#' }
 autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(is(object, "caretEnsemble"))
   ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
