@@ -61,7 +61,7 @@ summary.caretEnsemble <- function(object, ...) {
   types <- paste(types, collapse = ", ")
   wghts <- coef(object$ens_model$finalModel)
   metric <- object$ens_model$metric
-  val <- getMetric.train(object$ens_model)
+  val <- getMetric(object$ens_model)
   cat(paste0("The following models were ensembled: ", types, " \n"))
   cat("They were weighted: \n")
   cat(paste0(paste0(round(wghts, 4L), collapse = " "), "\n"))
@@ -83,15 +83,17 @@ extractModRes <- function(ensemble) {
     metric = unlist(
       lapply(
         ensemble$models,
-        getMetric.train,
-        metric = metric
+        getMetric,
+        metric = metric,
+        return_sd = FALSE
       )
     ),
     metricSD = unlist(
       lapply(
         ensemble$models,
-        getMetricSD.train,
-        metric = metric
+        getMetric,
+        metric = metric,
+        return_sd = TRUE
       )
     ),
     stringsAsFactors = FALSE
@@ -100,46 +102,31 @@ extractModRes <- function(ensemble) {
   modRes
 }
 
-#' Extract accuracy metrics from a model
+#' @title Extract accuracy metrics from a \code{\link[caret]{train}} model
+#' @description Extract the cross-validated accuracy metrics or their SDs from caret.
 #' @param x a train object
-#' @param metric which metric to get
-#' @param ... passed through
-#' @rdname metrics
-#' @export
-getMetric <- function(x, metric, ...) {
-  UseMethod("getMetric")
-}
-
-#' Extract accuracy metrics SDs from a model
-#' @rdname metrics
-#' @export
-getMetricSD <- function(x, metric, ...) {
-  UseMethod("getMetricSD")
-}
-
-#' Extract a model accuracy metric from a \code{\link[caret]{train}} object.
+#' @param metric a character string representing the metric to extract
+#' @param return_sd a boolean indicating whether to return the SD of the metric instead of the average.
 #' @return A numeric representing the metric desired metric.
-#' @rdname metrics
 #' @export
-getMetric.train <- function(x, metric = NULL, ...) {
+getMetric <- function(x, metric = NULL, return_sd = FALSE) {
+  # Load the metric used by train by default
   if (is.null(metric)) {
     metric <- x$metric
   }
-  stopifnot(metric %in% names(x$results))
-  val <- x$results[[metric]]
-  val <- ifelse(x$maximize, max(val, na.rm = TRUE), min(val, na.rm = TRUE))
-  val
-}
 
-#' Extract the standard deviation from resamples for an accuracy metric from a model object.
-#' @rdname metrics
-#' @export
-getMetricSD.train <- function(x, metric, ...) {
+  # Get the metric and its min or max
   stopifnot(metric %in% names(x$results))
   val <- x$results[[metric]]
-  SD <- x$results[[paste0(metric, "SD")]]
   idx <- ifelse(x$maximize, which.max(val), which.min(val))
-  SD[idx]
+  out <- val[idx]
+
+  # If SD, get the SD of the metric instead
+  if (return_sd) {
+    SD <- x$results[[paste0(metric, "SD")]]
+    out <- SD[idx]
+  }
+  out
 }
 
 #' @title Calculate the variable importance of variables in a caretEnsemble.

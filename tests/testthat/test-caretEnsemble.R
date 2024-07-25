@@ -35,14 +35,13 @@ test_that("We can extract metrics", {
     )
   )
   m1 <- getMetric(mod, "RMSE")
-  m2 <- getMetric.train(mod, "RMSE")
+  m2 <- getMetric(mod, "RMSE")
   expect_equal(m1, m2)
 
-  m1 <- getMetricSD(mod, "RMSE")
-  m2 <- getMetricSD.train(mod, "RMSE")
+  m1 <- getMetric(mod, "RMSE", return_sd = TRUE)
+  m2 <- getMetric(mod, "RMSE", return_sd = TRUE)
   expect_equal(m1, m2)
 })
-
 
 test_that("We can extract resdiuals from train regression objects", {
   data(iris)
