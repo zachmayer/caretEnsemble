@@ -5,7 +5,8 @@
 #'
 #' @details Check the models, and make a matrix of obs and preds
 #'
-#' @param all.models a list of caret models to ensemble.
+#' @param all.models a caretList, or an object coerceable to a caretList (such as a list of train objects)
+#' @param new_data if NULL, the stacked predictions will be extracted from the caretList
 #' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
 #' If 0, will include all levels.
 #' @param ... additional arguments to pass to the optimization function
@@ -25,11 +26,11 @@
 #' )
 #' caretStack(models, method = "glm")
 #' }
-caretStack <- function(all.models, excluded_class_id = 1L, ...) {
+caretStack <- function(all.models, new_data = NULL, excluded_class_id = 1L, ...) {
+  all.models <- as.caretList(all.models)
+
   # Validators
   excluded_class_id <- validateExcludedClass(excluded_class_id)
-  check_caretList_classes(all.models)
-  check_caretList_model_types(all.models)
 
   # Extract each model's cross-validated predictions and check them
   predobs <- extractBestPredsAndObs(all.models)
@@ -40,6 +41,26 @@ caretStack <- function(all.models, excluded_class_id = 1L, ...) {
   # Return final model
   out <- list(models = all.models, ens_model = model, error = model$results, excluded_class_id = excluded_class_id)
   class(out) <- "caretStack"
+  out
+}
+
+#' @title Calculate a weighted standard deviation
+#' @description Used to weight deviations among ensembled model predictions
+#'
+#' @param x a numeric vector
+#' @param w a vector of weights equal to length of x
+#' @param na.rm a logical indicating how to handle missing values, default = TRUE
+#' @export
+# https://stats.stackexchange.com/a/61285
+wtd.sd <- function(x, w, na.rm = FALSE) {
+  stopifnot(is.numeric(x), is.numeric(w))
+
+  xWbar <- weighted.mean(x, w, na.rm = na.rm)
+  w <- w / mean(w, na.rm = na.rm)
+
+  variance <- sum((w * (x - xWbar)^2L) / (sum(w, na.rm = na.rm) - 1L), na.rm = na.rm)
+  out <- sqrt(variance)
+
   out
 }
 

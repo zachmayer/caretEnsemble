@@ -128,6 +128,40 @@ trControlCheck <- function(x, y) {
   x
 }
 
+#' @title Checks that caretList models are all of the same type.
+#' @description Validate a caretList
+#' @param list_of_models a list of caret models to check
+#' @importFrom caret modelLookup
+check_caretList_model_types <- function(list_of_models) {
+  type <- extractModelType(list_of_models)
+
+  # Add a check that class models were trained with probabilities.
+  if (type == "Classification") {
+    for (model in list_of_models) {
+      unique_obs <- unique(model$pred$obs)
+      if (is.null(unique_obs)) {
+        stop("No predictions saved by train. Please re-run models with trainControl savePredictions = 'final'")
+      }
+    }
+  }
+
+  # Check that classification models saved probabilities
+  if (type == "Classification") {
+    probModels <- sapply(list_of_models, function(x) is.function(x$modelInfo$prob))
+    if (!all(probModels)) stop("All models for classification must be able to generate class probabilities.")
+    classProbs <- sapply(list_of_models, function(x) x$control$classProbs)
+    if (!all(classProbs)) {
+      bad_models <- names(list_of_models)[!classProbs]
+      bad_models <- paste(bad_models, collapse = ", ")
+      stop(
+        "Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs = TRUE: ",
+        bad_models
+      )
+    }
+  }
+  invisible(NULL)
+}
+
 #' @title Extracts the target variable from a set of arguments headed to the caret::train function.
 #' @description This function extracts the y variable from a set of arguments headed to a caret::train model.
 #' Since there are 2 methods to call caret::train, this function also has 2 methods.
@@ -276,7 +310,7 @@ as.caretList <- function(object) {
   if (is.null(object)) {
     stop("object is null")
   }
-  UseMethod("as.caretList")
+  UseMethod("as.caretList", object)
 }
 
 #' @title Convert object to caretList object - For Future Use
@@ -318,6 +352,12 @@ as.caretList.list <- function(object) {
   # Apply the class
   class(object) <- "caretList"
 
+  # Checks
+  check_caretList_classes(out)
+  check_caretList_model_types(out)
+  stop('fuck')
+  out
+
   # Return
   object
 }
@@ -330,6 +370,71 @@ as.caretList.list <- function(object) {
 `[.caretList` <- function(object, index) {
   newObj <- `[.listof`(object, index)
   newObj
+}
+
+#' @title Validate the excluded class
+#' @description Helper function to ensure that the excluded level for classification is an integer.
+#' Set to 0L to exclude no class.
+#' @param arg The value to check
+#' @return integer
+validateExcludedClass <- function(arg) {
+  # Handle the null case (usually old object where the missing level was not defined)
+  if (is.null(arg)) {
+    arg <- 1L
+    warning("No excluded_class_id set. Setting to 1L.")
+  }
+  # Check the input
+  if (!is.numeric(arg)) {
+    stop(paste0(
+      "classification excluded level must be numeric: ", arg
+    ))
+  }
+  if (length(arg) != 1L) {
+    stop(paste0(
+      "classification excluded level must have a length of 1: length=", length(arg)
+    ))
+  }
+
+  # Convert to integer if possible
+  if (is.integer(arg)) {
+    out <- arg
+  } else {
+    warning(paste0("classification excluded level is not an integer: ", arg))
+    if (is.numeric(arg)) {
+      out <- floor(arg)
+    }
+    suppressWarnings(out <- as.integer(out))
+  }
+
+  # Check the output
+  if (!is.finite(out)) {
+    stop(paste0(
+      "classification excluded level must be finite: ", arg
+    ))
+  }
+  if (out < 0L) {
+    stop(paste0(
+      "classification excluded level must be >= 0: ", arg
+    ))
+  }
+
+  out
+}
+
+#' @title Drop Excluded Class
+#' @description Drop the excluded class from a prediction data.frame
+#' @param x a data.table of predictions
+#' @param all_classes a character vector of all classes
+#' @param excluded_class_id an integer indicating the class to exclude
+dropExcludedClass <- function(x, all_classes, excluded_class_id) {
+  stopifnot(is(x, "data.table"), is.character(all_classes))
+  excluded_class_id <- validateExcludedClass(excluded_class_id)
+  if (length(all_classes) > 1L) {
+    excluded_class <- all_classes[excluded_class_id] # Note that if excluded_class_id is 0, no class will be excludede
+    classes_included <- setdiff(all_classes, excluded_class)
+    x <- x[, classes_included, drop = FALSE, with = FALSE]
+  }
+  x
 }
 
 #' @title Create a matrix of predictions for each of the models in a caretList
@@ -392,4 +497,91 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
 
   # Return
   preds
+}
+
+
+#' @title Extract the observed levels from a list of models
+#' @description Extract the observed levels from a list of models
+#' @param list_of_models an object of class caretList
+extractObsLevels <- function(list_of_models) {
+  all_levels <- lapply(list_of_models, levels)
+  all_levels <- unique(all_levels)
+  stopifnot(length(all_levels) == 1L)
+  all_levels <- all_levels[[1L]]
+  all_levels
+}
+
+#' @title Extract the best predictions (and observeds) from a list of train objects
+#' @description Extract predictions (and observeds) for the best tune from a list of caret models.
+#' This function extracts the raw preds from regression models and the class probs from classification models.
+#' Note that it extract preds and obs in one go, rather than separately. This is because caret can save the internal
+#' preds/obs from all resamples rather than just the final.  So we subset the internal pred/obs to just the best tuning
+#' (from caret) and return the pred and obs for that tune.
+#' @param list_of_models an object of class caretList or a list of caret models
+#' @param excluded_class_id an integer indicating the class to exclude for classification models
+#' @importFrom pbapply pblapply
+#' @importFrom data.table set as.data.table
+extractBestPredsAndObs <- function(list_of_models, excluded_class_id = 1L) {
+  # Determine the type and observed levels
+  type <- extractModelType(list_of_models)
+  obs_levels <- extractObsLevels(list_of_models)
+
+  # Extraxt best preds based on the tuning information
+  preds_and_obs <- lapply(list_of_models, extractBestPreds)
+
+  # Check the extracted data
+  check_bestpreds_resamples(preds_and_obs)
+  check_bestpreds_indexes(preds_and_obs)
+  check_bestpreds_preds(preds_and_obs)
+  check_bestpreds_obs(preds_and_obs)
+
+  # Extract the preds
+  if (type == "Classification") {
+    keep_cols <- extractObsLevels(list_of_models)
+  } else if (type == "Regression") {
+    keep_cols <- "pred"
+  }
+  preds <- lapply(preds_and_obs, function(x) x[, keep_cols, drop = FALSE, with = FALSE])
+
+  # Drop the excluded level from the preds
+  if (type == "Classification") {
+    preds <- lapply(preds, dropExcludedClass, all_classes = obs_levels, excluded_class_id = excluded_class_id)
+  }
+
+  # Convert list of data.tables into one data.table
+  preds <- data.table::as.data.table(preds)
+
+  # Return
+  # TODO:
+  # - make this a data.table
+  # - make Classifciaiton pull from each sub-model
+  # - aggregate by row index and sort by row inde3x
+  # - merge with all possible IDs, warn on NAs and fill with 0
+  # - allow different models, different methods, different resamples, different types.
+  # - Only require a common set of rows
+  out <- list(
+    preds = preds,
+    obs = preds_and_obs[[1L]][["obs"]],
+    rowIndex = preds_and_obs[[1L]][["rowIndex"]],
+    Resample = preds_and_obs[[1L]][["Resample"]],
+    type = type
+  )
+  invisible(gc(reset = TRUE))
+  out
+}
+
+#' @title Validate a custom caret model info list
+#' @description Currently, this only ensures that all model info lists
+#' were also assigned a "method" attribute for consistency with usage
+#' of non-custom models
+#' @param x a model info list (e.g. \code{getModelInfo("rf", regex=F)\[[1]]})
+#' @return validated model info list (i.e. x)
+checkCustomModel <- function(x) {
+  if (is.null(x$method)) {
+    stop(paste(
+      "Custom models must be defined with a \"method\" attribute containing the name",
+      "by which that model should be referenced.  Example: my.glm.model$method <- \"custom_glm\""
+    ))
+  }
+  x
 }
