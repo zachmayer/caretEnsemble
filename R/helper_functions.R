@@ -1,4 +1,3 @@
-
 #####################################################
 # Extraction functions - train
 #####################################################
@@ -19,33 +18,4 @@ extractModelName <- function(x) {
   } else {
     x$method
   }
-}
-
-#' @title Extract the best predictions from a train object
-#' @description Extract predictions for the best tune from a model
-#' @param x a train object
-#' @importFrom data.table data.table setorderv set
-extractBestPreds <- function(x) {
-  # Checks
-  stopifnot(
-    is(x, "train"),
-    x$control$savePredictions %in% c("all", "final", TRUE)
-  )
-
-  # Extract the best tune and the pred data
-  a <- data.table::data.table(x$bestTune, key = names(x$bestTune))
-  b <- data.table::data.table(x$pred, key = names(x$bestTune))
-
-  # Subset pred data to the best tune only
-  b <- b[a, ]
-
-  # Remove some columns we don't need and order
-  for (var in names(x$bestTune)) {
-    data.table::set(b, j = var, value = NULL)
-  }
-  data.table::setorderv(b, c("Resample", "rowIndex"))
-
-  # Returb
-  invisible(gc(reset = TRUE))
-  b
 }

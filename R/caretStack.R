@@ -1,15 +1,27 @@
 #' @title Combine several predictive models via stacking
 #'
-#' @description Find a good linear combination of several classification or regression models,
-#' using either linear regression, elastic net regression, or greedy optimization.
+#' @description Stack several \code{\link[caret]{train}} models using a \code{\link[caret]{train}} model.
 #'
-#' @details Check the models, and make a matrix of obs and preds
+#' @details Uses either transfer learning or stacking to stack models.  Assumes that all models were trained on
+#' the same number of rows of data, with the same target values.  The features, cross-validation strategies,
+#' and model types (class vs reg) may vary however.  If your stack of models were trained with different number of
+#' rows, please provide new_X and new_y so the models can predict on a common set of data for stacking.
+#'
+#' If your models were trained on different columns, you should use stacking.
+#'
+#' If you have both differing rows and columns in your model set, you are out of luck.  You need at least
+#' a common set of rows during training (for stacking) or a common set of columns at
+#' inference time for transfer learning.
 #'
 #' @param all.models a caretList, or an object coerceable to a caretList (such as a list of train objects)
-#' @param new_data if NULL, the stacked predictions will be extracted from the caretList
+#' @param new_X Data to predict on for the caretList, prior to training the stack (for transfer learning).
+#' if NULL, the stacked predictions will be extracted from the caretList models.
 #' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
+#' @param new_y The outcome variable to predict on for the caretList, prior to training the stack
+#' (for transfer learning).
+#' If NULL, will use the observed levels from the first model in the caret stack
 #' If 0, will include all levels.
-#' @param ... additional arguments to pass to the optimization function
+#' @param ... additional arguments to pass to the stacking model
 #' @return S3 caretStack object
 #' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).
 #'   Ensemble Selection from Libraries of Models.
@@ -26,17 +38,29 @@
 #' )
 #' caretStack(models, method = "glm")
 #' }
-caretStack <- function(all.models, new_data = NULL, excluded_class_id = 1L, ...) {
+caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id = 1L, ...) {
   all.models <- as.caretList(all.models)
+
+  # Make sure either both or neither new_X and new_y are NULL
+  if (is.null(new_X) != is.null(new_y)) {
+    stop("Both new_X and new_y must be NULL, or neither.")
+  }
 
   # Validators
   excluded_class_id <- validateExcludedClass(excluded_class_id)
 
-  # Extract each model's cross-validated predictions and check them
-  predobs <- extractBestPredsAndObs(all.models)
+  # Predict for each model.  If new_X is NULL, will return stacked predictions
+  preds <- caretPredict(all.models, newdata = new_X, excluded_class_id = excluded_class_id)
 
   # Build a caret model
-  model <- train(predobs$preds, predobs$obs, ...)
+  obs <- new_y
+  if (is.null(obs)) {
+    obs <- data.table::data.table(all.models[[1L]]$pred)
+    data.table::setorderv(obs, "rowIndex")
+    obs <- obs[, list(obs = obs[1L]), by = "rowIndex"]
+  }
+  stopifnot(nrow(obs) == nrow(preds))
+  model <- train(preds, obs, ...)
 
   # Return final model
   out <- list(models = all.models, ens_model = model, error = model$results, excluded_class_id = excluded_class_id)
@@ -107,7 +131,7 @@ predict.caretStack <- function(
   stopifnot(is(object$models, "caretList"))
 
   # Extract model types
-  model_type <- extractModelType(object$models)
+  model_type <- object$ens_model$modelType
 
   # If the excluded class wasn't set at train time, set it
   if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {

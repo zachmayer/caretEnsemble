@@ -1,3 +1,20 @@
+#' @title Check binary classification
+#' @description Check that the problem is a binary classification problem
+#'
+#' @param list_of_models a list of caret models to check
+#' @keywords internal
+check_binary_classification <- function(list_of_models) {
+  if (is.list(list_of_models) && length(list_of_models) > 1L) {
+    lapply(list_of_models, function(x) {
+      # avoid regression models
+      if (is(x, "train") && !is.null(x$pred$obs) && is.factor(x$pred$obs) && nlevels(x$pred$obs) > 2L) {
+        stop("caretEnsemble only supports binary classification problems")
+      }
+    })
+  }
+  invisible(NULL)
+}
+
 #' @title Combine several predictive models via weights
 #'
 #' @description Find a good linear combination of several classification or regression models,
@@ -229,7 +246,7 @@ plot.caretEnsemble <- function(x, ...) {
 extractPredObsResid <- function(object, show_class_id = 2L) {
   stopifnot(is(object, "train"))
   type <- object$modelType
-  predobs <- extractBestPredsAndObs(list(object))
+  predobs <- caretPredict(object)
   pred <- predobs$pred
   obs <- predobs$obs
   id <- predobs$rowIndex
