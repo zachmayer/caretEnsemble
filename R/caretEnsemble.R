@@ -122,12 +122,13 @@ summary.caretEnsemble <- function(object, ...) {
 #' from the caret package. It returns a \code{\link[data.table]{data.table}} with importances normalized to sum to 1.
 #' @param x a \code{\link[caret]{train}} object
 #' @param model_name a character string representing the name of the model
+#' @param ... additional arguments passed to \code{\link[caret]{varImp}}
 #' @return a \code{\link[data.table]{data.table}} with 2 columns: the variables and their importances.
 #' @importFrom caret varImp
 #' @importFrom data.table data.table
 #' @keywords internal
-varImpDataTable <- function(x, model_name) {
-  imp <- caret::varImp(x)
+varImpDataTable <- function(x, model_name, ...) {
+  imp <- caret::varImp(x, ...)
   imp <- imp[["importance"]]
   imp <- data.table::data.table(
     model_name = model_name,
@@ -144,16 +145,17 @@ varImpDataTable <- function(x, model_name) {
 #' importance for each model is calculated and then averaged by the weight of the overall model
 #' in the ensembled object.
 #' @param object a \code{caretEnsemble} to make predictions from.
-#' @importFrom data.table rbindlist dcast.data.table merge.data.table setorderv
+#' @param ... additional arguments passed to \code{\link[caret]{varImp}}
+#' @importFrom data.table rbindlist dcast.data.table merge.data.table setorderv setcolorder
 #' @return A \code{\link[data.table]{data.table}} with one row per variable and one column
 #' per model in object
 #' @export
-varImp.caretEnsemble <- function(object) {
+varImp.caretEnsemble <- function(object, ...) {
   model_names <- make.names(names(object$models), unique = TRUE, allow_ = TRUE)
 
   # Individual model importances
   # TODO: varImp.caretList should be a separate function
-  model_imp <- mapply(varImpDataTable, object$models, model_names, SIMPLIFY = FALSE)
+  model_imp <- mapply(varImpDataTable, object$models, model_names, MoreArgs = list(...), SIMPLIFY = FALSE)
   model_imp <- data.table::rbindlist(model_imp, fill = TRUE, use.names = TRUE)
   model_imp <- data.table::dcast.data.table(model_imp, var ~ model_name, value.var = "imp", fill = 0.0)
 
@@ -174,6 +176,7 @@ varImp.caretEnsemble <- function(object) {
 
   # Order and return
   data.table::setorderv(imp, "overall", order = -1L)
+  data.table::setcolorder(imp, c("var", "overallq", model_names))
   imp
 }
 
