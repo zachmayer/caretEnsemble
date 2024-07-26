@@ -9,10 +9,10 @@
 \arguments{
 \item{object}{a \code{caretEnsemble} to make predictions from.}
 
-\item{...}{other arguments to be passed to varImp}
+\item{...}{additional arguments passed to \code{\link[caret]{varImp}}}
 }
 \value{
-A \code{\link{data.frame}} with one row per variable and one column
+A \code{\link[data.table]{data.table}} with one row per variable and one column
 per model in object
 }
 \description{
