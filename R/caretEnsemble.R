@@ -176,7 +176,7 @@ varImp.caretEnsemble <- function(object, ...) {
 
   # Order and return
   data.table::setorderv(imp, "overall", order = -1L)
-  data.table::setcolorder(imp, c("var", "overallq", model_names))
+  data.table::setcolorder(imp, c("var", "overall", model_names))
   imp
 }
 

@@ -45,7 +45,6 @@ Imports:
     methods,
     pbapply,
     ggplot2,
-    digest,
     lattice,
     gridExtra,
     data.table,

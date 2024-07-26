@@ -4,10 +4,12 @@
 \alias{varImp.caretEnsemble}
 \title{Calculate the variable importance of variables in a caretEnsemble.}
 \usage{
-\method{varImp}{caretEnsemble}(object)
+\method{varImp}{caretEnsemble}(object, ...)
 }
 \arguments{
 \item{object}{a \code{caretEnsemble} to make predictions from.}
+
+\item{...}{additional arguments passed to \code{\link[caret]{varImp}}}
 }
 \value{
 A \code{\link[data.table]{data.table}} with one row per variable and one column

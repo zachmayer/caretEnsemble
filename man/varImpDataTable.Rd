@@ -4,12 +4,14 @@
 \alias{varImpDataTable}
 \title{Calculate the variable importance of variables in a caret model.}
 \usage{
-varImpDataTable(x, model_name)
+varImpDataTable(x, model_name, ...)
 }
 \arguments{
 \item{x}{a \code{\link[caret]{train}} object}
 
 \item{model_name}{a character string representing the name of the model}
+
+\item{...}{additional arguments passed to \code{\link[caret]{varImp}}}
 }
 \value{
 a \code{\link[data.table]{data.table}} with 2 columns: the variables and their importances.
