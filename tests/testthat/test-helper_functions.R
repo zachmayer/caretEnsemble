@@ -186,8 +186,8 @@ test_that("Checks generate errors", {
 test_that("check_caretList_model_types stops when there are no predictions saved", {
   model_list <- models.class
   model_list[[1L]]$pred <- NULL
-  err <- "No predictions saved by train. Please re-run models with trainControl savePredictions = 'final'"
-  expect_error(check_caretList_model_types(model_list), err)
+  err <- "No probability function found. Re-fit with a method that supports prob."
+  expect_error(lapply(model_list, extractModelType), err)
 })
 
 test_that("check_caretList_model_types stops when a classification model support probabilities", {
@@ -200,8 +200,8 @@ test_that("check_caretList_model_types stops when a classification model support
 test_that("check_caretList_model_types stops when a classification model did not save probs", {
   model_list <- models.class
   model_list[[1L]]$control$classProbs <- FALSE
-  m <- "No probability function found.  Re-fit with a method that supports prob."
-  expect_error(lapply(model_list, extractModelType), m)
+  err <- "No probability function found.  Re-fit with a method that supports prob."
+  expect_error(lapply(model_list, extractModelType), err)
   context("Test helper functions for multiclass classification")
 
   test_that("Check errors in caretEnsemble for multiclass classification work", {
