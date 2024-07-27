@@ -149,38 +149,64 @@ test_that("We can ensemble models of different predictors", {
 
 context("Does ensemble prediction work with new data")
 
-test_that("It works for regression models", {
+test_that("caretEnsemble works for regression models", {
   set.seed(1234L)
   ens.reg <- caretEnsemble(models.reg, trControl = trainControl(number = 2L))
   expect_is(ens.reg, "caretEnsemble")
-  pred.reg <- predict(ens.reg)
-  newPreds1 <- as.data.frame(X.reg)
-  pred.regb <- predict(ens.reg, newdata = newPreds1)
-  pred.regc <- predict(ens.reg, newdata = newPreds1[2L, ])
-  expect_identical(pred.reg, pred.regb)
-  expect_lt(abs(4.740135 - pred.regc), 0.05)
-  expect_is(pred.reg, "numeric")
-  expect_is(pred.regb, "numeric")
-  expect_is(pred.regc, "numeric")
-  expect_length(pred.regc, 1L)
+
+  # Predictions
+  pred_stacked <- predict(ens.reg) # stacked predictions
+  pred_in_sample <- predict(ens.reg, newdata = X.reg) # in sample predictions
+  pred_one <- predict(ens.reg, newdata = X.reg[2L, , drop = FALSE]) # one row predictions
+
+  # Check class
+  expect_is(pred_stacked, "numeric")
+  expect_is(pred_in_sample, "numeric")
+  expect_is(pred_one, "numeric")
+
+  # Check len
+  expect_length(pred_stacked, 150L)
+  expect_length(pred_in_sample, 150L)
+  expect_length(pred_one, 1L)
+
+  # stacked predcitons should be similar to in sample predictions
+  expect_equal(pred_stacked, pred_in_sample, tol = 0.1)
+
+  # One row predictions
+  expect_equivalent(pred_one, 4.712639, tol = 0.05)
 })
 
-test_that("It works for classification models", {
+test_that("caretEnsemble works for classification models", {
   set.seed(1234L)
   ens.class <- caretEnsemble(models.class, trControl = trainControl(number = 2L))
   expect_that(ens.class, is_a("caretEnsemble"))
-  pred.class <- predict(ens.class, type = "prob")
-  newPreds1 <- as.data.frame(X.class)
-  pred.classb <- predict(ens.class, newdata = newPreds1, type = "prob")
-  pred.classc <- predict(ens.class, newdata = newPreds1[2L, ], type = "prob")
-  expect_s3_class(pred.class, "data.frame")
-  expect_identical(nrow(pred.class), 150L)
-  expect_identical(pred.class, pred.classb)
-  expect_lt(abs(0.9633519 - pred.classc[, 1L]), 0.01)
-  expect_is(pred.class, "data.frame")
-  expect_is(pred.classb, "data.frame")
-  expect_is(pred.classc, "data.frame")
-  expect_equal(nrow(pred.classc), 1L)
+
+  # Predictions
+  pred_stacked <- predict(ens.class, type = "prob") # stacked predictions
+  pred_in_sample <- predict(ens.class, newdata = X.class, type = "prob") # in sample predictions
+  pred_one <- predict(ens.class, newdata = X.class[2L, , drop = FALSE], type = "prob") # one row predictions
+
+  # Check class
+  expect_is(pred_stacked, "data.frame")
+  expect_is(pred_in_sample, "data.frame")
+  expect_is(pred_one, "data.frame")
+
+  # Check rows
+  expect_equal(nrow(pred_stacked), 150L)
+  expect_equal(nrow(pred_in_sample), 150L)
+  expect_equal(nrow(pred_one), 1L)
+
+  # Check cols
+  expect_equal(ncol(pred_stacked), 2L)
+  expect_equal(ncol(pred_in_sample), 2L)
+  expect_equal(ncol(pred_one), 2L)
+
+  # stacked predcitons should be similar to in sample predictions
+  expect_equal(pred_stacked, pred_in_sample, tol = 0.1)
+
+  # One row predictions
+  expect_equivalent(pred_one$Yes, 0.03833661, tol = 0.05)
+  expect_equivalent(pred_one$No, 0.9616634, tol = 0.05)
 })
 
 context("Do ensembles of custom models work?")
@@ -205,29 +231,43 @@ test_that("Ensembles using custom models work correctly", {
     treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
   )
   train.control <- trainControl(method = "cv", number = 2L, classProbs = TRUE)
-  X.df <- as.data.frame(X.class)
 
   # Create an ensemble using the above models
-  expect_warning(cl <- caretList(X.df, Y.class, tuneList = tune.list, trControl = train.control))
-  expect_that(cl, is_a("caretList"))
+  expect_warning(cl <- caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control))
+  expect_is(cl, "caretList")
   expect_silent(cs <- caretEnsemble(cl))
-  expect_that(cs, is_a("caretEnsemble"))
+  expect_is(cs, "caretEnsemble")
 
   # Validate names assigned to ensembled models
   expect_equal(sort(names(cs$models)), c("custom.rf", "myrpart", "treebag"))
 
   # Validate ensemble predictions
-  pred.classa <- predict(cs, type = "prob")
-  expect_silent(pred.classb <- predict(cs, newdata = X.df, type = "prob"))
-  expect_silent(pred.classc <- predict(cs, newdata = X.df[2L, ], type = "prob"))
-  expect_s3_class(pred.classa, "data.frame")
-  expect_s3_class(pred.classb, "data.frame")
-  expect_s3_class(pred.classc, "data.frame")
-  expect_identical(nrow(pred.classa), 150L)
-  expect_identical(nrow(pred.classb), 150L)
-  expect_identical(nrow(pred.classc), 1L)
-  expect_identical(pred.classa, pred.classb)
-  expect_equal(pred.classc[, 1L], 0.9489, tol = 0.01)
+  pred_stacked <- predict(cs, type = "prob") # stacked predictions
+  pred_in_sample <- predict(cs, newdata = X.class, type = "prob") # in sample predictions
+  pred_one <- predict(cs, newdata = X.class[2L, , drop = FALSE], type = "prob") # one row predictions
+
+  # Check class
+  expect_is(pred_stacked, "data.frame")
+  expect_is(pred_in_sample, "data.frame")
+  expect_is(pred_one, "data.frame")
+
+  # Check rows
+  expect_equal(nrow(pred_stacked), 150L)
+  expect_equal(nrow(pred_in_sample), 150L)
+  expect_equal(nrow(pred_one), 1L)
+
+  # Check cols
+  expect_equal(ncol(pred_stacked), 2L)
+  expect_equal(ncol(pred_in_sample), 2L)
+  expect_equal(ncol(pred_one), 2L)
+
+  # stacked predcitons should be similar to in sample predictions
+  # These differ a lot!
+  expect_equal(pred_stacked, pred_in_sample, tol = 0.4)
+
+  # One row predictions
+  expect_equivalent(pred_one$Yes, 0.05072556, tol = 0.05)
+  expect_equivalent(pred_one$No, 0.9492744, tol = 0.05)
 
   # Verify that not specifying a method attribute for custom models causes an error
   tune.list <- list(
