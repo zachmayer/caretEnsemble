@@ -61,7 +61,7 @@ test_that("Columns for caretList predictions are correct and ordered", {
   methods <- names(model_list)
   classes <- levels(iris$Species)
   class_method_combinations <- expand.grid(classes, methods)
-  ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "."))
+  ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
 
   # Check the names of the columns are correct
   expect_true(all(colnames(p) %in% ordered_colnames))
@@ -143,7 +143,7 @@ test_that("Periods are supported in method and class names in caretList and care
   p <- predict(model_list, newdata = iris[, -5L])
 
   class_method_combinations <- expand.grid(classes, methods)
-  ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "."))
+  ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
   expect_equal(colnames(p), ordered_colnames)
 
   model_stack <- caretStack(model_list, method = "knn")

@@ -84,7 +84,7 @@ test_that("We can predict", {
   model_names <- c("rf", "glm", "rpart", "treebag")
   class_names <- c("No", "Yes")
   combinations <- expand.grid(class_names, model_names)
-  expect_true(all(colnames(out) == paste(combinations$Var2, combinations$Var1, sep = ".")))
+  expect_true(all(colnames(out) == paste(combinations$Var2, combinations$Var1, sep = "_")))
   out2 <- predict(models.reg, newdata = X.reg)
   expect_identical(dim(out2), c(150L, 4L))
   expect_true(all(colnames(out2) == c("rf", "glm", "rpart", "treebag")))
@@ -200,8 +200,8 @@ test_that("check_caretList_model_types stops when a classification model support
 test_that("check_caretList_model_types stops when a classification model did not save probs", {
   model_list <- models.class
   model_list[[1L]]$control$classProbs <- FALSE
-  m <- "Some models were fit with no class probabilities. Please re-fit them with trainControl, classProbs = TRUE: rf"
-  expect_error(check_caretList_model_types(model_list), m)
+  m <- "No probability function found.  Re-fit with a method that supports prob."
+  expect_error(lapply(model_list, extractModelType), m)
   context("Test helper functions for multiclass classification")
 
   test_that("Check errors in caretEnsemble for multiclass classification work", {
@@ -273,7 +273,7 @@ test_that("check_caretList_model_types stops when a classification model did not
     classes <- levels(iris[, 5L])[-1L]
     models <- c("rpart", "glmnet")
     class_model_combinations <- expand.grid(classes, models)
-    varImp_rownames <- apply(class_model_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "."))
+    varImp_rownames <- apply(class_model_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
 
     model_stack <- caretStack(model_list, method = "knn", excluded_class_id = 1L)
     expect_identical(rownames(varImp(model_stack$ens_model)$importance), varImp_rownames)

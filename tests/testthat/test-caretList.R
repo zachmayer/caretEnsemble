@@ -158,7 +158,7 @@ test_that("caretList predictions", {
   modelnames <- names(models)
   classes <- levels(iris[, 5L])
   combinations <- expand.grid(classes, modelnames)
-  correct_colnames <- apply(combinations, 1L, function(x) paste(x[2L], x[1L], sep = "."))
+  correct_colnames <- apply(combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
   expect_equal(
     correct_colnames,
     colnames(p3)

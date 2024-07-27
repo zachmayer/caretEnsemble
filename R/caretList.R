@@ -373,6 +373,8 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   # Loop over the models and make predictions
   preds <- apply_fun(object, caretPredict, newdata = newdata, excluded_class_id = excluded_class_id, ...)
   stopifnot(
+    is.list(preds),
+    length(preds) >= 1L,
     length(preds) == length(object),
     sapply(preds, data.table::is.data.table)
   )
@@ -385,11 +387,22 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   pred_rows <- sapply(preds, nrow)
   stopifnot(pred_rows == pred_rows[1L])
 
-  # Combine the predictions into a single data.table
+  # Name the predictions
   for (i in seq_along(preds)) {
     p <- preds[[i]]
-    setnames(p, names(p), paste0(names(p), "_", names(object)[i]))
+    model_name <- names(object)[i]
+    if (ncol(p) == 1L) {
+      # For a single column, name it after the model (e.g. regression or binary with an excluded class)
+      setnames(p, names(p), model_name)
+    } else {
+      # For multiple columns, name them including the model (e.g. multiclass)
+      setnames(p, names(p), paste(model_name, names(p), sep = "_"))
+    }
   }
+  preds <- unname(preds)
+
+  # Combine the predictions into a single data.table
+  preds <- data.table::as.data.table(preds)
 
   # Return
   preds

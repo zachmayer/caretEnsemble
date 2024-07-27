@@ -65,6 +65,44 @@ dropExcludedClass <- function(x, all_classes, excluded_class_id) {
   x
 }
 
+#' @title Extract the model type from a \code{\link[caret]{train}} object
+#' @description Extract the model type from a \code{\link[caret]{train}} object.
+#' For classification, validates that the model can predict probabilities, and,
+#'  if stacked predictions are requested, that classProbs = TRUE.
+#' @param object a \code{\link[caret]{train}} object
+#' @param validate_for_stacking a logical indicating whether to validate the object for stacked predictions
+#' @return a character string
+#' @keywords internal
+extractModelType <- function(object, validate_for_stacking = TRUE) {
+  # Must be a train object
+  if (!is(object, "train")) {
+    stop("object must be a train object")
+  }
+
+  # Extract type
+  model_type <- object$modelType
+
+  # Class or reg?
+  is_class <- model_type == "Classification"
+
+  # Validate for predictions
+  if (is_class && !is.function(object$modelInfo$prob)) {
+    stop("No probability function found. Re-fit with a method that supports prob.")
+  }
+  # Validate for stacked predictions
+  if (validate_for_stacking) {
+    if (!object$control$savePredictions %in% c("all", "final", TRUE)) {
+      stop("Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions.")
+    }
+    if (is_class && !object$control$classProbs) {
+      stop("classProbs = FALSE. Re-fit with classProbs = TRUE in trainControl.")
+    }
+  }
+
+  # Return
+  model_type
+}
+
 #' @title Prediction wrapper for \code{\link[caret]{train}}
 #' @description This is a prediction wrapper for \code{\link[caret]{train}} with several features:
 #' - If newdata is null, return stacked predictions from the training job, rather than in-sample predictions.
@@ -77,22 +115,11 @@ dropExcludedClass <- function(x, all_classes, excluded_class_id) {
 #' @param ... additional arguments to pass to \code{\link[caret]{predict.train}}, if newdata is not NULL
 #' @return a data.table
 caretPredict <- function(object, newdata = NULL, excluded_class_id = 0L, ...) {
-  # Extract type
-  model_type <- object$modelType
-
-  # Checks
-  if (!is(object, "train")) {
-    stop("object must be a train object")
-  }
-  if (model_type == "Classification" && !is.function(object$modelInfo$prob)) {
-    stop("No probability function found.  Re-fit with a method that supports prob.")
-  }
+  # Extract the model type
+  model_type <- extractModelType(object, validate_for_stacking = is.null(newdata))
 
   # If newdata is NULL, return the stacked predictions
   if (is.null(newdata)) {
-    if (!object$control$savePredictions %in% c("all", "final", TRUE)) {
-      stop("Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions.")
-    }
     # Extract the best tune
     a <- data.table::data.table(object$bestTune, key = names(object$bestTune))
 
@@ -105,9 +132,6 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 0L, ...) {
     # Keep only the predictions
     keep_cols <- "pred"
     if (model_type == "Classification") {
-      if (!object$control$classProbs) {
-        stop("classProbs = FALSE. Re-fit with classProbs = TRUE in trainControl.")
-      }
       keep_cols <- levels(object)
     }
     pred <- pred[, c("rowIndex", keep_cols), drop = FALSE, with = FALSE]

@@ -39,7 +39,9 @@
 #' caretStack(models, method = "glm")
 #' }
 caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id = 1L, ...) {
-  all.models <- as.caretList(all.models)
+  if (!is.caretList(all.models)) {
+    all.models <- as.caretList(all.models)
+  }
 
   # Make sure either both or neither new_X and new_y are NULL
   if (is.null(new_X) != is.null(new_y)) {
@@ -50,7 +52,15 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
   excluded_class_id <- validateExcludedClass(excluded_class_id)
 
   # Predict for each model.  If new_X is NULL, will return stacked predictions
-  preds <- caretPredict(all.models, newdata = new_X, excluded_class_id = excluded_class_id)
+  preds <- predict.caretList(all.models, newdata = new_X, excluded_class_id = excluded_class_id)
+  stopifnot(
+    data.table::is.data.table(preds),
+    length(dim(preds)) == 2L,
+    !is.null(names(preds))
+  )
+
+  # TODO: check for names(preds) is the same as names(all.models)
+  # if regression or binary class with excluded_class_id=1L
 
   # Build a caret model
   obs <- new_y
@@ -58,6 +68,7 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
     obs <- data.table::data.table(all.models[[1L]]$pred)
     data.table::setorderv(obs, "rowIndex")
     obs <- obs[, list(obs = obs[1L]), by = "rowIndex"]
+    obs <- obs[["obs"]]
   }
   stopifnot(nrow(obs) == nrow(preds))
   model <- train(preds, obs, ...)
