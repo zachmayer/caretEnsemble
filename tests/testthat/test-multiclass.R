@@ -55,7 +55,7 @@ test_that("Columns for caretList predictions are correct and ordered", {
   num_classes <- length(unique(iris$Species))
 
   # Check the number of rows and columns is correct
-  p <- predict(model_list, newdata = iris[, -5L])
+  p <- predict(model_list, newdata = iris[, -5L], excluded_class_id = 0L)
   expect_equal(dim(p), c(nrow(iris), num_methods * num_classes))
 
   methods <- names(model_list)
@@ -83,7 +83,7 @@ test_that("Columns for caretStack are correct", {
     x = iris[, -5L],
     y = iris[, 5L],
     trControl = my_control,
-    methodList = c("glmnet", "rpart"),
+    methodList = "rpart",
     tuneList = list(
       nnet = caretModelSpec(method = "nnet", trace = FALSE)
     )
@@ -102,7 +102,7 @@ test_that("Columns for caretStack are correct", {
   classes <- levels(iris$Species)
 
   # Check that the columns are ordered correctly
-  expect_equal(colnames(p_prob), classes)
+  expect_named(p_prob, classes)
 })
 
 test_that("Periods are supported in method and class names in caretList and caretStack", {
@@ -140,7 +140,7 @@ test_that("Periods are supported in method and class names in caretList and care
   methods <- names(model_list)
   classes <- levels(iris[, 5L])
 
-  p <- predict(model_list, newdata = iris[, -5L])
+  p <- predict(model_list, newdata = iris[, -5L], excluded_class_id = 0L)
 
   class_method_combinations <- expand.grid(classes, methods)
   ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))

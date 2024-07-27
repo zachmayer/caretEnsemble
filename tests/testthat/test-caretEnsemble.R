@@ -153,11 +153,11 @@ test_that("It works for regression models", {
   set.seed(1234L)
   ens.reg <- caretEnsemble(models.reg, trControl = trainControl(number = 2L))
   expect_is(ens.reg, "caretEnsemble")
-  pred.reg <- predict(ens.reg) # These are stacked predictions
+  pred.reg <- predict(ens.reg)
   newPreds1 <- as.data.frame(X.reg)
   pred.regb <- predict(ens.reg, newdata = newPreds1)
   pred.regc <- predict(ens.reg, newdata = newPreds1[2L, ])
-  expect_equal(pred.reg, pred.regb, tol = 0.1) # Stacked preds should be similar but not identical
+  expect_identical(pred.reg, pred.regb)
   expect_lt(abs(4.740135 - pred.regc), 0.05)
   expect_is(pred.reg, "numeric")
   expect_is(pred.regb, "numeric")

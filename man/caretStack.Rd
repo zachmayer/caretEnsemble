@@ -7,7 +7,7 @@
 caretStack(all.models, new_X = NULL, new_y = NULL, excluded_class_id = 1L, ...)
 }
 \arguments{
-\item{all.models}{a caretList, or an object coerceable to a caretList (such as a list of train objects)}
+\item{all.models}{a caretList, or an object coercible to a caretList (such as a list of train objects)}
 
 \item{new_X}{Data to predict on for the caretList, prior to training the stack (for transfer learning).
 if NULL, the stacked predictions will be extracted from the caretList models.}

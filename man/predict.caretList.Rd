@@ -4,7 +4,7 @@
 \alias{predict.caretList}
 \title{Create a matrix of predictions for each of the models in a caretList}
 \usage{
-\method{predict}{caretList}(object, newdata = NULL, verbose = FALSE, excluded_class_id = 0L, ...)
+\method{predict}{caretList}(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...)
 }
 \arguments{
 \item{object}{an object of class caretList}

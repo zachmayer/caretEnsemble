@@ -244,21 +244,25 @@ plot.caretEnsemble <- function(x, ...) {
 #' @return a data.table with predictions, observeds, and residuals
 #' @importFrom data.table data.table
 extractPredObsResid <- function(object, show_class_id = 2L) {
-  stopifnot(is(object, "train"))
+  stopifnot(
+    is(object, "train"),
+    is.data.frame(object$pred)
+  )
+  keep_cols <- c("pred", "obs", "rowIndex")
   type <- object$modelType
-  predobs <- caretPredict(object)
-  pred <- predobs$pred
-  obs <- predobs$obs
-  id <- predobs$rowIndex
-  if (type == "Regression") {
-    pred <- pred[[1L]]
-  } else {
+  predobs <- data.table(object$pred)
+  if (type == "Classification") {
     show_class <- levels(object)[show_class_id]
-    pred <- pred[[show_class]]
-    obs <- as.integer(obs == show_class)
+    set(predobs, j = "pred", value = predobs[[show_class]])
+    set(predobs, j = "obs", value = as.integer(predobs[["obs"]] == show_class))
   }
-  out <- data.table::data.table(pred, obs, resid = obs - pred, id)
-  out
+  predobs <- predobs[, keep_cols, with = FALSE]
+  data.table::setkeyv(predobs, "rowIndex")
+  predobs <- predobs[, lapply(.SD, mean), by = "rowIndex"]
+  r <- predobs[["obs"]] - predobs[["pred"]]
+  data.table::set(predobs, j = "resid", value = r)
+  data.table::setorderv(predobs, "rowIndex")
+  predobs
 }
 
 #' @title Convenience function for more in-depth diagnostic plots of caretEnsemble objects
@@ -296,7 +300,6 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(is(object, "caretEnsemble"))
   ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
-  data.table::setkeyv(ensemble_data, "id")
 
   # Performance metrics by model
   g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
@@ -331,7 +334,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     ymax = max(.SD[["resid"]]),
     yavg = median(.SD[["resid"]]),
     yhat = .SD[["pred"]][1L]
-  ), by = "id"]
+  ), by = "rowIndex"]
   g4 <- ggplot2::ggplot(sub_model_summary, ggplot2::aes(
     x = .data[["yhat"]],
     y = .data[["yavg"]]
@@ -358,8 +361,8 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     xvars <- setdiff(xvars, c(".outcome", ".weights", "(Intercept)"))
     xvars <- sample(xvars, 2L)
   }
-  data.table::set(x_data, j = "id", value = seq_len(nrow(x_data)))
-  plotdf <- merge(ensemble_data, x_data, by = "id")
+  data.table::set(x_data, j = "rowIndex", value = seq_len(nrow(x_data)))
+  plotdf <- merge(ensemble_data, x_data, by = "rowIndex")
   g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1L]]], .data[["resid"]])) +
     ggplot2::geom_point() +
     ggplot2::geom_smooth(se = FALSE) +
@@ -374,5 +377,5 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     ggplot2::scale_y_continuous("Residuals") +
     ggplot2::labs(title = paste0("Residuals Against ", xvars[2L])) +
     ggplot2::theme_bw()
-  suppressMessages(gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2L))
+  suppressWarnings(suppressMessages(gridExtra::grid.arrange(g1, g2, g3, g4, g5, g6, ncol = 2L)))
 }

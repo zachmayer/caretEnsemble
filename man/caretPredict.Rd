@@ -4,7 +4,7 @@
 \alias{caretPredict}
 \title{Prediction wrapper for \code{\link[caret]{train}}}
 \usage{
-caretPredict(object, newdata = NULL, excluded_class_id = 0L, ...)
+caretPredict(object, newdata = NULL, excluded_class_id = 1L, ...)
 }
 \arguments{
 \item{object}{a \code{\link[caret]{train}} object}

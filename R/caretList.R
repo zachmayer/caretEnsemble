@@ -361,7 +361,7 @@ as.caretList.list <- function(object) {
 #' @importFrom data.table as.data.table setnames
 #' @export
 #' @method predict caretList
-predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 0L, ...) {
+predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...) {
   stopifnot(is.caretList(object))
 
   # Decided whether to be verbose or quiet

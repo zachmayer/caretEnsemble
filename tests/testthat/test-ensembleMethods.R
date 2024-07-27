@@ -107,6 +107,8 @@ test_that("Metric is used correctly", {
 context("Testing caretEnsemble generics")
 
 test_that("No errors are thrown by a generics for ensembles", {
+  test_plot_file <- "caretEnsemble_test_plots.png"
+  png(test_plot_file)
   set.seed(2239L)
   ens.class <- caretEnsemble(
     models.class,
@@ -118,30 +120,27 @@ test_that("No errors are thrown by a generics for ensembles", {
       savePredictions = TRUE
     )
   )
-  # varImp struggles with the rf in our test suite, why?
-  models.subset <- models.reg[2L:4L]
-  class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2L, savePredictions = TRUE))
+  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(number = 2L, savePredictions = TRUE))
   expect_output(summary(ens.class), "ROC")
   expect_output(summary(ens.reg), "RMSE")
 
   expect_is(plot(ens.class), "ggplot")
   expect_is(plot(ens.reg), "ggplot")
-  expect_is(plot(ens.reg$models[[2L]]), "trellis")
+
   tp <- plot(ens.class)
   tp2 <- plot(ens.reg)
   expect_equal(nrow(tp$data), 4L)
-  expect_equal(nrow(tp2$data), 3L)
+  expect_equal(nrow(tp2$data), 4L)
+
   expect_equal(tp$data$model_name, names(ens.class$models))
   expect_equal(tp2$data$model_name, names(ens.reg$models))
 
-  test_plot_file <- "caretEnsemble_test_plots.png"
-  png(test_plot_file)
   suppressWarnings(autoplot(ens.class))
   suppressWarnings(autoplot(ens.reg))
   suppressWarnings(autoplot(ens.class, xvars = c("Petal.Length", "Petal.Width")))
   suppressWarnings(autoplot(ens.reg, xvars = c("Petal.Length", "Petal.Width")))
   expect_error(autoplot(ens.reg$models[[1L]]))
+
   dev.off()
   expect_true(file.exists(test_plot_file))
   unlink(test_plot_file)

@@ -138,8 +138,8 @@ test_that("caretList predictions", {
     )
   })
 
-  p2 <- predict(models)
-  p3 <- predict(models, newdata = iris[100L, 1L:2L])
+  p2 <- predict(models, excluded_class_id = 0L)
+  p3 <- predict(models, newdata = iris[, 1L:2L], excluded_class_id = 0L)
   expect_is(p2, "data.table")
   expect_is(p2[[1L]], "numeric")
   expect_is(p2[[2L]], "numeric")
@@ -154,6 +154,8 @@ test_that("caretList predictions", {
     length(names(models)) * nlevels(as.factor(iris[, 5L])),
     length(colnames(p3))
   ) # check that we have the right number of columns
+  expect_identical(dim(p2), dim(p3))
+  expect_named(p2, names(p3))
 
   modelnames <- names(models)
   classes <- levels(iris[, 5L])
@@ -689,12 +691,16 @@ test_that("as.caretList.list stops for non-list object", {
   expect_error(as.caretList.list(1L), "object must be a list of caret models")
 })
 
-test_that("predict.caretList gives a warning and stops for missing training data", {
-  mock_model <- list(structure(list(trainingData = NULL), class = "train"))
-  class(mock_model) <- "caretList"
-
-  err <- "newdata is NULL and trainingData is NULL for some models. Use newdata or retrain with returnData=TRUE."
-  expect_error(predict.caretList(mock_model), err)
+test_that("predict.caretList doesn't care about missing training data", {
+  new_model_list <- lapply(models.class, function(x) {
+    x$trainingData <- NULL
+    x
+  })
+  new_model_list <- as.caretList(new_model_list)
+  pred <- predict.caretList(new_model_list)
+  expect_is(pred, "data.table")
+  expect_equal(nrow(pred), 150L)
+  expect_named(pred, names(new_model_list))
 })
 
 test_that("extractModelName handles custom models correctly", {

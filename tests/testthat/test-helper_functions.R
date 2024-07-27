@@ -29,7 +29,7 @@ test_that("No predictions generates an error", {
       trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
     )
   )
-  check_caretList_model_types(models_multi)
+  expect_is(sapply(models_multi, extractModelType), "character")
 
   suppressWarnings(
     models <- caretList(
@@ -43,20 +43,20 @@ test_that("No predictions generates an error", {
     iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
     tuneLength = 1L,
     method = "glmnet",
-    trControl = trainControl(method = "cv", number = 2L, savePredictions = "none", classProbs = TRUE)
+    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
   )
   models2 <- c(new_model, models)
   models3 <- c(models, new_model)
-  check_caretList_model_types(models)
-  expect_error(check_caretList_model_types(models2))
-  expect_error(check_caretList_model_types(models3))
+  expect_is(sapply(models, extractModelType), "character")
+  expect_is(sapply(models2, extractModelType), "character")
+  expect_is(sapply(models3, extractModelType), "character")
 })
 
-test_that("We can make the predobs matrix", {
-  out <- extractBestPredsAndObs(models.reg)
-  expect_is(out, "list")
-  expect_length(out$obs, 150L)
-  expect_identical(dim(out$preds), c(150L, 4L))
+test_that("We can make the stacked predictions matrix", {
+  out <- predict(models.reg)
+  expect_s3_class(out, "data.table")
+  expect_identical(dim(out), c(150L, 4L))
+  expect_named(out, c("rf", "glm", "rpart", "treebag"))
 })
 
 test_that("We can predict", {
@@ -70,24 +70,23 @@ test_that("We can predict", {
 context("Do the helper functions work for classification objects?")
 ########################################################################
 
-test_that("We can make the predobs matrix", {
-  out <- extractBestPredsAndObs(models.class)
-  expect_that(out, is_a("list"))
-  expect_length(out$obs, 150L)
-  expect_identical(dim(out$preds), c(150L, 4L * 1L)) # number of models * (number of classes-1)
+test_that("We can make the stacked predictions matrix", {
+  out <- predict(models.class)
+  expect_s3_class(out, "data.table")
+  expect_identical(dim(out), c(150L, 4L * 1L)) # number of models * (number of classes-1)
 })
 
 test_that("We can predict", {
-  out <- predict(models.class, newdata = X.class)
+  out <- predict(models.class, newdata = X.class, excluded_class_id = 0L)
   expect_is(out, "data.table")
   expect_identical(dim(out), c(150L, 4L * 2L))
   model_names <- c("rf", "glm", "rpart", "treebag")
   class_names <- c("No", "Yes")
   combinations <- expand.grid(class_names, model_names)
-  expect_true(all(colnames(out) == paste(combinations$Var2, combinations$Var1, sep = "_")))
+  expect_named(out, paste(combinations$Var2, combinations$Var1, sep = "_"))
   out2 <- predict(models.reg, newdata = X.reg)
   expect_identical(dim(out2), c(150L, 4L))
-  expect_true(all(colnames(out2) == c("rf", "glm", "rpart", "treebag")))
+  expect_named(out2, c("rf", "glm", "rpart", "treebag"))
 })
 
 test_that("predict results same regardless of verbose option", {
@@ -133,7 +132,7 @@ test_that("wtd.sd handles NA values correctly", {
 
 test_that("Checks generate errors", {
   set.seed(42L)
-  myControl <- trainControl(method = "cv", number = 5L, savePredictions = "final")
+  myControl <- trainControl(method = "cv", number = 5L, savePredictions = "final", classProbs = TRUE)
   expect_warning(
     x <- caretList(
       Sepal.Length ~ Sepal.Width,
@@ -142,32 +141,18 @@ test_that("Checks generate errors", {
       trControl = myControl
     )
   )
-  modelLibrary <- extractBestPredsAndObs(x)
-  idx <- sample(seq_along(modelLibrary$preds$lm), length(modelLibrary$preds$lm))
-  modelLibrary$preds$nn <- modelLibrary$preds$lm[idx]
+  expect_is(predict(x), "data.table")
 
-  expect_error(check_bestpreds_resamples(modelLibrary))
-  expect_error(check_bestpreds_indexes(modelLibrary))
-  expect_error(check_bestpreds_obs(modelLibrary))
-
-  expect_warning(x$rpart <- train(Sepal.Length ~ Sepal.Width, iris, method = "rpart"))
-  expect_error(check_bestpreds_resamples(modelLibrary))
-  expect_error(check_bestpreds_indexes(modelLibrary))
-  expect_error(check_bestpreds_obs(modelLibrary))
-
-  expect_error(check_caretList_classes(x$glm$finalModel))
-
+  # Add an rpart model
   x$rpart <- train(Species ~ Sepal.Width, iris, method = "rpart", trControl = myControl)
-  check_caretList_classes(x)
-  expect_error(check_caretList_model_types(x))
-
-  expect_error(m <- extractBestPredsAndObs(x))
+  expect_is(sapply(x, extractModelType), "character")
+  expect_is(predict(x), "data.table")
 
   set.seed(42L)
   myControl2 <- trainControl(
     method = "cv",
     number = 10L,
-    savePredictions = TRUE,
+    savePredictions = "final",
     classProbs = TRUE,
     summaryFunction = twoClassSummary
   )
@@ -175,33 +160,34 @@ test_that("Checks generate errors", {
     x <- caretList(
       iris[1L:100L, -5L],
       factor(ifelse(iris[1L:100L, "Species"] == "setosa", "Yes", "No")),
+      metric = "ROC",
       methodList = c("lda", "rf"),
       trControl = myControl2
     )
   )
-  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method = "rpart")
-  expect_error(check_caretList_model_types(x))
+  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method = "rpart", trControl = myControl)
+  expect_is(sapply(x, extractModelType), "character")
 })
 
-test_that("check_caretList_model_types stops when there are no predictions saved", {
+test_that("extractModelType shouldn't care about predictions", {
   model_list <- models.class
   model_list[[1L]]$pred <- NULL
+  expect_is(sapply(model_list, extractModelType), "character")
+  expect_equal(unique(sapply(model_list, extractModelType)), "Classification")
+})
+
+test_that("extractModelType stops when a classification model can't predict probabilities", {
+  model_list <- models.class
+  model_list[[1L]]$modelInfo$prob <- FALSE
   err <- "No probability function found. Re-fit with a method that supports prob."
   expect_error(lapply(model_list, extractModelType), err)
 })
 
-test_that("check_caretList_model_types stops when a classification model support probabilities", {
-  model_list <- models.class
-  model_list[[1L]]$modelInfo$prob <- FALSE
-  err <- "All models for classification must be able to generate class probabilities."
-  expect_error(check_caretList_model_types(model_list), err)
-})
-
-test_that("check_caretList_model_types stops when a classification model did not save probs", {
+test_that("extractModelType stops when a classification model did not save probs", {
   model_list <- models.class
   model_list[[1L]]$control$classProbs <- FALSE
-  err <- "No probability function found.  Re-fit with a method that supports prob."
-  expect_error(lapply(model_list, extractModelType), err)
+  err <- "classProbs = FALSE. Re-fit with classProbs = TRUE in trainControl."
+  expect_error(lapply(model_list, extractModelType, validate_for_stacking = TRUE), err)
   context("Test helper functions for multiclass classification")
 
   test_that("Check errors in caretEnsemble for multiclass classification work", {
@@ -336,61 +322,46 @@ test_that("wtd.sd calculates weighted standard deviation correctly", {
   expect_error(wtd.sd(x, w[-1L]))
 })
 
-test_that("check_caretList_classes validates caretList correctly", {
-  expect_null(check_caretList_classes(models.class))
-  expect_null(check_caretList_classes(models.reg))
+test_that("extractModelType validates caretList correctly", {
+  expect_is(sapply(models.class, extractModelType), "character")
+  expect_is(sapply(models.reg, extractModelType), "character")
 
   # Test error for non-caretList object
-  expect_error(check_caretList_classes(list(model = lm(Y.reg ~ ., data = as.data.frame(X.reg)))))
+  expect_error(extractModelType(list(model = lm(Y.reg ~ ., data = as.data.frame(X.reg)))))
 })
 
-test_that("check_caretList_model_types validates model types correctly", {
-  expect_null(check_caretList_model_types(models.class))
-  expect_null(check_caretList_model_types(models.reg))
+test_that("extractModelType validates model types correctly", {
+  expect_is(sapply(models.class, extractModelType), "character")
+  expect_is(sapply(models.reg, extractModelType), "character")
 
   # Test error for mixed model types
-  mixed_list <- c(models.class, models.reg[1L])
-  class(mixed_list) <- "caretList"
-  expect_error(check_caretList_model_types(mixed_list))
+  mixed_list <- c(models.class, models.reg)
+  expect_is(sapply(mixed_list, extractModelType), "character")
 })
 
-test_that("extractBestPredsAndObs works", {
-  best_preds_class <- extractBestPredsAndObs(models.class)
-  best_preds_reg <- extractBestPredsAndObs(models.reg)
+test_that("Stacked predictions for caret lists works", {
+  best_preds_class <- predict(models.class)
+  best_preds_reg <- predict(models.reg)
 
-  expect_is(best_preds_class, "list")
-  expect_is(best_preds_reg, "list")
+  expect_is(best_preds_class, "data.table")
+  expect_is(best_preds_reg, "data.table")
 
-  expect_named(best_preds_class$preds, names(models.class))
-  expect_named(best_preds_reg$preds, names(models.reg))
+  expect_named(best_preds_class, names(models.class))
+  expect_named(best_preds_reg, names(models.reg))
 })
 
-test_that("extractBestPredsAndObs errors on inconsistent resamples", {
+test_that("Stacked predictions works with different resampling strategies", {
   models.class.inconsistent <- models.class
-  models.class.inconsistent[[1L]]$pred$Resample <- "BAD_SAMPLE"
-  err <- "Component models do not have the same re-sampling strategies"
-  expect_error(extractBestPredsAndObs(models.class.inconsistent), err)
+  models.class.inconsistent[[1L]]$pred$Resample <- "WEIRD_SAMPLING"
+  expect_is(predict(models.class.inconsistent), "data.table")
 })
 
-test_that("extractBestPredsAndObs errors on inconsistent row indexes", {
+test_that("Stacked predictions works if the row indexes differ", {
   models.class.inconsistent <- models.class
-  models.class.inconsistent[[1L]]$pred$rowIndex <- 0L
-  err <- "Re-sampled predictions from each component model do not use the same rowIndexes from the origial dataset"
-  expect_error(extractBestPredsAndObs(models.class.inconsistent), err)
-})
-
-test_that("extractBestPredsAndObs errors on inconsistent obs", {
-  models.class.inconsistent <- models.class
-  models.class.inconsistent[[1L]]$pred$obs <- -Inf
-  err <- "Observed values for each component model are not the same. Re-train the models with the same Y variable"
-  expect_error(extractBestPredsAndObs(models.class.inconsistent), err)
-})
-
-test_that("extractBestPredsAndObs errors on inconsistent pred", {
-  models.class.inconsistent <- models.class
-  models.class.inconsistent[[1L]]$pred$pred <- "BAD_PRED"
-  err <- "Component models do not all have the same type of predicitons.  Predictions are a mix of character, factor"
-  expect_error(extractBestPredsAndObs(models.class.inconsistent), err)
+  models.class.inconsistent[[1L]]$pred$rowIndex <- rev(models.class.inconsistent[[1L]]$pred$rowIndex)
+  big_preds <- rbind(models.class.inconsistent[[2L]]$pred, models.class.inconsistent[[2L]]$pred)
+  models.class.inconsistent[[2L]]$pred <- big_preds
+  expect_is(predict(models.class.inconsistent), "data.table")
 })
 
 test_that("extractModelName extracts model names correctly", {
@@ -404,56 +375,45 @@ test_that("extractModelName extracts model names correctly", {
 })
 
 test_that("extractModelType extracts model types correctly", {
-  expect_equal(extractModelType(models.class), "Classification")
-  expect_equal(extractModelType(models.reg), "Regression")
+  expect_identical(unique(sapply(models.class, extractModelType)), "Classification")
+  expect_identical(unique(sapply(models.reg, extractModelType)), "Regression")
 })
 
-test_that("extractBestPreds extracts best predictions correctly", {
-  best_preds_class <- extractBestPreds(models.class[[1L]])
-  best_preds_reg <- extractBestPreds(models.reg[[1L]])
+test_that("caretPredict extracts best predictions correctly", {
+  stacked_preds_class <- caretPredict(models.class[[1L]], excluded_class_id = 0L)
+  stacked_preds_reg <- caretPredict(models.reg[[1L]])
 
-  expect_s3_class(best_preds_class, "data.frame")
-  expect_s3_class(best_preds_reg, "data.frame")
-  expect_true(all(c("Resample", "rowIndex", "pred", "obs") %in% names(best_preds_class)))
-  expect_true(all(c("Resample", "rowIndex", "pred", "obs") %in% names(best_preds_reg)))
+  expect_s3_class(stacked_preds_class, "data.table")
+  expect_s3_class(stacked_preds_reg, "data.table")
+
+  expect_named(stacked_preds_class, c("No", "Yes"))
+  expect_named(stacked_preds_reg, "pred")
 })
 
-test_that("extractBestPredsAndObs extracts best predictions for all models", {
-  best_preds_class <- extractBestPredsAndObs(models.class)
-  best_preds_reg <- extractBestPredsAndObs(models.reg)
+test_that("Stacked predictions creates prediction-observation data correctly", {
+  stacked_preds_class <- predict(models.class)
+  stacked_preds_reg <- predict(models.reg)
 
-  expect_type(best_preds_class, "list")
-  expect_type(best_preds_reg, "list")
+  expect_s3_class(stacked_preds_class, "data.table")
+  expect_s3_class(stacked_preds_reg, "data.table")
 
-  expect_equal(ncol(best_preds_class$preds), length(models.class))
-  expect_equal(ncol(best_preds_reg$preds), length(models.reg))
+  expect_equal(ncol(stacked_preds_class), length(models.class))
+  expect_equal(ncol(stacked_preds_reg), length(models.reg))
 
-  expect_named(best_preds_class$pred, names(models.class))
-  expect_named(best_preds_reg$pred, names(models.reg))
+  expect_named(stacked_preds_class, names(models.class))
+  expect_named(stacked_preds_reg, names(stacked_preds_reg))
 
-  expected_names <- c("preds", "obs", "rowIndex", "Resample", "type")
-  expect_named(best_preds_class, expected_names)
-  expect_named(best_preds_reg, expected_names)
+  expect_identical(nrow(stacked_preds_class), 150L)
+  expect_identical(nrow(stacked_preds_reg), 150L)
 })
 
-test_that("extractBestPredsAndObs creates prediction-observation data correctly", {
-  pred_obs_matrix_class <- extractBestPredsAndObs(models.class)
-  pred_obs_matrix_reg <- extractBestPredsAndObs(models.reg)
-
-  expect_type(pred_obs_matrix_class, "list")
-  expect_type(pred_obs_matrix_reg, "list")
-  expect_true(all(c("obs", "preds", "type") %in% names(pred_obs_matrix_class)))
-  expect_true(all(c("obs", "preds", "type") %in% names(pred_obs_matrix_reg)))
-  expect_equal(nrow(pred_obs_matrix_class$preds), length(pred_obs_matrix_class$obs))
-  expect_equal(nrow(pred_obs_matrix_reg$preds), length(pred_obs_matrix_reg$obs))
-})
-
-test_that("extractBestPredsAndObs fails on new model types", {
-  models.class.new <- models.class
+test_that("Stacked predictions works on new model types, assuming the new type returns a single column called 'pred'", {
+  models.class.new <- models.reg
   for (idx in seq_along(models.class.new)) {
-    models.class.new[[idx]]$modelType <- "ObjectDetection"
+    models.class.new[[idx]]$modelType <- "TimeSeries"
   }
-  expect_error(extractBestPredsAndObs(models.class.new), "Unknown model type: ObjectDetection")
+  preds <- predict(models.class.new)
+  expect_s3_class(preds, "data.table")
 })
 
 test_that("validateExcludedClass validates excluded level correctly", {

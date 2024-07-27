@@ -13,7 +13,7 @@
 #' a common set of rows during training (for stacking) or a common set of columns at
 #' inference time for transfer learning.
 #'
-#' @param all.models a caretList, or an object coerceable to a caretList (such as a list of train objects)
+#' @param all.models a caretList, or an object coercible to a caretList (such as a list of train objects)
 #' @param new_X Data to predict on for the caretList, prior to training the stack (for transfer learning).
 #' if NULL, the stacked predictions will be extracted from the caretList models.
 #' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.

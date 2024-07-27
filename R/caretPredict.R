@@ -74,6 +74,8 @@ dropExcludedClass <- function(x, all_classes, excluded_class_id) {
 #' @return a character string
 #' @keywords internal
 extractModelType <- function(object, validate_for_stacking = TRUE) {
+  stopifnot(is(object, "train"))
+
   # Must be a train object
   if (!is(object, "train")) {
     stop("object must be a train object")
@@ -114,7 +116,9 @@ extractModelType <- function(object, validate_for_stacking = TRUE) {
 #' @param excluded_class_id an integer indicating the class to exclude.  If 0L, no class is excluded
 #' @param ... additional arguments to pass to \code{\link[caret]{predict.train}}, if newdata is not NULL
 #' @return a data.table
-caretPredict <- function(object, newdata = NULL, excluded_class_id = 0L, ...) {
+caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
+  stopifnot(is(object, "train"))
+
   # Extract the model type
   model_type <- extractModelType(object, validate_for_stacking = is.null(newdata))
 
