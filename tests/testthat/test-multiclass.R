@@ -146,7 +146,9 @@ test_that("Periods are supported in method and class names in caretList and care
   ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
   expect_equal(colnames(p), ordered_colnames)
 
-  model_stack <- caretStack(model_list, method = "knn")
+  model_stack <- caretStack(model_list, method = "knn", trControl = trainControl(
+    savePredictions = "final", classProbs = TRUE
+  ))
   p_prob <- predict(model_stack, newdata = iris[, -5L], type = "prob")
   expect_equal(colnames(p_prob), classes)
   p_raw <- predict(model_stack, newdata = iris[, -5L], type = "raw")

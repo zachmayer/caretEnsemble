@@ -120,9 +120,14 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' @param level tolerance/confidence level
 #' @param return_weights a logical indicating whether prediction weights for each model
 #' should be returned
+#' @param excluded_class_id Which class to exclude from predictions.  Note that if the caretStack
+#' was trained with an excluded_class_id, that class is ALWAYS excluded from the predictions from the
+#' caretList of input models.  excluded_class_id for predict.caretStack is for the final ensemble model.
+#' So different classes could be excluded from the caretList models and the final ensemble model.
 #' @param verbose a logical indicating whether to print progress
-#' @param type the type of prediction to return.  "raw" or "prob", as with caret.
-#' @param ... arguments to pass to \code{\link[caret]{predict.train}}.
+#' @param ... arguments to pass to \code{\link[caret]{predict.train}} for the ensemble model.
+#' Do not specify type here. For classification, type will always be prob, and for regression, type will always be raw.
+#' @return a data.table of predictions
 #' @export
 #' @details Prediction weights are defined as variable importance in the stacked
 #' caret model. This is not available for all cases such as where the library
@@ -146,8 +151,8 @@ predict.caretStack <- function(
     se = FALSE,
     level = 0.95,
     return_weights = FALSE,
+    excluded_class_id = 0L,
     verbose = FALSE,
-    type = "raw",
     ...) {
   # Check if the object is a caretStack
   stopifnot(is(object$models, "caretList"))
@@ -161,63 +166,59 @@ predict.caretStack <- function(
     warning("No excluded_class_id set.  Setting to 1L.")
   }
 
-  # Predict: TODO: JUST USE caretPredict
-  if (is.null(newdata)) {
-    meta_preds <- predict(object$ens_model, newdata = newdata, type = type, ...)
-  } else {
+  # If we're predicting on new data, or we need standard errors, we need predictions from the submodels
+  # Note that if se==TRUE and newdata is NULL, we will be returning STACKED predicitons
+  if (se || !is.null(newdata)) {
     preds <- predict(
       object$models,
       newdata = newdata,
       verbose = verbose,
       excluded_class_id = object[["excluded_class_id"]]
     )
-    meta_preds <- predict(object$ens_model, newdata = preds, type = type, ...)
-  }
-
-  # TODO REFACTOR AND CLEANUP
-  if (se || return_weights) {
-    imp <- varImp(object$ens_model)$importance
-    model_weights <- as.list(as.data.frame(imp))
-    model_methods <- colnames(preds) # TODO FIX FOR CASE WHERE NEWDATA IS NULL
-    model_weights <- lapply(model_weights, function(class_weights) {
-      # ensure that we have a numeric vector
-      class_weights <- ifelse(is.finite(class_weights), class_weights, 0L)
-      # normalize weights
-      class_weights <- class_weights / sum(class_weights)
-      names(class_weights) <- row.names(imp)
-      # set 0 weights for methods that are not present in varImp
-      for (m in setdiff(model_methods, names(class_weights))) {
-        class_weights[m] <- 0L
-      }
-      class_weights
-    })
-  }
-
-  # TODO REFACTOR AND CLEANUP
-  if (se) {
-    if (!inherits(meta_preds, "numeric") || is.null(model_weights$Overall)) {
-      message("Standard errors not available.")
-      out <- meta_preds
-    } else {
-      model_methods <- colnames(preds)
-      overall_weights <- model_weights$Overall[model_methods]
-
-      # Use overall weights to calculate standard error in regression estimations
-      std_error <- apply(preds, 1L, wtd.sd, w = overall_weights, na.rm = TRUE)
-      std_error <- qnorm(level) * std_error
-      out <- data.frame(
-        fit = meta_preds,
-        lwr = meta_preds - std_error,
-        upr = meta_preds + std_error
-      )
+    if (!is.null(newdata)) {
+      newdata <- preds
     }
-  } else {
-    out <- meta_preds
+  }
+
+  # Now predict on the stack
+  # If newdata is NULL, this will be stacked predictions
+  # If newdata is present, this will be predictions on the preds,
+  # which will be the caretList predictions on the newdata.
+  meta_preds <- caretPredict(object$ens_model, newdata = newdata, excluded_class_id = excluded_class_id, ...)
+  out <- meta_preds
+
+  # Calculate the model importances if we need them
+  # For multiclass, this weights all classes evenly, which is... fine for now
+  # In the future we could do SE by class, but that seems overcomplicated for now
+  # As it is, this is pretty made up
+  if (se || return_weights) {
+    imp <- as.matrix(varImp(object$ens_model)$importance)
+    imp_names <- rownames(imp)
+    imp <- apply(imp, 2L, function(x) x / sum(x))
+    row.names(imp) <- imp_names
+    imp <- rowMeans(imp)
+    stopifnot(
+      length(imp) == ncol(preds),
+      names(imp) %in% names(preds),
+      names(preds) %in% names(imp)
+    )
+  }
+
+  # Calculate SEs if we need them
+  if (se) {
+    std_error <- data.table::copy(preds)
+    data.table::setcolorder(std_error, names(imp))
+    std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
+    std_error <- qnorm(level) * std_error
+    out <- data.table::data.table(
+      fit = meta_preds,
+      lwr = meta_preds - std_error,
+      upr = meta_preds + std_error
+    )
   }
   if (return_weights) {
-    attr(out, "weights") <- model_weights
+    attr(out, "weights") <- imp
   }
-
   out
 }
 

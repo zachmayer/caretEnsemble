@@ -10,8 +10,8 @@
   se = FALSE,
   level = 0.95,
   return_weights = FALSE,
+  excluded_class_id = 0L,
   verbose = FALSE,
-  type = "raw",
   ...
 )
 }
@@ -27,11 +27,18 @@
 \item{return_weights}{a logical indicating whether prediction weights for each model
 should be returned}
 
+\item{excluded_class_id}{Which class to exclude from predictions.  Note that if the caretStack
+was trained with an excluded_class_id, that class is ALWAYS excluded from the predictions from the
+caretList of input models.  excluded_class_id for predict.caretStack is for the final ensemble model.
+So different classes could be excluded from the caretList models and the final ensemble model.}
+
 \item{verbose}{a logical indicating whether to print progress}
 
-\item{type}{the type of prediction to return.  "raw" or "prob", as with caret.}
-
-\item{...}{arguments to pass to \code{\link[caret]{predict.train}}.}
+\item{...}{arguments to pass to \code{\link[caret]{predict.train}} for the ensemble model.
+Do not specify type here. For classification, type will always be prob, and for regression, type will always be raw.}
+}
+\value{
+a data.table of predictions
 }
 \description{
 Make predictions from a caretStack. This function passes the data to each function in

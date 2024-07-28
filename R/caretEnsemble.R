@@ -147,10 +147,12 @@ summary.caretEnsemble <- function(object, ...) {
 varImpDataTable <- function(x, model_name, ...) {
   imp <- caret::varImp(x, ...)
   imp <- imp[["importance"]]
+  # Normalize to sum to 1, by class or overall
+  imp_by_class <- data.table::as.data.table(lapply(imp, function(x) x / sum(x)))
   imp <- data.table::data.table(
     model_name = model_name,
     var = trimws(gsub("[`()]", "", row.names(imp)), which = "both"),
-    imp = imp[["Overall"]] / sum(imp[["Overall"]])
+    imp_by_class
   )
   imp
 }
