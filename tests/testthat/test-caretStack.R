@@ -313,3 +313,61 @@ test_that("predict.caretStack works if excluded_class_id is not set", {
   expect_equal(ncol(pred), 2L)
   expect_named(pred, c("No", "Yes"))
 })
+
+context("Edge cases")
+
+test_that("caretStack coerces lists to caretLists", {
+  model_list <- models.reg
+  class(model_list) <- "list"
+  names(model_list) <- NULL
+  expect_warning(
+    {
+      ens <- caretStack(model_list, trControl = trainControl(number = 2L))
+    },
+    "Attempting to coerce all.models to a caretList."
+  )
+  expect_s3_class(ens, "caretStack")
+  expect_s3_class(ens$models, "caretList")
+  expect_named(ens$models, names(models.reg))
+})
+
+test_that("caretStack fails if new_X is NULL and newY is not and vice versa", {
+  err <- "Both new_X and new_y must be NULL, or neither."
+  expect_error(caretStack(models.reg, new_X = NULL, new_y = Y.reg), err)
+  expect_error(caretStack(models.reg, new_X = X.reg, new_y = NULL), err)
+})
+
+test_that("caretStack works if both new_X and new_Y are supplied", {
+  set.seed(42L)
+  N <- 50L
+  idx <- sample.int(nrow(X.reg, N))
+  stack_class <- caretStack(models.class, new_X = X.class[idx, ], new_y = Y.class[idx], method = "rpart")
+  stack_reg <- caretStack(models.reg, new_X = X.reg[idx, ], new_y = Y.reg[idx], method = "glm")
+
+  expect_s3_class(stack_class, "caretStack")
+  expect_s3_class(stack_reg, "caretStack")
+
+  pred_class_stack <- predict(stack_class, type = "prob")
+  stack_reg_stack <- predict(models.reg)
+
+  expect.is(pred_class_stack, "data.table")
+  expect.is(stack_reg_stack, "data.table")
+
+  expect_equal(nrow(pred_class_stack), N) # TODO: FIX THESE
+  expect_equal(nrow(stack_reg_stack), N) # TODO: FIX THESE
+
+  expect_equal(nrow(pred_class_stack), 2L) # TODO: FIX THESE
+  expect_equal(nrow(stack_reg_stack), 1L) # TODO: FIX THESE
+
+  pred_class <- predict(stack_class, new_X = X.class, type = "prob")
+  pred_reg <- predict(stack_reg, new_X = X.reg)
+
+  expect.is(pred_class, "data.table")
+  expect.is(pred_reg, "data.table")
+
+  expect_equal(nrow(pred_class), 150L)
+  expect_equal(nrow(pred_reg), 150L)
+
+  expect_equal(ncol(pred_class), 2L)
+  expect_equal(ncol(pred_reg), 1L)
+})

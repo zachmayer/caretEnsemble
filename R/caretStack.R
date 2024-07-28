@@ -40,6 +40,7 @@
 #' }
 caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id = 1L, ...) {
   if (!is.caretList(all.models)) {
+    warning("Attempting to coerce all.models to a caretList.")
     all.models <- as.caretList(all.models)
   }
 
