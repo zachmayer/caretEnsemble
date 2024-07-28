@@ -340,7 +340,7 @@ test_that("caretStack fails if new_X is NULL and newY is not and vice versa", {
 test_that("caretStack works if both new_X and new_Y are supplied", {
   set.seed(42L)
   N <- 50L
-  idx <- sample.int(nrow(X.reg, N))
+  idx <- sample.int(nrow(X.reg), N)
   stack_class <- caretStack(models.class, new_X = X.class[idx, ], new_y = Y.class[idx], method = "rpart")
   stack_reg <- caretStack(models.reg, new_X = X.reg[idx, ], new_y = Y.reg[idx], method = "glm")
 

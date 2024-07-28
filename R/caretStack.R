@@ -48,6 +48,13 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
   if (is.null(new_X) != is.null(new_y)) {
     stop("Both new_X and new_y must be NULL, or neither.")
   }
+  if (!is.null(new_X)) {
+    stopifnot(
+      is.data.frame(new_X) || is.matrix(new_X),
+      is.numeric(new_y) || is.factor(new_y) || is.character(new_y),
+      nrow(new_X) == length(new_y)
+    )
+  }
 
   # Validators
   excluded_class_id <- validateExcludedClass(excluded_class_id)
@@ -59,6 +66,9 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
     length(dim(preds)) == 2L,
     !is.null(names(preds))
   )
+  if (!is.null(new_X)) {
+    stopifnot(nrow(preds) == nrow(new_X))
+  }
 
   # TODO: check for names(preds) is the same as names(all.models)
   # if regression or binary class with excluded_class_id=1L
@@ -71,7 +81,7 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
     obs <- obs[, list(obs = obs[1L]), by = "rowIndex"]
     obs <- obs[["obs"]]
   }
-  stopifnot(nrow(obs) == nrow(preds))
+  stopifnot(nrow(preds) == length(obs))
   model <- train(preds, obs, ...)
 
   # Return final model
@@ -151,18 +161,24 @@ predict.caretStack <- function(
     warning("No excluded_class_id set.  Setting to 1L.")
   }
 
-  preds <- predict(
-    object$models,
-    newdata = newdata,
-    verbose = verbose,
-    excluded_class_id = object[["excluded_class_id"]]
-  )
-  meta_preds <- predict(object$ens_model, newdata = preds, type = type, ...)
+  # Predict: TODO: JUST USE caretPredict
+  if (is.null(newdata)) {
+    meta_preds <- predict(object$ens_model, newdata = newdata, type = type, ...)
+  } else {
+    preds <- predict(
+      object$models,
+      newdata = newdata,
+      verbose = verbose,
+      excluded_class_id = object[["excluded_class_id"]]
+    )
+    meta_preds <- predict(object$ens_model, newdata = preds, type = type, ...)
+  }
 
+  # TODO REFACTOR AND CLEANUP
   if (se || return_weights) {
     imp <- varImp(object$ens_model)$importance
     model_weights <- as.list(as.data.frame(imp))
-    model_methods <- colnames(preds)
+    model_methods <- colnames(preds) # TODO FIX FOR CASE WHERE NEWDATA IS NULL
     model_weights <- lapply(model_weights, function(class_weights) {
       # ensure that we have a numeric vector
       class_weights <- ifelse(is.finite(class_weights), class_weights, 0L)
@@ -177,6 +193,7 @@ predict.caretStack <- function(
     })
   }
 
+  # TODO REFACTOR AND CLEANUP
   if (se) {
     if (!inherits(meta_preds, "numeric") || is.null(model_weights$Overall)) {
       message("Standard errors not available.")
