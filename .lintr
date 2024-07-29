@@ -14,13 +14,14 @@ linters: linters_with_tags(
         "robustness", 
         "style", 
         "tidy_design"
-    ),
+    ),  # TODO: add todo linter
     return_linter(),
     object_overwrite_linter(),
     object_length_linter(),
     line_length_linter(120),
     object_usage_linter(),
     object_name_linter(),
+    cyclocomp_linter(17L),  # predict.caretStack() has a cyclomatic complexity of 17
     todo_comment_linter = NULL, # TODO refactor
     implicit_assignment_linter = NULL, # TODO refactor
     expect_identical_linter = NULL, # TODO big refactor

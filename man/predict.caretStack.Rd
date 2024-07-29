@@ -11,6 +11,7 @@
   level = 0.95,
   return_weights = FALSE,
   excluded_class_id = 0L,
+  return_class_only = FALSE,
   verbose = FALSE,
   ...
 )
@@ -31,6 +32,8 @@ should be returned}
 was trained with an excluded_class_id, that class is ALWAYS excluded from the predictions from the
 caretList of input models.  excluded_class_id for predict.caretStack is for the final ensemble model.
 So different classes could be excluded from the caretList models and the final ensemble model.}
+
+\item{return_class_only}{a logical indicating whether to return only the class predictions as a factor.}
 
 \item{verbose}{a logical indicating whether to print progress}
 

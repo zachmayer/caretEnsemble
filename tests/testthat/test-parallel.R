@@ -16,13 +16,13 @@ test_that("predict.caretEnsemble works in parallel", {
   # Basic
   pred_reg <- predict(ens_reg, newdata = X.reg)
   pred_reg2 <- predict(ens_reg, newdata = X_reg_big)
-  pred_reg2 <- pred_reg2[1:nrow(pred_reg)]
+  pred_reg2 <- pred_reg2[seq_len(nrow(pred_reg))]
   expect_equivalent(pred_reg, pred_reg2)
 
   # Return se
   pred_reg <- predict(ens_reg, newdata = X.reg, se = TRUE)
   pred_reg2 <- predict(ens_reg, newdata = X_reg_big, se = TRUE)
-  pred_reg2 <- pred_reg2[1:nrow(pred_reg)]
+  pred_reg2 <- pred_reg2[seq_len(nrow(pred_reg))]
   expect_equivalent(pred_reg, pred_reg2)
 
   # Return weights
@@ -31,6 +31,6 @@ test_that("predict.caretEnsemble works in parallel", {
     ens_reg,
     newdata = X_reg_big, se = TRUE, return_weights = TRUE
   )
-  pred_reg2 <- pred_reg2[1:nrow(pred_reg)]
+  pred_reg2 <- pred_reg2[seq_len(nrow(pred_reg))]
   expect_equivalent(pred_reg, pred_reg2)
 })

@@ -156,8 +156,11 @@ predict.caretStack <- function(
     return_class_only = FALSE,
     verbose = FALSE,
     ...) {
-  # Check if the object is a caretStack
-  stopifnot(is(object$models, "caretList"))
+  # Check the object
+  stopifnot(
+    is(object$models, "caretList"),
+    is(object$ens_model, "train")
+  )
 
   # Extract model types
   model_type <- object$ens_model$modelType
@@ -186,8 +189,7 @@ predict.caretStack <- function(
   if (return_class_only) {
     stopifnot(
       model_type == "Classification",
-      !se,
-      !return_weights
+      !se
     )
     excluded_class_id <- 0L
   }
@@ -203,10 +205,10 @@ predict.caretStack <- function(
   # TODO: TESTS FOR THIS
   # TODO: HANDLE ORDINAL
   if (return_class_only) {
-    class_id <- apply(out, 1L, which.max)]
+    class_id <- apply(out, 1L, which.max)
     class_levels <- levels(object$ens_model)
-    out <- factor(class_levels[class_id], levels)
-  } 
+    out <- factor(class_levels[class_id], class_levels)
+  }
 
   # Calculate the model importances if we need them
   # For multiclass, this weights all classes evenly, which is... fine for now
