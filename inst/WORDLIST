@@ -1,6 +1,7 @@
 CMD
 Caruana
 CodeFactor
+classProbs
 Deane
 Ksikes
 Makefile
@@ -13,6 +14,7 @@ autoplot
 caretList
 caretModelSpec
 caretStack
+coercible
 dev
 devtools
 dotplot
@@ -28,6 +30,7 @@ modelInfo
 modelLookup
 mtry
 multiclass
+newdata
 nnet
 observeds
 optimizers

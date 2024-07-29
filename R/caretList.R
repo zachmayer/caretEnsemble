@@ -41,6 +41,22 @@ tuneCheck <- function(x) {
   x
 }
 
+#' @title Validate a custom caret model info list
+#' @description Currently, this only ensures that all model info lists
+#' were also assigned a "method" attribute for consistency with usage
+#' of non-custom models
+#' @param x a model info list (e.g. \code{getModelInfo("rf", regex=F)\[[1]]})
+#' @return validated model info list (i.e. x)
+checkCustomModel <- function(x) {
+  if (is.null(x$method)) {
+    stop(paste(
+      "Custom models must be defined with a \"method\" attribute containing the name",
+      "by which that model should be referenced.  Example: my.glm.model$method <- \"custom_glm\""
+    ))
+  }
+  x
+}
+
 #' @title Check that the methods supplied by the user are valid caret methods
 #' @description This function uses modelLookup from caret to ensure the list of
 #' methods supplied by the user are all models caret can fit.
@@ -276,7 +292,7 @@ as.caretList <- function(object) {
   if (is.null(object)) {
     stop("object is null")
   }
-  UseMethod("as.caretList")
+  UseMethod("as.caretList", object)
 }
 
 #' @title Convert object to caretList object - For Future Use
@@ -345,50 +361,60 @@ as.caretList.list <- function(object) {
 #' @importFrom data.table as.data.table setnames
 #' @export
 #' @method predict caretList
-predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 0L, ...) {
+predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...) {
+  stopifnot(is.caretList(object))
+
   # Decided whether to be verbose or quiet
   apply_fun <- lapply
   if (verbose) {
     apply_fun <- pbapply::pblapply
   }
 
-  # Check data
-  if (is.null(newdata)) {
-    train_data_nulls <- sapply((object), function(x) is.null(x[["trainingData"]]))
-    if (any(train_data_nulls)) {
-      stop("newdata is NULL and trainingData is NULL for some models. Use newdata or retrain with returnData=TRUE.")
+  # Loop over the models and make predictions
+  preds <- apply_fun(object, caretPredict, newdata = newdata, excluded_class_id = excluded_class_id, ...)
+  stopifnot(
+    is.list(preds),
+    length(preds) >= 1L,
+    length(preds) == length(object),
+    sapply(preds, data.table::is.data.table)
+  )
+
+  # All preds must have the same number of rows.
+  # We allow different columns, and even different column names!
+  # E.g. you could mix classification and regression models
+  # caretPredict will aggregate multiple predictions for the same row (e.g. repeated CV)
+  # caretPredict will make sure the rows are sorted by the original row order
+  pred_rows <- sapply(preds, nrow)
+  stopifnot(pred_rows == pred_rows[1L])
+
+  # Name the predictions
+  for (i in seq_along(preds)) {
+    p <- preds[[i]]
+    model_name <- names(object)[i]
+    if (ncol(p) == 1L) {
+      # For a single column, name it after the model (e.g. regression or binary with an excluded class)
+      setnames(p, names(p), model_name)
+    } else {
+      # For multiple columns, name them including the model (e.g. multiclass)
+      setnames(p, names(p), paste(model_name, names(p), sep = "_"))
     }
   }
+  preds <- unname(preds)
 
-  # Loop over the models and make predictions
-  preds <- apply_fun(object, function(x) {
-    type <- x$modelType
-
-    # predict for class
-    if (type == "Classification") {
-      # use caret::levels.train to extract the levels of the target from each model
-      # and then drop the excluded class if needed
-      pred <- caret::predict.train(x, type = "prob", newdata = newdata, ...)
-      pred <- data.table::as.data.table(pred)
-      pred <- dropExcludedClass(pred, all_classes = levels(x), excluded_class_id = excluded_class_id)
-
-      # predict for reg
-    } else if (type == "Regression") {
-      pred <- caret::predict.train(x, type = "raw", newdata = newdata)
-      pred <- data.table::as.data.table(pred)
-
-      # Error
-    } else {
-      stop(paste("Unknown model type:", type))
-    }
-
-    # Return
-    pred
-  })
-
-  # Turn a list of data tables into one data.table
-  # Note that data.table will name the columns based off the names of the list and the names of each data.table
+  # Combine the predictions into a single data.table
   preds <- data.table::as.data.table(preds)
+
+  stopifnot(
+    !is.null(names(preds)),
+    length(dim(preds)) == 2L
+  )
+  all_regression <- all(sapply(object, function(x) x$modelType == "Regression"))
+  if (all_regression) {
+    stopifnot(
+      length(names(preds)) == length(object),
+      names(preds) == names(object)
+    )
+  }
 
   # Return
   preds

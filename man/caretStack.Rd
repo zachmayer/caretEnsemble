@@ -4,25 +4,40 @@
 \alias{caretStack}
 \title{Combine several predictive models via stacking}
 \usage{
-caretStack(all.models, excluded_class_id = 1L, ...)
+caretStack(all.models, new_X = NULL, new_y = NULL, excluded_class_id = 1L, ...)
 }
 \arguments{
-\item{all.models}{a list of caret models to ensemble.}
+\item{all.models}{a caretList, or an object coercible to a caretList (such as a list of train objects)}
 
-\item{excluded_class_id}{The integer level to exclude from binary classification or multiclass problems.
+\item{new_X}{Data to predict on for the caretList, prior to training the stack (for transfer learning).
+if NULL, the stacked predictions will be extracted from the caretList models.}
+
+\item{new_y}{The outcome variable to predict on for the caretList, prior to training the stack
+(for transfer learning).
+If NULL, will use the observed levels from the first model in the caret stack
 If 0, will include all levels.}
 
-\item{...}{additional arguments to pass to the optimization function}
+\item{excluded_class_id}{The integer level to exclude from binary classification or multiclass problems.}
+
+\item{...}{additional arguments to pass to the stacking model}
 }
 \value{
 S3 caretStack object
 }
 \description{
-Find a good linear combination of several classification or regression models,
-using either linear regression, elastic net regression, or greedy optimization.
+Stack several \code{\link[caret]{train}} models using a \code{\link[caret]{train}} model.
 }
 \details{
-Check the models, and make a matrix of obs and preds
+Uses either transfer learning or stacking to stack models.  Assumes that all models were trained on
+the same number of rows of data, with the same target values.  The features, cross-validation strategies,
+and model types (class vs reg) may vary however.  If your stack of models were trained with different number of
+rows, please provide new_X and new_y so the models can predict on a common set of data for stacking.
+
+If your models were trained on different columns, you should use stacking.
+
+If you have both differing rows and columns in your model set, you are out of luck.  You need at least
+a common set of rows during training (for stacking) or a common set of columns at
+inference time for transfer learning.
 }
 \examples{
 \dontrun{

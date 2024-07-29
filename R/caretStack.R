@@ -1,14 +1,27 @@
 #' @title Combine several predictive models via stacking
 #'
-#' @description Find a good linear combination of several classification or regression models,
-#' using either linear regression, elastic net regression, or greedy optimization.
+#' @description Stack several \code{\link[caret]{train}} models using a \code{\link[caret]{train}} model.
 #'
-#' @details Check the models, and make a matrix of obs and preds
+#' @details Uses either transfer learning or stacking to stack models.  Assumes that all models were trained on
+#' the same number of rows of data, with the same target values.  The features, cross-validation strategies,
+#' and model types (class vs reg) may vary however.  If your stack of models were trained with different number of
+#' rows, please provide new_X and new_y so the models can predict on a common set of data for stacking.
 #'
-#' @param all.models a list of caret models to ensemble.
+#' If your models were trained on different columns, you should use stacking.
+#'
+#' If you have both differing rows and columns in your model set, you are out of luck.  You need at least
+#' a common set of rows during training (for stacking) or a common set of columns at
+#' inference time for transfer learning.
+#'
+#' @param all.models a caretList, or an object coercible to a caretList (such as a list of train objects)
+#' @param new_X Data to predict on for the caretList, prior to training the stack (for transfer learning).
+#' if NULL, the stacked predictions will be extracted from the caretList models.
 #' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
+#' @param new_y The outcome variable to predict on for the caretList, prior to training the stack
+#' (for transfer learning).
+#' If NULL, will use the observed levels from the first model in the caret stack
 #' If 0, will include all levels.
-#' @param ... additional arguments to pass to the optimization function
+#' @param ... additional arguments to pass to the stacking model
 #' @return S3 caretStack object
 #' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).
 #'   Ensemble Selection from Libraries of Models.
@@ -25,21 +38,67 @@
 #' )
 #' caretStack(models, method = "glm")
 #' }
-caretStack <- function(all.models, excluded_class_id = 1L, ...) {
+caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id = 1L, ...) {
+  if (!is.caretList(all.models)) {
+    warning("Attempting to coerce all.models to a caretList.")
+    all.models <- as.caretList(all.models)
+  }
+
+  # Make sure either both or neither new_X and new_y are NULL
+  if (is.null(new_X) != is.null(new_y)) {
+    stop("Both new_X and new_y must be NULL, or neither.")
+  }
+  if (!is.null(new_X)) {
+    stopifnot(
+      is.data.frame(new_X) || is.matrix(new_X),
+      is.numeric(new_y) || is.factor(new_y) || is.character(new_y),
+      nrow(new_X) == length(new_y)
+    )
+  }
+
   # Validators
   excluded_class_id <- validateExcludedClass(excluded_class_id)
-  check_caretList_classes(all.models)
-  check_caretList_model_types(all.models)
 
-  # Extract each model's cross-validated predictions and check them
-  predobs <- extractBestPredsAndObs(all.models)
+  # Predict for each model.  If new_X is NULL, will return stacked predictions
+  preds <- predict.caretList(all.models, newdata = new_X, excluded_class_id = excluded_class_id)
+  if (!is.null(new_X)) {
+    stopifnot(nrow(preds) == nrow(new_X))
+  }
 
   # Build a caret model
-  model <- train(predobs$preds, predobs$obs, ...)
+  obs <- new_y
+  if (is.null(obs)) {
+    obs <- data.table::data.table(all.models[[1L]]$pred)
+    data.table::setorderv(obs, "rowIndex")
+    obs <- obs[, list(obs = obs[1L]), by = "rowIndex"]
+    obs <- obs[["obs"]]
+  }
+  stopifnot(nrow(preds) == length(obs))
+  model <- train(preds, obs, ...)
 
   # Return final model
   out <- list(models = all.models, ens_model = model, error = model$results, excluded_class_id = excluded_class_id)
   class(out) <- "caretStack"
+  out
+}
+
+#' @title Calculate a weighted standard deviation
+#' @description Used to weight deviations among ensembled model predictions
+#'
+#' @param x a numeric vector
+#' @param w a vector of weights equal to length of x
+#' @param na.rm a logical indicating how to handle missing values, default = TRUE
+#' @export
+# https://stats.stackexchange.com/a/61285
+wtd.sd <- function(x, w, na.rm = FALSE) {
+  stopifnot(is.numeric(x), is.numeric(w))
+
+  xWbar <- weighted.mean(x, w, na.rm = na.rm)
+  w <- w / mean(w, na.rm = na.rm)
+
+  variance <- sum((w * (x - xWbar)^2L) / (sum(w, na.rm = na.rm) - 1L), na.rm = na.rm)
+  out <- sqrt(variance)
+
   out
 }
 
@@ -53,9 +112,19 @@ caretStack <- function(all.models, excluded_class_id = 1L, ...) {
 #' @param level tolerance/confidence level
 #' @param return_weights a logical indicating whether prediction weights for each model
 #' should be returned
+#' @param excluded_class_id Which class to exclude from predictions.  Note that if the caretStack
+#' was trained with an excluded_class_id, that class is ALWAYS excluded from the predictions from the
+#' caretList of input models.  excluded_class_id for predict.caretStack is for the final ensemble model.
+#' So different classes could be excluded from the caretList models and the final ensemble model.
+#' @param return_class_only a logical indicating whether to return only the class predictions as a factor.
+#' If TRUE, the return will be a factor rather than a data.table.  This is a convenience function,
+#' and should not be widely used.  For example if you have a downstream process that consumes
+#' the output of the model, you should have that process consume probabilities for each class.
+#' This will make it easier to change prediction probability thresholds if needed in the future.
 #' @param verbose a logical indicating whether to print progress
-#' @param type the type of prediction to return.  "raw" or "prob", as with caret.
-#' @param ... arguments to pass to \code{\link[caret]{predict.train}}.
+#' @param ... arguments to pass to \code{\link[caret]{predict.train}} for the ensemble model.
+#' Do not specify type here. For classification, type will always be prob, and for regression, type will always be raw.
+#' @return a data.table of predictions
 #' @export
 #' @details Prediction weights are defined as variable importance in the stacked
 #' caret model. This is not available for all cases such as where the library
@@ -79,14 +148,18 @@ predict.caretStack <- function(
     se = FALSE,
     level = 0.95,
     return_weights = FALSE,
+    excluded_class_id = 0L,
+    return_class_only = FALSE,
     verbose = FALSE,
-    type = "raw",
     ...) {
-  # Check if the object is a caretStack
-  stopifnot(is(object$models, "caretList"))
+  # Check the object
+  stopifnot(
+    is(object$models, "caretList"),
+    is(object$ens_model, "train")
+  )
 
   # Extract model types
-  model_type <- extractModelType(object$models)
+  model_type <- object$ens_model$modelType
 
   # If the excluded class wasn't set at train time, set it
   if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
@@ -94,56 +167,82 @@ predict.caretStack <- function(
     warning("No excluded_class_id set.  Setting to 1L.")
   }
 
-  preds <- predict(
-    object$models,
-    newdata = newdata,
-    verbose = verbose,
-    excluded_class_id = object[["excluded_class_id"]]
-  )
-  meta_preds <- predict(object$ens_model, newdata = preds, type = type, ...)
-
-  if (se || return_weights) {
-    imp <- varImp(object$ens_model)$importance
-    model_weights <- as.list(as.data.frame(imp))
-    model_methods <- colnames(preds)
-    model_weights <- lapply(model_weights, function(class_weights) {
-      # ensure that we have a numeric vector
-      class_weights <- ifelse(is.finite(class_weights), class_weights, 0L)
-      # normalize weights
-      class_weights <- class_weights / sum(class_weights)
-      names(class_weights) <- row.names(imp)
-      # set 0 weights for methods that are not present in varImp
-      for (m in setdiff(model_methods, names(class_weights))) {
-        class_weights[m] <- 0L
-      }
-      class_weights
-    })
+  # If we're predicting on new data, or we need standard errors, we need predictions from the submodels
+  # Note that if se==TRUE and newdata is NULL, we will be returning STACKED predicitons
+  if (se || !is.null(newdata)) {
+    preds <- predict(
+      object$models,
+      newdata = newdata,
+      verbose = verbose,
+      excluded_class_id = object[["excluded_class_id"]]
+    )
+    if (!is.null(newdata)) {
+      newdata <- preds
+    }
   }
 
-  if (se) {
-    if (!inherits(meta_preds, "numeric") || is.null(model_weights$Overall)) {
-      message("Standard errors not available.")
-      out <- meta_preds
-    } else {
-      model_methods <- colnames(preds)
-      overall_weights <- model_weights$Overall[model_methods]
+  # Check return_class_only
+  if (return_class_only) {
+    stopifnot(
+      model_type == "Classification",
+      !se
+    )
+    excluded_class_id <- 0L
+  }
 
-      # Use overall weights to calculate standard error in regression estimations
-      std_error <- apply(preds, 1L, wtd.sd, w = overall_weights, na.rm = TRUE)
-      std_error <- qnorm(level) * std_error
-      out <- data.frame(
-        fit = meta_preds,
-        lwr = meta_preds - std_error,
-        upr = meta_preds + std_error
-      )
+  # Now predict on the stack
+  # If newdata is NULL, this will be stacked predictions
+  # If newdata is present, this will be predictions on the preds,
+  # which will be the caretList predictions on the newdata.
+  meta_preds <- caretPredict(object$ens_model, newdata = newdata, excluded_class_id = excluded_class_id, ...)
+  out <- meta_preds
+
+  # Map to class levels
+  # TODO: HANDLE ORDINAL and TESTS FOR THIS
+  if (return_class_only) {
+    class_id <- apply(out, 1L, which.max)
+    class_levels <- levels(object$ens_model)
+    out <- factor(class_levels[class_id], class_levels)
+  }
+
+  # Calculate the model importances if we need them
+  # For multiclass, this weights all classes evenly, which is... fine for now
+  # In the future we could do SE by class, but that seems overcomplicated for now
+  # As it is, this is pretty made up
+  if (se || return_weights) {
+    imp <- as.matrix(varImp(object$ens_model)$importance)
+    imp_names <- rownames(imp)
+    imp <- apply(imp, 2L, function(x) x / sum(x))
+    row.names(imp) <- imp_names
+    imp <- rowMeans(imp)
+    if (!all(
+      length(imp) == ncol(preds),
+      names(imp) %in% names(preds),
+      names(preds) %in% names(imp)
+    )) {
+      warning("Cannot calculate standard errors due to the preprocessing used in train")
+      se <- FALSE
     }
-  } else {
-    out <- meta_preds
+  }
+
+  # Calculate SEs if we need them
+  if (se) {
+    std_error <- data.table::copy(preds)
+    data.table::setcolorder(std_error, names(imp))
+    std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
+    std_error <- qnorm(level) * std_error
+    if (ncol(meta_preds) == 1L) {
+      meta_preds <- meta_preds[[1L]] # No names if one column (e.g. reg or binary with a dropped class)
+    }
+    out <- data.table::data.table(
+      fit = meta_preds,
+      lwr = meta_preds - std_error,
+      upr = meta_preds + std_error
+    )
   }
   if (return_weights) {
-    attr(out, "weights") <- model_weights
+    attr(out, "weights") <- imp
   }
-
   out
 }
 

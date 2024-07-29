@@ -65,11 +65,15 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
 
   # Create class and probability predictions, as well as class predictions
   # generated from probability predictions using a .5 cutoff
-  Y.pred <- predict(model.ens, newdata = X.test, type = "raw")
-  Y.prob <- predict(model.ens, newdata = X.test, type = "prob")
+  Y.pred <- predict(model.ens, newdata = X.test, return_class_only = TRUE)
+  Y.prob <- predict(model.ens, newdata = X.test, return_class_only = FALSE)
+  expect_length(Y.pred, nrow(X.test))
+  expect_identical(nrow(Y.prob), nrow(X.test))
+  expect_identical(ncol(Y.prob), length(Y.levels))
+
   Y.cutoff <- factor(
     ifelse(
-      Y.prob[, Y.levels[pos.level]] > 0.5,
+      Y.prob[[Y.levels[pos.level]]] > 0.5,
       Y.levels[pos.level],
       Y.levels[-pos.level]
     ),

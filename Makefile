@@ -1,9 +1,9 @@
 # Makefile for R project
 
-.PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check-cran fix-style lint spell clean
+.PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check-cran fix-style lint spell build-vignettes clean
 
 # Default target
-all: clean fix-style document install lint spell test check-cran coverage
+all: clean fix-style document install lint spell test build-vignettes check-cran coverage
 
 # Install dependencies
 install-deps:
@@ -88,6 +88,10 @@ spell:
 		}; \
 	"
 
+# Build vignettes
+build-vignettes:
+	Rscript -e "devtools::build_vignettes()"
+	
 # Clean up generated files
 clean:
 	rm -rf *.Rcheck
@@ -99,3 +103,5 @@ clean:
 	rm -f .Rhistory
 	rm -rf lib/
 	rm -f caretEnsemble_test_plots.png
+	Rscript -e "devtools::clean_vignettes()"
+	Rscript -e "devtools::clean_dll()"

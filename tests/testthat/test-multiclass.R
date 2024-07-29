@@ -23,11 +23,11 @@ test_that("We can predict with caretList and caretStack multiclass problems", {
 
   ens <- caretStack(model_list, method = "rpart")
 
-  p_raw <- predict(ens, newdata = iris[, -5L], type = "raw")
-  expect_is(p_raw, "factor")
-  expect_length(p_raw, nrow(iris))
+  p_raw <- predict(ens, newdata = iris[, -5L])
+  expect_s3_class(p_raw, "data.table")
+  expect_identical(nrow(p_raw), nrow(iris))
 
-  p <- predict(ens, newdata = iris[, -5L], type = "prob")
+  p <- predict(ens, newdata = iris[, -5L])
   expect_is(p, "data.frame")
   expect_equal(nrow(p), nrow(iris))
 })
@@ -55,13 +55,13 @@ test_that("Columns for caretList predictions are correct and ordered", {
   num_classes <- length(unique(iris$Species))
 
   # Check the number of rows and columns is correct
-  p <- predict(model_list, newdata = iris[, -5L])
+  p <- predict(model_list, newdata = iris[, -5L], excluded_class_id = 0L)
   expect_equal(dim(p), c(nrow(iris), num_methods * num_classes))
 
   methods <- names(model_list)
   classes <- levels(iris$Species)
   class_method_combinations <- expand.grid(classes, methods)
-  ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "."))
+  ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
 
   # Check the names of the columns are correct
   expect_true(all(colnames(p) %in% ordered_colnames))
@@ -83,7 +83,7 @@ test_that("Columns for caretStack are correct", {
     x = iris[, -5L],
     y = iris[, 5L],
     trControl = my_control,
-    methodList = c("glmnet", "rpart"),
+    methodList = "rpart",
     tuneList = list(
       nnet = caretModelSpec(method = "nnet", trace = FALSE)
     )
@@ -94,15 +94,15 @@ test_that("Columns for caretStack are correct", {
   num_classes <- length(unique(iris$Species))
 
   # Check the number of rows and columns is correct
-  p_raw <- predict(model_stack, newdata = iris[, -5L], type = "raw")
-  expect_length(p_raw, nrow(iris))
-  p_prob <- predict(model_stack, newdata = iris[, -5L], type = "prob")
+  p_raw <- predict(model_stack, newdata = iris[, -5L])
+  expect_identical(nrow(p_raw), nrow(iris))
+  p_prob <- predict(model_stack, newdata = iris[, -5L])
   expect_equal(dim(p_prob), c(nrow(iris), num_classes))
 
   classes <- levels(iris$Species)
 
   # Check that the columns are ordered correctly
-  expect_equal(colnames(p_prob), classes)
+  expect_named(p_prob, classes)
 })
 
 test_that("Periods are supported in method and class names in caretList and caretStack", {
@@ -140,17 +140,19 @@ test_that("Periods are supported in method and class names in caretList and care
   methods <- names(model_list)
   classes <- levels(iris[, 5L])
 
-  p <- predict(model_list, newdata = iris[, -5L])
+  p <- predict(model_list, newdata = iris[, -5L], excluded_class_id = 0L)
 
   class_method_combinations <- expand.grid(classes, methods)
-  ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "."))
+  ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
   expect_equal(colnames(p), ordered_colnames)
 
-  model_stack <- caretStack(model_list, method = "knn")
-  p_prob <- predict(model_stack, newdata = iris[, -5L], type = "prob")
+  model_stack <- caretStack(model_list, method = "knn", trControl = trainControl(
+    savePredictions = "final", classProbs = TRUE
+  ))
+  p_prob <- predict(model_stack, newdata = iris[, -5L])
   expect_equal(colnames(p_prob), classes)
-  p_raw <- predict(model_stack, newdata = iris[, -5L], type = "raw")
-  expect_equal(levels(p_raw), classes)
+  p_raw <- predict(model_stack, newdata = iris[, -5L])
+  expect_named(p_raw, classes)
 })
 
 test_that("We can make a confusion matrix", {
@@ -182,8 +184,10 @@ test_that("We can make a confusion matrix", {
   model_stack <- caretStack(model_list, method = "knn")
 
   # Make a confusion matrix
-  predictions <- predict(model_stack, newdata = test_data[, -5L], type = "raw")
-  cm <- confusionMatrix(predictions, test_data[, 5L])
+  predictions <- predict(model_stack, newdata = test_data[, -5L])
+  classes <- apply(predictions, 1L, function(x) names(x)[which.max(x)])
+  classes <- factor(classes, levels = levels(test_data[, 5L]))
+  cm <- confusionMatrix(classes, test_data[, 5L])
   expect_is(cm, "confusionMatrix")
 
   # Check dims
@@ -245,7 +249,7 @@ test_that("caretList and caretStack handle imbalanced multiclass data", {
   expect_s3_class(stack, "caretStack")
 
   preds <- predict(stack, newdata = X)
-  expect_true(all(levels(y) %in% levels(preds)))
+  expect_named(preds, levels(y))
 })
 
 test_that("caretList and caretStack handle a large number of classes", {
@@ -275,7 +279,7 @@ test_that("caretList and caretStack handle a large number of classes", {
   stack <- caretStack(model_list, method = "rpart")
   expect_s3_class(stack, "caretStack")
 
-  preds <- predict(stack, newdata = X, type = "prob")
+  preds <- predict(stack, newdata = X)
   expect_equal(ncol(preds), nlevels(y))
 })
 
@@ -305,8 +309,9 @@ test_that("caretList and caretStack handle ordinal multiclass data", {
   expect_s3_class(stack, "caretStack")
 
   preds <- predict(stack, newdata = Boston)
-  expect_s3_class(preds, "ordered")
-  expect_s3_class(preds, "factor")
+  expect_s3_class(preds, "data.table")
+  expect_named(preds, levels(Boston$rad))
+  expect_equal(rowSums(preds), rep(1.0, nrow(Boston)), tol = 0.0001)
 })
 
 test_that("caretList and caretStack produce consistent probability predictions", {
@@ -330,7 +335,7 @@ test_that("caretList and caretStack produce consistent probability predictions",
 
   stack <- caretStack(model_list, method = "rpart")
 
-  prob_preds <- predict(stack, newdata = iris[, -5L], type = "prob")
+  prob_preds <- predict(stack, newdata = iris[, -5L])
   expect_equal(nrow(prob_preds), nrow(iris))
   expect_equal(ncol(prob_preds), nlevels(iris$Species))
   expect_true(all(rowSums(prob_preds) >= 0.99))

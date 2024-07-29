@@ -205,7 +205,7 @@ test_that("as.caretList fails on non-list", {
 })
 
 test_that("predict.caretList works for classification and regression", {
-  class_preds <- predict(models.class, newdata = X.class)
+  class_preds <- predict(models.class, newdata = X.class, excluded_class_id = 0L)
   reg_preds <- predict(models.reg, newdata = X.reg)
 
   expect_is(class_preds, "data.table")
@@ -217,7 +217,7 @@ test_that("predict.caretList works for classification and regression", {
 })
 
 test_that("predict.caretList handles type='prob' for classification", {
-  class_probs <- predict(models.class, newdata = X.class)
+  class_probs <- predict(models.class, newdata = X.class, excluded_class_id = 0L)
   expect_is(class_probs, "data.table")
   expect_equal(nrow(class_probs), nrow(X.class))
   expect_equal(ncol(class_probs), length(models.class) * nlevels(Y.class))
