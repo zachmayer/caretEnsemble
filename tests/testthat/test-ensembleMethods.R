@@ -183,9 +183,7 @@ test_that("Do model results in caretEnsemble match component models - regression
   expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = TRUE))
 })
 
-# Reg tests
-test_that("Prediction options are respected in regression and classification", {
-  skip_on_cran()
+test_that("Prediction options are respected in regression", {
   ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
   tests <- expand.grid(se = 0L:1L, return_weights = 0L:1L)
   tests <- data.frame(lapply(tests, as.logical))
@@ -202,13 +200,14 @@ test_that("Prediction options are respected in regression and classification", {
     expect_s3_class(p, "data.table")
 
     if (tests[i, "return_weights"]) {
-      expect_is(attr(p, which = "weights")$Overall, "numeric")
+      expect_is(attr(p, which = "weights"), "numeric")
     } else {
       expect_null(attr(p, which = "weights"))
     }
   }
+})
 
-  # Class tests
+test_that("Prediction options are respected in Classification", {
   ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   tests <- expand.grid(se = 0L:1L, return_weights = 0L:1L)
   tests <- data.frame(lapply(tests, as.logical))

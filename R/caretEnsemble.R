@@ -176,11 +176,13 @@ varImp.caretEnsemble <- function(object, ...) {
   # TODO: varImp.caretList should be a separate function
   model_imp <- mapply(varImpDataTable, object$models, model_names, SIMPLIFY = FALSE) # TODO , MoreArgs = list(...)
   model_imp <- data.table::rbindlist(model_imp, fill = TRUE, use.names = TRUE)
-  model_imp <- data.table::dcast.data.table(model_imp, var ~ model_name, value.var = "imp", fill = 0.0)
+  model_imp <- data.table::dcast.data.table(model_imp, var ~ model_name, value.var = "Overall", fill = 0.0)
+  # TODO: multiclass
 
   # Overall importance
   ens_imp <- varImpDataTable(object$ens_model, "ensemble")
-  ens_imp <- data.table::dcast.data.table(ens_imp, model_name ~ var, value.var = "imp", fill = 0.0)
+  ens_imp <- data.table::dcast.data.table(ens_imp, model_name ~ var, value.var = "Overall", fill = 0.0)
+  # TODO: multiclass
 
   # Use overall importance to weight individual model importances
   model_imp_mat <- as.matrix(model_imp[, model_names, with = FALSE])

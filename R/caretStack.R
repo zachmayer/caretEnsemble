@@ -125,6 +125,10 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' caretList of input models.  excluded_class_id for predict.caretStack is for the final ensemble model.
 #' So different classes could be excluded from the caretList models and the final ensemble model.
 #' @param return_class_only a logical indicating whether to return only the class predictions as a factor.
+#' If TRUE, the return will be a factor rather than a data.table.  This is a convenience function,
+#' and should not be widely used.  For example if you have a downstream process that consumes
+#' the output of the model, you should have that process consume probabilities for each class.
+#' This will make it easier to change prediction probability thresholds if needed in the future.
 #' @param verbose a logical indicating whether to print progress
 #' @param ... arguments to pass to \code{\link[caret]{predict.train}} for the ensemble model.
 #' Do not specify type here. For classification, type will always be prob, and for regression, type will always be raw.
