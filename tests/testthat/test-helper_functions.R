@@ -443,7 +443,8 @@ test_that("validateExcludedClass validates excluded level correctly", {
 test_that("extractModelType fails for models without object$control$savePredictions", {
   model <- models.class[[1L]]
   model$control$savePredictions <- NULL
-  expect_error(extractModelType(model), "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions.")
+  err <- "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions."
+  expect_error(extractModelType(model), err)
   model$control$savePredictions <- "BAD_VALUE"
-  expect_error(extractModelType(model), "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions.")
+  expect_error(extractModelType(model), err)
 })

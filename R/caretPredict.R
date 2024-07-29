@@ -89,7 +89,7 @@ extractModelType <- function(object, validate_for_stacking = TRUE) {
   # Validate for stacked predictions
   if (validate_for_stacking) {
     err <- "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions."
-    if(is.null(object$control$savePredictions)){
+    if (is.null(object$control$savePredictions)) {
       stop(err)
     }
     if (!object$control$savePredictions %in% c("all", "final", TRUE)) {
