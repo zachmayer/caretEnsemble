@@ -404,6 +404,18 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   # Combine the predictions into a single data.table
   preds <- data.table::as.data.table(preds)
 
+  stopifnot(
+    !is.null(names(preds)),
+    length(dim(preds)) == 2L
+  )
+  all_regression <- all(sapply(object, function(x) x$modelType == "Regression"))
+  if (all_regression) {
+    stopifnot(
+      length(names(preds)) == length(object),
+      names(preds) == names(object)
+    )
+  }
+
   # Return
   preds
 }

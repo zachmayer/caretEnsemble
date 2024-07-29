@@ -61,17 +61,9 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
 
   # Predict for each model.  If new_X is NULL, will return stacked predictions
   preds <- predict.caretList(all.models, newdata = new_X, excluded_class_id = excluded_class_id)
-  stopifnot(
-    data.table::is.data.table(preds),
-    length(dim(preds)) == 2L,
-    !is.null(names(preds))
-  )
   if (!is.null(new_X)) {
     stopifnot(nrow(preds) == nrow(new_X))
   }
-
-  # TODO: check for names(preds) is the same as names(all.models)
-  # if regression or binary class with excluded_class_id=1L
 
   # Build a caret model
   obs <- new_y
@@ -206,8 +198,7 @@ predict.caretStack <- function(
   out <- meta_preds
 
   # Map to class levels
-  # TODO: TESTS FOR THIS
-  # TODO: HANDLE ORDINAL
+  # TODO: HANDLE ORDINAL and TESTS FOR THIS
   if (return_class_only) {
     class_id <- apply(out, 1L, which.max)
     class_levels <- levels(object$ens_model)
