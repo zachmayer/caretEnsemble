@@ -90,7 +90,6 @@ spell:
 
 # Build vignettes
 build-vignettes:
-	Rscript -e "devtools::clean_vignettes()"
 	Rscript -e "devtools::build_vignettes()"
 	
 # Clean up generated files
@@ -104,4 +103,5 @@ clean:
 	rm -f .Rhistory
 	rm -rf lib/
 	rm -f caretEnsemble_test_plots.png
-	Rscript -e "devtools::clean_all()"
+	Rscript -e "devtools::clean_vignettes()"
+	Rscript -e "devtools::clean_dll()"

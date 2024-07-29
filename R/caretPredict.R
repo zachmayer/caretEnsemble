@@ -76,11 +76,6 @@ dropExcludedClass <- function(x, all_classes, excluded_class_id) {
 extractModelType <- function(object, validate_for_stacking = TRUE) {
   stopifnot(is(object, "train"))
 
-  # Must be a train object
-  if (!is(object, "train")) {
-    stop("object must be a train object")
-  }
-
   # Extract type
   model_type <- object$modelType
 
@@ -93,8 +88,12 @@ extractModelType <- function(object, validate_for_stacking = TRUE) {
   }
   # Validate for stacked predictions
   if (validate_for_stacking) {
+    err <- "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions."
+    if(is.null(object$control$savePredictions)){
+      stop(err)
+    }
     if (!object$control$savePredictions %in% c("all", "final", TRUE)) {
-      stop("Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions.")
+      stop(err)
     }
     if (is_class && !object$control$classProbs) {
       stop("classProbs = FALSE. Re-fit with classProbs = TRUE in trainControl.")

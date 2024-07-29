@@ -427,3 +427,23 @@ test_that("validateExcludedClass validates excluded level correctly", {
   txt <- "classification excluded level is not an integer: 2"
   expect_warning(expect_equal(validateExcludedClass(2.0), 2L), txt)
 })
+
+test_that("validateExcludedClass validates excluded level correctly", {
+  expect_warning(validateExcludedClass(NULL), "No excluded_class_id set. Setting to 1L.")
+  expect_error(validateExcludedClass(c(1L, 2L)), "classification excluded level must have a length of 1: length=2")
+  expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
+  expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
+  expect_warning(expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"))
+  expect_warning(expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"))
+  expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
+  txt <- "classification excluded level is not an integer: 2"
+  expect_warning(expect_equal(validateExcludedClass(2.0), 2L), txt)
+})
+
+test_that("extractModelType fails for models without object$control$savePredictions", {
+  model <- models.class[[1L]]
+  model$control$savePredictions <- NULL
+  expect_error(extractModelType(model), "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions.")
+  model$control$savePredictions <- "BAD_VALUE"
+  expect_error(extractModelType(model), "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions.")
+})
