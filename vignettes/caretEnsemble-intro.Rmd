@@ -110,10 +110,10 @@ summary(greedy_ensemble)
 
 The ensemble"s AUC on the training set resamples is 0.76, which is about 7% better than the best individual model.  We can confirm this finding on the test set:
 ```{r, echo=TRUE}
-model_preds <- lapply(model_list, predict, newdata = testing, type = "prob")
+model_preds <- lapply(model_list, predict, newdata = testing)
 model_preds <- lapply(model_preds, function(x) x[, "M"])
 model_preds <- data.frame(model_preds)
-ens_preds <- predict(greedy_ensemble, newdata = testing, type = "prob")
+ens_preds <- predict(greedy_ensemble, newdata = testing)
 model_preds$ensemble <- ens_preds
 caTools::colAUC(model_preds, testing$Class)
 ```
@@ -147,7 +147,7 @@ glm_ensemble <- caretStack(
   )
 )
 model_preds2 <- model_preds
-model_preds2$ensemble <- predict(glm_ensemble, newdata = testing, type = "prob")
+model_preds2$ensemble <- predict(glm_ensemble, newdata = testing)
 CF <- coef(glm_ensemble$ens_model$finalModel)[-1L]
 colAUC(model_preds2, testing$Class)
 CF / sum(CF)
@@ -172,7 +172,7 @@ gbm_ensemble <- caretStack(
   )
 )
 model_preds3 <- model_preds
-model_preds3$ensemble <- predict(gbm_ensemble, newdata = testing, type = "prob")
+model_preds3$ensemble <- predict(gbm_ensemble, newdata = testing)
 colAUC(model_preds3, testing$Class)
 ```
 
