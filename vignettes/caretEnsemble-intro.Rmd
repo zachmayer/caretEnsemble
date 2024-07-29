@@ -108,17 +108,24 @@ greedy_ensemble <- caretEnsemble(
 summary(greedy_ensemble)
 ```
 
-The ensemble"s AUC on the training set resamples is 0.76, which is about 7% better than the best individual model.  We can confirm this finding on the test set:
+The ensemble has an AUC on the training set resamples of 0.81, which is about 4% better than the best individual model.  We can confirm this finding on the test set:
 ```{r, echo=TRUE}
-model_preds <- lapply(model_list, predict, newdata = testing)
-model_preds <- lapply(model_preds, function(x) x[, "M"])
-model_preds <- data.frame(model_preds)
-ens_preds <- predict(greedy_ensemble, newdata = testing)
+model_preds <- predict(model_list, newdata = testing, excluded_class_id = 2L)
+ens_preds <- predict(greedy_ensemble, newdata = testing, excluded_class_id = 2L)
 model_preds$ensemble <- ens_preds
 caTools::colAUC(model_preds, testing$Class)
 ```
 
 The ensemble"s AUC on the test set is about 6% higher than the best individual model.
+
+Note that the levels for the Sonar Data are "M" and "R", where M is level 1 and R is level 2.  "M" stands for "metal cylinder" and "R" stands for rock. M is the positive class, so we exclude class 2L from our predictions.  You can set excluded_class_id = 0L
+```{r, echo=TRUE, results="hide", warning=FALSE}
+predict(greedy_ensemble, newdata = head(testing), excluded_class_id = 0L)
+```
+
+```{r, echo=FALSE, results="asis"}
+knitr::kable(predict(greedy_ensemble, newdata = head(testing), excluded_class_id = 0L))
+```
 
 We can also use varImp to extract the variable importances from each member of the ensemble, as well as the final ensemble model:
 ```{r, echo=TRUE, results="hide"}
@@ -131,7 +138,7 @@ knitr::kable(varImp(greedy_ensemble))
 (The columns each sum up to 100.)
 
 ## caretStack
-caretStack allows us to move beyond simple blends of models to using "meta-models" to ensemble collections of predictive models. DO NOT use the `trainControl` object you used to fit the training models to fit the ensemble.  The re-sampling indexes will be wrong.  Fortunately, you don"t need to be fastidious with re-sampling indexes for caretStack, as it only fits one model, and the defaults `train` uses will usually work fine:
+caretStack allows us to move beyond simple blends of models to using "meta-models" to ensemble collections of predictive models. DO NOT use the `trainControl` object you used to fit the training models to fit the ensemble.  The re-sampling indexes will be wrong.  Fortunately, you do not need to be fastidious with re-sampling indexes for caretStack, as it only fits one model, and the defaults `train` uses will usually work fine:
 
 ```{r, echo=TRUE}
 glm_ensemble <- caretStack(
@@ -147,7 +154,7 @@ glm_ensemble <- caretStack(
   )
 )
 model_preds2 <- model_preds
-model_preds2$ensemble <- predict(glm_ensemble, newdata = testing)
+model_preds2$ensemble <- predict(glm_ensemble, newdata = testing, excluded_class_id = 2L)
 CF <- coef(glm_ensemble$ens_model$finalModel)[-1L]
 colAUC(model_preds2, testing$Class)
 CF / sum(CF)
@@ -172,7 +179,7 @@ gbm_ensemble <- caretStack(
   )
 )
 model_preds3 <- model_preds
-model_preds3$ensemble <- predict(gbm_ensemble, newdata = testing)
+model_preds3$ensemble <- predict(gbm_ensemble, newdata = testing, excluded_class_id = 2L)
 colAUC(model_preds3, testing$Class)
 ```
 
