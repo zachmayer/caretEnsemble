@@ -65,7 +65,7 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
 
   # Create class and probability predictions, as well as class predictions
   # generated from probability predictions using a .5 cutoff
-  Y.pred <- predict(model.ens, newdata = X.test, type = "raw")
+  Y.pred <- predict(model.ens, newdata = X.test, type = "raw")  # TODO UPDATE WITH return_class_only
   Y.prob <- predict(model.ens, newdata = X.test, type = "prob")
   Y.cutoff <- factor(
     ifelse(

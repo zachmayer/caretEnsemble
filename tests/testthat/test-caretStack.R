@@ -16,14 +16,18 @@ test_that("We can stack regression models", {
   ens.reg <- caretStack(
     models.reg,
     method = "lm", preProcess = "pca",
-    trControl = trainControl(number = 2L, allowParallel = FALSE)
+    trControl = trainControl(
+      method = "cv",
+      number = 2L, allowParallel = FALSE,
+      savePredictions = "final"
+    )
   )
-  expect_that(ens.reg, is_a("caretStack"))
+  expect_s3_class(ens.reg, "caretStack")
   expect_is(summary(ens.reg), "summary.lm")
   invisible(capture.output(print(ens.reg)))
   pred.reg <- predict(ens.reg, newdata = X.reg)
-  expect_type(pred.reg, "double")
-  expect_length(pred.reg, 150L)
+  expect_s3_class(pred.reg, "data.table")
+  expect_identical(nrow(pred.reg), 150L)
 })
 
 test_that("We can stack classification models", {
@@ -36,12 +40,12 @@ test_that("We can stack classification models", {
   expect_that(ens.class, is_a("caretStack"))
   expect_is(summary(ens.class), "summary.glm")
   invisible(capture.output(print(ens.class)))
-  pred.class <- predict(ens.class, X.class, type = "prob")
+  pred.class <- predict(ens.class, X.class)
   expect_true(all(sapply(pred.class, is.numeric)))
   expect_identical(nrow(pred.class), 150L)
-  raw.class <- predict(ens.class, X.class, type = "raw")
-  expect_s3_class(raw.class, "factor")
-  expect_length(raw.class, 150L)
+  raw.class <- predict(ens.class, X.class)
+  expect_s3_class(raw.class, "data.table")
+  expect_identical(nrow(raw.class), 150L)
 })
 
 test_that("caretStack plots", {
@@ -56,7 +60,7 @@ test_that("caretStack plots", {
   dotplot(ens.reg, metric = "RMSE")
   dev.off()
   unlink(test_plot_file)
-  expect_is(ens.reg, "caretStack")
+  expect_s3_class(ens.reg, "caretStack")
 })
 
 context("Prediction errors for caretStack work as expected")
@@ -64,57 +68,59 @@ context("Prediction errors for caretStack work as expected")
 test_that("Failure to calculate se occurs gracefully", {
   ens.class <- caretStack(
     models.class,
-    method = "glm",
+    method = "glm", preProcess = "pca",
     trControl = trainControl(number = 2L, allowParallel = FALSE)
   )
 
-  predict(ens.class, X.class, type = "raw", se = TRUE)
-  expect_is(predict(ens.class, X.class, type = "raw"), "factor")
-  expect_is(predict(ens.class, X.class, type = "raw", se = TRUE), "factor")
-  expect_identical(
-    predict(ens.class, X.class, type = "raw", se = TRUE),
-    predict(ens.class, X.class, type = "raw")
-  )
+  w <- "Cannot calculate standard errors due to the preprocessing used in train"
+  expect_warning(predict(ens.class, X.class, se = TRUE), w)
+  expect_s3_class(predict(ens.class, X.class), "data.table")
+  expect_warning(expect_s3_class(predict(ens.class, X.class, se = TRUE), "data.table"), w)
+  expect_warning(expect_equivalent(
+    predict(ens.class, X.class, return_weights = TRUE),
+    predict(ens.class, X.class)
+  ), w)
   ens.reg <- caretStack(
     models.reg,
-    method = "lm", preProcess = "pca",
+    method = "glm", preProcess = "pca",
     trControl = trainControl(number = 2L, allowParallel = FALSE)
   )
-  expect_is(predict(ens.reg, X.reg, se = TRUE), "data.frame")
+  expect_warning(expect_s3_class(predict(ens.reg, X.reg, se = TRUE), "data.table"), w)
 
-  expect_is(predict(ens.class, X.class, type = "prob", se = TRUE), "data.frame")
-  expect_is(
-    predict(
-      ens.class, X.class,
-      type = "prob", se = TRUE, return_weights = TRUE
-    ), "data.frame"
+  expect_warning(expect_s3_class(predict(ens.class, X.class, se = TRUE), "data.table"), w)
+  expect_warning(
+    expect_s3_class(
+      predict(ens.class, X.class, se = TRUE, return_weights = TRUE),
+      "data.table"
+    ), w
   )
-  expect_identical(
-    colnames(predict(ens.class, X.class, type = "prob", se = TRUE)),
-    c("No", "Yes")
-  )
-  expect_false(
-    identical(
-      predict(ens.class, X.class, type = "raw", return_weights = TRUE),
-      predict(ens.class, X.class, type = "raw", return_weights = FALSE)
+
+  expect_warning(
+    expect_named(
+      predict(ens.class, X.class, se = TRUE, excluded_class_id = 0L),
+      c("No", "Yes")
     )
   )
-  expect_false(
+  expect_warning(expect_false(
     identical(
-      predict(ens.class, X.class, type = "prob", se = TRUE),
-      predict(ens.class, X.class, type = "prob", se = TRUE, return_weights = TRUE)
+      predict(ens.class, X.class, return_weights = TRUE),
+      predict(ens.class, X.class, return_weights = FALSE)
     )
-  )
-  expect_identical(
-    predict(ens.class, X.class, type = "prob", se = TRUE, level = 0.8),
-    predict(ens.class, X.class, type = "prob", se = TRUE, return_weights = FALSE)
-  )
-  expect_true(
+  ), w)
+  expect_warning(expect_false(
     identical(
-      predict(ens.class, X.class, type = "prob", level = 0.8),
-      predict(ens.class, X.class, type = "prob", return_weights = FALSE)
+      predict(ens.class, X.class, se = TRUE),
+      predict(ens.class, X.class, se = TRUE, return_weights = TRUE)
     )
-  )
+  ), w)
+  expect_warning(expect_equivalent(
+    predict(ens.class, X.class, se = TRUE, level = 0.8, return_weights = TRUE),
+    predict(ens.class, X.class, se = TRUE, level = 0.8, return_weights = FALSE)
+  ), w)
+  expect_warning(expect_equivalent(
+    predict(ens.class, X.class, level = 0.8, return_weights = TRUE),
+    predict(ens.class, X.class, level = 0.8, return_weights = FALSE)
+  ), w)
 })
 
 test_that("Test na.action pass through", {
@@ -128,10 +134,10 @@ test_that("Test na.action pass through", {
   X_reg_na[sample.int(nrow(X_reg_na), 20L), sample.int(ncol(X_reg_na) - 1L, 1L)] <- NA
 
   pred.reg <- predict(ens.reg, newdata = X_reg_na, na.action = na.pass)
-  expect_length(pred.reg, nrow(X_reg_na))
+  expect_identical(nrow(pred.reg), nrow(X_reg_na))
 
   pred.reg <- predict(ens.reg, newdata = X_reg_na)
-  expect_false(length(pred.reg) != nrow(X_reg_na))
+  expect_false(nrow(pred.reg) != nrow(X_reg_na))
 })
 
 test_that("is.caretStack correctly identifies caretStack objects", {
@@ -160,7 +166,7 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
     trControl = trainControl(method = "cv"),
     excluded_class_id = 4L
   )
-  pred <- predict(meta_model, newdata = iris, type = "prob")
+  pred <- predict(meta_model, newdata = iris)
   expect_equal(nrow(pred), 150L)
   expect_equal(ncol(pred), 3L)
   expect_true(all(sapply(pred, is.finite)))
@@ -195,7 +201,7 @@ test_that("caretStack handles different stacking algorithms", {
       expect_equal(stack$ens_model$method, method)
 
       predictions <- predict(stack, newdata = test_data)
-      expect_length(predictions, nrow(test_data))
+      expect_identical(nrow(predictions), nrow(test_data))
     }
   }
 })
@@ -213,7 +219,7 @@ test_that("caretStack handles missing data in new data", {
   test_data_with_na[1L:5L, 1L] <- NA
 
   pred <- predict(stack, newdata = test_data_with_na)
-  expect_length(pred, nrow(test_data_with_na))
+  expect_identical(nrow(pred), nrow(test_data_with_na))
 })
 
 test_that("caretStack handles different metrics", {
@@ -267,7 +273,7 @@ test_that("caretStack handles imbalanced data", {
 
   expect_s3_class(stack, "caretStack")
   pred <- predict(stack, newdata = imbalanced_data)
-  expect_length(pred, nrow(imbalanced_data))
+  expect_identical(nrow(pred), nrow(imbalanced_data))
 })
 
 test_that("caretStack handles custom preprocessing", {
@@ -305,10 +311,10 @@ test_that("caretStack handles custom performance function", {
 test_that("predict.caretStack works if excluded_class_id is not set", {
   ens <- caretStack(models.class)
   ens[["excluded_class_id"]] <- NULL
-  expect_warning(pred <- predict(ens, X.class, type = "prob"), "No excluded_class_id set.  Setting to 1L.")
+  expect_warning(pred <- predict(ens, X.class), "No excluded_class_id set.  Setting to 1L.")
 
   # Note that we don't exclude the class from the ensemble predictions, but merely from the preprocessing
-  expect_is(pred, "data.frame") # caret returns data.frame
+  expect_s3_class(pred, "data.table") # caret returns data.frame
   expect_equal(nrow(pred), nrow(X.class))
   expect_equal(ncol(pred), 2L)
   expect_named(pred, c("No", "Yes"))
@@ -341,32 +347,44 @@ test_that("caretStack works if both new_X and new_Y are supplied", {
   set.seed(42L)
   N <- 50L
   idx <- sample.int(nrow(X.reg), N)
-  stack_class <- caretStack(models.class, new_X = X.class[idx, ], new_y = Y.class[idx], method = "rpart")
-  stack_reg <- caretStack(models.reg, new_X = X.reg[idx, ], new_y = Y.reg[idx], method = "glm")
+  stack_class <- caretStack(
+    models.class,
+    new_X = X.class[idx, ],
+    new_y = Y.class[idx],
+    method = "rpart",
+    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
+  )
+  stack_reg <- caretStack(
+    models.reg,
+    new_X = X.reg[idx, ],
+    new_y = Y.reg[idx],
+    method = "glm",
+    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = FALSE)
+  )
 
   expect_s3_class(stack_class, "caretStack")
   expect_s3_class(stack_reg, "caretStack")
 
-  pred_class_stack <- predict(stack_class, type = "prob")
-  stack_reg_stack <- predict(models.reg)
+  pred_class_stack <- predict(stack_class)
+  stack_reg_stack <- predict(stack_reg)
 
-  expect.is(pred_class_stack, "data.table")
-  expect.is(stack_reg_stack, "data.table")
+  expect_s3_class(pred_class_stack, "data.table")
+  expect_s3_class(stack_reg_stack, "data.table")
 
-  expect_equal(nrow(pred_class_stack), N) # TODO: FIX THESE
-  expect_equal(nrow(stack_reg_stack), N) # TODO: FIX THESE
+  expect_equal(nrow(pred_class_stack), N)
+  expect_equal(nrow(stack_reg_stack), N)
 
-  expect_equal(nrow(pred_class_stack), 2L) # TODO: FIX THESE
-  expect_equal(nrow(stack_reg_stack), 1L) # TODO: FIX THESE
+  expect_equal(ncol(pred_class_stack), 2L)
+  expect_equal(ncol(stack_reg_stack), 1L)
 
-  pred_class <- predict(stack_class, new_X = X.class, type = "prob")
+  pred_class <- predict(stack_class, new_X = X.class)
   pred_reg <- predict(stack_reg, new_X = X.reg)
 
-  expect.is(pred_class, "data.table")
-  expect.is(pred_reg, "data.table")
+  expect_s3_class(pred_class, "data.table")
+  expect_s3_class(pred_reg, "data.table")
 
-  expect_equal(nrow(pred_class), 150L)
-  expect_equal(nrow(pred_reg), 150L)
+  expect_equal(nrow(pred_class), N)
+  expect_equal(nrow(pred_reg), N)
 
   expect_equal(ncol(pred_class), 2L)
   expect_equal(ncol(pred_reg), 1L)

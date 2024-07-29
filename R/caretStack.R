@@ -124,6 +124,7 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' was trained with an excluded_class_id, that class is ALWAYS excluded from the predictions from the
 #' caretList of input models.  excluded_class_id for predict.caretStack is for the final ensemble model.
 #' So different classes could be excluded from the caretList models and the final ensemble model.
+#' @param return_class_only a logical indicating whether to return only the class predictions as a factor.
 #' @param verbose a logical indicating whether to print progress
 #' @param ... arguments to pass to \code{\link[caret]{predict.train}} for the ensemble model.
 #' Do not specify type here. For classification, type will always be prob, and for regression, type will always be raw.
@@ -152,6 +153,7 @@ predict.caretStack <- function(
     level = 0.95,
     return_weights = FALSE,
     excluded_class_id = 0L,
+    return_class_only = FALSE,
     verbose = FALSE,
     ...) {
   # Check if the object is a caretStack
@@ -180,12 +182,31 @@ predict.caretStack <- function(
     }
   }
 
+  # Check return_class_only
+  if (return_class_only) {
+    stopifnot(
+      model_type == "Classification",
+      !se,
+      !return_weights
+    )
+    excluded_class_id <- 0L
+  }
+
   # Now predict on the stack
   # If newdata is NULL, this will be stacked predictions
   # If newdata is present, this will be predictions on the preds,
   # which will be the caretList predictions on the newdata.
   meta_preds <- caretPredict(object$ens_model, newdata = newdata, excluded_class_id = excluded_class_id, ...)
   out <- meta_preds
+
+  # Map to class levels
+  # TODO: TESTS FOR THIS
+  # TODO: HANDLE ORDINAL
+  if (return_class_only) {
+    class_id <- apply(out, 1L, which.max)]
+    class_levels <- levels(object$ens_model)
+    out <- factor(class_levels[class_id], levels)
+  } 
 
   # Calculate the model importances if we need them
   # For multiclass, this weights all classes evenly, which is... fine for now
@@ -197,11 +218,14 @@ predict.caretStack <- function(
     imp <- apply(imp, 2L, function(x) x / sum(x))
     row.names(imp) <- imp_names
     imp <- rowMeans(imp)
-    stopifnot(
+    if (!all(
       length(imp) == ncol(preds),
       names(imp) %in% names(preds),
       names(preds) %in% names(imp)
-    )
+    )) {
+      warning("Cannot calculate standard errors due to the preprocessing used in train")
+      se <- FALSE
+    }
   }
 
   # Calculate SEs if we need them
@@ -210,6 +234,9 @@ predict.caretStack <- function(
     data.table::setcolorder(std_error, names(imp))
     std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
     std_error <- qnorm(level) * std_error
+    if (ncol(meta_preds) == 1L) {
+      meta_preds <- meta_preds[[1L]] # No names if one column (e.g. reg or binary with a dropped class)
+    }
     out <- data.table::data.table(
       fit = meta_preds,
       lwr = meta_preds - std_error,

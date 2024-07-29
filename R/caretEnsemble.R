@@ -174,7 +174,7 @@ varImp.caretEnsemble <- function(object, ...) {
 
   # Individual model importances
   # TODO: varImp.caretList should be a separate function
-  model_imp <- mapply(varImpDataTable, object$models, model_names, MoreArgs = list(...), SIMPLIFY = FALSE)
+  model_imp <- mapply(varImpDataTable, object$models, model_names, SIMPLIFY = FALSE) # TODO , MoreArgs = list(...)
   model_imp <- data.table::rbindlist(model_imp, fill = TRUE, use.names = TRUE)
   model_imp <- data.table::dcast.data.table(model_imp, var ~ model_name, value.var = "imp", fill = 0.0)
 

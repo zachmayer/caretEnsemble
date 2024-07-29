@@ -193,23 +193,18 @@ test_that("Prediction options are respected in regression and classification", {
     suppressWarnings({
       p <- predict(
         ens.reg,
+        newdata = X.reg,
         se = tests[i, "se"],
         return_weights = tests[i, "return_weights"]
       )
     })
 
-    if (tests[i, "se"]) {
-      expect_is(p, "data.frame")
-      preds <- p
-    } else {
-      expect_is(p, "numeric")
-      preds <- p
-    }
+    expect_s3_class(p, "data.table")
 
     if (tests[i, "return_weights"]) {
-      expect_is(attr(preds, which = "weights")$Overall, "numeric")
+      expect_is(attr(p, which = "weights")$Overall, "numeric")
     } else {
-      expect_null(attr(preds, which = "weights"))
+      expect_null(attr(p, which = "weights"))
     }
   }
 
@@ -221,19 +216,18 @@ test_that("Prediction options are respected in regression and classification", {
     suppressWarnings({
       p <- predict(
         ens.class,
+        newdata = X.class,
         se = tests[i, "se"],
-        return_weights = tests[i, "return_weights"],
-        type = "prob"
+        return_weights = tests[i, "return_weights"]
       )
     })
 
-    expect_is(p, "data.frame")
-    preds <- p
+    expect_s3_class(p, "data.table")
 
     if (tests[i, "return_weights"]) {
-      expect_is(unlist(attr(preds, which = "weights")), "numeric")
+      expect_is(unlist(attr(p, which = "weights")), "numeric")
     } else {
-      expect_null(attr(preds, which = "weights"))
+      expect_null(attr(p, which = "weights"))
     }
   }
 })
