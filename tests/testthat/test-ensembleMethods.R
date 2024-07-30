@@ -78,8 +78,9 @@ test_that("Metric is used correctly", {
   ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2L))
 
   # Get an incorrect metric
-  expect_error(getMetric(ens.class$models[[3L]], metric = "RMSE"))
-  expect_error(getMetric(ens.reg$models[[2L]], metric = "ROC"))
+  err <- "metric %in% names(x$results) is not TRUE"
+  expect_error(getMetric(ens.class$models[[3L]], metric = "RMSE"), err, fixed = TRUE)
+  expect_error(getMetric(ens.reg$models[[2L]], metric = "ROC"), err, fixed = TRUE)
 
   # Correct metric
   expect_equal(getMetric(ens.class$models[[1L]], metric = "ROC"), 0.9293333, tol = 0.1)
@@ -139,7 +140,7 @@ test_that("No errors are thrown by a generics for ensembles", {
   autoplot(ens.reg)
   autoplot(ens.class, xvars = c("Petal.Length", "Petal.Width"))
   autoplot(ens.reg, xvars = c("Petal.Length", "Petal.Width"))
-  expect_error(autoplot(ens.reg$models[[1L]]))
+  expect_error(autoplot(ens.reg$models[[1L]]), "Objects of class (.*?) are not supported by autoplot")
 
   dev.off()
   expect_true(file.exists(test_plot_file))
@@ -177,10 +178,10 @@ test_that("Do model results in caretEnsemble match component models - regression
   newDat <- newDat[1L:10L, ]
 
   # These yield errors on NAs because predict.randomForest can't handle NAs in new data
-  expect_error(predict(ens.class, newdata = newDat, return_weights = TRUE, se = FALSE))
-  expect_error(predict(ens.reg, newdata = newDat, return_weights = TRUE, se = TRUE))
-  expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = FALSE))
-  expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = TRUE))
+  expect_error(predict(ens.class, newdata = newDat, return_weights = TRUE, se = FALSE), "missing values in newdata")
+  expect_error(predict(ens.reg, newdata = newDat, return_weights = TRUE, se = TRUE), "missing values in newdata")
+  expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = FALSE), "missing values in newdata")
+  expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = TRUE), "missing values in newdata")
 })
 
 test_that("Prediction options are respected in regression", {

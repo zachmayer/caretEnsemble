@@ -217,7 +217,7 @@ test_that("Multiclass is not supported for caretEnsemble", {
     )
   )
 
-  expect_error(caretEnsemble(model_list))
+  expect_error(caretEnsemble(model_list), "caretEnsemble only supports binary classification problems")
 })
 
 test_that("caretList and caretStack handle imbalanced multiclass data", {

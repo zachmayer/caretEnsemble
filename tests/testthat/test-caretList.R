@@ -49,7 +49,8 @@ test_that("caretModelSpec and checking functions work as expected", {
   expect_length(all_models, length(all_models_check))
 
   methodCheck(all_models)
-  expect_error(methodCheck(c(all_models, "THIS_IS_NOT_A_REAL_MODEL")))
+  err <- "The following models are not valid caret models: THIS_IS_NOT_A_REAL_MODEL"
+  expect_error(methodCheck(c(all_models, "THIS_IS_NOT_A_REAL_MODEL")), err)
   expect_error(methodCheck(c(all_models, "THIS_IS_NOT_A_REAL_MODEL", "GBM")))
 })
 
@@ -181,8 +182,10 @@ test_that("caretList predictions", {
     colnames(p3)
   ) # check the column names are correct and ordered correctly (methodname_classname)
 
+  # Check that bad model types error
+  # This error message is weird though
   models[[1L]]$modelType <- "Bogus"
-  expect_error(predict(models))
+  expect_error(predict(models), "Error in gmean(pred) : mean is not meaningful for factors.")
 })
 
 test_that("as.caretList.list returns a caretList object", {
@@ -204,18 +207,20 @@ test_that("Target variable names with character | are not allowed", {
   bad_iris[, 5L] <- as.factor(as.character(bad_iris[, 5L]))
 
   # Expect an error from caret
-  expect_error(model_list <- caretList(
-    x = bad_iris[, -5L],
-    y = bad_iris[, 5L],
-    methodList = c("rpart", "glmnet"),
-    trControl = trainControl(
-      method = "cv",
-      number = 2L,
-      classProbs = TRUE,
-      savePredictions = "final",
-      index = createFolds(bad_iris$Species, 2L, list = TRUE, returnTrain = TRUE)
-    )
-  ))
+  expect_error(
+    caretList(
+      x = bad_iris[, -5L],
+      y = bad_iris[, 5L],
+      methodList = c("rpart", "glmnet"),
+      trControl = trainControl(
+        method = "cv",
+        number = 2L,
+        classProbs = TRUE,
+        savePredictions = "final",
+        index = createFolds(bad_iris$Species, 2L, list = TRUE, returnTrain = TRUE)
+      )
+    ), "At least one of the class levels is not a valid R variable name; This will cause errors when class prob"
+  )
 })
 
 test_that("Character | in model names is transformed into a point", {

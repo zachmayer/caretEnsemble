@@ -61,7 +61,7 @@ test_that("We can ensemble regression models", {
 
   expect_true(all(pred.reg == pred.reg2$fit))
 
-  expect_error(predict(ens.reg, return_weights = "BOGUS"))
+  expect_error(predict(ens.reg, return_weights = "BOGUS"), "Error in se || return_weights")
 
   expect_s3_class(pred.reg, "data.table")
   expect_identical(nrow(pred.reg), 150L)
