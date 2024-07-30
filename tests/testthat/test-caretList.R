@@ -185,7 +185,7 @@ test_that("caretList predictions", {
   # Check that bad model types error
   # This error message is weird though
   models[[1L]]$modelType <- "Bogus"
-  expect_error(predict(models), "Error in gmean(pred) : mean is not meaningful for factors.")
+  expect_error(predict(models), "mean is not meaningful for factors.")
 })
 
 test_that("as.caretList.list returns a caretList object", {
