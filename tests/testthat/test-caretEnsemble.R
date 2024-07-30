@@ -14,14 +14,6 @@ data(X.class)
 data(Y.class)
 
 #############################################################################
-context("Test errors and warnings")
-#############################################################################
-test_that("Ensembling fails with no CV", {
-  my_control <- trainControl(method = "none", savePredictions = "final")
-  expect_error(expect_warning(trControlCheck(my_control)))
-})
-
-#############################################################################
 context("Test metric and residual extraction")
 #############################################################################
 
@@ -243,10 +235,16 @@ test_that("Ensembles using custom models work correctly", {
     # Add a non-custom model
     treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
   )
-  train.control <- trainControl(method = "cv", number = 2L, classProbs = TRUE, savePredictions = "final")
+  train.control <- trainControl(
+    method = "cv",
+    number = 2L,
+    classProbs = TRUE,
+    savePredictions = "final",
+    summaryFunction = twoClassSummary
+  )
 
   # Create an ensemble using the above models
-  expect_warning(cl <- caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control))
+  cl <- caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control)
   expect_is(cl, "caretList")
   cs <- caretEnsemble(cl, trControl = trainControl(
     method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE

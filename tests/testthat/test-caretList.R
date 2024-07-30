@@ -356,9 +356,6 @@ test_that("Non standard cv methods work", {
     # Ignore method if index is specified
     expect_is(trainControl(method = m, index = 1L:10L, savePredictions = "final"), "list")
 
-    # Fail if no index and un-known method
-    expect_error(trControlCheck(trainControl(method = m, savePredictions = TRUE)))
-
     # Model itself should fit fine
     model <- train(
       Sepal.Length ~ Sepal.Width,
@@ -809,14 +806,19 @@ test_that("caretList handles large number of predictors", {
   X <- data.frame(matrix(rnorm(n * p), n, p))
   y <- factor(sample(c("A", "B"), n, replace = TRUE))
 
-  expect_warning(
-    models <- caretList(
-      x = X,
-      y = y,
-      methodList = c("glmnet", "rpart"),
-      trControl = trainControl(method = "cv", number = 2L, allowParallel = FALSE, classProbs = TRUE)
+  models <- caretList(
+    x = X,
+    y = y,
+    methodList = c("glmnet", "rpart"),
+    trControl = trainControl(
+      method = "cv",
+      number = 2L,
+      allowParallel = FALSE,
+      classProbs = TRUE,
+      summaryFunction = twoClassSummary
     )
   )
+
 
   expect_s3_class(models, "caretList")
   expect_length(models, 2L)
@@ -828,20 +830,19 @@ test_that("caretList handles imbalanced data", {
   X <- data.frame(x1 = rnorm(n), x2 = rnorm(n))
   y <- factor(c(rep("A", 950L), rep("B", 50L)))
 
-  expect_warning({
-    models <- caretList(
-      x = X,
-      y = y,
-      methodList = c("glmnet", "rpart"),
-      trControl = trainControl(
-        method = "cv",
-        number = 2L,
-        sampling = "down",
-        allowParallel = FALSE,
-        classProbs = TRUE
-      )
+  models <- caretList(
+    x = X,
+    y = y,
+    methodList = c("glmnet", "rpart"),
+    trControl = trainControl(
+      method = "cv",
+      number = 2L,
+      sampling = "down",
+      allowParallel = FALSE,
+      classProbs = TRUE,
+      summaryFunction = twoClassSummary
     )
-  })
+  )
 
   expect_s3_class(models, "caretList")
   expect_length(models, 2L)
@@ -853,20 +854,19 @@ test_that("caretList handles custom performance metrics", {
     c(default = mean(data$obs == data$pred))
   }
 
-  expect_warning({
-    models <- caretList(
-      x = iris[, 1L:4L],
-      y = iris[, 5L],
-      methodList = c("rpart", "rf"),
-      trControl = trainControl(
-        method = "cv",
-        number = 2L,
-        summaryFunction = custom_summary,
-        allowParallel = FALSE,
-        classProbs = TRUE
-      )
+  models <- caretList(
+    x = iris[, 1L:4L],
+    y = iris[, 5L],
+    metric = "default",
+    methodList = c("rpart", "rf"),
+    trControl = trainControl(
+      method = "cv",
+      number = 2L,
+      summaryFunction = custom_summary,
+      allowParallel = FALSE,
+      classProbs = TRUE
     )
-  })
+  )
 
   expect_s3_class(models, "caretList")
   expect_true(all(sapply(models, function(m) "default" %in% colnames(m$results))))

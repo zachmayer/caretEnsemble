@@ -99,14 +99,16 @@ test_that("Failure to calculate se occurs gracefully", {
     expect_named(
       predict(ens.class, X.class, se = TRUE, excluded_class_id = 0L),
       c("No", "Yes")
-    )
+    ), w
   )
-  expect_warning(expect_false(
-    identical(
-      predict(ens.class, X.class, return_weights = TRUE),
-      predict(ens.class, X.class, return_weights = FALSE)
-    )
-  ), w)
+  expect_warning(
+    expect_false(
+      identical(
+        predict(ens.class, X.class, return_weights = TRUE),
+        predict(ens.class, X.class, return_weights = FALSE)
+      )
+    ), w
+  )
   expect_warning(expect_false(
     identical(
       predict(ens.class, X.class, se = TRUE),

@@ -130,40 +130,52 @@ test_that("wtd.sd handles NA values correctly", {
   expect_false(is.na(caretEnsemble::wtd.sd(x1, w = w1, na.rm = TRUE)))
 })
 
-test_that("Checks generate errors", {
+test_that("caretList supports combined regression, binary, multiclass", {
   set.seed(42L)
-  myControl <- trainControl(method = "cv", number = 5L, savePredictions = "final", classProbs = TRUE)
-  expect_warning(
-    x <- caretList(
-      Sepal.Length ~ Sepal.Width,
-      iris,
-      methodList = c("glm", "lm"),
-      trControl = myControl
-    )
+
+  myControl_reg <- trainControl(
+    method = "cv",
+    number = 5L,
+    savePredictions = "final"
   )
-  expect_is(predict(x), "data.table")
 
-  # Add an rpart model
-  x$rpart <- train(Species ~ Sepal.Width, iris, method = "rpart", trControl = myControl)
-  expect_is(sapply(x, extractModelType), "character")
-  expect_is(predict(x), "data.table")
-
-  set.seed(42L)
-  myControl2 <- trainControl(
+  myControl_bin <- trainControl(
     method = "cv",
     number = 10L,
     savePredictions = "final",
     classProbs = TRUE,
     summaryFunction = twoClassSummary
   )
+
+  myControl_multi <- trainControl(
+    method = "cv",
+    number = 10L,
+    savePredictions = "final",
+    classProbs = TRUE
+  )
+
+  x <- caretList(
+    Sepal.Length ~ Sepal.Width,
+    iris,
+    methodList = c("glm", "lm"),
+    trControl = myControl_reg
+  )
+  expect_is(predict(x), "data.table")
+
+  # Add an rpart model
+  x$rpart <- train(Species ~ Sepal.Width, iris, method = "rpart", trControl = myControl_multi)
+  expect_is(sapply(x, extractModelType), "character")
+  expect_is(predict(x), "data.table")
+
+  set.seed(42L)
   x <- caretList(
     iris[1L:100L, -5L],
     factor(ifelse(iris[1L:100L, "Species"] == "setosa", "Yes", "No")),
     metric = "ROC",
     methodList = c("lda", "rf"),
-    trControl = myControl2
+    trControl = myControl_bin
   )
-  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method = "rpart", trControl = myControl)
+  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method = "rpart", trControl = myControl_multi)
   expect_is(sapply(x, extractModelType), "character")
 })
 
@@ -223,9 +235,10 @@ test_that("extractModelType stops when a classification model did not save probs
     expect_equal(validateExcludedClass(4L), 4L)
 
     # Decimals work with a warning
-    expect_warning(expect_equal(validateExcludedClass(0.0), 0L))
-    expect_warning(expect_equal(validateExcludedClass(1.0), 1L))
-    expect_warning(expect_equal(validateExcludedClass(4.0), 4L))
+    wrn <- "classification excluded level is not an integer:"
+    expect_warning(expect_equal(validateExcludedClass(0.0), 0L), wrn)
+    expect_warning(expect_equal(validateExcludedClass(1.0), 1L), wrn)
+    expect_warning(expect_equal(validateExcludedClass(4.0), 4L), wrn)
 
     # Less than 0 will error
     expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
@@ -284,15 +297,17 @@ test_that("validateExcludedClass stops for non-finite input", {
 test_that("validateExcludedClass stops for non-positive input", {
   invalid_input <- -1.0
   err <- "classification excluded level must be >= 0: -1"
-  expect_warning(expect_error(validateExcludedClass(invalid_input), err))
+  wrn <- "classification excluded level is not an integer:"
+  expect_warning(expect_error(validateExcludedClass(invalid_input), err), wrn)
 })
 
 test_that("validateExcludedClass warns for non-integer input", {
-  expect_warning(
-    validated <- validateExcludedClass(1.1),
-    "classification excluded level is not an integer: 1.1"
+  expect_equal(
+    expect_warning(
+      validated <- validateExcludedClass(1.1),
+      "classification excluded level is not an integer: 1.1"
+    ), 1L
   )
-  expect_equal(validated, 1L)
 })
 
 test_that("validateExcludedClass passes for valid input", {
