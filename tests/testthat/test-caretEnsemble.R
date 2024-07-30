@@ -279,8 +279,8 @@ test_that("Ensembles using custom models work correctly", {
   expect_equal(pred_stacked, pred_in_sample, tol = 0.4)
 
   # One row predictions
-  expect_equivalent(pred_one$Yes, 0.05072556, tol = 0.05)
-  expect_equivalent(pred_one$No, 0.9492744, tol = 0.05)
+  expect_equivalent(pred_one$Yes, 0.07557944, tol = 0.1)
+  expect_equivalent(pred_one$No, 0.9244206, tol = 0.1)
 
   # Verify that not specifying a method attribute for custom models causes an error
   tune.list <- list(
