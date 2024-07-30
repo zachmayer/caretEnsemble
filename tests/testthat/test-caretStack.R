@@ -153,7 +153,9 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
     Species ~ .,
     data = iris,
     trControl = trainControl(
-      method = "cv", classProbs = TRUE, savePredictions = "final",
+      method = "cv",
+      classProbs = TRUE,
+      savePredictions = "final",
       index = createResample(iris$Species)
     ),
     methodList = c("rpart", "rf")
@@ -249,20 +251,18 @@ test_that("caretStack handles imbalanced data", {
     train_data[train_data$Species == "virginica", ][1L:5L, ]
   )
 
-  expect_warning({
-    model_list <- caretList(
-      x = imbalanced_data[, 1L:4L],
-      y = imbalanced_data$Species,
-      methodList = "rpart",
-      trControl = trainControl(
-        method = "cv",
-        number = 3L,
-        classProbs = TRUE,
-        sampling = "up",
-        savePredictions = "final"
-      )
+  model_list <- caretList(
+    x = imbalanced_data[, 1L:4L],
+    y = imbalanced_data$Species,
+    methodList = "rpart",
+    trControl = trainControl(
+      method = "cv",
+      number = 3L,
+      classProbs = TRUE,
+      sampling = "up",
+      savePredictions = "final"
     )
-  })
+  )
 
   stack <- caretStack(
     model_list,

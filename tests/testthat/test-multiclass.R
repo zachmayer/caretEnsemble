@@ -233,14 +233,12 @@ test_that("caretList and caretStack handle imbalanced multiclass data", {
     classProbs = TRUE
   )
 
-  expect_warning({
-    model_list <- caretList(
-      x = X,
-      y = y,
-      trControl = my_control,
-      methodList = c("rpart", "glmnet")
-    )
-  })
+  model_list <- caretList(
+    x = X,
+    y = y,
+    trControl = my_control,
+    methodList = c("rpart", "glmnet")
+  )
 
   expect_s3_class(model_list, "caretList")
   expect_length(model_list, 2L)
@@ -265,14 +263,12 @@ test_that("caretList and caretStack handle a large number of classes", {
     classProbs = TRUE
   )
 
-  expect_warning({
-    model_list <- caretList(
-      x = X,
-      y = y,
-      trControl = my_control,
-      methodList = "rpart"
-    )
-  })
+  model_list <- caretList(
+    x = X,
+    y = y,
+    trControl = my_control,
+    methodList = "rpart"
+  )
 
   expect_s3_class(model_list, "caretList")
 
@@ -294,14 +290,12 @@ test_that("caretList and caretStack handle ordinal multiclass data", {
     savePredictions = "final",
     classProbs = TRUE
   )
-  expect_warning({
-    model_list <- caretList(
-      rad ~ .,
-      data = Boston,
-      trControl = my_control,
-      methodList = c("rpart", "glmnet")
-    )
-  })
+  model_list <- caretList(
+    rad ~ .,
+    data = Boston,
+    trControl = my_control,
+    methodList = c("rpart", "glmnet")
+  )
 
   expect_s3_class(model_list, "caretList")
 
@@ -324,14 +318,12 @@ test_that("caretList and caretStack produce consistent probability predictions",
     classProbs = TRUE
   )
 
-  expect_warning({
-    model_list <- caretList(
-      x = iris[, -5L],
-      y = iris[, 5L],
-      trControl = my_control,
-      methodList = c("rpart", "glmnet")
-    )
-  })
+  model_list <- caretList(
+    x = iris[, -5L],
+    y = iris[, 5L],
+    trControl = my_control,
+    methodList = c("rpart", "glmnet")
+  )
 
   stack <- caretStack(model_list, method = "rpart")
 
@@ -359,14 +351,12 @@ test_that("caretList and caretStack handle new levels in prediction data", {
     classProbs = TRUE
   )
 
-  expect_warning({
-    model_list <- caretList(
-      x = train_data[, -5L],
-      y = train_data[, 5L],
-      trControl = my_control,
-      methodList = c("rf", "rpart")
-    )
-  })
+  model_list <- caretList(
+    x = train_data[, -5L],
+    y = train_data[, 5L],
+    trControl = my_control,
+    methodList = c("rf", "rpart")
+  )
 
   stack <- caretStack(model_list, method = "rpart")
 

@@ -34,7 +34,7 @@ model_list1 <- caretList(
   data = Sonar,
   trControl = ctrl1,
   tuneList = list(
-    glm = caretModelSpec(method = "glm", family = "binomial"),
+    glm = caretModelSpec(method = "rf"),
     rpart = caretModelSpec(method = "rpart")
   ),
   metric = "ROC"

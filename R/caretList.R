@@ -135,13 +135,13 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #'
 #' @param ... arguments to pass to \code{\link[caret]{train}}.
 #' These arguments will determine which train method gets dispatched.
-#' @param metric a string, the metric to optimize for.  If NULL, we will choose a good one.
 #' @param trControl a \code{\link[caret]{trainControl}} object.  If null, we will construct a good one.
 #' @param methodList optional, a character vector of caret models to ensemble.
 #' One of methodList or tuneList must be specified.
 #' @param tuneList optional, a NAMED list of caretModelSpec objects.
 #' This much more flexible than methodList and allows the
 #' specification of model-specific parameters (e.g. passing trace=FALSE to nnet)
+#' @param metric a string, the metric to optimize for.  If NULL, we will choose a good one.
 #' @param continue_on_fail, logical, should a valid caretList be returned that
 #' excludes models that fail, default is FALSE
 #' @return A list of \code{\link[caret]{train}} objects. If the model fails to build,
@@ -169,20 +169,17 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #' }
 caretList <- function(
     ...,
-    metric = NULL,
     trControl = NULL,
     methodList = NULL,
     tuneList = NULL,
+    metric = NULL,
     continue_on_fail = FALSE) {
   # Checks
-  if (is.null(trControl)) {
-    trControl <- trainControl()
-  }
   if (is.null(tuneList) && is.null(methodList)) {
     stop("Please either define a methodList or tuneList")
   }
   if (!is.null(methodList) && anyDuplicated(methodList) > 0L) {
-    warning("Duplicate entries in methodList.  Using unqiue methodList values.")
+    warning("Duplicate entries in methodList. Using unqiue methodList values.")
     methodList <- unique(methodList)
   }
 
@@ -196,14 +193,23 @@ caretList <- function(
 
   # Determine class vs reg
   target <- extractCaretTarget(...)
-  is_class <- is.factor(target) || is.character(target) || is.logical(target) || length(unique(target)) == 2L
+  is_class <- is.factor(target) || is.character(target)
+  is_binary <- length(unique(target)) == 2L
 
   # Determine metric
+  default_summary <- caret::defaultSummary
   if (is.null(metric)) {
-    metric <- ifelse(is_class, "ROC", "RMSE")
+    metric <- "RMSE"
+    if (is_class) {
+      metric <- "Accuracy"
+      if (is_binary) {
+        metric <- "ROC"
+        default_summary <- caret::twoClassSummary
+      }
+    }
   }
 
-  # Add indexes to trControl if they are missing
+  # Make a trainControl if it is missing
   if (is.null(trControl)) {
     trControl <- caret::trainControl(
       method = "cv",
@@ -211,7 +217,7 @@ caretList <- function(
       index = caret::createFolds(target, k = 5L, list = TRUE, returnTrain = TRUE),
       savePredictions = "final",
       classProbs = is_class,
-      summaryFunction = ifelse(is_class, caret::twoClassSummary, caret::defaultSummary)
+      summaryFunction = default_summary
     )
   }
 
@@ -219,6 +225,7 @@ caretList <- function(
   # Squish trControl back onto the global arguments list
   global_args <- list(...)
   global_args[["trControl"]] <- trControl
+  global_args[["metric"]] <- metric
 
   # Loop through the tuneLists and fit caret models with those specs
   modelList <- lapply(tuneList, function(m) {

@@ -243,7 +243,7 @@ test_that("Ensembles using custom models work correctly", {
     # Add a non-custom model
     treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
   )
-  train.control <- trainControl(method = "cv", number = 2L, classProbs = TRUE)
+  train.control <- trainControl(method = "cv", number = 2L, classProbs = TRUE, savePredictions = "final")
 
   # Create an ensemble using the above models
   expect_warning(cl <- caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control))

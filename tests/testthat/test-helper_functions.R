@@ -33,7 +33,13 @@ test_that("No predictions generates an error", {
     iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
     tuneLength = 1L, verbose = FALSE,
     methodList = c("rf", "gbm"),
-    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
+    trControl = trainControl(
+      method = "cv",
+      number = 2L,
+      savePredictions = "final",
+      classProbs = TRUE,
+      summaryFunction = twoClassSummary
+    )
   )
   new_model <- train(
     iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
@@ -189,6 +195,7 @@ test_that("extractModelType stops when a classification model did not save probs
       method = "cv",
       number = 5L,
       savePredictions = "final",
+      classProbs = TRUE,
       index = createResample(iris[, 5L], 5L)
     )
     model_list <- caretList(
