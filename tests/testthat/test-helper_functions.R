@@ -17,7 +17,7 @@ data(X.class)
 data(Y.class)
 
 test_that("Recycling generates a warning", {
-  expect_error(caretEnsemble::wtd.sd(matrix(1L:10L, ncol = 2L), w = 1L))
+  expect_error(caretEnsemble::wtd.sd(matrix(1L:10L, ncol = 2L), w = 1L), "'x' and 'w' must have the same length")
 })
 
 test_that("No predictions generates an error", {
@@ -217,7 +217,8 @@ test_that("extractModelType stops when a classification model did not save probs
       trControl = myControl
     )
 
-    expect_error(check_binary_classification(model_list))
+    err <- "caretEnsemble only supports binary classification problems"
+    expect_error(check_binary_classification(model_list), err)
     expect_null(check_binary_classification(models.class))
     expect_null(check_binary_classification(models.reg))
 
@@ -333,7 +334,7 @@ test_that("wtd.sd calculates weighted standard deviation correctly", {
   expect_false(is.na(wtd.sd(x_na, w, na.rm = TRUE)))
 
   # Test error for mismatched lengths
-  expect_error(wtd.sd(x, w[-1L]))
+  expect_error(wtd.sd(x, w[-1L]), "'x' and 'w' must have the same length")
 })
 
 test_that("extractModelType validates caretList correctly", {
@@ -341,7 +342,11 @@ test_that("extractModelType validates caretList correctly", {
   expect_is(sapply(models.reg, extractModelType), "character")
 
   # Test error for non-caretList object
-  expect_error(extractModelType(list(model = lm(Y.reg ~ ., data = as.data.frame(X.reg)))))
+  expect_error(
+    extractModelType(list(model = lm(Y.reg ~ ., data = as.data.frame(X.reg)))),
+    "is(object, \"train\") is not TRUE",
+    fixed = TRUE
+  )
 })
 
 test_that("extractModelType validates model types correctly", {
@@ -435,11 +440,17 @@ test_that("validateExcludedClass validates excluded level correctly", {
   expect_error(validateExcludedClass(c(1L, 2L)), "classification excluded level must have a length of 1: length=2")
   expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
   expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
-  expect_warning(expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"))
-  expect_warning(expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"))
+  expect_warning(
+    expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"),
+    "classification excluded level is not an integer"
+  )
+  expect_warning(
+    expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"),
+    "classification excluded level is not an integer"
+  )
   expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
   txt <- "classification excluded level is not an integer: 2"
-  expect_warning(expect_equal(validateExcludedClass(2.0), 2L), txt)
+  expect_warning(expect_equal(validateExcludedClass(2.0), 2L), txt, "classification excluded level is not an integer")
 })
 
 test_that("validateExcludedClass validates excluded level correctly", {
@@ -447,8 +458,14 @@ test_that("validateExcludedClass validates excluded level correctly", {
   expect_error(validateExcludedClass(c(1L, 2L)), "classification excluded level must have a length of 1: length=2")
   expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
   expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
-  expect_warning(expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"))
-  expect_warning(expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"))
+  expect_warning(
+    expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"),
+    "classification excluded level is not an integer"
+  )
+  expect_warning(
+    expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"),
+    "classification excluded level is not an integer"
+  )
   expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
   txt <- "classification excluded level is not an integer: 2"
   expect_warning(expect_equal(validateExcludedClass(2.0), 2L), txt)
