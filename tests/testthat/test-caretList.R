@@ -5,11 +5,11 @@ suppressMessages({
   library(caret)
   library(kernlab)
 })
-train <- twoClassSim(
+train <- caret::twoClassSim(
   n = 1000L, intercept = -8L, linearVars = 3L,
   noiseVars = 10L, corrVars = 4L, corrValue = 0.6
 )
-test <- twoClassSim(
+test <- caret::twoClassSim(
   n = 1500L, intercept = -7L, linearVars = 3L,
   noiseVars = 10L, corrVars = 4L, corrValue = 0.6
 )
@@ -63,53 +63,68 @@ test_that("Target extraction functions work", {
 
 test_that("caretList errors for bad models", {
   data(iris)
-  expect_error(caretList(Sepal.Width ~ ., iris))
-  expect_warning(caretList(Sepal.Width ~ ., iris, methodList = c("lm", "lm")))
-  expect_warning(expect_is(caretList(Sepal.Width ~ ., iris, methodList = "lm", continue_on_fail = TRUE), "caretList"))
 
-  my_control <- trainControl(method = "cv", number = 2L)
-  bad_bad <- list(
-    bad1 = caretModelSpec(method = "glm", tuneLength = 1L),
-    bad2 = caretModelSpec(method = "glm", tuneLength = 1L)
+  # Basic checks
+  expect_error(caretList(Sepal.Width ~ ., iris), "Please either define a methodList or tuneList")
+  expect_warning(
+    caretList(Sepal.Width ~ ., iris, methodList = c("lm", "lm")),
+    "Duplicate entries in methodList.  Using unqiue methodList values."
   )
+  expect_is(caretList(Sepal.Width ~ ., iris, methodList = "lm", continue_on_fail = TRUE), "caretList")
+
+  # Check that by default a bad model kills the training job
+  my_control <- trainControl(method = "cv", number = 2L)
+  bad <- list(
+    bad = caretModelSpec(method = "glm", tuneLength = 1L)
+  )
+  expect_output(
+    expect_warning(
+      expect_error(
+        caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad, trControl = my_control),
+        regexp = "Stopping" # From caret.train
+      ),
+      regexp = "model fit failed for Fold1"
+    ),
+    regexp = "Something is wrong; all the Accuracy metric values are missing:"
+  )
+  expect_output(
+    expect_warning(
+      expect_error(
+        caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad, trControl = my_control, continue_on_fail = TRUE),
+        regexp = "caret:train failed for all models.  Please inspect your data."
+      ),
+      regexp = "model fit failed for Fold1" # From caretList
+    ),
+    regexp = "Something is wrong; all the Accuracy metric values are missing:"
+  )
+
+  # Check that at least one good model + continue_on_fail works
   good_bad <- list(
     good = caretModelSpec(method = "glmnet", tuneLength = 1L),
     bad = caretModelSpec(method = "glm", tuneLength = 1L)
   )
-  suppressWarnings({
-    invisible(capture.output({
-      expect_error(caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad_bad, trControl = my_control))
-      expect_error(caretList(iris[, 1L:4L], iris[, 5L], tuneList = good_bad, trControl = my_control))
-      expect_error(caretList(
-        iris[, 1L:4L], iris[, 5L],
-        tuneList = bad_bad,
-        trControl = my_control,
-        continue_on_fail = TRUE
-      ))
-      working <- caretList(
-        iris[, 1L:4L], iris[, 5L],
-        tuneList = good_bad,
-        trControl = my_control,
-        continue_on_fail = TRUE
-      )
-      expect_is(working, "caretList")
-    }))
-  })
+  expect_s3_class(
+    expect_output(
+      expect_warning(
+        caretList(iris[, 1L:4L], iris[, 5L], tuneList = good_bad, trControl = my_control, continue_on_fail = TRUE),
+        regexp = "model fit failed for Fold1" # From caretList
+      ),
+      regexp = "Something is wrong; all the Accuracy metric values are missing:"
+    ), "caretList"
+  )
 })
 
 test_that("caretList predictions", {
-  suppressWarnings({
-    models <- caretList(
-      iris[, 1L:2L], iris[, 3L],
-      tuneLength = 1L, verbose = FALSE,
-      methodList = "rf", tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
-      trControl = trainControl(
-        method = "cv",
-        number = 2L, savePredictions = "final",
-        classProbs = TRUE
-      )
+  models <- caretList(
+    iris[, 1L:2L], iris[, 3L],
+    tuneLength = 1L, verbose = FALSE,
+    methodList = "rf", tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
+    trControl = trainControl(
+      method = "cv",
+      number = 2L, savePredictions = "final",
+      classProbs = TRUE
     )
-  })
+  )
   p1 <- predict(models)
   p2 <- predict(models, newdata = iris[100L, 1L:2L])
   p3 <- predict(models, newdata = iris[110L, 1L:2L])
@@ -126,17 +141,15 @@ test_that("caretList predictions", {
   expect_is(p3[[2L]], "numeric")
   expect_named(models, colnames(p3))
 
-  suppressWarnings({
-    models <- caretList(
-      iris[, 1L:2L], iris[, 5L],
-      tuneLength = 1L, verbose = FALSE,
-      methodList = "rf",
-      tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
-      trControl = trainControl(
-        method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE
-      )
+  models <- caretList(
+    iris[, 1L:2L], iris[, 5L],
+    tuneLength = 1L, verbose = FALSE,
+    methodList = "rf",
+    tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE)),
+    trControl = trainControl(
+      method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE
     )
-  })
+  )
 
   p2 <- predict(models, excluded_class_id = 0L)
   p3 <- predict(models, newdata = iris[, 1L:2L], excluded_class_id = 0L)
@@ -167,7 +180,7 @@ test_that("caretList predictions", {
   ) # check the column names are correct and ordered correctly (methodname_classname)
 
   models[[1L]]$modelType <- "Bogus"
-  expect_error(suppressWarnings(predict(models)))
+  expect_error(predict(models))
 })
 
 test_that("as.caretList.list returns a caretList object", {
@@ -247,14 +260,12 @@ test_that("We can fit models with a mix of methodList and tuneList", {
     rpart = caretModelSpec(method = "rpart", tuneLength = 10L),
     rf = caretModelSpec(method = "rf", tuneGrid = data.frame(mtry = 2L))
   )
-  suppressWarnings({
-    test <- caretList(
-      x = iris[, 1L:3L],
-      y = iris[, 4L],
-      methodList = c("knn", "glm"),
-      tuneList = myList
-    )
-  })
+  test <- caretList(
+    x = iris[, 1L:3L],
+    y = iris[, 4L],
+    methodList = c("knn", "glm"),
+    tuneList = myList
+  )
   expect_is(test, "caretList")
   expect_is(caretEnsemble(test), "caretEnsemble")
   expect_length(test, 4L)
@@ -288,25 +299,18 @@ test_that("We can handle different CV methods", {
       verboseIter = FALSE
     )
 
-    suppressWarnings({
-      suppressMessages({
-        models <- caretList(
-          x = iris[, 1L:3L],
-          y = iris[, 4L],
-          trControl = myControl,
-          tuneLength = 2L,
-          methodList = c("rpart", "rf")
-        )
-        ens <- caretStack(models, method = "glm", trControl = trainControl(number = 2L))
-      })
-    })
+    models <- caretList(
+      x = iris[, 1L:3L],
+      y = iris[, 4L],
+      trControl = myControl,
+      tuneLength = 2L,
+      methodList = c("rpart", "rf")
+    )
+    ens <- caretStack(models, method = "glm", trControl = trainControl(number = 2L))
+
     invisible(sapply(models, expect_is, class = "train"))
 
-    suppressWarnings({
-      suppressMessages({
-        ens <- caretEnsemble(models, trControl = trainControl(number = 2L))
-      })
-    })
+    ens <- caretEnsemble(models, trControl = trainControl(number = 2L))
 
     expect_is(ens, "caretEnsemble")
 
@@ -332,16 +336,14 @@ test_that("CV methods we cant handle fail", {
     expect_is(trainControl(method = m, index = 1L:10L, savePredictions = "final"), "list")
 
     # Fail if no index and un-known method
-    expect_error(suppressWarnings(trControlCheck(trainControl(method = m, savePredictions = TRUE))))
+    expect_error(trControlCheck(trainControl(method = m, savePredictions = TRUE)))
 
     # Model itself should fit fine
-    suppressWarnings(
-      model <- train(
-        Sepal.Length ~ Sepal.Width,
-        tuneLength = 1L,
-        data = iris, method = ifelse(m == "oob", "rf", "lm"),
-        trControl = trainControl(method = m, index = 1L:10L)
-      )
+    model <- train(
+      Sepal.Length ~ Sepal.Width,
+      tuneLength = 1L,
+      data = iris, method = ifelse(m == "oob", "rf", "lm"),
+      trControl = trainControl(method = m, index = 1L:10L)
     )
     expect_is(model, "train")
   }
@@ -362,15 +364,13 @@ test_that("Classification models", {
 
   # Simple two method list
   # Warning because we Are going to auto-set indexes
-  suppressWarnings({
-    test1 <- caretList(
-      x = train[, -23L],
-      y = train[, "Class"],
-      metric = "ROC",
-      trControl = myControl,
-      methodList = c("knn", "glm")
-    )
-  })
+  test1 <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    metric = "ROC",
+    trControl = myControl,
+    methodList = c("knn", "glm")
+  )
 
   expect_is(test1, "caretList")
   expect_is(caretEnsemble(test1), "caretEnsemble")
@@ -390,39 +390,33 @@ test_that("Longer tests for Classification models", {
 
   # Simple two method list
   # Warning because we Are going to auto-set indexes
-  suppressWarnings({
-    test1 <- caretList(
-      x = train[, -23L],
-      y = train[, "Class"],
-      metric = "ROC",
-      trControl = myControl,
-      methodList = c("knn", "glm")
-    )
-  })
+  test1 <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    metric = "ROC",
+    trControl = myControl,
+    methodList = c("knn", "glm")
+  )
 
   expect_is(test1, "caretList")
   expect_is(caretEnsemble(test1), "caretEnsemble")
   expect_is(caretEnsemble(test1), "caretEnsemble")
 
-  suppressWarnings({
-    test2 <- caretList(
-      x = train[, -23L],
-      y = train[, "Class"],
-      metric = "ROC",
-      trControl = myControl,
-      methodList = c("knn", "glm", "rpart")
-    )
-  })
+  test2 <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    metric = "ROC",
+    trControl = myControl,
+    methodList = c("knn", "glm", "rpart")
+  )
 
-  suppressWarnings({
-    test3 <- caretList(
-      x = train[, -23L],
-      y = train[, "Class"],
-      metric = "ROC",
-      trControl = myControl,
-      methodList = c("svmLinear", "knn", "glm")
-    )
-  })
+  test3 <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    metric = "ROC",
+    trControl = myControl,
+    methodList = c("svmLinear", "knn", "glm")
+  )
 
   expect_is(test2, "caretList")
   expect_is(test3, "caretList")
@@ -442,27 +436,23 @@ test_that("Test that caretList preserves user specified error functions", {
     returnData = TRUE, verboseIter = FALSE
   )
 
-  suppressWarnings({
-    test1 <- caretList(
-      x = train[, -23L],
-      y = train[, "Class"],
-      tuneLength = 7L,
-      metric = "Kappa",
-      trControl = myControl,
-      methodList = c("knn", "rpart", "glm")
-    )
-  })
+  test1 <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    tuneLength = 7L,
+    metric = "Kappa",
+    trControl = myControl,
+    methodList = c("knn", "rpart", "glm")
+  )
 
-  suppressWarnings({
-    test2 <- caretList(
-      x = train[, -23L],
-      y = train[, "Class"],
-      tuneLength = 4L,
-      metric = "Accuracy",
-      trControl = myControl,
-      methodList = c("knn", "rpart", "glm")
-    )
-  })
+  test2 <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    tuneLength = 4L,
+    metric = "Accuracy",
+    trControl = myControl,
+    methodList = c("knn", "rpart", "glm")
+  )
 
   expect_identical(test1[[1L]]$metric, "Kappa")
   expect_identical(test2[[1L]]$metric, "Accuracy")
@@ -482,27 +472,23 @@ test_that("Test that caretList preserves user specified error functions", {
     returnData = TRUE, verboseIter = FALSE
   )
 
-  suppressWarnings({
-    test1 <- caretList(
-      x = train[, -23L],
-      y = train[, "Class"],
-      tuneLength = 7L,
-      metric = "Kappa",
-      trControl = myControl,
-      methodList = c("knn", "rpart", "glm")
-    )
-  })
+  test1 <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    tuneLength = 7L,
+    metric = "Kappa",
+    trControl = myControl,
+    methodList = c("knn", "rpart", "glm")
+  )
 
-  suppressWarnings({
-    test2 <- caretList(
-      x = train[, -23L],
-      y = train[, "Class"],
-      tuneLength = 4L,
-      metric = "Accuracy",
-      trControl = myControl,
-      methodList = c("knn", "rpart", "glm")
-    )
-  })
+  test2 <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    tuneLength = 4L,
+    metric = "Accuracy",
+    trControl = myControl,
+    methodList = c("knn", "rpart", "glm")
+  )
 
   expect_identical(test1[[1L]]$metric, "Kappa")
   expect_identical(test2[[1L]]$metric, "Accuracy")
@@ -544,14 +530,12 @@ test_that("Users can pass a custom tuneList", {
     )
   )
 
-  suppressWarnings({
-    test2a <- caretList(
-      x = train[, -23L],
-      y = train[, "Class"],
-      trControl = myControl,
-      tuneList = tuneTest
-    )
-  })
+  test2a <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    trControl = myControl,
+    tuneList = tuneTest
+  )
 
   myEns2a <- caretEnsemble(test2a)
   expect_is(myEns2a, "caretEnsemble")
@@ -578,14 +562,12 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
       softmax = FALSE
     )
   )
-  suppressWarnings({
-    test <- caretList(
-      x = train[, -23L],
-      y = train[, "Class"],
-      trControl = myControl,
-      tuneList = tuneTest
-    )
-  })
+  test <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    trControl = myControl,
+    tuneList = tuneTest
+  )
   ens <- caretEnsemble(test)
   expect_is(ens, "caretEnsemble")
   expect_is(test, "caretList")
@@ -602,22 +584,18 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   )
   x <- iris[, 1L:3L]
   y <- iris[, 4L]
-  suppressWarnings({
-    set.seed(42L)
-    test_default <- caretList(
-      x = x,
-      y = y,
-      tuneList = tuneTest
-    )
-  })
-  suppressWarnings({
-    set.seed(42L)
-    test_flma <- caretList(
-      y ~ .,
-      data = data.frame(y = y, x),
-      tuneList = tuneTest
-    )
-  })
+  set.seed(42L)
+  test_default <- caretList(
+    x = x,
+    y = y,
+    tuneList = tuneTest
+  )
+  set.seed(42L)
+  test_flma <- caretList(
+    y ~ .,
+    data = data.frame(y = y, x),
+    tuneList = tuneTest
+  )
   ens_default <- caretEnsemble(test_default)
   ens_flma <- caretEnsemble(test_flma)
   expect_is(ens_default, "caretEnsemble")
@@ -639,26 +617,21 @@ test_that("Regression Models", {
     returnData = TRUE, verboseIter = FALSE
   )
 
-  suppressWarnings({
-    test1 <- caretList(
-      x = train[, c(-23L, -1L)],
-      y = train[, 1L],
-      trControl = myControl2,
-      methodList = c("glm", "lm")
-    )
-  })
+  test1 <- caretList(
+    x = train[, c(-23L, -1L)],
+    y = train[, 1L],
+    trControl = myControl2,
+    methodList = c("glm", "lm")
+  )
+  test2 <- caretList(
+    x = train[, c(-23L, -1L)],
+    y = train[, 1L],
+    trControl = myControl2,
+    methodList = c("glm", "ppr", "lm")
+  )
 
-  suppressWarnings({
-    test2 <- caretList(
-      x = train[, c(-23L, -1L)],
-      y = train[, 1L],
-      trControl = myControl2,
-      methodList = c("glm", "ppr", "lm")
-    )
-  })
-
-  suppressWarnings(ens1 <- caretEnsemble(test1))
-  suppressWarnings(ens2 <- caretEnsemble(test2))
+  ens1 <- caretEnsemble(test1)
+  ens2 <- caretEnsemble(test2)
 
   expect_is(test1, "caretList")
   expect_is(test2, "caretList")

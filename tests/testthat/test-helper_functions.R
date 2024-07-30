@@ -21,23 +21,19 @@ test_that("Recycling generates a warning", {
 })
 
 test_that("No predictions generates an error", {
-  suppressWarnings(
-    models_multi <- caretList(
-      iris[, 1L:2L], iris[, 5L],
-      tuneLength = 1L, verbose = FALSE,
-      methodList = c("rf", "gbm"),
-      trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
-    )
+  models_multi <- caretList(
+    iris[, 1L:2L], iris[, 5L],
+    tuneLength = 1L, verbose = FALSE,
+    methodList = c("rf", "gbm"),
+    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
   )
   expect_is(sapply(models_multi, extractModelType), "character")
 
-  suppressWarnings(
-    models <- caretList(
-      iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
-      tuneLength = 1L, verbose = FALSE,
-      methodList = c("rf", "gbm"),
-      trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
-    )
+  models <- caretList(
+    iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
+    tuneLength = 1L, verbose = FALSE,
+    methodList = c("rf", "gbm"),
+    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
   )
   new_model <- train(
     iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
@@ -91,12 +87,10 @@ test_that("We can predict", {
 
 test_that("predict results same regardless of verbose option", {
   invisible(capture.output({
-    suppressWarnings({
-      expect_is(predict(models.class, newdata = X.class), "data.table")
-      out1 <- predict(models.class, newdata = X.class)
-      out2 <- predict(models.class, verbose = TRUE, newdata = X.class)
-      expect_identical(out1, out2)
-    })
+    expect_is(predict(models.class, newdata = X.class), "data.table")
+    out1 <- predict(models.class, newdata = X.class)
+    out2 <- predict(models.class, verbose = TRUE, newdata = X.class)
+    expect_identical(out1, out2)
 
     expect_is(predict(models.reg, newdata = X.reg), "data.table")
     out1 <- predict(models.reg, newdata = X.reg)
@@ -156,14 +150,12 @@ test_that("Checks generate errors", {
     classProbs = TRUE,
     summaryFunction = twoClassSummary
   )
-  suppressWarnings(
-    x <- caretList(
-      iris[1L:100L, -5L],
-      factor(ifelse(iris[1L:100L, "Species"] == "setosa", "Yes", "No")),
-      metric = "ROC",
-      methodList = c("lda", "rf"),
-      trControl = myControl2
-    )
+  x <- caretList(
+    iris[1L:100L, -5L],
+    factor(ifelse(iris[1L:100L, "Species"] == "setosa", "Yes", "No")),
+    metric = "ROC",
+    methodList = c("lda", "rf"),
+    trControl = myControl2
   )
   x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method = "rpart", trControl = myControl)
   expect_is(sapply(x, extractModelType), "character")

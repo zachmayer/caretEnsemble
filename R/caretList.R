@@ -97,53 +97,6 @@ methodCheck <- function(x) {
   invisible(NULL)
 }
 
-#' @title Check that the trainControl object supplied by the user is valid and has defined re-sampling indexes.
-#' @description This function checks the user-supplied trainControl object and makes
-#' sure it has all the required fields.
-#' If the resampling indexes are missing, it adds them to the model.
-#' If savePredictions=FALSE or "none", this function sets it to "final".
-#' @param x a trainControl object.
-#' @param y the target for the model.  Used to determine resampling indexes.
-#' @importFrom caret createResample createFolds createMultiFolds createDataPartition
-#' @return NULL
-trControlCheck <- function(x, y) {
-  if (length(x$savePredictions) != 1L) {
-    stop("Please pass exactly 1 argument to savePredictions, e.g. savePredictions='final'")
-  }
-
-  if (!(x$savePredictions %in% c("all", "final"))) {
-    warning("trControl$savePredictions not 'all' or 'final'.  Setting to 'final' so we can ensemble the models.")
-    x$savePredictions <- "final"
-  }
-
-  if (is.null(x$index)) {
-    # So each model in the ensemble will have the same resampling indexes
-    warning("indexes not defined in trControl.  Attempting to set them ourselves.")
-    if (x$method == "none") {
-      # All good ensemble methods rely on out-of sample data.
-      # If you really need to ensemble without re-sampling, try the median or mean of the model's predictions.
-      stop("Models that aren't resampled cannot be ensembled.")
-    } else if (x$method == "boot" || x$method == "adaptive_boot") {
-      x$index <- createResample(y, times = x$number, list = TRUE)
-    } else if (x$method == "cv" || x$method == "adaptive_cv") {
-      x$index <- createFolds(y, k = x$number, list = TRUE, returnTrain = TRUE)
-    } else if (x$method == "repeatedcv") {
-      x$index <- createMultiFolds(y, k = x$number, times = x$repeats)
-    } else if (x$method == "LGOCV" || x$method == "adaptive_LGOCV") {
-      x$index <- createDataPartition(
-        y,
-        times = x$number,
-        p = 0.5,
-        list = TRUE,
-        groups = min(5L, length(y))
-      )
-    } else {
-      stop(paste0("caretList can't handle cv method='", x$method, "'. Please specify trControl$index manually"))
-    }
-  }
-  x
-}
-
 #' @title Extracts the target variable from a set of arguments headed to the caret::train function.
 #' @description This function extracts the y variable from a set of arguments headed to a caret::train model.
 #' Since there are 2 methods to call caret::train, this function also has 2 methods.
@@ -182,9 +135,8 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #'
 #' @param ... arguments to pass to \code{\link[caret]{train}}.
 #' These arguments will determine which train method gets dispatched.
-#' @param trControl a \code{\link[caret]{trainControl}} object.
-#' We are going to intercept this object check that it has the
-#' "index" slot defined, and define the indexes if they are not.
+#' @param metric a string, the metric to optimize for.  If NULL, we will choose a good one.
+#' @param trControl a \code{\link[caret]{trainControl}} object.  If null, we will construct a good one.
 #' @param methodList optional, a character vector of caret models to ensemble.
 #' One of methodList or tuneList must be specified.
 #' @param tuneList optional, a NAMED list of caretModelSpec objects.
@@ -217,6 +169,7 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #' }
 caretList <- function(
     ...,
+    metric = NULL,
     trControl = NULL,
     methodList = NULL,
     tuneList = NULL,
@@ -241,16 +194,30 @@ caretList <- function(
   # Make sure tuneList is valid
   tuneList <- tuneCheck(tuneList)
 
-  # Capture global arguments for train as a list
-  global_args <- list(...)
+  # Determine class vs reg
+  target <- extractCaretTarget(...)
+  is_class <- is.factor(target) || is.character(target) || is.logical(target) || length(unique(target)) == 2L
 
-  # Add indexes to trControl if they are missing
-  if (is.null(trControl$index)) {
-    target <- extractCaretTarget(...)
-    trControl <- trControlCheck(x = trControl, y = target)
+  # Determine metric
+  if (is.null(metric)) {
+    metric <- ifelse(is_class, "ROC", "RMSE")
   }
 
+  # Add indexes to trControl if they are missing
+  if (is.null(trControl)) {
+    trControl <- caret::trainControl(
+      method = "cv",
+      number = 5L,
+      index = caret::createFolds(target, k = 5L, list = TRUE, returnTrain = TRUE),
+      savePredictions = "final",
+      classProbs = is_class,
+      summaryFunction = ifelse(is_class, caret::twoClassSummary, caret::defaultSummary)
+    )
+  }
+
+  # Capture global arguments for train as a list
   # Squish trControl back onto the global arguments list
+  global_args <- list(...)
   global_args[["trControl"]] <- trControl
 
   # Loop through the tuneLists and fit caret models with those specs
@@ -268,7 +235,7 @@ caretList <- function(
   modelList <- modelList[!nulls]
 
   if (length(modelList) == 0L) {
-    stop("caret:train failed for all models.  Please inspect your data.")
+    stop("caret:train failed for all models. Please inspect your data.")
   }
   class(modelList) <- c("caretList", "list")
 

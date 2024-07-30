@@ -135,10 +135,10 @@ test_that("No errors are thrown by a generics for ensembles", {
   expect_equal(tp$data$model_name, names(ens.class$models))
   expect_equal(tp2$data$model_name, names(ens.reg$models))
 
-  suppressWarnings(autoplot(ens.class))
-  suppressWarnings(autoplot(ens.reg))
-  suppressWarnings(autoplot(ens.class, xvars = c("Petal.Length", "Petal.Width")))
-  suppressWarnings(autoplot(ens.reg, xvars = c("Petal.Length", "Petal.Width")))
+  autoplot(ens.class)
+  autoplot(ens.reg)
+  autoplot(ens.class, xvars = c("Petal.Length", "Petal.Width"))
+  autoplot(ens.reg, xvars = c("Petal.Length", "Petal.Width"))
   expect_error(autoplot(ens.reg$models[[1L]]))
 
   dev.off()
@@ -188,14 +188,12 @@ test_that("Prediction options are respected in regression", {
   tests <- expand.grid(se = 0L:1L, return_weights = 0L:1L)
   tests <- data.frame(lapply(tests, as.logical))
   for (i in seq_len(nrow(tests))) {
-    suppressWarnings({
-      p <- predict(
-        ens.reg,
-        newdata = X.reg,
-        se = tests[i, "se"],
-        return_weights = tests[i, "return_weights"]
-      )
-    })
+    p <- predict(
+      ens.reg,
+      newdata = X.reg,
+      se = tests[i, "se"],
+      return_weights = tests[i, "return_weights"]
+    )
 
     expect_s3_class(p, "data.table")
 
@@ -212,14 +210,12 @@ test_that("Prediction options are respected in Classification", {
   tests <- expand.grid(se = 0L:1L, return_weights = 0L:1L)
   tests <- data.frame(lapply(tests, as.logical))
   for (i in seq_len(nrow(tests))) {
-    suppressWarnings({
-      p <- predict(
-        ens.class,
-        newdata = X.class,
-        se = tests[i, "se"],
-        return_weights = tests[i, "return_weights"]
-      )
-    })
+    p <- predict(
+      ens.class,
+      newdata = X.class,
+      se = tests[i, "se"],
+      return_weights = tests[i, "return_weights"]
+    )
 
     expect_s3_class(p, "data.table")
 

@@ -33,26 +33,22 @@ myControl_class <- trainControl(
 
 # Regression
 set.seed(482L)
-suppressWarnings({
-  models.reg <- caretList(
-    x = X.reg,
-    y = Y.reg,
-    methodList = c("rf", "glm", "rpart", "treebag"),
-    trControl = myControl_reg
-  )
-})
+models.reg <- caretList(
+  x = X.reg,
+  y = Y.reg,
+  methodList = c("rf", "glm", "rpart", "treebag"),
+  trControl = myControl_reg
+)
 
 # Classification
 set.seed(482L)
-suppressWarnings({
-  models.class <- caretList(
-    x = X.class,
-    y = Y.class,
-    metric = "ROC",
-    methodList = c("rf", "glm", "rpart", "treebag"),
-    trControl = myControl_class
-  )
-})
+models.class <- caretList(
+  x = X.class,
+  y = Y.class,
+  metric = "ROC",
+  methodList = c("rf", "glm", "rpart", "treebag"),
+  trControl = myControl_class
+)
 
 # Save
 usethis::use_data(
