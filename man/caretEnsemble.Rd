@@ -23,14 +23,14 @@ Find a good linear combination of several classification or regression models,
 using linear regression.
 }
 \details{
-Every model in the "library" must be a separate \code{train} object.  For
+Every model in the "library" must be a separate \code{train} object. For
 example, if you wish to combine a random forests with several different
-values of mtry, you must build a model for each value of mtry.  If you
+values of mtry, you must build a model for each value of mtry. If you
 use several values of mtry in one train model, (e.g. tuneGrid =
 expand.grid(.mtry=2:5)), caret will select the best value of mtry
-before we get a chance to include it in the ensemble.  By default,
+before we get a chance to include it in the ensemble. By default,
 RMSE is used to ensemble regression models, and AUC is used to ensemble
-Classification models.  This function does not currently support multi-class
+Classification models. This function does not currently support multi-class
 problems
 }
 \note{

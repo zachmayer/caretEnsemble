@@ -28,14 +28,14 @@
 \item{return_weights}{a logical indicating whether prediction weights for each model
 should be returned}
 
-\item{excluded_class_id}{Which class to exclude from predictions.  Note that if the caretStack
+\item{excluded_class_id}{Which class to exclude from predictions. Note that if the caretStack
 was trained with an excluded_class_id, that class is ALWAYS excluded from the predictions from the
-caretList of input models.  excluded_class_id for predict.caretStack is for the final ensemble model.
+caretList of input models. excluded_class_id for predict.caretStack is for the final ensemble model.
 So different classes could be excluded from the caretList models and the final ensemble model.}
 
 \item{return_class_only}{a logical indicating whether to return only the class predictions as a factor.
-If TRUE, the return will be a factor rather than a data.table.  This is a convenience function,
-and should not be widely used.  For example if you have a downstream process that consumes
+If TRUE, the return will be a factor rather than a data.table. This is a convenience function,
+and should not be widely used. For example if you have a downstream process that consumes
 the output of the model, you should have that process consume probabilities for each class.
 This will make it easier to change prediction probability thresholds if needed in the future.}
 

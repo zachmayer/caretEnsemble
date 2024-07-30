@@ -2,14 +2,14 @@
 #'
 #' @description Stack several \code{\link[caret]{train}} models using a \code{\link[caret]{train}} model.
 #'
-#' @details Uses either transfer learning or stacking to stack models.  Assumes that all models were trained on
-#' the same number of rows of data, with the same target values.  The features, cross-validation strategies,
-#' and model types (class vs reg) may vary however.  If your stack of models were trained with different number of
+#' @details Uses either transfer learning or stacking to stack models. Assumes that all models were trained on
+#' the same number of rows of data, with the same target values. The features, cross-validation strategies,
+#' and model types (class vs reg) may vary however. If your stack of models were trained with different number of
 #' rows, please provide new_X and new_y so the models can predict on a common set of data for stacking.
 #'
 #' If your models were trained on different columns, you should use stacking.
 #'
-#' If you have both differing rows and columns in your model set, you are out of luck.  You need at least
+#' If you have both differing rows and columns in your model set, you are out of luck. You need at least
 #' a common set of rows during training (for stacking) or a common set of columns at
 #' inference time for transfer learning.
 #'
@@ -59,7 +59,7 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
   # Validators
   excluded_class_id <- validateExcludedClass(excluded_class_id)
 
-  # Predict for each model.  If new_X is NULL, will return stacked predictions
+  # Predict for each model. If new_X is NULL, will return stacked predictions
   preds <- predict.caretList(all.models, newdata = new_X, excluded_class_id = excluded_class_id)
   if (!is.null(new_X)) {
     stopifnot(nrow(preds) == nrow(new_X))
@@ -112,13 +112,13 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' @param level tolerance/confidence level
 #' @param return_weights a logical indicating whether prediction weights for each model
 #' should be returned
-#' @param excluded_class_id Which class to exclude from predictions.  Note that if the caretStack
+#' @param excluded_class_id Which class to exclude from predictions. Note that if the caretStack
 #' was trained with an excluded_class_id, that class is ALWAYS excluded from the predictions from the
-#' caretList of input models.  excluded_class_id for predict.caretStack is for the final ensemble model.
+#' caretList of input models. excluded_class_id for predict.caretStack is for the final ensemble model.
 #' So different classes could be excluded from the caretList models and the final ensemble model.
 #' @param return_class_only a logical indicating whether to return only the class predictions as a factor.
-#' If TRUE, the return will be a factor rather than a data.table.  This is a convenience function,
-#' and should not be widely used.  For example if you have a downstream process that consumes
+#' If TRUE, the return will be a factor rather than a data.table. This is a convenience function,
+#' and should not be widely used. For example if you have a downstream process that consumes
 #' the output of the model, you should have that process consume probabilities for each class.
 #' This will make it easier to change prediction probability thresholds if needed in the future.
 #' @param verbose a logical indicating whether to print progress
@@ -164,7 +164,7 @@ predict.caretStack <- function(
   # If the excluded class wasn't set at train time, set it
   if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
     object[["excluded_class_id"]] <- 1L
-    warning("No excluded_class_id set.  Setting to 1L.")
+    warning("No excluded_class_id set. Setting to 1L.")
   }
 
   # If we're predicting on new data, or we need standard errors, we need predictions from the submodels
@@ -323,7 +323,7 @@ plot.caretStack <- function(x, ...) {
 }
 
 #' @title Comparison dotplot for a caretStack object
-#' @description This is a function to make a dotplot from a caretStack.  It uses dotplot from the
+#' @description This is a function to make a dotplot from a caretStack. It uses dotplot from the
 #' caret package on all the models in the ensemble, excluding the final ensemble model.At the moment,
 #' this function only works if the ensembling model has the same number of resamples as the component models.
 #' @param x An object of class caretStack

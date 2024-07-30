@@ -28,11 +28,11 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   expect_identical(Y.levels, levels(Y.test))
   expect_length(Y.levels, 2L)
 
-  # Manually generate fold indexes.  Note that this must be
+  # Manually generate fold indexes. Note that this must be
   # done explicitly because using built-in caret functions like
   # "createFolds" generate splits that are dependent upon the alphabetical
   # order of the factor levels in the response (which is what this test module
-  # needs to prove invariance to).  This happens because createFolds uses
+  # needs to prove invariance to). This happens because createFolds uses
   # the base table function to create class frequency counts and that table
   # command sorts results alphabetically.
   k <- 3L
@@ -53,7 +53,7 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
 
   # Verify that the observed responses in each fold, for each model,
   # have the same levels and that the first level is equal to the first
-  # level in the original data (i.e. Y.class).  This check exists to
+  # level in the original data (i.e. Y.class). This check exists to
   # avoid regressions to bugs like this:
   # https://github.com/zachmayer/caretEnsemble/pull/190
   unique.levels <- unique(sapply(model.ens$models, function(x) levels(x$pred$obs)[1L]))
@@ -85,11 +85,11 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   cmat.cutoff <- confusionMatrix(Y.cutoff, Y.test, positive = Y.levels[pos.level])
 
   # Verify that the positive level of the Y response is equal to the positive
-  # class label used by caret.  This could potentially become untrue if
+  # class label used by caret. This could potentially become untrue if
   # the levels of the response were ever rearranged by caretEnsemble at some point.
   expect_identical(cmat.pred$positive, Y.levels[pos.level])
 
-  # Verify that the accuracy score on predicted classes is relatively high.  This
+  # Verify that the accuracy score on predicted classes is relatively high. This
   # check exists to avoid previous errors where classifer ensemble predictions were
   # being made using the incorrect level of the response, causing the opposite
   # class labels to be predicted with new data.
@@ -108,7 +108,7 @@ test_that("Ensembled classifiers do not rearrange outcome factor levels", {
   runBinaryLevelValidation(Y.train, Y.test, pos.level = 1L)
 
   # Now reverse the assigment of the response labels as well as
-  # the levels of the response factor.  Reversing the assignment
+  # the levels of the response factor. Reversing the assignment
   # is necessary to make sure the expected accuracy numbers are
   # the same (i.e. Making a "No" into a "Yes" in the response means
   # predictions of the first class will still be as accurate).

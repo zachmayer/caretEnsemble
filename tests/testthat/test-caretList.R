@@ -259,7 +259,6 @@ test_that("Character | in model names is transformed into a point", {
 context("We can fit models with a mix of methodList and tuneList")
 ################################################
 test_that("We can fit models with a mix of methodList and tuneList", {
-  skip_on_cran()
   myList <- list(
     rpart = caretModelSpec(method = "rpart", tuneLength = 10L),
     rf = caretModelSpec(method = "rf", tuneGrid = data.frame(mtry = 2L))
@@ -284,7 +283,6 @@ test_that("We can fit models with a mix of methodList and tuneList", {
 context("We can handle different CV methods")
 ################################################
 test_that("We can handle different CV methods", {
-  skip_on_cran()
   for (m in c(
     "boot",
     "adaptive_boot",
@@ -406,7 +404,6 @@ test_that("Classification models", {
 })
 
 test_that("Longer tests for Classification models", {
-  skip_on_cran()
   # Specify controls
   myControl <- trainControl(
     method = "cv", number = 3L,
@@ -456,7 +453,6 @@ test_that("Longer tests for Classification models", {
 })
 
 test_that("Test that caretList preserves user specified error functions", {
-  skip_on_cran()
   myControl <- trainControl(
     method = "cv", number = 3L,
     p = 0.75, savePredictions = "final",
@@ -534,7 +530,6 @@ test_that("Test that caretList preserves user specified error functions", {
 })
 
 test_that("Users can pass a custom tuneList", {
-  skip_on_cran()
   # User specifies methods and tuning parameters specifically using a tuneList
   myControl <- trainControl(
     method = "cv",
@@ -580,7 +575,6 @@ test_that("Users can pass a custom tuneList", {
 
 context("User tuneTest parameters are respected and model is ensembled")
 test_that("User tuneTest parameters are respected and model is ensembled", {
-  skip_on_cran()
   myControl <- trainControl(
     method = "cv",
     number = 3L,

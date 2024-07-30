@@ -201,7 +201,6 @@ test_that("extractModelType stops when a classification model did not save probs
   context("Test helper functions for multiclass classification")
 
   test_that("Check errors in caretEnsemble for multiclass classification work", {
-    skip_on_cran()
     data(iris)
     myControl <- trainControl(
       method = "cv",
@@ -262,7 +261,7 @@ test_that("extractModelType stops when a classification model did not save probs
     # Stacking with the excluded level should work
     invisible(caretStack(model_list, method = "knn", excluded_class_id = 1L))
 
-    # Stacking with too great of a level should work.  No error or warning.
+    # Stacking with too great of a level should work. No error or warning.
     # TODO: maybe caretStack should raise a warning if excluded_class_id is too high?
     # Should also validate it?
     stack <- caretStack(model_list, method = "knn", excluded_class_id = 4L)

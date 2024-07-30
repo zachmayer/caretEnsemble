@@ -16,5 +16,5 @@ a data.table with predictions, observeds, and residuals
 }
 \description{
 This function extracts the best predictions and observations from a train object
-and then calculates residuals.  It only uses one class for classification models, by default class 2.
+and then calculates residuals. It only uses one class for classification models, by default class 2.
 }

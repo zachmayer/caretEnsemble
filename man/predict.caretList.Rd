@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{an object of class caretList}
 
-\item{newdata}{New data for predictions.  It can be NULL, but this is ill-advised.}
+\item{newdata}{New data for predictions. It can be NULL, but this is ill-advised.}
 
 \item{verbose}{Logical. If FALSE no progress bar is printed if TRUE a progress
 bar is shown. Default FALSE.}

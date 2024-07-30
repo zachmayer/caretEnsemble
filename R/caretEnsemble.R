@@ -20,14 +20,14 @@ check_binary_classification <- function(list_of_models) {
 #' @description Find a good linear combination of several classification or regression models,
 #' using linear regression.
 #'
-#' @details Every model in the "library" must be a separate \code{train} object.  For
+#' @details Every model in the "library" must be a separate \code{train} object. For
 #' example, if you wish to combine a random forests with several different
-#' values of mtry, you must build a model for each value of mtry.  If you
+#' values of mtry, you must build a model for each value of mtry. If you
 #' use several values of mtry in one train model, (e.g. tuneGrid =
 #' expand.grid(.mtry=2:5)), caret will select the best value of mtry
-#' before we get a chance to include it in the ensemble.  By default,
+#' before we get a chance to include it in the ensemble. By default,
 #' RMSE is used to ensemble regression models, and AUC is used to ensemble
-#' Classification models.  This function does not currently support multi-class
+#' Classification models. This function does not currently support multi-class
 #' problems
 #' @note Currently when missing values are present in the training data, weights
 #' are calculated using only observations which are complete across all models
@@ -240,7 +240,7 @@ plot.caretEnsemble <- function(x, ...) {
 
 #' @title Extract the best predictions and observations from a train object
 #' @description This function extracts the best predictions and observations from a train object
-#' and then calculates residuals.  It only uses one class for classification models, by default class 2.
+#' and then calculates residuals. It only uses one class for classification models, by default class 2.
 #' @param object a \code{train} object
 #' @param show_class_id For classification only: which class level to use for residuals
 #' @return a data.table with predictions, observeds, and residuals
