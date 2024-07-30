@@ -9,7 +9,6 @@ data(Y.class)
 
 context("Parallelization works")
 test_that("predict.caretEnsemble works in parallel", {
-  skip_on_cran()
   X_reg_big <- data.table::rbindlist(lapply(1L:100L, function(x) data.table(X.reg)))
   ens_reg <- caretEnsemble(models.reg)
 

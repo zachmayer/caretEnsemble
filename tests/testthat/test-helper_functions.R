@@ -201,7 +201,6 @@ test_that("extractModelType stops when a classification model did not save probs
   context("Test helper functions for multiclass classification")
 
   test_that("Check errors in caretEnsemble for multiclass classification work", {
-    skip_on_cran()
     data(iris)
     myControl <- trainControl(
       method = "cv",
