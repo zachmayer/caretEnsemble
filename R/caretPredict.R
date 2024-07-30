@@ -111,8 +111,8 @@ extractModelType <- function(object, validate_for_stacking = TRUE) {
 #' - Optionally drops one predicted class for classification models.
 #' - Always returns a \code{\link[data.table]{data.table}}
 #' @param object a \code{\link[caret]{train}} object
-#' @param newdata New data to use for predictions.  If NULL, stacked predictions from the training data are returned.
-#' @param excluded_class_id an integer indicating the class to exclude.  If 0L, no class is excluded
+#' @param newdata New data to use for predictions. If NULL, stacked predictions from the training data are returned.
+#' @param excluded_class_id an integer indicating the class to exclude. If 0L, no class is excluded
 #' @param ... additional arguments to pass to \code{\link[caret]{predict.train}}, if newdata is not NULL
 #' @return a data.table
 caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {

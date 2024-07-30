@@ -51,7 +51,7 @@ checkCustomModel <- function(x) {
   if (is.null(x$method)) {
     stop(paste(
       "Custom models must be defined with a \"method\" attribute containing the name",
-      "by which that model should be referenced.  Example: my.glm.model$method <- \"custom_glm\""
+      "by which that model should be referenced. Example: my.glm.model$method <- \"custom_glm\""
     ))
   }
   x
@@ -77,7 +77,7 @@ methodCheck <- function(x) {
       data.frame(type = "native", model = m, stringsAsFactors = FALSE)
     } else {
       stop(paste0(
-        "Method \"", m, "\" is invalid.  Methods must either be character names ",
+        "Method \"", m, "\" is invalid. Methods must either be character names ",
         "supported by caret (e.g. \"gbm\") or modelInfo lists ",
         "(e.g. getModelInfo(\"gbm\", regex=F))"
       ))
@@ -135,13 +135,13 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #'
 #' @param ... arguments to pass to \code{\link[caret]{train}}.
 #' These arguments will determine which train method gets dispatched.
-#' @param trControl a \code{\link[caret]{trainControl}} object.  If null, we will construct a good one.
+#' @param trControl a \code{\link[caret]{trainControl}} object. If null, we will construct a good one.
 #' @param methodList optional, a character vector of caret models to ensemble.
 #' One of methodList or tuneList must be specified.
 #' @param tuneList optional, a NAMED list of caretModelSpec objects.
 #' This much more flexible than methodList and allows the
 #' specification of model-specific parameters (e.g. passing trace=FALSE to nnet)
-#' @param metric a string, the metric to optimize for.  If NULL, we will choose a good one.
+#' @param metric a string, the metric to optimize for. If NULL, we will choose a good one.
 #' @param continue_on_fail, logical, should a valid caretList be returned that
 #' excludes models that fail, default is FALSE
 #' @return A list of \code{\link[caret]{train}} objects. If the model fails to build,
@@ -326,7 +326,7 @@ as.caretList.list <- function(object) {
 #' @description Make a matrix of predictions from a list of caret models
 #'
 #' @param object an object of class caretList
-#' @param newdata New data for predictions.  It can be NULL, but this is ill-advised.
+#' @param newdata New data for predictions. It can be NULL, but this is ill-advised.
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
 #' @param excluded_class_id Integer. The class id to drop when predicting for multiclass

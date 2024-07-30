@@ -1,4 +1,4 @@
-# NOTE: I don't see how this tests the parallel code.  It seems to just test caretEnsemble
+# NOTE: I don't see how this tests the parallel code. It seems to just test caretEnsemble
 data(models.reg)
 data(X.reg)
 data(Y.reg)

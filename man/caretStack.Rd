@@ -28,14 +28,14 @@ S3 caretStack object
 Stack several \code{\link[caret]{train}} models using a \code{\link[caret]{train}} model.
 }
 \details{
-Uses either transfer learning or stacking to stack models.  Assumes that all models were trained on
-the same number of rows of data, with the same target values.  The features, cross-validation strategies,
-and model types (class vs reg) may vary however.  If your stack of models were trained with different number of
+Uses either transfer learning or stacking to stack models. Assumes that all models were trained on
+the same number of rows of data, with the same target values. The features, cross-validation strategies,
+and model types (class vs reg) may vary however. If your stack of models were trained with different number of
 rows, please provide new_X and new_y so the models can predict on a common set of data for stacking.
 
 If your models were trained on different columns, you should use stacking.
 
-If you have both differing rows and columns in your model set, you are out of luck.  You need at least
+If you have both differing rows and columns in your model set, you are out of luck. You need at least
 a common set of rows during training (for stacking) or a common set of columns at
 inference time for transfer learning.
 }
