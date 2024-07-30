@@ -29,18 +29,16 @@ ctrl1 <- trainControl(
 ens_ctrl <- trainControl(number = 2L)
 
 # a model of class caretList
-suppressWarnings({
-  model_list1 <- caretList(
-    Class ~ .,
-    data = Sonar,
-    trControl = ctrl1,
-    tuneList = list(
-      glm = caretModelSpec(method = "glm", family = "binomial"),
-      rpart = caretModelSpec(method = "rpart")
-    ),
-    metric = "ROC"
-  )
-})
+model_list1 <- caretList(
+  Class ~ .,
+  data = Sonar,
+  trControl = ctrl1,
+  tuneList = list(
+    glm = caretModelSpec(method = "rf"),
+    rpart = caretModelSpec(method = "rpart")
+  ),
+  metric = "ROC"
+)
 
 # a model of class train
 rfTrain <- train(

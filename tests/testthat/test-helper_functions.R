@@ -17,26 +17,28 @@ data(X.class)
 data(Y.class)
 
 test_that("Recycling generates a warning", {
-  expect_error(caretEnsemble::wtd.sd(matrix(1L:10L, ncol = 2L), w = 1L))
+  expect_error(caretEnsemble::wtd.sd(matrix(1L:10L, ncol = 2L), w = 1L), "'x' and 'w' must have the same length")
 })
 
 test_that("No predictions generates an error", {
-  suppressWarnings(
-    models_multi <- caretList(
-      iris[, 1L:2L], iris[, 5L],
-      tuneLength = 1L, verbose = FALSE,
-      methodList = c("rf", "gbm"),
-      trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
-    )
+  models_multi <- caretList(
+    iris[, 1L:2L], iris[, 5L],
+    tuneLength = 1L, verbose = FALSE,
+    methodList = c("rf", "gbm"),
+    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
   )
   expect_is(sapply(models_multi, extractModelType), "character")
 
-  suppressWarnings(
-    models <- caretList(
-      iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
-      tuneLength = 1L, verbose = FALSE,
-      methodList = c("rf", "gbm"),
-      trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
+  models <- caretList(
+    iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
+    tuneLength = 1L, verbose = FALSE,
+    methodList = c("rf", "gbm"),
+    trControl = trainControl(
+      method = "cv",
+      number = 2L,
+      savePredictions = "final",
+      classProbs = TRUE,
+      summaryFunction = twoClassSummary
     )
   )
   new_model <- train(
@@ -91,12 +93,10 @@ test_that("We can predict", {
 
 test_that("predict results same regardless of verbose option", {
   invisible(capture.output({
-    suppressWarnings({
-      expect_is(predict(models.class, newdata = X.class), "data.table")
-      out1 <- predict(models.class, newdata = X.class)
-      out2 <- predict(models.class, verbose = TRUE, newdata = X.class)
-      expect_identical(out1, out2)
-    })
+    expect_is(predict(models.class, newdata = X.class), "data.table")
+    out1 <- predict(models.class, newdata = X.class)
+    out2 <- predict(models.class, verbose = TRUE, newdata = X.class)
+    expect_identical(out1, out2)
 
     expect_is(predict(models.reg, newdata = X.reg), "data.table")
     out1 <- predict(models.reg, newdata = X.reg)
@@ -130,42 +130,52 @@ test_that("wtd.sd handles NA values correctly", {
   expect_false(is.na(caretEnsemble::wtd.sd(x1, w = w1, na.rm = TRUE)))
 })
 
-test_that("Checks generate errors", {
+test_that("caretList supports combined regression, binary, multiclass", {
   set.seed(42L)
-  myControl <- trainControl(method = "cv", number = 5L, savePredictions = "final", classProbs = TRUE)
-  expect_warning(
-    x <- caretList(
-      Sepal.Length ~ Sepal.Width,
-      iris,
-      methodList = c("glm", "lm"),
-      trControl = myControl
-    )
+
+  myControl_reg <- trainControl(
+    method = "cv",
+    number = 5L,
+    savePredictions = "final"
   )
-  expect_is(predict(x), "data.table")
 
-  # Add an rpart model
-  x$rpart <- train(Species ~ Sepal.Width, iris, method = "rpart", trControl = myControl)
-  expect_is(sapply(x, extractModelType), "character")
-  expect_is(predict(x), "data.table")
-
-  set.seed(42L)
-  myControl2 <- trainControl(
+  myControl_bin <- trainControl(
     method = "cv",
     number = 10L,
     savePredictions = "final",
     classProbs = TRUE,
     summaryFunction = twoClassSummary
   )
-  suppressWarnings(
-    x <- caretList(
-      iris[1L:100L, -5L],
-      factor(ifelse(iris[1L:100L, "Species"] == "setosa", "Yes", "No")),
-      metric = "ROC",
-      methodList = c("lda", "rf"),
-      trControl = myControl2
-    )
+
+  myControl_multi <- trainControl(
+    method = "cv",
+    number = 10L,
+    savePredictions = "final",
+    classProbs = TRUE
   )
-  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method = "rpart", trControl = myControl)
+
+  x <- caretList(
+    Sepal.Length ~ Sepal.Width,
+    iris,
+    methodList = c("glm", "lm"),
+    trControl = myControl_reg
+  )
+  expect_is(predict(x), "data.table")
+
+  # Add an rpart model
+  x$rpart <- train(Species ~ Sepal.Width, iris, method = "rpart", trControl = myControl_multi)
+  expect_is(sapply(x, extractModelType), "character")
+  expect_is(predict(x), "data.table")
+
+  set.seed(42L)
+  x <- caretList(
+    iris[1L:100L, -5L],
+    factor(ifelse(iris[1L:100L, "Species"] == "setosa", "Yes", "No")),
+    metric = "ROC",
+    methodList = c("lda", "rf"),
+    trControl = myControl_bin
+  )
+  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method = "rpart", trControl = myControl_multi)
   expect_is(sapply(x, extractModelType), "character")
 })
 
@@ -197,6 +207,7 @@ test_that("extractModelType stops when a classification model did not save probs
       method = "cv",
       number = 5L,
       savePredictions = "final",
+      classProbs = TRUE,
       index = createResample(iris[, 5L], 5L)
     )
     model_list <- caretList(
@@ -206,7 +217,8 @@ test_that("extractModelType stops when a classification model did not save probs
       trControl = myControl
     )
 
-    expect_error(check_binary_classification(model_list))
+    err <- "caretEnsemble only supports binary classification problems"
+    expect_error(check_binary_classification(model_list), err)
     expect_null(check_binary_classification(models.class))
     expect_null(check_binary_classification(models.reg))
 
@@ -224,9 +236,10 @@ test_that("extractModelType stops when a classification model did not save probs
     expect_equal(validateExcludedClass(4L), 4L)
 
     # Decimals work with a warning
-    expect_warning(expect_equal(validateExcludedClass(0.0), 0L))
-    expect_warning(expect_equal(validateExcludedClass(1.0), 1L))
-    expect_warning(expect_equal(validateExcludedClass(4.0), 4L))
+    wrn <- "classification excluded level is not an integer:"
+    expect_warning(expect_equal(validateExcludedClass(0.0), 0L), wrn)
+    expect_warning(expect_equal(validateExcludedClass(1.0), 1L), wrn)
+    expect_warning(expect_equal(validateExcludedClass(4.0), 4L), wrn)
 
     # Less than 0 will error
     expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
@@ -285,15 +298,17 @@ test_that("validateExcludedClass stops for non-finite input", {
 test_that("validateExcludedClass stops for non-positive input", {
   invalid_input <- -1.0
   err <- "classification excluded level must be >= 0: -1"
-  expect_warning(expect_error(validateExcludedClass(invalid_input), err))
+  wrn <- "classification excluded level is not an integer:"
+  expect_warning(expect_error(validateExcludedClass(invalid_input), err), wrn)
 })
 
 test_that("validateExcludedClass warns for non-integer input", {
-  expect_warning(
-    validated <- validateExcludedClass(1.1),
-    "classification excluded level is not an integer: 1.1"
+  expect_equal(
+    expect_warning(
+      validated <- validateExcludedClass(1.1),
+      "classification excluded level is not an integer: 1.1"
+    ), 1L
   )
-  expect_equal(validated, 1L)
 })
 
 test_that("validateExcludedClass passes for valid input", {
@@ -319,7 +334,7 @@ test_that("wtd.sd calculates weighted standard deviation correctly", {
   expect_false(is.na(wtd.sd(x_na, w, na.rm = TRUE)))
 
   # Test error for mismatched lengths
-  expect_error(wtd.sd(x, w[-1L]))
+  expect_error(wtd.sd(x, w[-1L]), "'x' and 'w' must have the same length")
 })
 
 test_that("extractModelType validates caretList correctly", {
@@ -327,7 +342,11 @@ test_that("extractModelType validates caretList correctly", {
   expect_is(sapply(models.reg, extractModelType), "character")
 
   # Test error for non-caretList object
-  expect_error(extractModelType(list(model = lm(Y.reg ~ ., data = as.data.frame(X.reg)))))
+  expect_error(
+    extractModelType(list(model = lm(Y.reg ~ ., data = as.data.frame(X.reg)))),
+    "is(object, \"train\") is not TRUE",
+    fixed = TRUE
+  )
 })
 
 test_that("extractModelType validates model types correctly", {
@@ -421,11 +440,17 @@ test_that("validateExcludedClass validates excluded level correctly", {
   expect_error(validateExcludedClass(c(1L, 2L)), "classification excluded level must have a length of 1: length=2")
   expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
   expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
-  expect_warning(expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"))
-  expect_warning(expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"))
+  expect_warning(
+    expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"),
+    "classification excluded level is not an integer"
+  )
+  expect_warning(
+    expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"),
+    "classification excluded level is not an integer"
+  )
   expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
   txt <- "classification excluded level is not an integer: 2"
-  expect_warning(expect_equal(validateExcludedClass(2.0), 2L), txt)
+  expect_warning(expect_equal(validateExcludedClass(2.0), 2L), txt, "classification excluded level is not an integer")
 })
 
 test_that("validateExcludedClass validates excluded level correctly", {
@@ -433,8 +458,14 @@ test_that("validateExcludedClass validates excluded level correctly", {
   expect_error(validateExcludedClass(c(1L, 2L)), "classification excluded level must have a length of 1: length=2")
   expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
   expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
-  expect_warning(expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"))
-  expect_warning(expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"))
+  expect_warning(
+    expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"),
+    "classification excluded level is not an integer"
+  )
+  expect_warning(
+    expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"),
+    "classification excluded level is not an integer"
+  )
   expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
   txt <- "classification excluded level is not an integer: 2"
   expect_warning(expect_equal(validateExcludedClass(2.0), 2L), txt)

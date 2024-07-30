@@ -9,6 +9,7 @@ caretList(
   trControl = NULL,
   methodList = NULL,
   tuneList = NULL,
+  metric = NULL,
   continue_on_fail = FALSE
 )
 }
@@ -16,9 +17,7 @@ caretList(
 \item{...}{arguments to pass to \code{\link[caret]{train}}.
 These arguments will determine which train method gets dispatched.}
 
-\item{trControl}{a \code{\link[caret]{trainControl}} object.
-We are going to intercept this object check that it has the
-"index" slot defined, and define the indexes if they are not.}
+\item{trControl}{a \code{\link[caret]{trainControl}} object.  If null, we will construct a good one.}
 
 \item{methodList}{optional, a character vector of caret models to ensemble.
 One of methodList or tuneList must be specified.}
@@ -26,6 +25,8 @@ One of methodList or tuneList must be specified.}
 \item{tuneList}{optional, a NAMED list of caretModelSpec objects.
 This much more flexible than methodList and allows the
 specification of model-specific parameters (e.g. passing trace=FALSE to nnet)}
+
+\item{metric}{a string, the metric to optimize for.  If NULL, we will choose a good one.}
 
 \item{continue_on_fail, }{logical, should a valid caretList be returned that
 excludes models that fail, default is FALSE}

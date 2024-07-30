@@ -132,7 +132,7 @@ test_that("Target class selection configuration works", {
   excluded_class <- validateExcludedClass(2L)
 
   # Should error
-  expect_error(validateExcludedClass("x"))
+  expect_error(validateExcludedClass("x"), "classification excluded level must be numeric")
 
   # Check that we can exclude the first class
   Y.levels <- levels(Y.train)

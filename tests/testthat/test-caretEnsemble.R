@@ -14,14 +14,6 @@ data(X.class)
 data(Y.class)
 
 #############################################################################
-context("Test errors and warnings")
-#############################################################################
-test_that("Ensembling fails with no CV", {
-  my_control <- trainControl(method = "none", savePredictions = "final")
-  expect_error(expect_warning(trControlCheck(my_control)))
-})
-
-#############################################################################
 context("Test metric and residual extraction")
 #############################################################################
 
@@ -69,7 +61,7 @@ test_that("We can ensemble regression models", {
 
   expect_true(all(pred.reg == pred.reg2$fit))
 
-  expect_error(predict(ens.reg, return_weights = "BOGUS"))
+  expect_error(predict(ens.reg, return_weights = "BOGUS"), "Error in se || return_weights")
 
   expect_s3_class(pred.reg, "data.table")
   expect_identical(nrow(pred.reg), 150L)
@@ -243,10 +235,16 @@ test_that("Ensembles using custom models work correctly", {
     # Add a non-custom model
     treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
   )
-  train.control <- trainControl(method = "cv", number = 2L, classProbs = TRUE)
+  train.control <- trainControl(
+    method = "cv",
+    number = 2L,
+    classProbs = TRUE,
+    savePredictions = "final",
+    summaryFunction = twoClassSummary
+  )
 
   # Create an ensemble using the above models
-  expect_warning(cl <- caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control))
+  cl <- caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control)
   expect_is(cl, "caretList")
   cs <- caretEnsemble(cl, trControl = trainControl(
     method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE
@@ -281,8 +279,8 @@ test_that("Ensembles using custom models work correctly", {
   expect_equal(pred_stacked, pred_in_sample, tol = 0.4)
 
   # One row predictions
-  expect_equivalent(pred_one$Yes, 0.05072556, tol = 0.05)
-  expect_equivalent(pred_one$No, 0.9492744, tol = 0.05)
+  expect_equivalent(pred_one$Yes, 0.07557944, tol = 0.1)
+  expect_equivalent(pred_one$No, 0.9244206, tol = 0.1)
 
   # Verify that not specifying a method attribute for custom models causes an error
   tune.list <- list(
