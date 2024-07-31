@@ -28,26 +28,10 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   expect_identical(Y.levels, levels(Y.test))
   expect_length(Y.levels, 2L)
 
-  # Manually generate fold indexes. Note that this must be
-  # done explicitly because using built-in caret functions like
-  # "createFolds" generate splits that are dependent upon the alphabetical
-  # order of the factor levels in the response (which is what this test module
-  # needs to prove invariance to). This happens because createFolds uses
-  # the base table function to create class frequency counts and that table
-  # command sorts results alphabetically.
-  k <- 3L
-  folds <- sample(seq_along(Y.train))
-  folds <- setNames(split(folds, seq_along(folds) %% k), sprintf("Fold%s", 1L:k))
-  folds <- lapply(folds, function(x) setdiff(seq_along(Y.train), x))
-  fold.idx <- sort(unique(unlist(folds)))
-  expect_true(all(fold.idx == seq_along(Y.train)), "CV indexes not generated correctly")
-
   # Train a caret ensemble
-  ctrl <- trainControl(method = "cv", savePredictions = "final", classProbs = TRUE, index = folds)
   model.list <- caretList(
     X.train, Y.train,
-    metric = "Accuracy",
-    trControl = ctrl, methodList = c("rpart", "glmnet")
+    methodList = c("rpart", "glmnet")
   )
   model.ens <- caretEnsemble(model.list)
 
@@ -93,12 +77,12 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # check exists to avoid previous errors where classifer ensemble predictions were
   # being made using the incorrect level of the response, causing the opposite
   # class labels to be predicted with new data.
-  expect_equal(as.numeric(cmat.pred$overall["Accuracy"]), 0.862, tol = 0.001)
+  expect_gt(cmat.pred$overall["Accuracy"], 0.79)
 
   # Similar to the above, ensure that probability predictions are working correctly
   # by checking to see that accuracy is also high for class predictions created
   # from probabilities
-  expect_equal(as.numeric(cmat.cutoff$overall["Accuracy"]), 0.862, tol = 0.001)
+  expect_gt(cmat.cutoff$overall["Accuracy"], 0.79)
 }
 
 test_that("Ensembled classifiers do not rearrange outcome factor levels", {

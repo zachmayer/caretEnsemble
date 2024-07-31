@@ -79,30 +79,30 @@ test_that("Metric is used correctly", {
 
   # Get an incorrect metric
   err <- "metric %in% names(x$results) is not TRUE"
-  expect_error(getMetric(ens.class$models[[3L]], metric = "RMSE"), err, fixed = TRUE)
-  expect_error(getMetric(ens.reg$models[[2L]], metric = "ROC"), err, fixed = TRUE)
+  expect_error(getMetric(ens.class$models[[3L]], "RMSE"), err, fixed = TRUE)
+  expect_error(getMetric(ens.reg$models[[2L]], "ROC"), err, fixed = TRUE)
 
   # Correct metric
-  expect_equal(getMetric(ens.class$models[[1L]], metric = "ROC"), 0.9293333, tol = 0.1)
-  expect_equal(getMetric(ens.class$models[[2L]], metric = "ROC"), 0.9406667, tol = 0.1)
-  expect_equal(getMetric(ens.class$models[[3L]], metric = "ROC"), 0.8826667, tol = 0.1)
-  expect_equal(getMetric(ens.class$models[[4L]], metric = "ROC"), 0.9153333, tol = 0.1)
+  expect_equal(getMetric(ens.class$models[[1L]], "ROC"), 0.9293333, tol = 0.1)
+  expect_equal(getMetric(ens.class$models[[2L]], "ROC"), 0.9406667, tol = 0.1)
+  expect_equal(getMetric(ens.class$models[[3L]], "ROC"), 0.8826667, tol = 0.1)
+  expect_equal(getMetric(ens.class$models[[4L]], "ROC"), 0.9153333, tol = 0.1)
 
   # Correct metric
-  expect_equal(getMetric(ens.reg$models[[1L]], metric = "RMSE"), 0.3146584, tol = 0.1)
-  expect_equal(getMetric(ens.reg$models[[2L]], metric = "RMSE"), 0.439482, tol = 0.1)
-  expect_equal(getMetric(ens.reg$models[[3L]], metric = "RMSE"), 0.3361409, tol = 0.1)
+  expect_equal(getMetric(ens.reg$models[[1L]], "RMSE"), 0.3146584, tol = 0.1)
+  expect_equal(getMetric(ens.reg$models[[2L]], "RMSE"), 0.439482, tol = 0.1)
+  expect_equal(getMetric(ens.reg$models[[3L]], "RMSE"), 0.3361409, tol = 0.1)
 
   # Correct metric
-  expect_equal(getMetric(ens.class$models[[1L]], metric = "ROC", return_sd = TRUE), 0.05897897, tol = 0.1)
-  expect_equal(getMetric(ens.class$models[[2L]], metric = "ROC", return_sd = TRUE), 0.05196865, tol = 0.1)
-  expect_equal(getMetric(ens.class$models[[3L]], metric = "ROC", return_sd = TRUE), 0.05985304, tol = 0.1)
-  expect_equal(getMetric(ens.class$models[[4L]], metric = "ROC", return_sd = TRUE), 0.07554248, tol = 0.1)
+  expect_equal(getMetric(ens.class$models[[1L]], "ROC", return_sd = TRUE), 0.05897897, tol = 0.1)
+  expect_equal(getMetric(ens.class$models[[2L]], "ROC", return_sd = TRUE), 0.05196865, tol = 0.1)
+  expect_equal(getMetric(ens.class$models[[3L]], "ROC", return_sd = TRUE), 0.05985304, tol = 0.1)
+  expect_equal(getMetric(ens.class$models[[4L]], "ROC", return_sd = TRUE), 0.07554248, tol = 0.1)
 
   # Correct metric
-  expect_equal(getMetric(ens.reg$models[[1L]], metric = "RMSE", return_sd = TRUE), 0.05839238, tol = 0.1)
-  expect_equal(getMetric(ens.reg$models[[2L]], metric = "RMSE", return_sd = TRUE), 0.06043732, tol = 0.1)
-  expect_equal(getMetric(ens.reg$models[[3L]], metric = "RMSE", return_sd = TRUE), 0.06942881, tol = 0.1)
+  expect_equal(getMetric(ens.reg$models[[1L]], "RMSE", return_sd = TRUE), 0.05839238, tol = 0.1)
+  expect_equal(getMetric(ens.reg$models[[2L]], "RMSE", return_sd = TRUE), 0.06043732, tol = 0.1)
+  expect_equal(getMetric(ens.reg$models[[3L]], "RMSE", return_sd = TRUE), 0.06942881, tol = 0.1)
 })
 
 context("Testing caretEnsemble generics")

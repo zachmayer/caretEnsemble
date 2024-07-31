@@ -3,17 +3,9 @@ context("caretList and caretStack work for multiclass problems")
 #############################################################################
 test_that("We can predict with caretList and caretStack multiclass problems", {
   data(iris)
-  my_control <- caret::trainControl(
-    method = "boot",
-    number = 5L,
-    savePredictions = "final",
-    classProbs = TRUE,
-    index = caret::createResample(iris[, 5L], 5L)
-  )
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
-    trControl = my_control,
     methodList = c("glmnet", "rpart")
   )
 
@@ -34,17 +26,9 @@ test_that("We can predict with caretList and caretStack multiclass problems", {
 
 test_that("Columns for caretList predictions are correct and ordered", {
   data(iris)
-  my_control <- caret::trainControl(
-    method = "boot",
-    number = 5L,
-    savePredictions = "final",
-    classProbs = TRUE,
-    index = caret::createResample(iris[, 5L], 5L)
-  )
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
-    trControl = my_control,
     methodList = c("glmnet", "rpart"),
     tuneList = list(
       nnet = caretModelSpec(method = "nnet", trace = FALSE)
@@ -72,17 +56,9 @@ test_that("Columns for caretList predictions are correct and ordered", {
 
 test_that("Columns for caretStack are correct", {
   data(iris)
-  my_control <- caret::trainControl(
-    method = "boot",
-    number = 5L,
-    savePredictions = "final",
-    classProbs = TRUE,
-    index = caret::createResample(iris[, 5L], 5L)
-  )
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
-    trControl = my_control,
     methodList = "rpart",
     tuneList = list(
       nnet = caretModelSpec(method = "nnet", trace = FALSE)
@@ -110,18 +86,9 @@ test_that("Periods are supported in method and class names in caretList and care
   # Rename values and levels to have underscores
   levels(iris[, 5L]) <- c("setosa_1", "versicolor_2", "virginica_3")
   iris[, 5L] <- factor(iris[, 5L])
-
-  my_control <- caret::trainControl(
-    method = "boot",
-    number = 5L,
-    savePredictions = "final",
-    classProbs = TRUE,
-    index = caret::createResample(iris[, 5L], 5L)
-  )
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
-    trControl = my_control,
     methodList = c("glmnet", "rpart"),
     tuneList = list(
       nnet_1 = caretModelSpec(
@@ -163,18 +130,9 @@ test_that("We can make a confusion matrix", {
   train_indices <- sample.int(n, n * 0.8)
   train_data <- iris[train_indices, ]
   test_data <- iris[-train_indices, ]
-
-  my_control <- caret::trainControl(
-    method = "boot",
-    number = 5L,
-    savePredictions = "final",
-    classProbs = TRUE,
-    index = caret::createResample(train_data[, 5L], 5L)
-  )
   model_list <- caretList(
     x = train_data[, -5L],
     y = train_data[, 5L],
-    trControl = my_control,
     methodList = c("glmnet", "rpart"),
     tuneList = list(
       nnet = caretModelSpec(method = "nnet", trace = FALSE)
@@ -200,17 +158,9 @@ test_that("Multiclass is not supported for caretEnsemble", {
   data(iris)
   data(models.class)
   data(models.reg)
-  my_control <- caret::trainControl(
-    method = "boot",
-    number = 5L,
-    savePredictions = "final",
-    classProbs = TRUE,
-    index = caret::createResample(iris[, 5L], 5L)
-  )
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
-    trControl = my_control,
     methodList = c("glmnet", "rpart"),
     tuneList = list(
       nnet = caretModelSpec(method = "nnet", trace = FALSE)
@@ -226,17 +176,9 @@ test_that("caretList and caretStack handle imbalanced multiclass data", {
   X <- data.table::data.table(x1 = rnorm(n), x2 = rnorm(n))
   y <- factor(c(rep("A", 700L), rep("B", 200L), rep("C", 100L)))
 
-  my_control <- trainControl(
-    method = "cv",
-    number = 3L,
-    savePredictions = "final",
-    classProbs = TRUE
-  )
-
   model_list <- caretList(
     x = X,
     y = y,
-    trControl = my_control,
     methodList = c("rpart", "glmnet")
   )
 
@@ -256,17 +198,9 @@ test_that("caretList and caretStack handle a large number of classes", {
   X <- data.table::data.table(x1 = rnorm(n), x2 = rnorm(n))
   y <- factor(sample(paste0("Class", 1L:100L), n, replace = TRUE))
 
-  my_control <- trainControl(
-    method = "cv",
-    number = 2L,
-    savePredictions = "final",
-    classProbs = TRUE
-  )
-
   model_list <- caretList(
     x = X,
     y = y,
-    trControl = my_control,
     methodList = "rpart"
   )
 
@@ -284,16 +218,9 @@ test_that("caretList and caretStack handle ordinal multiclass data", {
   Boston$chas <- as.factor(Boston$chas)
   Boston$rad <- factor(paste0("rad_", Boston$rad), ordered = TRUE)
 
-  my_control <- trainControl(
-    method = "cv",
-    number = 2L,
-    savePredictions = "final",
-    classProbs = TRUE
-  )
   model_list <- caretList(
     rad ~ .,
     data = Boston,
-    trControl = my_control,
     methodList = c("rpart", "glmnet")
   )
 
@@ -311,17 +238,9 @@ test_that("caretList and caretStack handle ordinal multiclass data", {
 test_that("caretList and caretStack produce consistent probability predictions", {
   data(iris)
 
-  my_control <- trainControl(
-    method = "cv",
-    number = 3L,
-    savePredictions = "final",
-    classProbs = TRUE
-  )
-
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
-    trControl = my_control,
     methodList = c("rpart", "glmnet")
   )
 
@@ -344,17 +263,9 @@ test_that("caretList and caretStack handle new levels in prediction data", {
   test_data$Species <- factor(as.character(test_data$Species), levels = c(levels(iris$Species), "NewSpecies"))
   test_data$Species[1L] <- "NewSpecies"
 
-  my_control <- trainControl(
-    method = "cv",
-    number = 2L,
-    savePredictions = "final",
-    classProbs = TRUE
-  )
-
   model_list <- caretList(
     x = train_data[, -5L],
     y = train_data[, 5L],
-    trControl = my_control,
     methodList = c("rf", "rpart")
   )
 

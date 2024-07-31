@@ -45,7 +45,6 @@ set.seed(482L)
 models.class <- caretList(
   x = X.class,
   y = Y.class,
-  metric = "ROC",
   methodList = c("rf", "glm", "rpart", "treebag"),
   trControl = myControl_class
 )

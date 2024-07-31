@@ -202,14 +202,12 @@ caretList <- function(
   is_binary <- length(unique(target)) == 2L
 
   # Determine metric
-  default_summary <- caret::defaultSummary
   if (is.null(metric)) {
     metric <- "RMSE"
     if (is_class) {
       metric <- "Accuracy"
       if (is_binary) {
         metric <- "ROC"
-        default_summary <- caret::twoClassSummary
       }
     }
   }
@@ -222,7 +220,7 @@ caretList <- function(
       index = caret::createFolds(target, k = 5L, list = TRUE, returnTrain = TRUE),
       savePredictions = "final",
       classProbs = is_class,
-      summaryFunction = default_summary,
+      summaryFunction = ifelse(is_class && is_binary, caret::twoClassSummary, caret::defaultSummary),
       returnData = FALSE
     )
   }

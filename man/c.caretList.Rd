@@ -19,22 +19,19 @@ class caretList for future ensembling
 \examples{
 \dontrun{
 model_list1 <- caretList(Class ~ .,
-  data = Sonar, trControl = ctrl1,
+  data = Sonar,
   tuneList = list(
     glm = caretModelSpec(method = "glm", family = "binomial"),
     rpart = caretModelSpec(method = "rpart")
-  ),
-  metric = "ROC"
+  )
 )
 
 model_list2 <- caretList(Class ~ .,
   data = Sonar,
-  trControl = ctrl1,
   tuneList = list(
     glm = caretModelSpec(method = "rpart"),
     rpart = caretModelSpec(method = "rf")
-  ),
-  metric = "ROC"
+  )
 )
 
 bigList <- c(model_list1, model_list2)
