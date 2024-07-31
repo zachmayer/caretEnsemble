@@ -1,7 +1,5 @@
 context("Does binary class selection work?")
-library(caret)
-library(testthat)
-library(caretEnsemble)
+
 library(testthat)
 
 # Load and prepare data for subsequent tests
@@ -12,7 +10,7 @@ data(X.class)
 data(Y.class)
 
 # Create 80/20 train/test split
-index <- createDataPartition(Y.class, p = 0.8)[[1L]]
+index <- caret::createDataPartition(Y.class, p = 0.8)[[1L]]
 X.train <- X.class[index, ]
 X.test <- X.class[-index, ]
 Y.train <- Y.class[index]
@@ -65,8 +63,8 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   )
 
   # Create confusion matricies for each class prediction vector
-  cmat.pred <- confusionMatrix(Y.pred, Y.test, positive = Y.levels[pos.level])
-  cmat.cutoff <- confusionMatrix(Y.cutoff, Y.test, positive = Y.levels[pos.level])
+  cmat.pred <- caret::confusionMatrix(Y.pred, Y.test, positive = Y.levels[pos.level])
+  cmat.cutoff <- caret::confusionMatrix(Y.cutoff, Y.test, positive = Y.levels[pos.level])
 
   # Verify that the positive level of the Y response is equal to the positive
   # class label used by caret. This could potentially become untrue if

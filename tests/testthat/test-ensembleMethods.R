@@ -3,7 +3,6 @@
 # make update-test-fixtures
 
 context("Does variable importance work?")
-library(caret)
 
 data(models.reg)
 data(X.reg)
@@ -15,8 +14,8 @@ data(Y.class)
 
 test_that("We can get variable importance in ensembles", {
   set.seed(2239L)
-  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
-  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
+  ens.class <- caretEnsemble(models.class, trControl = caret::trainControl(method = "none"))
+  ens.reg <- caretEnsemble(models.reg, trControl = caret::trainControl(method = "none"))
   expect_s3_class(caret::varImp(ens.class), "data.table")
   expect_s3_class(caret::varImp(ens.class, scale = TRUE), "data.table")
   expect_s3_class(caret::varImp(ens.reg), "data.table")
@@ -26,7 +25,7 @@ test_that("We can get variable importance in ensembles", {
 test_that("caret::varImp works for caretEnsembles", {
   set.seed(2239L)
   for (models in list(models.class, models.reg)) {
-    ens <- caretEnsemble(models, trControl = trainControl(method = "none"))
+    ens <- caretEnsemble(models, trControl = caret::trainControl(method = "none"))
     expected_names <- c("var", "overall", names(ens$models))
     expected_var_names <- c(
       "Intercept",
@@ -47,8 +46,8 @@ test_that("caret::varImp works for caretEnsembles", {
 
 test_that("We get the right dimensions back", {
   set.seed(2239L)
-  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
-  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
+  ens.class <- caretEnsemble(models.class, trControl = caret::trainControl(method = "none"))
+  ens.reg <- caretEnsemble(models.reg, trControl = caret::trainControl(method = "none"))
   expect_equal(ncol(caret::varImp(ens.class)), 6L)
   expect_equal(ncol(caret::varImp(ens.reg)), 6L)
   expect_equal(nrow(caret::varImp(ens.class)), 6L)
@@ -64,15 +63,15 @@ test_that("Metric is used correctly", {
   ens.class <- caretEnsemble(
     models.class,
     metric = "ROC",
-    trControl = trainControl(
+    trControl = caret::trainControl(
       number = 2L,
-      summaryFunction = twoClassSummary,
+      summaryFunction = caret::twoClassSummary,
       classProbs = TRUE
     )
   )
 
   # Make ensemble
-  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(number = 2L))
+  ens.reg <- caretEnsemble(models.reg, trControl = caret::trainControl(number = 2L))
 
   # Get an incorrect metric
   err <- "metric %in% names(x$results) is not TRUE"
@@ -111,14 +110,14 @@ test_that("No errors are thrown by a generics for ensembles", {
   ens.class <- caretEnsemble(
     models.class,
     metric = "ROC",
-    trControl = trainControl(
+    trControl = caret::trainControl(
       number = 2L,
-      summaryFunction = twoClassSummary,
+      summaryFunction = caret::twoClassSummary,
       classProbs = TRUE,
       savePredictions = TRUE
     )
   )
-  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(number = 2L, savePredictions = TRUE))
+  ens.reg <- caretEnsemble(models.reg, trControl = caret::trainControl(number = 2L, savePredictions = TRUE))
   expect_output(summary(ens.class), "ROC")
   expect_output(summary(ens.reg), "RMSE")
 
@@ -152,11 +151,11 @@ test_that("Do model results in caretEnsemble match component models - classifica
   ens.class <- caretEnsemble(
     models.class,
     metric = "ROC",
-    trControl = trainControl(
-      number = 2L, summaryFunction = twoClassSummary, classProbs = TRUE
+    trControl = caret::trainControl(
+      number = 2L, summaryFunction = caret::twoClassSummary, classProbs = TRUE
     )
   )
-  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(number = 2L))
+  ens.reg <- caretEnsemble(models.reg, trControl = caret::trainControl(number = 2L))
   modres1 <- extractModelMetrics(ens.class)
   modres2 <- extractModelMetrics(ens.reg)
   expect_s3_class(modres2, "data.table")
@@ -164,8 +163,8 @@ test_that("Do model results in caretEnsemble match component models - classifica
 })
 
 test_that("Do model results in caretEnsemble match component models - regression", {
-  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
-  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
+  ens.reg <- caretEnsemble(models.reg, trControl = caret::trainControl(method = "none"))
+  ens.class <- caretEnsemble(models.class, trControl = caret::trainControl(method = "none"))
   newDat <- ens.class$models[[3L]]$trainingData
   newDat[2L, 2L] <- NA
   newDat[3L, 3L] <- NA
@@ -180,7 +179,7 @@ test_that("Do model results in caretEnsemble match component models - regression
 })
 
 test_that("Prediction options are respected in regression", {
-  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
+  ens.reg <- caretEnsemble(models.reg, trControl = caret::trainControl(method = "none"))
   tests <- expand.grid(se = 0L:1L, return_weights = 0L:1L)
   tests <- data.table::as.data.table(lapply(tests, as.logical))
   for (i in seq_len(nrow(tests))) {
@@ -202,7 +201,7 @@ test_that("Prediction options are respected in regression", {
 })
 
 test_that("Prediction options are respected in Classification", {
-  ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
+  ens.class <- caretEnsemble(models.class, trControl = caret::trainControl(method = "none"))
   tests <- expand.grid(se = 0L:1L, return_weights = 0L:1L)
   tests <- data.table::as.data.table(lapply(tests, as.logical))
   for (i in seq_len(nrow(tests))) {

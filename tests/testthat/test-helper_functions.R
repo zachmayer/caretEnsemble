@@ -1,8 +1,3 @@
-suppressMessages({
-  library(testthat)
-  library(caret)
-})
-
 ########################################################################
 context("Do the helper functions work for regression objects?")
 ########################################################################
@@ -32,16 +27,16 @@ test_that("No predictions generates an error", {
     tuneLength = 1L, verbose = FALSE,
     methodList = c("rf", "gbm")
   )
-  new_model <- train(
+  new_model <- caret::train(
     iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
     tuneLength = 1L,
     method = "glmnet",
     metric = "ROC",
-    trControl = trainControl(
+    trControl = caret::trainControl(
       method = "cv",
       number = 2L,
       classProbs = TRUE,
-      summaryFunction = twoClassSummary,
+      summaryFunction = caret::twoClassSummary,
       savePredictions = "final"
     )
   )

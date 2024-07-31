@@ -9,13 +9,6 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
-```{r, echo=TRUE, results="hide"}
-library(caretEnsemble)
-library(caret)
-library(mlbench)
-library(plyr)
-```
-
 `caretEnsemble` is a package for making ensembles of caret models. You should already be somewhat familiar with the caret package before trying out `caretEnsemble`.
 
 `caretEnsemble` has 3 primary functions: **`caretList`**, **`caretEnsemble`** and **`caretStack`**. `caretList` is used to build lists of caret models on the same training data, with the same re-sampling parameters. `caretEnsemble` and `caretStack` are used to create ensemble models from such lists of caret models. `caretEnsemble` uses a glm to create a simple linear blend of models and `caretStack` uses a caret model to combine the outputs from several component caret models.
@@ -27,15 +20,15 @@ library(plyr)
 `caretEnsemble` has 2 arguments that can be used to specify which models to fit: `methodList` and `tuneList`. `methodList` is a simple character vector of methods that will be fit with the default `train` parameters, while `tuneList` can be used to customize the call to each component model and will be discussed in more detail later. First, lets build an example dataset (adapted from the caret vignette):
 ```{r, echo=TRUE, results="hide"}
 # Adapted from the caret vignette
-data(Sonar)
+data(Sonar, package = "mlbench")
 set.seed(107L)
-inTrain <- createDataPartition(y = Sonar$Class, p = 0.75, list = FALSE)
+inTrain <- caret::createDataPartition(y = Sonar$Class, p = 0.75, list = FALSE)
 training <- Sonar[inTrain, ]
 testing <- Sonar[-inTrain, ]
 ```
 
 ```{r, echo=TRUE, results="hide", warning=FALSE}
-model_list <- caretList(
+model_list <- caretEnsemble::caretList(
   Class ~ .,
   data = training,
   methodList = c("glmnet", "rpart")
@@ -53,14 +46,14 @@ knitr::kable(p)
 
 If you desire more control over the model fit, use the `caretModelSpec` to construct a list of model specifications for the `tuneList` argument. This argument can be used to fit several different variants of the same model, and can also be used to pass arguments through `train` down to the component functions (e.g. `trace=FALSE` for `nnet`):
 ```{r, echo=TRUE, results="hide", warning=FALSE}
-model_list_big <- caretList(
+model_list_big <- caretEnsemble::caretList(
   Class ~ .,
   data = training,
   methodList = c("glmnet", "rpart"),
   tuneList = list(
-    rf1 = caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 2L)),
-    rf2 = caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 10L), preProcess = "pca"),
-    nn = caretModelSpec(method = "nnet", tuneLength = 2L, trace = FALSE)
+    rf1 = caretEnsemble::caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 2L)),
+    rf2 = caretEnsemble::caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 10L), preProcess = "pca"),
+    nn = caretEnsemble::caretModelSpec(method = "nnet", tuneLength = 2L, trace = FALSE)
   )
 )
 ```
@@ -70,24 +63,24 @@ Finally, you should note that `caretList` does not support custom caret models. 
 ## caretEnsemble
 `caretList` is the preferred way to construct list of caret models in this package, as it will ensure the resampling indexes are identical across all models. Lets take a closer look at our list of models:
 ```{r, echo=TRUE, fig.show="hold"}
-lattice::xyplot(resamples(model_list))
+lattice::xyplot(caret::resamples(model_list))
 ```
     
 As you can see from this plot, these 2 models are uncorrelated, and the rpart model is occasionally anti-predictive, with a one re-sample showing AUC of 0.46.
 
 We can confirm the 2 model"s correlation with the `modelCor` function from caret (caret has a lot of convenient functions for analyzing lists of models):
 ```{r, echo=TRUE}
-caret::modelCor(resamples(model_list))
+caret::modelCor(caret::resamples(model_list))
 ```
 
 These 2 models make a good candidate for an ensemble: their predictions are fairly uncorrelated, but their overall accuracy is similar. We do a simple, linear greedy optimization on AUC using caretEnsemble:
 ```{r, echo=TRUE}
-greedy_ensemble <- caretEnsemble(
+greedy_ensemble <- caretEnsemble::caretEnsemble(
   model_list,
   metric = "ROC",
-  trControl = trainControl(
+  trControl = caret::trainControl(
     method = "cv",
-    summaryFunction = twoClassSummary,
+    summaryFunction = caret::twoClassSummary,
     classProbs = TRUE
   )
 )
@@ -125,14 +118,14 @@ knitr::kable(caret::varImp(greedy_ensemble))
 
 ## caretStack
 ```{r, echo=TRUE}
-glm_ensemble <- caretStack(
+glm_ensemble <- caretEnsemble::caretStack(
   model_list,
   method = "glm",
   metric = "ROC",
-  trControl = trainControl(
+  trControl = caret::trainControl(
     method = "cv",
     classProbs = TRUE,
-    summaryFunction = twoClassSummary
+    summaryFunction = caret::twoClassSummary
   )
 )
 model_preds2 <- model_preds
@@ -146,16 +139,16 @@ Note that `glm_ensemble$ens_model` is a regular caret object of class `train`. T
 
 We can also use more sophisticated ensembles than simple linear weights, but these models are much more susceptible to over-fitting, and generally require large sets of resamples to train on (n=50 or higher for bootstrap samples). Lets try one anyways:
 ```{r, echo=TRUE}
-gbm_ensemble <- caretStack(
+gbm_ensemble <- caretEnsemble::caretStack(
   model_list,
   method = "gbm",
   verbose = FALSE,
   tuneLength = 5L,
   metric = "ROC",
-  trControl = trainControl(
+  trControl = caret::trainControl(
     method = "cv",
     classProbs = TRUE,
-    summaryFunction = twoClassSummary
+    summaryFunction = caret::twoClassSummary
   )
 )
 model_preds3 <- model_preds

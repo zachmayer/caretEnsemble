@@ -1,10 +1,6 @@
 # Test caretList
 set.seed(442L)
-suppressMessages({
-  library(testthat)
-  library(caret)
-  library(kernlab)
-})
+
 train <- caret::twoClassSim(
   n = 1000L, intercept = -8L, linearVars = 3L,
   noiseVars = 10L, corrVars = 4L, corrValue = 0.6
@@ -317,13 +313,13 @@ test_that("Non standard cv methods work", {
   models <- lapply(
     c("boot632", "LOOCV", "none"),
     function(m) {
-      model <- train(
+      model <- caret::train(
         x = iris[, 1L:2L],
         y = iris[, 3L],
         tuneLength = 1L,
         data = iris,
         method = "rf",
-        trControl = trainControl(
+        trControl = caret::trainControl(
           method = m,
           savePredictions = "final"
         )
@@ -706,7 +702,7 @@ test_that("caretList handles custom performance metrics", {
     y = iris[, 5L],
     metric = "default",
     methodList = c("rpart", "rf"),
-    trControl = trainControl(
+    trControl = caret::trainControl(
       method = "cv",
       number = 2L,
       summaryFunction = function(data, lev = NULL, model = NULL) c(default = mean(data$obs == data$pred)),

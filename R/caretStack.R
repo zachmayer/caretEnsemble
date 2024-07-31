@@ -29,7 +29,6 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:50, 1:2],
 #'   y = iris[1:50, 3],
@@ -134,7 +133,6 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' @method predict caretStack
 #' @examples
 #' \dontrun{
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -266,7 +264,6 @@ is.caretStack <- function(object) {
 #' @export
 #' @examples
 #' \dontrun{
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -287,7 +284,6 @@ summary.caretStack <- function(object, ...) {
 #' @export
 #' @examples
 #' \dontrun{
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -312,7 +308,6 @@ print.caretStack <- function(x, ...) {
 #' @method plot caretStack
 #' @examples
 #' \dontrun{
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -335,7 +330,6 @@ plot.caretStack <- function(x, ...) {
 #' @examples
 #' \dontrun{
 #' set.seed(42)
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],

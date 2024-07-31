@@ -41,7 +41,6 @@ inference time for transfer learning.
 }
 \examples{
 \dontrun{
-library("rpart")
 models <- caretList(
   x = iris[1:50, 1:2],
   y = iris[1:50, 3],

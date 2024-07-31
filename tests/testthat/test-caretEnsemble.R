@@ -2,9 +2,6 @@
 # UPDATE THE FIXTURES!
 # make update-test-fixtures
 
-library(testthat)
-library(caret)
-
 data(models.reg)
 data(X.reg)
 data(Y.reg)
@@ -19,7 +16,7 @@ context("Test metric and residual extraction")
 
 test_that("We can extract metrics", {
   data(iris)
-  mod <- train(
+  mod <- caret::train(
     iris[, 1L:2L], iris[, 3L],
     method = "lm"
   )
@@ -34,7 +31,7 @@ test_that("We can extract metrics", {
 
 test_that("We can extract resdiuals from train regression objects", {
   data(iris)
-  mod <- train(
+  mod <- caret::train(
     iris[, 1L:2L], iris[, 3L],
     method = "lm"
   )
@@ -95,7 +92,7 @@ test_that("We can ensemble models of different predictors", {
   Y.reg <- iris[, 1L]
   X.reg <- model.matrix(~., iris[, -1L])
   mseeds <- vector(mode = "list", length = 12L)
-  my_control <- trainControl(
+  my_control <- caret::trainControl(
     method = "cv", number = 2L,
     p = 0.75,
     savePrediction = TRUE,
@@ -104,10 +101,10 @@ test_that("We can ensemble models of different predictors", {
 
   set.seed(482L)
   nestedList <- list(
-    glm1 = train(x = X.reg[, c(-1L, -2L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
-    glm2 = train(x = X.reg[, c(-1L, -3L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
-    glm3 = train(x = X.reg[, c(-1L, -2L, -3L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
-    glm4 = train(x = X.reg[, c(-1L, -4L, -6L)], y = Y.reg, method = "glm", trControl = my_control)
+    glm1 = caret::train(x = X.reg[, c(-1L, -2L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
+    glm2 = caret::train(x = X.reg[, c(-1L, -3L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
+    glm3 = caret::train(x = X.reg[, c(-1L, -2L, -3L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
+    glm4 = caret::train(x = X.reg[, c(-1L, -4L, -6L)], y = Y.reg, method = "glm", trControl = my_control)
   )
   nestedList <- as.caretList(nestedList)
 
@@ -163,7 +160,7 @@ test_that("caretEnsemble works for classification models", {
   set.seed(1234L)
   ens.class <- caretEnsemble(
     models.class,
-    trControl = trainControl(
+    trControl = caret::trainControl(
       method = "cv",
       number = 2L,
       savePredictions = "final",
@@ -226,7 +223,7 @@ test_that("Ensembles using custom models work correctly", {
   cl <- caretList(X.class, Y.class, tuneList = tune.list)
   cs <- caretEnsemble(
     cl,
-    trControl = trainControl(
+    trControl = caret::trainControl(
       method = "cv",
       number = 2L,
       savePredictions = "final",

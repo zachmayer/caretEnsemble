@@ -1,11 +1,5 @@
 # test-S3-generic-extensions
 set.seed(107L)
-suppressMessages({
-  library(testthat)
-  library(caret)
-  library(caretEnsemble)
-  library(mlbench)
-})
 
 data(models.class)
 data(X.class)
@@ -14,17 +8,17 @@ data(models.reg)
 data(X.reg)
 data(Y.reg)
 
-data(Sonar)
+data(Sonar, package = "mlbench")
 
 # A common control to use for both test fixtures
-my_control <- trainControl(
+my_control <- caret::trainControl(
   method = "cv",
   number = 2L,
   savePredictions = "final",
-  summaryFunction = twoClassSummary,
+  summaryFunction = caret::twoClassSummary,
   classProbs = TRUE,
   verboseIter = FALSE,
-  index = createResample(Sonar$Class, 3L)
+  index = caret::createResample(Sonar$Class, 3L)
 )
 
 # a model of class caretList
@@ -39,7 +33,7 @@ model_list1 <- caretList(
 )
 
 # a model of class train
-rpart_model <- train(
+rpart_model <- caret::train(
   Class ~ .,
   data = Sonar,
   tuneLength = 2L,

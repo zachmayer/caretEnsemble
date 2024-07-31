@@ -1,6 +1,3 @@
-library(testthat)
-library(caret)
-
 data(models.reg)
 data(X.reg)
 data(Y.reg)
@@ -214,11 +211,11 @@ test_that("caretStack handles different metrics", {
       models.class,
       method = "glm",
       metric = metric,
-      trControl = trainControl(
+      trControl = caret::trainControl(
         method = "cv",
         number = 3L,
         classProbs = TRUE,
-        summaryFunction = twoClassSummary
+        summaryFunction = caret::twoClassSummary
       )
     )
     expect_s3_class(stack, "caretStack")
@@ -240,7 +237,7 @@ test_that("caretStack handles upsampling data", {
     x = imbalanced_data[, 1L:4L],
     y = imbalanced_data$Species,
     methodList = "rpart",
-    trControl = trainControl(
+    trControl = caret::trainControl(
       method = "cv",
       number = 3L,
       classProbs = TRUE,
@@ -282,7 +279,7 @@ test_that("caretStack handles custom performance function", {
       model_list,
       method = "glm",
       metric = "default",
-      trControl = trainControl(method = "cv", number = 3L, summaryFunction = custom_summary)
+      trControl = caret::trainControl(method = "cv", number = 3L, summaryFunction = custom_summary)
     )
 
     expect_s3_class(stack, "caretStack")
@@ -333,7 +330,7 @@ test_that("caretStack works if both new_X and new_Y are supplied", {
     new_y = Y.class[idx],
     method = "rpart",
     # Need probs for stacked preds
-    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
+    trControl = caret::trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
   )
   stack_reg <- caretStack(
     models.reg,
@@ -341,7 +338,7 @@ test_that("caretStack works if both new_X and new_Y are supplied", {
     new_y = Y.reg[idx],
     method = "glm",
     # Need probs for stacked preds
-    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = FALSE)
+    trControl = caret::trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = FALSE)
   )
 
   expect_s3_class(stack_class, "caretStack")
