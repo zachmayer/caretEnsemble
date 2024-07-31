@@ -7,7 +7,7 @@ check_binary_classification <- function(list_of_models) {
   if (is.list(list_of_models) && length(list_of_models) > 1L) {
     lapply(list_of_models, function(x) {
       # avoid regression models
-      if (is(x, "train") && !is.null(x$pred$obs) && is.factor(x$pred$obs) && nlevels(x$pred$obs) > 2L) {
+      if (methods::is(x, "train") && !is.null(x$pred$obs) && is.factor(x$pred$obs) && nlevels(x$pred$obs) > 2L) {
         stop("caretEnsemble only supports binary classification problems")
       }
     })
@@ -58,7 +58,7 @@ caretEnsemble <- function(all.models, ...) {
 #' @description Check if an object is a caretEnsemble object
 #' @export
 is.caretEnsemble <- function(object) {
-  is(object, "caretEnsemble")
+  methods::is(object, "caretEnsemble")
 }
 
 #' @title Extract accuracy metrics from a \code{\link[caret]{train}} model
@@ -203,8 +203,9 @@ varImp.caretEnsemble <- function(object, ...) {
 #' @param x a \code{caretEnsemble} object
 #' @param ... additional arguments to pass to plot
 #' @return A plot
-#' @export
+#' @importFrom graphics plot
 #' @method plot caretEnsemble
+#' @export
 #' @examples
 #' \dontrun{
 #' set.seed(42)
@@ -247,7 +248,7 @@ plot.caretEnsemble <- function(x, ...) {
 #' @return a data.table::data.table with predictions, observeds, and residuals
 extractPredObsResid <- function(object, show_class_id = 2L) {
   stopifnot(
-    is(object, "train"),
+    methods::is(object, "train"),
     is.data.frame(object$pred)
   )
   keep_cols <- c("pred", "obs", "rowIndex")
@@ -297,7 +298,7 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #' suppressWarnings(autoplot(ens))
 #' }
 autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...) {
-  stopifnot(is(object, "caretEnsemble"))
+  stopifnot(methods::is(object, "caretEnsemble"))
   ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
 
   # Performance metrics by model

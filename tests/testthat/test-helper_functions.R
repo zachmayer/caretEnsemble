@@ -248,7 +248,7 @@ test_that("extractModelType stops when a classification model did not save probs
     varImp_rownames <- apply(class_model_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
 
     model_stack <- caretStack(model_list, method = "knn", excluded_class_id = 1L)
-    expect_identical(rownames(varImp(model_stack$ens_model)$importance), varImp_rownames)
+    expect_identical(rownames(caret::varImp(model_stack$ens_model)$importance), varImp_rownames)
   })
 })
 

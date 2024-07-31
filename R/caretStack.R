@@ -54,7 +54,7 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
       is.numeric(new_y) || is.factor(new_y) || is.character(new_y),
       nrow(new_X) == length(new_y)
     )
-    new_X <- as.data.table(new_X)
+    new_X <- data.table::as.data.table(new_X)
   }
 
   # Validators
@@ -75,7 +75,7 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
     obs <- obs[["obs"]]
   }
   stopifnot(nrow(preds) == length(obs))
-  model <- train(preds, obs, ...)
+  model <- caret::train(preds, obs, ...)
 
   # Return final model
   out <- list(models = all.models, ens_model = model, error = model$results, excluded_class_id = excluded_class_id)
@@ -155,8 +155,8 @@ predict.caretStack <- function(
     ...) {
   # Check the object
   stopifnot(
-    is(object$models, "caretList"),
-    is(object$ens_model, "train")
+    methods::is(object$models, "caretList"),
+    methods::is(object$ens_model, "train")
   )
 
   # Extract model types
@@ -214,7 +214,7 @@ predict.caretStack <- function(
   # In the future we could do SE by class, but that seems overcomplicated for now
   # As it is, this is pretty made up
   if (se || return_weights) {
-    imp <- as.matrix(varImp(object$ens_model)$importance)
+    imp <- as.matrix(caret::varImp(object$ens_model)$importance)
     imp_names <- rownames(imp)
     imp <- apply(imp, 2L, function(x) x / sum(x))
     row.names(imp) <- imp_names
@@ -255,7 +255,7 @@ predict.caretStack <- function(
 #' @description Check if an object is a caretStack object
 #' @export
 is.caretStack <- function(object) {
-  is(object, "caretStack")
+  methods::is(object, "caretStack")
 }
 
 #' @title Summarize a caretStack object
@@ -283,7 +283,6 @@ summary.caretStack <- function(object, ...) {
 #' @description This is a function to print a caretStack.
 #' @param x An object of class caretStack
 #' @param ... ignored
-#' @importFrom stats na.omit
 #' @export
 #' @examples
 #' \dontrun{
@@ -332,8 +331,6 @@ plot.caretStack <- function(x, ...) {
 #' this function only works if the ensembling model has the same number of resamples as the component models.
 #' @param x An object of class caretStack
 #' @param ... passed to dotplot
-#' @importFrom lattice dotplot
-#' @importFrom caret resamples
 #' @examples
 #' \dontrun{
 #' set.seed(42)
@@ -349,5 +346,5 @@ plot.caretStack <- function(x, ...) {
 #' }
 dotplot.caretStack <- function(x, ...) {
   resamps <- caret::resamples(x$models)
-  dotplot(resamps, ...)
+  lattice::dotplot(resamps, ...)
 }

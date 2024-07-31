@@ -4,7 +4,7 @@
 \alias{dotplot.caretStack}
 \title{Comparison dotplot for a caretStack object}
 \usage{
-\method{dotplot}{caretStack}(x, ...)
+dotplot.caretStack(x, ...)
 }
 \arguments{
 \item{x}{An object of class caretStack}

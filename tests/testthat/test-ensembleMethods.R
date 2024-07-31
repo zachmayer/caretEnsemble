@@ -17,13 +17,13 @@ test_that("We can get variable importance in ensembles", {
   set.seed(2239L)
   ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
-  expect_s3_class(varImp(ens.class), "data.table")
-  expect_s3_class(varImp(ens.class, scale = TRUE), "data.table")
-  expect_s3_class(varImp(ens.reg), "data.table")
-  expect_s3_class(varImp(ens.reg, scale = TRUE), "data.table")
+  expect_s3_class(caret::varImp(ens.class), "data.table")
+  expect_s3_class(caret::varImp(ens.class, scale = TRUE), "data.table")
+  expect_s3_class(caret::varImp(ens.reg), "data.table")
+  expect_s3_class(caret::varImp(ens.reg, scale = TRUE), "data.table")
 })
 
-test_that("varImp works for caretEnsembles", {
+test_that("caret::varImp works for caretEnsembles", {
   set.seed(2239L)
   for (models in list(models.class, models.reg)) {
     ens <- caretEnsemble(models, trControl = trainControl(method = "none"))
@@ -37,7 +37,7 @@ test_that("varImp works for caretEnsembles", {
       "Petal.Length"
     )
     for (s in c(TRUE, FALSE)) {
-      i <- varImp(ens, scale = s)
+      i <- caret::varImp(ens, scale = s)
       expect_s3_class(i, "data.table")
       expect_named(i, expected_names)
       expect_equal(sort(i[["var"]]), sort(expected_var_names))
@@ -49,10 +49,10 @@ test_that("We get the right dimensions back", {
   set.seed(2239L)
   ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
-  expect_equal(ncol(varImp(ens.class)), 6L)
-  expect_equal(ncol(varImp(ens.reg)), 6L)
-  expect_equal(nrow(varImp(ens.class)), 6L)
-  expect_equal(nrow(varImp(ens.reg)), 6L)
+  expect_equal(ncol(caret::varImp(ens.class)), 6L)
+  expect_equal(ncol(caret::varImp(ens.reg)), 6L)
+  expect_equal(nrow(caret::varImp(ens.class)), 6L)
+  expect_equal(nrow(caret::varImp(ens.reg)), 6L)
 })
 
 context("Do metric extraction functions work as expected")

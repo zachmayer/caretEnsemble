@@ -50,7 +50,7 @@ test_that("caretStack plots", {
   )
   png(filename = test_plot_file)
   plot(ens.reg)
-  dotplot(ens.reg, metric = "RMSE")
+  lattice::dotplot(ens.reg, metric = "RMSE")
   dev.off()
   unlink(test_plot_file)
   expect_s3_class(ens.reg, "caretStack")

@@ -70,14 +70,14 @@ Finally, you should note that `caretList` does not support custom caret models. 
 ## caretEnsemble
 `caretList` is the preferred way to construct list of caret models in this package, as it will ensure the resampling indexes are identical across all models. Lets take a closer look at our list of models:
 ```{r, echo=TRUE, fig.show="hold"}
-xyplot(resamples(model_list))
+lattice::xyplot(resamples(model_list))
 ```
     
 As you can see from this plot, these 2 models are uncorrelated, and the rpart model is occasionally anti-predictive, with a one re-sample showing AUC of 0.46.
 
 We can confirm the 2 model"s correlation with the `modelCor` function from caret (caret has a lot of convenient functions for analyzing lists of models):
 ```{r, echo=TRUE}
-modelCor(resamples(model_list))
+caret::modelCor(resamples(model_list))
 ```
 
 These 2 models make a good candidate for an ensemble: their predictions are fairly uncorrelated, but their overall accuracy is similar. We do a simple, linear greedy optimization on AUC using caretEnsemble:
@@ -115,10 +115,10 @@ knitr::kable(predict(greedy_ensemble, newdata = head(testing), excluded_class_id
 
 We can also use varImp to extract the variable importances from each member of the ensemble, as well as the final ensemble model:
 ```{r, echo=TRUE, results="hide"}
-varImp(greedy_ensemble)
+caret::varImp(greedy_ensemble)
 ```
 ```{r, echo=FALSE, results="asis"}
-knitr::kable(varImp(greedy_ensemble))
+knitr::kable(caret::varImp(greedy_ensemble))
 ```
 
 (The columns each sum up to 100.)
