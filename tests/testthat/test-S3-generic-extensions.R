@@ -142,10 +142,9 @@ test_that("c.train combines train objects correctly", {
 
 test_that("c.caretList handles duplicate names", {
   models_class1 <- models.class[1L:2L]
-  models_class2 <- models.class[1L:2L]
-  class(models_class1) <- class(models_class2) <- "caretList"
+  class(models_class1) <- "caretList"
 
-  combined_models <- c(models_class1, models_class2)
+  combined_models <- c(models_class1, models_class1)
 
   expect_s3_class(combined_models, "caretList")
   expect_length(combined_models, 4L)
