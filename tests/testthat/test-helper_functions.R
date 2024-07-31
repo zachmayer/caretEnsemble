@@ -11,7 +11,10 @@ data(X.class)
 data(Y.class)
 
 testthat::test_that("Recycling generates a warning", {
-  testthat::expect_error(caretEnsemble::wtd.sd(matrix(1L:10L, ncol = 2L), w = 1L), "'x' and 'w' must have the same length")
+  testthat::expect_error(
+    caretEnsemble::wtd.sd(matrix(1L:10L, ncol = 2L), w = 1L),
+    "'x' and 'w' must have the same length"
+  )
 })
 
 testthat::test_that("No predictions generates an error", {
@@ -394,7 +397,8 @@ testthat::test_that("Stacked predictions creates prediction-observation data cor
   testthat::expect_identical(nrow(stacked_preds_reg), 150L)
 })
 
-testthat::test_that("Stacked predictions works on new model types, assuming the new type returns a single column called 'pred'", {
+testthat::test_that("Stacked predictions works on new model types", {
+  # Note that new model types would have to return a single column called 'pred'
   models.class.new <- models.reg
   for (idx in seq_along(models.class.new)) {
     models.class.new[[idx]]$modelType <- "TimeSeries"
@@ -405,7 +409,10 @@ testthat::test_that("Stacked predictions works on new model types, assuming the 
 
 testthat::test_that("validateExcludedClass validates excluded level correctly", {
   testthat::expect_warning(validateExcludedClass(NULL), "No excluded_class_id set. Setting to 1L.")
-  testthat::expect_error(validateExcludedClass(c(1L, 2L)), "classification excluded level must have a length of 1: length=2")
+  testthat::expect_error(
+    validateExcludedClass(c(1L, 2L)),
+    "classification excluded level must have a length of 1: length=2"
+  )
   testthat::expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
   testthat::expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
   testthat::expect_warning(
@@ -418,12 +425,20 @@ testthat::test_that("validateExcludedClass validates excluded level correctly", 
   )
   testthat::expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
   txt <- "classification excluded level is not an integer: 2"
-  testthat::expect_warning(testthat::expect_equal(validateExcludedClass(2.0), 2L), txt, "classification excluded level is not an integer")
+  testthat::expect_warning(
+    testthat::expect_equal(
+      validateExcludedClass(2.0), 2L
+    ), txt,
+    "classification excluded level is not an integer"
+  )
 })
 
 testthat::test_that("validateExcludedClass validates excluded level correctly", {
   testthat::expect_warning(validateExcludedClass(NULL), "No excluded_class_id set. Setting to 1L.")
-  testthat::expect_error(validateExcludedClass(c(1L, 2L)), "classification excluded level must have a length of 1: length=2")
+  testthat::expect_error(
+    validateExcludedClass(c(1L, 2L)),
+    "classification excluded level must have a length of 1: length=2"
+  )
   testthat::expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
   testthat::expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
   testthat::expect_warning(

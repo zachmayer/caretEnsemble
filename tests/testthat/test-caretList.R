@@ -556,7 +556,10 @@ testthat::test_that("Regression Models", {
 
 testthat::test_that("methodCheck stops for invalid method type", {
   testthat::expect_error(methodCheck(list(123L)), "Method \"123\" is invalid.")
-  testthat::expect_error(methodCheck(list("invalid_method")), "The following models are not valid caret models: invalid_method")
+  testthat::expect_error(
+    methodCheck(list("invalid_method")),
+    "The following models are not valid caret models: invalid_method"
+  )
 })
 
 testthat::test_that("is.caretList correctly identifies caretList objects", {

@@ -1,7 +1,5 @@
 testthat::context("Does binary class selection work?")
 
-library(testthat)
-
 # Load and prepare data for subsequent tests
 seed <- 2239L
 set.seed(seed)

@@ -172,10 +172,11 @@ testthat::test_that("Do model results in caretEnsemble match component models - 
   newDat <- newDat[1L:10L, ]
 
   # These yield errors on NAs because predict.randomForest can't handle NAs in new data
-  testthat::expect_error(predict(ens.class, newdata = newDat, return_weights = TRUE, se = FALSE), "missing values in newdata")
-  testthat::expect_error(predict(ens.reg, newdata = newDat, return_weights = TRUE, se = TRUE), "missing values in newdata")
-  testthat::expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = FALSE), "missing values in newdata")
-  testthat::expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = TRUE), "missing values in newdata")
+  err <- "missing values in newdata"
+  testthat::expect_error(predict(ens.class, newdata = newDat, return_weights = TRUE, se = FALSE), err)
+  testthat::expect_error(predict(ens.reg, newdata = newDat, return_weights = TRUE, se = TRUE), err)
+  testthat::expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = FALSE), err)
+  testthat::expect_error(predict(ens.reg, newdata = newDat, return_weights = FALSE, se = TRUE), err)
 })
 
 testthat::test_that("Prediction options are respected in regression", {
