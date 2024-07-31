@@ -1,4 +1,4 @@
-context("Does binary class selection work?")
+testthat::context("Does binary class selection work?")
 
 library(testthat)
 
@@ -17,14 +17,14 @@ Y.train <- Y.class[index]
 Y.test <- Y.class[-index]
 
 #############################################################################
-context("Do classifier predictions use the correct target classes?")
+testthat::context("Do classifier predictions use the correct target classes?")
 #############################################################################
 
 runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # Extract levels of response input data
   Y.levels <- levels(Y.train)
-  expect_identical(Y.levels, levels(Y.test))
-  expect_length(Y.levels, 2L)
+  testthat::expect_identical(Y.levels, levels(Y.test))
+  testthat::expect_length(Y.levels, 2L)
 
   # Train a caret ensemble
   model.list <- caretList(
@@ -39,19 +39,19 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # avoid regressions to bugs like this:
   # https://github.com/zachmayer/caretEnsemble/pull/190
   unique.levels <- unique(sapply(model.ens$models, function(x) levels(x$pred$obs)[1L]))
-  expect_identical(unique.levels, Y.levels[1L])
+  testthat::expect_identical(unique.levels, Y.levels[1L])
 
   # Verify that the training data given to the ensemble model has the
   # same levels in the response as the original, raw data
-  expect_identical(levels(model.ens$ens_model$trainingData$.outcome), Y.levels)
+  testthat::expect_identical(levels(model.ens$ens_model$trainingData$.outcome), Y.levels)
 
   # Create class and probability predictions, as well as class predictions
   # generated from probability predictions using a .5 cutoff
   Y.pred <- predict(model.ens, newdata = X.test, return_class_only = TRUE)
   Y.prob <- predict(model.ens, newdata = X.test, return_class_only = FALSE)
-  expect_length(Y.pred, nrow(X.test))
-  expect_identical(nrow(Y.prob), nrow(X.test))
-  expect_identical(ncol(Y.prob), length(Y.levels))
+  testthat::expect_length(Y.pred, nrow(X.test))
+  testthat::expect_identical(nrow(Y.prob), nrow(X.test))
+  testthat::expect_identical(ncol(Y.prob), length(Y.levels))
 
   Y.cutoff <- factor(
     ifelse(
@@ -69,21 +69,21 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # Verify that the positive level of the Y response is equal to the positive
   # class label used by caret. This could potentially become untrue if
   # the levels of the response were ever rearranged by caretEnsemble at some point.
-  expect_identical(cmat.pred$positive, Y.levels[pos.level])
+  testthat::expect_identical(cmat.pred$positive, Y.levels[pos.level])
 
   # Verify that the accuracy score on predicted classes is relatively high. This
   # check exists to avoid previous errors where classifer ensemble predictions were
   # being made using the incorrect level of the response, causing the opposite
   # class labels to be predicted with new data.
-  expect_gt(cmat.pred$overall["Accuracy"], 0.79)
+  testthat::expect_gt(cmat.pred$overall["Accuracy"], 0.79)
 
   # Similar to the above, ensure that probability predictions are working correctly
   # by checking to see that accuracy is also high for class predictions created
   # from probabilities
-  expect_gt(cmat.cutoff$overall["Accuracy"], 0.79)
+  testthat::expect_gt(cmat.cutoff$overall["Accuracy"], 0.79)
 }
 
-test_that("Ensembled classifiers do not rearrange outcome factor levels", {
+testthat::test_that("Ensembled classifiers do not rearrange outcome factor levels", {
   # First run the level selection test using the default levels
   # of the response (i.e. c('No', 'Yes'))
   set.seed(seed)
@@ -108,13 +108,13 @@ test_that("Ensembled classifiers do not rearrange outcome factor levels", {
   runBinaryLevelValidation(refactor(Y.train), refactor(Y.test))
 })
 
-test_that("Target class selection configuration works", {
+testthat::test_that("Target class selection configuration works", {
   # No error
   excluded_class <- validateExcludedClass(1L)
   excluded_class <- validateExcludedClass(2L)
 
   # Should error
-  expect_error(validateExcludedClass("x"), "classification excluded level must be numeric")
+  testthat::expect_error(validateExcludedClass("x"), "classification excluded level must be numeric")
 
   # Check that we can exclude the first class
   Y.levels <- levels(Y.train)

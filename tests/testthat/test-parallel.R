@@ -7,8 +7,8 @@ data(models.class)
 data(X.class)
 data(Y.class)
 
-context("Parallelization works")
-test_that("predict.caretEnsemble works in parallel", {
+testthat::context("Parallelization works")
+testthat::test_that("predict.caretEnsemble works in parallel", {
   X_reg_big <- data.table::rbindlist(lapply(1L:100L, function(x) data.table::data.table(X.reg)))
   ens_reg <- caretEnsemble(models.reg)
 
@@ -16,13 +16,13 @@ test_that("predict.caretEnsemble works in parallel", {
   pred_reg <- predict(ens_reg, newdata = X.reg)
   pred_reg2 <- predict(ens_reg, newdata = X_reg_big)
   pred_reg2 <- pred_reg2[seq_len(nrow(pred_reg))]
-  expect_equivalent(pred_reg, pred_reg2)
+  testthat::expect_equivalent(pred_reg, pred_reg2)
 
   # Return se
   pred_reg <- predict(ens_reg, newdata = X.reg, se = TRUE)
   pred_reg2 <- predict(ens_reg, newdata = X_reg_big, se = TRUE)
   pred_reg2 <- pred_reg2[seq_len(nrow(pred_reg))]
-  expect_equivalent(pred_reg, pred_reg2)
+  testthat::expect_equivalent(pred_reg, pred_reg2)
 
   # Return weights
   pred_reg <- predict(ens_reg, newdata = X.reg, se = TRUE, return_weights = TRUE)
@@ -31,5 +31,5 @@ test_that("predict.caretEnsemble works in parallel", {
     newdata = X_reg_big, se = TRUE, return_weights = TRUE
   )
   pred_reg2 <- pred_reg2[seq_len(nrow(pred_reg))]
-  expect_equivalent(pred_reg, pred_reg2)
+  testthat::expect_equivalent(pred_reg, pred_reg2)
 })
