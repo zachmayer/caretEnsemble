@@ -15,7 +15,6 @@
 #' @keywords internal
 caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE) {
   # Combine args
-  # TODO a test for handling arg collisions (e.g. dupe in global vs local)
   # I think my handling here is correct (update globals with locals, which allows locals be partial)
   # but it would be nice to have some tests
   model_args <- utils::modifyList(global_args, local_args)
