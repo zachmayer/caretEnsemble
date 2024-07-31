@@ -31,7 +31,6 @@ my_control <- trainControl(
 model_list1 <- caretList(
   Class ~ .,
   data = Sonar,
-  metric = "ROC",
   trControl = my_control,
   tuneList = list(
     glm = caretModelSpec(method = "rf"),
@@ -40,7 +39,7 @@ model_list1 <- caretList(
 )
 
 # a model of class train
-rfTrain <- train(
+rpart_model <- train(
   Class ~ .,
   data = Sonar,
   tuneLength = 2L,
@@ -56,7 +55,6 @@ test_that("c.caretEnsemble can bind two caretList objects", {
   model_list2 <- caretList(
     Class ~ .,
     data = Sonar,
-    metric = "ROC",
     trControl = my_control,
     tuneList = list(
       glm = caretModelSpec(method = "rpart", tuneLength = 2L),
@@ -74,7 +72,7 @@ test_that("c.caretEnsemble can bind two caretList objects", {
 })
 
 test_that("c.caretEnsemble can bind a caretList and train object", {
-  bigList <- c(model_list1, rfTrain)
+  bigList <- c(model_list1, rpart_model)
   ens1 <- caretEnsemble(bigList)
 
   expect_is(bigList, "caretList")
@@ -84,16 +82,7 @@ test_that("c.caretEnsemble can bind a caretList and train object", {
 })
 
 test_that("c.caretList can bind two objects of class train", {
-  # a model of class train
-  rpartTrain <- train(
-    Class ~ .,
-    data = Sonar,
-    metric = "ROC",
-    trControl = my_control,
-    method = "rpart"
-  )
-
-  bigList <- c(rfTrain, rpartTrain)
+  bigList <- c(rpart_model, rpart_model)
   ens1 <- caretEnsemble(bigList)
 
   expect_is(bigList, "caretList")

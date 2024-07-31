@@ -251,8 +251,7 @@ test_that("caretStack handles upsampling data", {
 
   stack <- caretStack(
     model_list,
-    method = "rpart",
-    metric = "Kappa"
+    method = "rpart"
   )
 
   expect_s3_class(stack, "caretStack")

@@ -31,7 +31,6 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # Train a caret ensemble
   model.list <- caretList(
     X.train, Y.train,
-    metric = "Accuracy",
     methodList = c("rpart", "glmnet")
   )
   model.ens <- caretEnsemble(model.list)
