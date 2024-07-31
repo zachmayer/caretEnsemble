@@ -94,10 +94,9 @@ getMetric <- function(x, metric = NULL, return_sd = FALSE) {
 #' @param metric a character string representing the metric to extract.
 #' If NULL, each model will return the metric it was trained on.
 #' If not NULL, the specified metric must be present for EVERY trained model.
-#' @importFrom data.table data.table setorderv
 extractModelMetrics <- function(ensemble, metric = NULL) {
   stopifnot(is.caretEnsemble(ensemble))
-  model_metrics <- data.table(
+  model_metrics <- data.table::data.table(
     model_name = names(ensemble$models),
     metric = sapply(ensemble$models, "[[", "metric"),
     value = sapply(ensemble$models, getMetric, return_sd = FALSE),
@@ -141,8 +140,6 @@ summary.caretEnsemble <- function(object, ...) {
 #' @param model_name a character string representing the name of the model
 #' @param ... additional arguments passed to \code{\link[caret]{varImp}}
 #' @return a \code{\link[data.table]{data.table}} with 2 columns: the variables and their importances.
-#' @importFrom caret varImp
-#' @importFrom data.table data.table
 #' @keywords internal
 varImpDataTable <- function(x, model_name, ...) {
   imp <- caret::varImp(x, ...)
@@ -165,9 +162,10 @@ varImpDataTable <- function(x, model_name, ...) {
 #' in the ensembled object.
 #' @param object a \code{caretEnsemble} to make predictions from.
 #' @param ... additional arguments passed to \code{\link[caret]{varImp}}
-#' @importFrom data.table rbindlist dcast.data.table merge.data.table setorderv setcolorder
 #' @return A \code{\link[data.table]{data.table}} with one row per variable and one column
 #' per model in object
+#' @importFrom caret varImp
+#' @method varImp caretEnsemble
 #' @export
 varImp.caretEnsemble <- function(object, ...) {
   model_names <- make.names(names(object$models), unique = TRUE, allow_ = TRUE)
@@ -205,8 +203,6 @@ varImp.caretEnsemble <- function(object, ...) {
 #' @param x a \code{caretEnsemble} object
 #' @param ... additional arguments to pass to plot
 #' @return A plot
-#' @importFrom ggplot2 ggplot aes geom_pointrange theme_bw labs geom_hline
-#' @importFrom rlang .data
 #' @export
 #' @method plot caretEnsemble
 #' @examples
@@ -218,8 +214,8 @@ varImp.caretEnsemble <- function(object, ...) {
 #' }
 plot.caretEnsemble <- function(x, ...) {
   dat <- extractModelMetrics(x)
-  plt <- ggplot(
-    dat, aes(
+  plt <- ggplot2::ggplot(
+    dat, ggplot2::aes(
       x = .data[["model_name"]],
       y = .data[["value"]],
       ymin = .data[["value"]] - .data[["sd"]],
@@ -227,13 +223,18 @@ plot.caretEnsemble <- function(x, ...) {
       color = .data[["metric"]]
     )
   ) +
-    geom_pointrange() +
-    theme_bw() +
-    labs(x = "Individual Model Method", y = "Metric Value")
+    ggplot2::geom_pointrange() +
+    ggplot2::theme_bw() +
+    ggplot2::labs(x = "Individual Model Method", y = "Metric Value")
 
   if (nrow(x$error) > 0L) {
     plt <- plt +
-      geom_hline(linetype = 2L, linewidth = 0.2, yintercept = min(x$error[[x$ens_model$metric]]), color = I("red"))
+      ggplot2::geom_hline(
+        linetype = 2L,
+        linewidth = 0.2,
+        yintercept = min(x$error[[x$ens_model$metric]]),
+        color = I("red")
+      )
   }
   plt
 }
@@ -243,8 +244,7 @@ plot.caretEnsemble <- function(x, ...) {
 #' and then calculates residuals. It only uses one class for classification models, by default class 2.
 #' @param object a \code{train} object
 #' @param show_class_id For classification only: which class level to use for residuals
-#' @return a data.table with predictions, observeds, and residuals
-#' @importFrom data.table data.table
+#' @return a data.table::data.table with predictions, observeds, and residuals
 extractPredObsResid <- function(object, show_class_id = 2L) {
   stopifnot(
     is(object, "train"),
@@ -252,11 +252,11 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
   )
   keep_cols <- c("pred", "obs", "rowIndex")
   type <- object$modelType
-  predobs <- data.table(object$pred)
+  predobs <- data.table::data.table(object$pred)
   if (type == "Classification") {
     show_class <- levels(object)[show_class_id]
-    set(predobs, j = "pred", value = predobs[[show_class]])
-    set(predobs, j = "obs", value = as.integer(predobs[["obs"]] == show_class))
+    data.table::set(predobs, j = "pred", value = predobs[[show_class]])
+    data.table::set(predobs, j = "obs", value = as.integer(predobs[["obs"]] == show_class))
   }
   predobs <- predobs[, keep_cols, with = FALSE]
   data.table::setkeyv(predobs, "rowIndex")
@@ -281,11 +281,8 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
 #' right is the disagreement in the residuals of the component models (unweighted)
 #' across the fitted values. Bottom left and bottom right are the plots of the
 #' residuals against two random or user specified variables.
-#' @importFrom ggplot2 ggplot aes geom_point geom_smooth geom_bar geom_linerange
-#' @importFrom ggplot2 scale_x_continuous scale_y_continuous labs theme_bw autoplot
-#' @importFrom data.table data.table set rbindlist setkeyv .SD
-#' @importFrom rlang .data
-#' @importFrom gridExtra grid.arrange
+#' @importFrom ggplot2 autoplot
+#' @method autoplot caretEnsemble
 #' @export
 #' @examples
 #' \dontrun{
@@ -304,17 +301,17 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
 
   # Performance metrics by model
-  g1 <- plot(object) + labs(title = "Metric and SD For Component Models")
+  g1 <- plot(object) + ggplot2::labs(title = "Metric and SD For Component Models")
 
   # Residuals vs Fitted
   # Disable the object usage linter in here — it raises false positives for .SD and .data
   g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(.data[["pred"]], .data[["resid"]])) +
-    geom_point() +
-    geom_smooth(se = FALSE) +
-    scale_x_continuous("Fitted Values") +
-    scale_y_continuous("Residual") +
-    labs(title = "Residuals vs Fitted") +
-    theme_bw()
+    ggplot2::geom_point() +
+    ggplot2::geom_smooth(se = FALSE) +
+    ggplot2::scale_x_continuous("Fitted Values") +
+    ggplot2::scale_y_continuous("Residual") +
+    ggplot2::labs(title = "Residuals vs Fitted") +
+    ggplot2::theme_bw()
 
   # Model Weights
   wghtFrame <- data.table::as.data.table(coef(object[["ens_model"]][["finalModel"]]))
