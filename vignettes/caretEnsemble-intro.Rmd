@@ -32,14 +32,6 @@ set.seed(107L)
 inTrain <- createDataPartition(y = Sonar$Class, p = 0.75, list = FALSE)
 training <- Sonar[inTrain, ]
 testing <- Sonar[-inTrain, ]
-my_control <- trainControl(
-  method = "boot",
-  number = 25L,
-  savePredictions = "final",
-  classProbs = TRUE,
-  index = createResample(training$Class, 25L),
-  summaryFunction = twoClassSummary
-)
 ```
 Notice that we are explicitly setting the resampling `index` to being used in `trainControl`. If you do not set this index manually, `caretList` will attempt to set it for automatically, but it"s generally a good idea to set it yourself.
 
@@ -48,8 +40,7 @@ Now we can use `caretList` to fit a series of models (each with the same `trCont
 model_list <- caretList(
   Class ~ .,
   data = training,
-  trControl = my_control,
-  methodList = c("glm", "rpart")
+  methodList = c("glmnet", "rpart")
 )
 ```
 (As with `train`, the formula interface is convenient but introduces move overhead. For large datasets the explicitly passing `x` and `y` is preferred).
@@ -67,9 +58,7 @@ If you desire more control over the model fit, use the `caretModelSpec` to const
 model_list_big <- caretList(
   Class ~ .,
   data = training,
-  trControl = my_control,
-  metric = "ROC",
-  methodList = c("glm", "rpart"),
+  methodList = c("glmnet", "rpart"),
   tuneList = list(
     rf1 = caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 2L)),
     rf2 = caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 10L), preProcess = "pca"),
@@ -99,7 +88,7 @@ greedy_ensemble <- caretEnsemble(
   model_list,
   metric = "ROC",
   trControl = trainControl(
-    number = 2L,
+    method = "cv",
     summaryFunction = twoClassSummary,
     classProbs = TRUE
   )
@@ -107,15 +96,15 @@ greedy_ensemble <- caretEnsemble(
 summary(greedy_ensemble)
 ```
 
-The ensemble has an AUC on the training set resamples of 0.81, which is about 4% better than the best individual model. We can confirm this finding on the test set:
 ```{r, echo=TRUE}
 model_preds <- predict(model_list, newdata = testing, excluded_class_id = 2L)
 ens_preds <- predict(greedy_ensemble, newdata = testing, excluded_class_id = 2L)
 model_preds$ensemble <- ens_preds
-caTools::colAUC(model_preds, testing$Class)
+auc <- caTools::colAUC(model_preds, testing$Class)
+print(auc)
 ```
 
-The ensemble"s AUC on the test set is about 6% higher than the best individual model.
+The ensemble has an AUC on the training set resamples of `r round(auc[1, 'ensemble'], 2)` which is about `r round(auc[1, 'ensemble'] - max(auc[1, 'glmnet'], auc[1, 'rpart']), 3) * 100`% better than the best individual model.
 
 Note that the levels for the Sonar Data are "M" and "R", where M is level 1 and R is level 2. "M" stands for "metal cylinder" and "R" stands for rock. M is the positive class, so we exclude class 2L from our predictions. You can set excluded_class_id = 0L
 ```{r, echo=TRUE, results="hide", warning=FALSE}
@@ -145,18 +134,16 @@ glm_ensemble <- caretStack(
   method = "glm",
   metric = "ROC",
   trControl = trainControl(
-    method = "boot",
-    number = 10L,
-    savePredictions = "final",
+    method = "cv",
     classProbs = TRUE,
     summaryFunction = twoClassSummary
   )
 )
 model_preds2 <- model_preds
 model_preds2$ensemble <- predict(glm_ensemble, newdata = testing, excluded_class_id = 2L)
+print(caTools::colAUC(model_preds2, testing$Class))
 CF <- coef(glm_ensemble$ens_model$finalModel)[-1L]
-caTools::colAUC(model_preds2, testing$Class)
-CF / sum(CF)
+print(CF / sum(CF))
 ```
 
 Note that `glm_ensemble$ens_model` is a regular caret object of class `train`. The glm-weighted model weights (glm vs rpart) and test-set AUCs are extremely similar to the caretEnsemble greedy optimization.
@@ -167,12 +154,10 @@ gbm_ensemble <- caretStack(
   model_list,
   method = "gbm",
   verbose = FALSE,
-  tuneLength = 10L,
+  tuneLength = 5L,
   metric = "ROC",
   trControl = trainControl(
-    method = "boot",
-    number = 10L,
-    savePredictions = "final",
+    method = "cv",
     classProbs = TRUE,
     summaryFunction = twoClassSummary
   )

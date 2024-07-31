@@ -107,8 +107,8 @@ table.table-condensed {
       </ul>
       <div class="tab-content" data-tabsetid="covr">
         <div class="tab-pane active" title="Files" data-value="Files" id="tab-covr-1">
-          <div class="datatables html-widget html-fill-item" id="htmlwidget-8e5d5d7ce563fe9cb80b" style="width:100%;height:500px;"></div>
-          <script type="application/json" data-for="htmlwidget-8e5d5d7ce563fe9cb80b">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[["<a href=\"#\">R/caretEnsemble.R<\/a>","<a href=\"#\">R/caretList.R<\/a>","<a href=\"#\">R/caretStack.R<\/a>","<a href=\"#\">R/caretPredict.R<\/a>","<a href=\"#\">R/S3GenericExtenstions.R<\/a>","<a href=\"#\">R/caretTrain.R<\/a>","<a href=\"#\">R/helper_functions.R<\/a>"],[383,396,353,186,103,58,21],[156,128,95,76,24,18,5],[156,128,95,76,24,18,5],[0,0,0,0,0,0,0],["19","126","2016","380","6","184","378"],["100.00%","100.00%","100.00%","100.00%","100.00%","100.00%","100.00%"]],"container":"<table class=\"row-border\">\n  <thead>\n    <tr>\n      <th>File<\/th>\n      <th>Lines<\/th>\n      <th>Relevant<\/th>\n      <th>Covered<\/th>\n      <th>Missed<\/th>\n      <th>Hits / Line<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"dom":"t","paging":false,"columnDefs":[{"targets":6,"createdCell":"function(td, cellData, rowData, row, col) {\n  var percent = cellData.replace(\"%\", \"\");\n  if (percent > 90) {\n    var grad = \"linear-gradient(90deg, #edfde7 \" + cellData + \", white \" + cellData + \")\";\n  } else if (percent > 75) {\n    var grad = \"linear-gradient(90deg, #f9ffe5 \" + cellData + \", white \" + cellData + \")\";\n  } else {\n    var grad = \"linear-gradient(90deg, #fcece9 \" + cellData + \", white \" + cellData + \")\";\n  }\n  $(td).css(\"background\", grad);\n}\n"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"File","targets":0},{"name":"Lines","targets":1},{"name":"Relevant","targets":2},{"name":"Covered","targets":3},{"name":"Missed","targets":4},{"name":"Hits / Line","targets":5},{"name":"Coverage","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"callback":"function(table) {\ntable.on('click.dt', 'a', function() {\n  files = $('div#files div');\n  files.not('div.hidden').addClass('hidden');\n  id = $(this).text();\n  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');\n  $('ul.nav a[data-value=Source]').text(id).tab('show');\n});\n}"},"evals":["options.columnDefs.0.createdCell","callback"],"jsHooks":[]}</script>
+          <div class="datatables html-widget html-fill-item" id="htmlwidget-03e0ef3b78d3d45bc94f" style="width:100%;height:500px;"></div>
+          <script type="application/json" data-for="htmlwidget-03e0ef3b78d3d45bc94f">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[["<a href=\"#\">R/caretEnsemble.R<\/a>","<a href=\"#\">R/caretList.R<\/a>","<a href=\"#\">R/caretStack.R<\/a>","<a href=\"#\">R/caretPredict.R<\/a>","<a href=\"#\">R/S3GenericExtenstions.R<\/a>","<a href=\"#\">R/caretTrain.R<\/a>","<a href=\"#\">R/helper_functions.R<\/a>"],[383,396,353,186,103,57,21],[156,128,95,76,24,18,5],[156,128,95,76,24,18,5],[0,0,0,0,0,0,0],["19","126","2016","380","6","184","378"],["100.00%","100.00%","100.00%","100.00%","100.00%","100.00%","100.00%"]],"container":"<table class=\"row-border\">\n  <thead>\n    <tr>\n      <th>File<\/th>\n      <th>Lines<\/th>\n      <th>Relevant<\/th>\n      <th>Covered<\/th>\n      <th>Missed<\/th>\n      <th>Hits / Line<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"dom":"t","paging":false,"columnDefs":[{"targets":6,"createdCell":"function(td, cellData, rowData, row, col) {\n  var percent = cellData.replace(\"%\", \"\");\n  if (percent > 90) {\n    var grad = \"linear-gradient(90deg, #edfde7 \" + cellData + \", white \" + cellData + \")\";\n  } else if (percent > 75) {\n    var grad = \"linear-gradient(90deg, #f9ffe5 \" + cellData + \", white \" + cellData + \")\";\n  } else {\n    var grad = \"linear-gradient(90deg, #fcece9 \" + cellData + \", white \" + cellData + \")\";\n  }\n  $(td).css(\"background\", grad);\n}\n"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"File","targets":0},{"name":"Lines","targets":1},{"name":"Relevant","targets":2},{"name":"Covered","targets":3},{"name":"Missed","targets":4},{"name":"Hits / Line","targets":5},{"name":"Coverage","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"callback":"function(table) {\ntable.on('click.dt', 'a', function() {\n  files = $('div#files div');\n  files.not('div.hidden').addClass('hidden');\n  id = $(this).text();\n  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');\n  $('ul.nav a[data-value=Source]').text(id).tab('show');\n});\n}"},"evals":["options.columnDefs.0.createdCell","callback"],"jsHooks":[]}</script>
         </div>
         <div class="tab-pane" title="Source" data-value="Source" id="tab-covr-2">
           <div id="files">
@@ -4330,56 +4330,56 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">219</td>
-                    <td class="coverage">6<em>x</em></td>
+                    <td class="coverage">20<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    trControl &lt;- caret::trainControl(</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">220</td>
-                    <td class="coverage">6<em>x</em></td>
+                    <td class="coverage">20<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      method = "cv",</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">221</td>
-                    <td class="coverage">6<em>x</em></td>
+                    <td class="coverage">20<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      number = 5L,</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">222</td>
-                    <td class="coverage">6<em>x</em></td>
+                    <td class="coverage">20<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      index = caret::createFolds(target, k = 5L, list = TRUE, returnTrain = TRUE),</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">223</td>
-                    <td class="coverage">6<em>x</em></td>
+                    <td class="coverage">20<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      savePredictions = "final",</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">224</td>
-                    <td class="coverage">6<em>x</em></td>
+                    <td class="coverage">20<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      classProbs = is_class,</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">225</td>
-                    <td class="coverage">6<em>x</em></td>
+                    <td class="coverage">20<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      summaryFunction = default_summary,</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">226</td>
-                    <td class="coverage">6<em>x</em></td>
+                    <td class="coverage">20<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      returnData = FALSE</pre>
                     </td>
@@ -5569,418 +5569,6 @@ table.table-condensed {
                   </tr>
                   <tr class="never">
                     <td class="num">396</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">}</pre>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div id="R/caretTrain.R" class="hidden">
-              <table class="table-condensed">
-                <tbody>
-                  <tr class="never">
-                    <td class="num">1</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @title caretTrain</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">2</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @description</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">3</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#'  This function is a wrapper around the `train` function from the `caret` package.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">4</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#'  It allows for the passing of local and global arguments to the `train` function.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">5</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#'  It also allows for the option to continue on fail, and to trim the output model.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">6</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#'  Trimming the model removes components that are not needed for stacking, to save</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">7</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#'  memory and speed up the stacking process. It also converts preds to a data.table.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">8</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @param local_args A list of arguments to pass to the `train` function.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">9</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @param global_args A list of arguments to pass to the `train` function.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">10</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @param continue_on_fail A logical indicating whether to continue if the `train` function fails.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">11</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#'  If `TRUE`, the function will return `NULL` if the `train` function fails.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">12</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @param trim A logical indicating whether to trim the output model.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">13</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' If `TRUE`, the function will remove some elements that are not needed from the output model.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">14</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @return The output of the `train` function.</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">15</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">#' @keywords internal</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">16</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">caretTrain &lt;- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE) {</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">17</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  # Combine args</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">18</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  # TODO a test for handling arg collisions (e.g. dupe in global vs local)</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">19</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  # I think my handling here is correct (update globals with locals, which allows locals be partial)</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">20</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  # but it would be nice to have some tests</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">21</td>
-                    <td class="coverage">135<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  model_args &lt;- utils::modifyList(global_args, local_args)</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">22</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r"></pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">23</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  # Fit</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">24</td>
-                    <td class="coverage">135<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  if (continue_on_fail) {</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">25</td>
-                    <td class="coverage">4<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    model &lt;- tryCatch(do.call(train, model_args), error = function(e) {</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">26</td>
-                    <td class="coverage">2<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">      warning(conditionMessage(e))</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">27</td>
-                    <td class="coverage">2<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">      NULL</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">28</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    })</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">29</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  } else {</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">30</td>
-                    <td class="coverage">131<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    model &lt;- do.call(train, model_args)</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">31</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  }</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">32</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r"></pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">33</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  # Use data.table for stacked predictions</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">34</td>
-                    <td class="coverage">133<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  if ("pred" %in% names(model)) {</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">35</td>
-                    <td class="coverage">131<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    model[["pred"]] &lt;- data.table::data.table(model[["pred"]])</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">36</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  }</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">37</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r"></pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">38</td>
-                    <td class="coverage">133<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  if (trim) {</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">39</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    # Remove some elements that are not needed from the train model</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">40</td>
-                    <td class="coverage">133<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    removals &lt;- c("call", "dots", "trainingData", "resampledCM")</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">41</td>
-                    <td class="coverage">133<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    for (i in removals) {</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">42</td>
-                    <td class="coverage">532<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">      if (i %in% names(model)) {</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">43</td>
-                    <td class="coverage">524<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">        model[[i]] &lt;- NULL</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">44</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">      }</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">45</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    }</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">46</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r"></pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">47</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    # Remove some elements that are not needed from the model control (within the train model)</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">48</td>
-                    <td class="coverage">133<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    c_removals &lt;- c("index", "indexOut", "indexFinal")</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">49</td>
-                    <td class="coverage">133<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    for (i in c_removals) {</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">50</td>
-                    <td class="coverage">399<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">      if (i %in% names(model[["control"]])) {</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">51</td>
-                    <td class="coverage">393<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">        model[["control"]][[i]] &lt;- NULL</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">52</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">      }</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">53</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">    }</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">54</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  }</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">55</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r"></pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">56</td>
-                    <td class="coverage"></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  # Return</pre>
-                    </td>
-                  </tr>
-                  <tr class="covered">
-                    <td class="num">57</td>
-                    <td class="coverage">133<em>x</em></td>
-                    <td class="col-sm-12">
-                      <pre class="language-r">  model</pre>
-                    </td>
-                  </tr>
-                  <tr class="never">
-                    <td class="num">58</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>
@@ -10493,6 +10081,411 @@ table.table-condensed {
                   </tr>
                   <tr class="never">
                     <td class="num">103</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">}</pre>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="R/caretTrain.R" class="hidden">
+              <table class="table-condensed">
+                <tbody>
+                  <tr class="never">
+                    <td class="num">1</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#' @title caretTrain</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">2</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#' @description</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">3</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#'  This function is a wrapper around the `train` function from the `caret` package.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">4</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#'  It allows for the passing of local and global arguments to the `train` function.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">5</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#'  It also allows for the option to continue on fail, and to trim the output model.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">6</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#'  Trimming the model removes components that are not needed for stacking, to save</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">7</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#'  memory and speed up the stacking process. It also converts preds to a data.table.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">8</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#' @param local_args A list of arguments to pass to the `train` function.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">9</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#' @param global_args A list of arguments to pass to the `train` function.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">10</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#' @param continue_on_fail A logical indicating whether to continue if the `train` function fails.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">11</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#'  If `TRUE`, the function will return `NULL` if the `train` function fails.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">12</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#' @param trim A logical indicating whether to trim the output model.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">13</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#' If `TRUE`, the function will remove some elements that are not needed from the output model.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">14</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#' @return The output of the `train` function.</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">15</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">#' @keywords internal</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">16</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">caretTrain &lt;- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE) {</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">17</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  # Combine args</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">18</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  # I think my handling here is correct (update globals with locals, which allows locals be partial)</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">19</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  # but it would be nice to have some tests</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">20</td>
+                    <td class="coverage">135<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  model_args &lt;- utils::modifyList(global_args, local_args)</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">21</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r"></pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">22</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  # Fit</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">23</td>
+                    <td class="coverage">135<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  if (continue_on_fail) {</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">24</td>
+                    <td class="coverage">4<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    model &lt;- tryCatch(do.call(train, model_args), error = function(e) {</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">25</td>
+                    <td class="coverage">2<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">      warning(conditionMessage(e))</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">26</td>
+                    <td class="coverage">2<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">      NULL</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">27</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    })</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">28</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  } else {</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">29</td>
+                    <td class="coverage">131<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    model &lt;- do.call(train, model_args)</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">30</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  }</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">31</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r"></pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">32</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  # Use data.table for stacked predictions</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">33</td>
+                    <td class="coverage">133<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  if ("pred" %in% names(model)) {</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">34</td>
+                    <td class="coverage">131<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    model[["pred"]] &lt;- data.table::data.table(model[["pred"]])</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">35</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  }</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">36</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r"></pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">37</td>
+                    <td class="coverage">133<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  if (trim) {</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">38</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    # Remove some elements that are not needed from the train model</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">39</td>
+                    <td class="coverage">133<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    removals &lt;- c("call", "dots", "trainingData", "resampledCM")</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">40</td>
+                    <td class="coverage">133<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    for (i in removals) {</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">41</td>
+                    <td class="coverage">532<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">      if (i %in% names(model)) {</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">42</td>
+                    <td class="coverage">524<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">        model[[i]] &lt;- NULL</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">43</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">      }</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">44</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    }</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">45</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r"></pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">46</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    # Remove some elements that are not needed from the model control (within the train model)</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">47</td>
+                    <td class="coverage">133<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    c_removals &lt;- c("index", "indexOut", "indexFinal")</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">48</td>
+                    <td class="coverage">133<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    for (i in c_removals) {</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">49</td>
+                    <td class="coverage">399<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">      if (i %in% names(model[["control"]])) {</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">50</td>
+                    <td class="coverage">393<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">        model[["control"]][[i]] &lt;- NULL</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">51</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">      }</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">52</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">    }</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">53</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  }</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">54</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r"></pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">55</td>
+                    <td class="coverage"></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  # Return</pre>
+                    </td>
+                  </tr>
+                  <tr class="covered">
+                    <td class="num">56</td>
+                    <td class="coverage">133<em>x</em></td>
+                    <td class="col-sm-12">
+                      <pre class="language-r">  model</pre>
+                    </td>
+                  </tr>
+                  <tr class="never">
+                    <td class="num">57</td>
                     <td class="coverage"></td>
                     <td class="col-sm-12">
                       <pre class="language-r">}</pre>

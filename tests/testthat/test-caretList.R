@@ -74,14 +74,13 @@ test_that("caretList errors for bad models", {
   expect_is(caretList(Sepal.Width ~ ., iris, methodList = "lm", continue_on_fail = TRUE), "caretList")
 
   # Check that by default a bad model kills the training job
-  my_control <- trainControl(method = "cv", number = 2L, classProbs = TRUE)
   bad <- list(
     bad = caretModelSpec(method = "glm", tuneLength = 1L)
   )
   expect_output(
     expect_warning(
       expect_error(
-        caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad, trControl = my_control),
+        caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad),
         regexp = "Stopping" # Stop training on the first error.  This is the mssage straight from train.
       ),
       regexp = "model fit failed for Fold1"
@@ -91,7 +90,7 @@ test_that("caretList errors for bad models", {
   expect_output(
     expect_warning(
       expect_error(
-        caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad, trControl = my_control, continue_on_fail = TRUE),
+        caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad, continue_on_fail = TRUE),
         regexp = "caret:train failed for all models. Please inspect your data."
       ),
       regexp = "model fit failed for Fold1"
@@ -107,7 +106,7 @@ test_that("caretList errors for bad models", {
   expect_s3_class(
     expect_output(
       expect_warning(
-        caretList(iris[, 1L:4L], iris[, 5L], tuneList = good_bad, trControl = my_control, continue_on_fail = TRUE),
+        caretList(iris[, 1L:4L], iris[, 5L], tuneList = good_bad, continue_on_fail = TRUE),
         regexp = "model fit failed for Fold1"
       ),
       regexp = "Something is wrong; all the Accuracy metric values are missing:"
