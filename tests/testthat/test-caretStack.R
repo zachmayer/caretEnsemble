@@ -154,12 +154,6 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
   model_list <- caretList(
     Species ~ .,
     data = iris,
-    trControl = trainControl(
-      method = "cv",
-      classProbs = TRUE,
-      savePredictions = "final",
-      index = createResample(iris$Species)
-    ),
     methodList = c("rpart", "rf")
   )
 
@@ -243,7 +237,7 @@ test_that("caretStack handles different metrics", {
   }
 })
 
-test_that("caretStack handles imbalanced data", {
+test_that("caretStack handles upsampling data", {
   data(iris)
   train_data <- iris
 
@@ -329,9 +323,7 @@ test_that("caretStack coerces lists to caretLists", {
   class(model_list) <- "list"
   names(model_list) <- NULL
   expect_warning(
-    {
-      ens <- caretStack(model_list, trControl = trainControl(number = 2L))
-    },
+    ens <- caretStack(model_list, trControl = trainControl(number = 2L)),
     "Attempting to coerce all.models to a caretList."
   )
   expect_s3_class(ens, "caretStack")
