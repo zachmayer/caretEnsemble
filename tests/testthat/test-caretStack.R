@@ -15,12 +15,7 @@ test_that("We can stack regression models", {
   set.seed(96367L)
   ens.reg <- caretStack(
     models.reg,
-    method = "lm", preProcess = "pca",
-    trControl = trainControl(
-      method = "cv",
-      number = 2L, allowParallel = FALSE,
-      savePredictions = "final"
-    )
+    method = "lm", preProcess = "pca"
   )
   expect_s3_class(ens.reg, "caretStack")
   expect_is(summary(ens.reg), "summary.lm")
@@ -34,8 +29,7 @@ test_that("We can stack classification models", {
   set.seed(42L)
   ens.class <- caretStack(
     models.class,
-    method = "glm",
-    trControl = trainControl(number = 2L, allowParallel = FALSE)
+    method = "glm"
   )
   expect_that(ens.class, is_a("caretStack"))
   expect_is(summary(ens.class), "summary.glm")
@@ -52,8 +46,7 @@ test_that("caretStack plots", {
   test_plot_file <- "caretEnsemble_test_plots.png"
   ens.reg <- caretStack(
     models.reg,
-    method = "gbm", tuneLength = 2L, verbose = FALSE,
-    trControl = trainControl(number = 2L, allowParallel = FALSE)
+    method = "gbm", tuneLength = 2L, verbose = FALSE
   )
   png(filename = test_plot_file)
   plot(ens.reg)
@@ -68,8 +61,7 @@ context("Prediction errors for caretStack work as expected")
 test_that("Failure to calculate se occurs gracefully", {
   ens.class <- caretStack(
     models.class,
-    method = "glm", preProcess = "pca",
-    trControl = trainControl(number = 2L, allowParallel = FALSE)
+    method = "glm", preProcess = "pca"
   )
 
   w <- "Cannot calculate standard errors due to the preprocessing used in train"
@@ -82,8 +74,7 @@ test_that("Failure to calculate se occurs gracefully", {
   ), w)
   ens.reg <- caretStack(
     models.reg,
-    method = "glm", preProcess = "pca",
-    trControl = trainControl(number = 2L, allowParallel = FALSE)
+    method = "glm", preProcess = "pca"
   )
   expect_warning(expect_s3_class(predict(ens.reg, X.reg, se = TRUE), "data.table"), w)
 
@@ -161,7 +152,6 @@ test_that("predict.caretStack works correctly if the multiclass excluded level i
   meta_model <- caretStack(
     model_list,
     method = "rpart",
-    trControl = trainControl(method = "cv"),
     excluded_class_id = 4L
   )
   pred <- predict(meta_model, newdata = iris)
@@ -184,14 +174,12 @@ test_that("caretStack handles different stacking algorithms", {
         stack <- caretStack(
           model_list,
           method = method,
-          trControl = trainControl(method = "cv", number = 3L),
           verbose = FALSE
         )
       } else {
         stack <- caretStack(
           model_list,
-          method = method,
-          trControl = trainControl(method = "cv", number = 3L)
+          method = method
         )
       }
 
@@ -209,8 +197,7 @@ test_that("caretStack handles missing data in new data", {
 
   stack <- caretStack(
     models.class.subset,
-    method = "rpart",
-    trControl = trainControl(method = "cv", number = 3L)
+    method = "rpart"
   )
 
   test_data_with_na <- X.class
@@ -228,7 +215,9 @@ test_that("caretStack handles different metrics", {
       method = "glm",
       metric = metric,
       trControl = trainControl(
-        method = "cv", number = 3L, classProbs = TRUE,
+        method = "cv",
+        number = 3L,
+        classProbs = TRUE,
         summaryFunction = twoClassSummary
       )
     )
@@ -263,8 +252,7 @@ test_that("caretStack handles upsampling data", {
   stack <- caretStack(
     model_list,
     method = "rpart",
-    metric = "Kappa",
-    trControl = trainControl(method = "cv", number = 3L)
+    metric = "Kappa"
   )
 
   expect_s3_class(stack, "caretStack")
@@ -278,8 +266,7 @@ test_that("caretStack handles custom preprocessing", {
     stack <- caretStack(
       model_list,
       method = "glm",
-      preProcess = preprocess,
-      trControl = trainControl(method = "cv", number = 3L)
+      preProcess = preprocess
     )
     expect_s3_class(stack, "caretStack")
     expect_named(stack$ens_model$preProcess$method, c(preprocess, "ignore"))
@@ -323,7 +310,7 @@ test_that("caretStack coerces lists to caretLists", {
   class(model_list) <- "list"
   names(model_list) <- NULL
   expect_warning(
-    ens <- caretStack(model_list, trControl = trainControl(number = 2L)),
+    ens <- caretStack(model_list),
     "Attempting to coerce all.models to a caretList."
   )
   expect_s3_class(ens, "caretStack")
@@ -346,6 +333,7 @@ test_that("caretStack works if both new_X and new_Y are supplied", {
     new_X = X.class[idx, ],
     new_y = Y.class[idx],
     method = "rpart",
+    # Need probs for stacked preds
     trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
   )
   stack_reg <- caretStack(
@@ -353,6 +341,7 @@ test_that("caretStack works if both new_X and new_Y are supplied", {
     new_X = X.reg[idx, ],
     new_y = Y.reg[idx],
     method = "glm",
+    # Need probs for stacked preds
     trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = FALSE)
   )
 
