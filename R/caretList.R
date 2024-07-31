@@ -72,9 +72,9 @@ methodCheck <- function(x) {
   models <- lapply(x, function(m) {
     if (is.list(m)) {
       checkCustomModel(m)
-      data.frame(type = "custom", model = m$method, stringsAsFactors = FALSE)
+      data.table::data.table(type = "custom", model = m$method, stringsAsFactors = FALSE)
     } else if (is.character(m)) {
-      data.frame(type = "native", model = m, stringsAsFactors = FALSE)
+      data.table::data.table(type = "native", model = m, stringsAsFactors = FALSE)
     } else {
       stop(paste0(
         "Method \"", m, "\" is invalid. Methods must either be character names ",
@@ -83,7 +83,7 @@ methodCheck <- function(x) {
       ))
     }
   })
-  models <- do.call(rbind, models) # Could use data.table to be more efficient with lots of models
+  models <- data.table::rbindlist(models)
 
   # Ensure that all non-custom models are valid
   native_models <- subset(models, get("type") == "native")$model
@@ -133,7 +133,10 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #' Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
 #' function.
 #'
-#' @param ... arguments to pass to \code{\link[caret]{train}}.
+#' @param ... arguments to pass to \code{\link[caret]{train}}.  Don't use the formula interface, its slower
+#' and buggier compared to the X, y interface.  Use a \code{\link[data.table]{data.table}} for X.
+#' Particularly if you have a large dataset and/or many models, using a data.table will
+#' avoid unnecessary copies of your data and can save a lot of time and RAM.
 #' These arguments will determine which train method gets dispatched.
 #' @param trControl a \code{\link[caret]{trainControl}} object. If null, we will construct a good one.
 #' @param methodList optional, a character vector of caret models to ensemble.
@@ -142,8 +145,9 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #' This much more flexible than methodList and allows the
 #' specification of model-specific parameters (e.g. passing trace=FALSE to nnet)
 #' @param metric a string, the metric to optimize for. If NULL, we will choose a good one.
-#' @param continue_on_fail, logical, should a valid caretList be returned that
+#' @param continue_on_fail logical, should a valid caretList be returned that
 #' excludes models that fail, default is FALSE
+#' @param trim logical should the train models be trimmed to save memory and speed up stacking
 #' @return A list of \code{\link[caret]{train}} objects. If the model fails to build,
 #' it is dropped from the list.
 #' @importFrom caret trainControl train
@@ -173,7 +177,8 @@ caretList <- function(
     methodList = NULL,
     tuneList = NULL,
     metric = NULL,
-    continue_on_fail = FALSE) {
+    continue_on_fail = FALSE,
+    trim = TRUE) {
   # Checks
   if (is.null(tuneList) && is.null(methodList)) {
     stop("Please either define a methodList or tuneList")
@@ -229,49 +234,7 @@ caretList <- function(
   global_args[["metric"]] <- metric
 
   # Loop through the tuneLists and fit caret models with those specs
-  # TODO: MAKE A FUNCTION
-  modelList <- lapply(tuneList, function(m) {
-    # Combine args
-    model_args <- c(global_args, m)
-
-    # Fit
-    if (continue_on_fail) {
-      model <- tryCatch(do.call(train, model_args), error = function(e) NULL)
-    } else {
-      model <- do.call(train, model_args)
-    }
-
-    # Use data.table for stacked predictions
-    if ("pred" %in% names(model)) {
-      model[["pred"]] <- data.table::data.table(model[["pred"]])
-    }
-
-    # Remove some elements that are not needed from the train model
-    removals <- c("call", "dots", "trainingData", "resample", "resampledCM", "perfNames", "maxmimize", "times")
-    for (i in removals) {
-      if (i %in% names(model)) {
-        model[[i]] <- NULL
-      }
-    }
-
-    # Remove some elements that are not needed from the train model
-    trim_fun <- model[["modelInfo"]][["trim"]]
-    if (!is.null(trim_fun)) {
-      model[["finalModel"]] <- trim_fun(model[["finalModel"]])
-    }
-
-    # Remove some elements that are not needed from the model control
-    c_removals <- c("index", "indexOut", "indexFinal")
-    for (i in c_removals) {
-      if (i %in% names(model[["control"]])) {
-        model[["control"]][[i]] <- NULL
-      }
-    }
-
-    # Return
-    model
-  })
-
+  modelList <- lapply(tuneList, caretTrain, global_args = global_args, continue_on_fail = continue_on_fail, trim = trim)
   names(modelList) <- names(tuneList)
   nulls <- sapply(modelList, is.null)
   modelList <- modelList[!nulls]
@@ -380,6 +343,9 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   }
 
   # Loop over the models and make predictions
+  if (!is.null(newdata)) {
+    newdata <- data.table::as.data.table(newdata)
+  }
   preds <- apply_fun(object, caretPredict, newdata = newdata, excluded_class_id = excluded_class_id, ...)
   stopifnot(
     is.list(preds),
@@ -394,7 +360,7 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   # caretPredict will aggregate multiple predictions for the same row (e.g. repeated CV)
   # caretPredict will make sure the rows are sorted by the original row order
   pred_rows <- sapply(preds, nrow)
-  stopifnot(pred_rows == pred_rows[1L])
+  stopifnot(pred_rows == pred_rows[1L]) # TODO: informative error message
 
   # Name the predictions
   for (i in seq_along(preds)) {

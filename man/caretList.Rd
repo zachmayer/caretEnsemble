@@ -10,11 +10,15 @@ caretList(
   methodList = NULL,
   tuneList = NULL,
   metric = NULL,
-  continue_on_fail = FALSE
+  continue_on_fail = FALSE,
+  trim = TRUE
 )
 }
 \arguments{
-\item{...}{arguments to pass to \code{\link[caret]{train}}.
+\item{...}{arguments to pass to \code{\link[caret]{train}}.  Don't use the formula interface, its slower
+and buggier compared to the X, y interface.  Use a \code{\link[data.table]{data.table}} for X.
+Particularly if you have a large dataset and/or many models, using a data.table will
+avoid unnecessary copies of your data and can save a lot of time and RAM.
 These arguments will determine which train method gets dispatched.}
 
 \item{trControl}{a \code{\link[caret]{trainControl}} object. If null, we will construct a good one.}
@@ -28,8 +32,10 @@ specification of model-specific parameters (e.g. passing trace=FALSE to nnet)}
 
 \item{metric}{a string, the metric to optimize for. If NULL, we will choose a good one.}
 
-\item{continue_on_fail, }{logical, should a valid caretList be returned that
+\item{continue_on_fail}{logical, should a valid caretList be returned that
 excludes models that fail, default is FALSE}
+
+\item{trim}{logical should the train models be trimmed to save memory and speed up stacking}
 }
 \value{
 A list of \code{\link[caret]{train}} objects. If the model fails to build,

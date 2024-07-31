@@ -14,6 +14,6 @@ dropExcludedClass(x, all_classes, excluded_class_id)
 \item{excluded_class_id}{an integer indicating the class to exclude}
 }
 \description{
-Drop the excluded class from a prediction data.frame
+Drop the excluded class from a prediction data.table
 }
 \keyword{internal}

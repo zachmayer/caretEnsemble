@@ -54,6 +54,7 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
       is.numeric(new_y) || is.factor(new_y) || is.character(new_y),
       nrow(new_X) == length(new_y)
     )
+    new_X <- as.data.table(new_X)
   }
 
   # Validators
@@ -169,6 +170,9 @@ predict.caretStack <- function(
 
   # If we're predicting on new data, or we need standard errors, we need predictions from the submodels
   # Note that if se==TRUE and newdata is NULL, we will be returning STACKED predicitons
+  if (!is.null(newdata)) {
+    newdata <- data.table::as.data.table(newdata)
+  }
   if (se || !is.null(newdata)) {
     preds <- predict(
       object$models,

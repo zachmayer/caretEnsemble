@@ -28,7 +28,7 @@ test_that("We can predict with caretList and caretStack multiclass problems", {
   expect_identical(nrow(p_raw), nrow(iris))
 
   p <- predict(ens, newdata = iris[, -5L])
-  expect_is(p, "data.frame")
+  expect_s3_class(p, "data.table")
   expect_equal(nrow(p), nrow(iris))
 })
 
@@ -223,7 +223,7 @@ test_that("Multiclass is not supported for caretEnsemble", {
 test_that("caretList and caretStack handle imbalanced multiclass data", {
   set.seed(123L)
   n <- 1000L
-  X <- data.frame(x1 = rnorm(n), x2 = rnorm(n))
+  X <- data.table::data.table(x1 = rnorm(n), x2 = rnorm(n))
   y <- factor(c(rep("A", 700L), rep("B", 200L), rep("C", 100L)))
 
   my_control <- trainControl(
@@ -253,7 +253,7 @@ test_that("caretList and caretStack handle imbalanced multiclass data", {
 test_that("caretList and caretStack handle a large number of classes", {
   set.seed(123L)
   n <- 1000L
-  X <- data.frame(x1 = rnorm(n), x2 = rnorm(n))
+  X <- data.table::data.table(x1 = rnorm(n), x2 = rnorm(n))
   y <- factor(sample(paste0("Class", 1L:100L), n, replace = TRUE))
 
   my_control <- trainControl(

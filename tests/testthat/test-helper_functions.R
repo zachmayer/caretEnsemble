@@ -262,7 +262,6 @@ test_that("extractModelType stops when a classification model did not save probs
     invisible(caretStack(model_list, method = "knn", excluded_class_id = 1L))
 
     # Stacking with too great of a level should work. No error or warning.
-    # TODO: maybe caretStack should raise a warning if excluded_class_id is too high?
     # Should also validate it?
     stack <- caretStack(model_list, method = "knn", excluded_class_id = 4L)
     invisible(predict(stack, iris[, -5L]))

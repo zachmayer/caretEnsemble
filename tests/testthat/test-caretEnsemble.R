@@ -192,9 +192,9 @@ test_that("caretEnsemble works for classification models", {
   pred_one <- predict(ens.class, newdata = X.class[2L, , drop = FALSE]) # one row predictions
 
   # Check class
-  expect_is(pred_stacked, "data.frame")
-  expect_is(pred_in_sample, "data.frame")
-  expect_is(pred_one, "data.frame")
+  expect_s3_class(pred_stacked, "data.table")
+  expect_s3_class(pred_in_sample, "data.table")
+  expect_s3_class(pred_one, "data.table")
 
   # Check rows
   expect_equal(nrow(pred_stacked), 150L)
@@ -260,9 +260,9 @@ test_that("Ensembles using custom models work correctly", {
   pred_one <- predict(cs, newdata = X.class[2L, , drop = FALSE]) # one row predictions
 
   # Check class
-  expect_is(pred_stacked, "data.frame")
-  expect_is(pred_in_sample, "data.frame")
-  expect_is(pred_one, "data.frame")
+  expect_s3_class(pred_stacked, "data.table")
+  expect_s3_class(pred_in_sample, "data.table")
+  expect_s3_class(pred_one, "data.table")
 
   # Check rows
   expect_equal(nrow(pred_stacked), 150L)

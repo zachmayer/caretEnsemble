@@ -49,7 +49,7 @@ validateExcludedClass <- function(arg) {
 }
 
 #' @title Drop Excluded Class
-#' @description Drop the excluded class from a prediction data.frame
+#' @description Drop the excluded class from a prediction data.table
 #' @param x a data.table of predictions
 #' @param all_classes a character vector of all classes
 #' @param excluded_class_id an integer indicating the class to exclude
