@@ -217,7 +217,8 @@ caretList <- function(
       index = caret::createFolds(target, k = 5L, list = TRUE, returnTrain = TRUE),
       savePredictions = "final",
       classProbs = is_class,
-      summaryFunction = default_summary
+      summaryFunction = default_summary,
+      returnData = FALSE
     )
   }
 
@@ -228,15 +229,49 @@ caretList <- function(
   global_args[["metric"]] <- metric
 
   # Loop through the tuneLists and fit caret models with those specs
+  # TODO: MAKE A FUNCTION
   modelList <- lapply(tuneList, function(m) {
+    # Combine args
     model_args <- c(global_args, m)
+
+    # Fit
     if (continue_on_fail) {
       model <- tryCatch(do.call(train, model_args), error = function(e) NULL)
     } else {
       model <- do.call(train, model_args)
     }
+
+    # Use data.table for stacked predictions
+    if ("pred" %in% names(model)) {
+      model[["pred"]] <- data.table::data.table(model[["pred"]])
+    }
+
+    # Remove some elements that are not needed from the train model
+    removals <- c("call", "dots", "trainingData", "resample", "resampledCM", "perfNames", "maxmimize", "times")
+    for (i in removals) {
+      if (i %in% names(model)) {
+        model[[i]] <- NULL
+      }
+    }
+
+    # Remove some elements that are not needed from the train model
+    trim_fun <- model[["modelInfo"]][["trim"]]
+    if (!is.null(trim_fun)) {
+      model[["finalModel"]] <- trim_fun(model[["finalModel"]])
+    }
+
+    # Remove some elements that are not needed from the model control
+    c_removals <- c("index", "indexOut", "indexFinal")
+    for (i in c_removals) {
+      if (i %in% names(model[["control"]])) {
+        model[["control"]][[i]] <- NULL
+      }
+    }
+
+    # Return
     model
   })
+
   names(modelList) <- names(tuneList)
   nulls <- sapply(modelList, is.null)
   modelList <- modelList[!nulls]
