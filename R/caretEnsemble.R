@@ -317,8 +317,8 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     theme_bw()
 
   # Model Weights
-  wghtFrame <- as.data.frame(coef(object$ens_model$finalModel))
-  wghtFrame$method <- row.names(wghtFrame)
+  wghtFrame <- data.table::as.data.table(coef(object[["ens_model"]][["finalModel"]]))
+  data.table::set(wghtFrame, j = "method", value = row.names(wghtFrame))
   names(wghtFrame) <- c("weights", "method")
   g3 <- ggplot2::ggplot(wghtFrame, ggplot2::aes(.data[["method"]], .data[["weights"]])) +
     ggplot2::geom_bar(stat = "identity", fill = I("gray50"), color = I("black")) +

@@ -82,7 +82,7 @@ test_that("caretList errors for bad models", {
     expect_warning(
       expect_error(
         caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad, trControl = my_control),
-        regexp = "Stopping" # From caret.train
+        regexp = "Stopping" # Stop training on the first error.  This is the mssage straight from train.
       ),
       regexp = "model fit failed for Fold1"
     ),
@@ -94,7 +94,7 @@ test_that("caretList errors for bad models", {
         caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad, trControl = my_control, continue_on_fail = TRUE),
         regexp = "caret:train failed for all models. Please inspect your data."
       ),
-      regexp = "model fit failed for Fold1" # From caretList
+      regexp = "model fit failed for Fold1"
     ),
     regexp = "Something is wrong; all the Accuracy metric values are missing:"
   )
@@ -108,7 +108,7 @@ test_that("caretList errors for bad models", {
     expect_output(
       expect_warning(
         caretList(iris[, 1L:4L], iris[, 5L], tuneList = good_bad, trControl = my_control, continue_on_fail = TRUE),
-        regexp = "model fit failed for Fold1" # From caretList
+        regexp = "model fit failed for Fold1"
       ),
       regexp = "Something is wrong; all the Accuracy metric values are missing:"
     ), "caretList"
@@ -261,7 +261,7 @@ context("We can fit models with a mix of methodList and tuneList")
 test_that("We can fit models with a mix of methodList and tuneList", {
   myList <- list(
     rpart = caretModelSpec(method = "rpart", tuneLength = 10L),
-    rf = caretModelSpec(method = "rf", tuneGrid = data.frame(mtry = 2L))
+    rf = caretModelSpec(method = "rf", tuneGrid = data.table::data.table(mtry = 2L))
   )
   expect_warning(
     test <- caretList(
@@ -546,7 +546,7 @@ test_that("Users can pass a custom tuneList", {
   tuneTest <- list(
     rpart = caretModelSpec(
       method = "rpart",
-      tuneGrid = data.frame(.cp = c(0.01, 0.001, 0.1, 1.0))
+      tuneGrid = data.table::data.table(.cp = c(0.01, 0.001, 0.1, 1.0))
     ),
     knn = caretModelSpec(
       method = "knn",
@@ -628,7 +628,7 @@ test_that("User tuneTest parameters are respected and model is ensembled", {
   expect_warning(
     test_flma <- caretList(
       y ~ .,
-      data = data.frame(y = y, x),
+      data = data.table::data.table(y = y, x),
       tuneList = tuneTest
     ), "There were missing values in resampled performance measures."
   )
@@ -730,7 +730,7 @@ test_that("predict.caretList works when the progress bar is turned off", {
   set.seed(42L)
   N <- 100L
   noise_level <- 1L / 10L
-  X <- data.frame(
+  X <- data.table::data.table(
     a = runif(N),
     b = runif(N)
   )
@@ -802,7 +802,7 @@ test_that("caretList handles large number of predictors", {
   set.seed(123L)
   n <- 100L
   p <- 1000L
-  X <- data.frame(matrix(rnorm(n * p), n, p))
+  X <- data.table::data.table(matrix(rnorm(n * p), n, p))
   y <- factor(sample(c("A", "B"), n, replace = TRUE))
 
   models <- caretList(
@@ -826,7 +826,7 @@ test_that("caretList handles large number of predictors", {
 test_that("caretList handles imbalanced data", {
   set.seed(123L)
   n <- 1000L
-  X <- data.frame(x1 = rnorm(n), x2 = rnorm(n))
+  X <- data.table::data.table(x1 = rnorm(n), x2 = rnorm(n))
   y <- factor(c(rep("A", 950L), rep("B", 50L)))
 
   models <- caretList(

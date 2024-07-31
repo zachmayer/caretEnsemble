@@ -3,7 +3,7 @@
 .PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check-cran fix-style lint spell build-vignettes clean
 
 # Default target
-all: clean fix-style document install lint spell test build-vignettes check-cran coverage
+all: clean fix-style document build-vignettes install lint spell test check-cran coverage
 
 # Install dependencies
 install-deps:

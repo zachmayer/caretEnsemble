@@ -14,7 +14,6 @@ library(caretEnsemble)
 library(caret)
 library(mlbench)
 library(plyr)
-library(caTools)
 ```
 
 `caretEnsemble` is a package for making ensembles of caret models. You should already be somewhat familiar with the caret package before trying out `caretEnsemble`.
@@ -56,7 +55,7 @@ model_list <- caretList(
 (As with `train`, the formula interface is convenient but introduces move overhead. For large datasets the explicitly passing `x` and `y` is preferred).
 We can use the `predict` function to extract predictions from this object for new data:
 ```{r, echo=TRUE, results="hide"}
-p <- as.data.frame(predict(model_list, newdata = head(testing)))
+p <- predict(model_list, newdata = head(testing))
 print(p)
 ```
 ```{r, echo=FALSE, results="asis"}
@@ -156,7 +155,7 @@ glm_ensemble <- caretStack(
 model_preds2 <- model_preds
 model_preds2$ensemble <- predict(glm_ensemble, newdata = testing, excluded_class_id = 2L)
 CF <- coef(glm_ensemble$ens_model$finalModel)[-1L]
-colAUC(model_preds2, testing$Class)
+caTools::colAUC(model_preds2, testing$Class)
 CF / sum(CF)
 ```
 
@@ -180,7 +179,7 @@ gbm_ensemble <- caretStack(
 )
 model_preds3 <- model_preds
 model_preds3$ensemble <- predict(gbm_ensemble, newdata = testing, excluded_class_id = 2L)
-colAUC(model_preds3, testing$Class)
+caTools::colAUC(model_preds3, testing$Class)
 ```
 
 In this case, the sophisticated ensemble is no better than a simple weighted linear combination. Non-linear ensembles seem to work best when you have:

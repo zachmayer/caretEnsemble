@@ -17,10 +17,10 @@ test_that("We can get variable importance in ensembles", {
   set.seed(2239L)
   ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
-  expect_is(varImp(ens.class), "data.frame")
-  expect_is(varImp(ens.class, scale = TRUE), "data.frame")
-  expect_is(varImp(ens.reg), "data.frame")
-  expect_is(varImp(ens.reg, scale = TRUE), "data.frame")
+  expect_s3_class(varImp(ens.class), "data.table")
+  expect_s3_class(varImp(ens.class, scale = TRUE), "data.table")
+  expect_s3_class(varImp(ens.reg), "data.table")
+  expect_s3_class(varImp(ens.reg, scale = TRUE), "data.table")
 })
 
 test_that("varImp works for caretEnsembles", {
@@ -38,7 +38,7 @@ test_that("varImp works for caretEnsembles", {
     )
     for (s in c(TRUE, FALSE)) {
       i <- varImp(ens, scale = s)
-      expect_is(i, "data.frame")
+      expect_s3_class(i, "data.table")
       expect_named(i, expected_names)
       expect_equal(sort(i[["var"]]), sort(expected_var_names))
     }
@@ -164,7 +164,7 @@ test_that("Do model results in caretEnsemble match component models - classifica
   ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2L))
   modres1 <- extractModelMetrics(ens.class)
   modres2 <- extractModelMetrics(ens.reg)
-  expect_is(modres2, "data.frame")
+  expect_s3_class(modres2, "data.table")
   expect_equal(modres2$model_name, names(models.subset))
 })
 
@@ -187,18 +187,18 @@ test_that("Do model results in caretEnsemble match component models - regression
 test_that("Prediction options are respected in regression", {
   ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "none"))
   tests <- expand.grid(se = 0L:1L, return_weights = 0L:1L)
-  tests <- data.frame(lapply(tests, as.logical))
+  tests <- data.table::as.data.table(lapply(tests, as.logical))
   for (i in seq_len(nrow(tests))) {
     p <- predict(
       ens.reg,
       newdata = X.reg,
-      se = tests[i, "se"],
-      return_weights = tests[i, "return_weights"]
+      se = tests[i, ][["se"]],
+      return_weights = tests[i, ][["return_weights"]]
     )
 
     expect_s3_class(p, "data.table")
 
-    if (tests[i, "return_weights"]) {
+    if (tests[i, ][["return_weights"]]) {
       expect_is(attr(p, which = "weights"), "numeric")
     } else {
       expect_null(attr(p, which = "weights"))
@@ -209,18 +209,18 @@ test_that("Prediction options are respected in regression", {
 test_that("Prediction options are respected in Classification", {
   ens.class <- caretEnsemble(models.class, trControl = trainControl(method = "none"))
   tests <- expand.grid(se = 0L:1L, return_weights = 0L:1L)
-  tests <- data.frame(lapply(tests, as.logical))
+  tests <- data.table::as.data.table(lapply(tests, as.logical))
   for (i in seq_len(nrow(tests))) {
     p <- predict(
       ens.class,
       newdata = X.class,
-      se = tests[i, "se"],
-      return_weights = tests[i, "return_weights"]
+      se = tests[i, ][["se"]],
+      return_weights = tests[i, ][["return_weights"]]
     )
 
     expect_s3_class(p, "data.table")
 
-    if (tests[i, "return_weights"]) {
+    if (tests[i, ][["return_weights"]]) {
       expect_is(unlist(attr(p, which = "weights")), "numeric")
     } else {
       expect_null(attr(p, which = "weights"))
