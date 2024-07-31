@@ -4,7 +4,6 @@
 #' @docType package
 #' @aliases caretEnsemble-package
 #' @name caretEnsemble
-#' @importFrom stats coef median model.frame model.response predict qnorm reshape resid residuals weighted.mean weights
 #' @importFrom data.table .SD
 #' @importFrom rlang .data
 "_PACKAGE"

@@ -94,7 +94,7 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
 wtd.sd <- function(x, w, na.rm = FALSE) {
   stopifnot(is.numeric(x), is.numeric(w))
 
-  xWbar <- weighted.mean(x, w, na.rm = na.rm)
+  xWbar <- stats::weighted.mean(x, w, na.rm = na.rm)
   w <- w / mean(w, na.rm = na.rm)
 
   variance <- sum((w * (x - xWbar)^2L) / (sum(w, na.rm = na.rm) - 1L), na.rm = na.rm)
@@ -130,6 +130,7 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' @details Prediction weights are defined as variable importance in the stacked
 #' caret model. This is not available for all cases such as where the library
 #' model predictions are transformed before being passed to the stacking model.
+#' @importFrom stats predict
 #' @method predict caretStack
 #' @examples
 #' \dontrun{
@@ -234,7 +235,7 @@ predict.caretStack <- function(
     std_error <- data.table::copy(preds)
     data.table::setcolorder(std_error, names(imp))
     std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
-    std_error <- qnorm(level) * std_error
+    std_error <- stats::qnorm(level) * std_error
     if (ncol(meta_preds) == 1L) {
       meta_preds <- meta_preds[[1L]] # No names if one column (e.g. reg or binary with a dropped class)
     }

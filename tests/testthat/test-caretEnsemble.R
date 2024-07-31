@@ -38,7 +38,7 @@ test_that("We can extract resdiuals from train regression objects", {
     iris[, 1L:2L], iris[, 3L],
     method = "lm"
   )
-  r <- residuals(mod)
+  r <- stats::residuals(mod)
   expect_is(r, "numeric")
   expect_length(r, 150L)
 })

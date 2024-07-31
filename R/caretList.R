@@ -120,7 +120,7 @@ extractCaretTarget.default <- function(x, y, ...) {
 #' @param data Data frame from which variables specified in formula are preferentially to be taken.
 #' @param ... ignored
 extractCaretTarget.formula <- function(form, data, ...) {
-  y <- model.response(model.frame(form, data))
+  y <- stats::model.response(stats::model.frame(form, data))
   names(y) <- NULL
   y
 }
@@ -322,6 +322,8 @@ as.caretList.list <- function(object) {
 #' bar is shown. Default FALSE.
 #' @param excluded_class_id Integer. The class id to drop when predicting for multiclass
 #' @param ... Other arguments to pass to \code{\link[caret]{predict.train}}
+#' @importFrom stats predict
+#' @method predict caretList
 #' @export
 predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...) {
   stopifnot(is.caretList(object))

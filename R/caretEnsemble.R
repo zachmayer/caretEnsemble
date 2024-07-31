@@ -120,7 +120,7 @@ extractModelMetrics <- function(ensemble, metric = NULL) {
 summary.caretEnsemble <- function(object, ...) {
   types <- names(object$models)
   types <- paste(types, collapse = ", ")
-  wghts <- coef(object$ens_model$finalModel)
+  wghts <- stats::coef(object$ens_model$finalModel)
   metric <- object$ens_model$metric
   val <- getMetric(object$ens_model)
   cat(paste0("The following models were ensembled: ", types, " \n"))
@@ -315,7 +315,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
     ggplot2::theme_bw()
 
   # Model Weights
-  wghtFrame <- data.table::as.data.table(coef(object[["ens_model"]][["finalModel"]]))
+  wghtFrame <- data.table::as.data.table(stats::coef(object[["ens_model"]][["finalModel"]]))
   data.table::set(wghtFrame, j = "method", value = row.names(wghtFrame))
   names(wghtFrame) <- c("weights", "method")
   g3 <- ggplot2::ggplot(wghtFrame, ggplot2::aes(.data[["method"]], .data[["weights"]])) +
@@ -332,7 +332,7 @@ autoplot.caretEnsemble <- function(object, xvars = NULL, show_class_id = 2L, ...
   sub_model_summary <- sub_model_data[, list(
     ymin = min(.SD[["resid"]]),
     ymax = max(.SD[["resid"]]),
-    yavg = median(.SD[["resid"]]),
+    yavg = stats::median(.SD[["resid"]]),
     yhat = .SD[["pred"]][1L]
   ), by = "rowIndex"]
   g4 <- ggplot2::ggplot(sub_model_summary, ggplot2::aes(
