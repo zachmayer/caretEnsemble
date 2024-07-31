@@ -21,10 +21,7 @@ test_that("We can extract metrics", {
   data(iris)
   mod <- train(
     iris[, 1L:2L], iris[, 3L],
-    method = "lm",
-    trControl = trainControl(
-      method = "cv", number = 3L, savePredictions = "final"
-    )
+    method = "lm"
   )
   m1 <- getMetric(mod, "RMSE")
   m2 <- getMetric(mod, "RMSE")
@@ -39,10 +36,7 @@ test_that("We can extract resdiuals from train regression objects", {
   data(iris)
   mod <- train(
     iris[, 1L:2L], iris[, 3L],
-    method = "lm",
-    trControl = trainControl(
-      method = "cv", number = 3L, savePredictions = "final"
-    )
+    method = "lm"
   )
   r <- residuals(mod)
   expect_is(r, "numeric")
@@ -54,7 +48,7 @@ context("Does ensembling and prediction work?")
 #############################################################################
 
 test_that("We can ensemble regression models", {
-  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(number = 2L, savePredictions = "final"))
+  ens.reg <- caretEnsemble(models.reg)
   expect_that(ens.reg, is_a("caretEnsemble"))
   pred.reg <- predict(ens.reg, newdata = X.reg)
   pred.reg2 <- predict(ens.reg, newdata = X.reg, se = TRUE)
@@ -65,12 +59,7 @@ test_that("We can ensemble regression models", {
 
   expect_s3_class(pred.reg, "data.table")
   expect_identical(nrow(pred.reg), 150L)
-  ens.class <- caretEnsemble(
-    models.class,
-    trControl = trainControl(
-      number = 2L, savePredictions = "final", classProbs = TRUE
-    )
-  )
+  ens.class <- caretEnsemble(models.class)
   expect_that(ens.class, is_a("caretEnsemble"))
   pred.class <- predict(ens.class, newdata = X.class)
   expect_s3_class(pred.class, "data.table")
@@ -106,23 +95,20 @@ test_that("We can ensemble models of different predictors", {
   Y.reg <- iris[, 1L]
   X.reg <- model.matrix(~., iris[, -1L])
   mseeds <- vector(mode = "list", length = 12L)
-  myControl <- trainControl(
-    method = "cv", number = 10L,
-    p = 0.75, savePrediction = TRUE,
-    classProbs = FALSE, returnResamp = "final",
-    returnData = TRUE
+  my_control <- trainControl(
+    method = "cv", number = 2L,
+    p = 0.75,
+    savePrediction = TRUE,
+    returnResamp = "final"
   )
 
   set.seed(482L)
-  glm1 <- train(x = X.reg[, c(-1L, -2L, -6L)], y = Y.reg, method = "glm", trControl = myControl)
-  set.seed(482L)
-  glm2 <- train(x = X.reg[, c(-1L, -3L, -6L)], y = Y.reg, method = "glm", trControl = myControl)
-  set.seed(482L)
-  glm3 <- train(x = X.reg[, c(-1L, -2L, -3L, -6L)], y = Y.reg, method = "glm", trControl = myControl)
-  set.seed(482L)
-  glm4 <- train(x = X.reg[, c(-1L, -4L, -6L)], y = Y.reg, method = "glm", trControl = myControl)
-
-  nestedList <- list(glm1 = glm1, glm2 = glm2, glm3 = glm3, glm4 = glm4)
+  nestedList <- list(
+    glm1 = train(x = X.reg[, c(-1L, -2L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
+    glm2 = train(x = X.reg[, c(-1L, -3L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
+    glm3 = train(x = X.reg[, c(-1L, -2L, -3L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
+    glm4 = train(x = X.reg[, c(-1L, -4L, -6L)], y = Y.reg, method = "glm", trControl = my_control)
+  )
   nestedList <- as.caretList(nestedList)
 
   # Can we predict from the list
@@ -132,7 +118,7 @@ test_that("We can ensemble models of different predictors", {
   expect_equal(ncol(pred_list), length(nestedList))
 
   # Can we predict from the ensemble
-  ensNest <- caretEnsemble(nestedList, trControl = trainControl(number = 2L))
+  ensNest <- caretEnsemble(nestedList)
   expect_s3_class(ensNest, "caretEnsemble")
   pred.nest <- predict(ensNest, newdata = X.reg)
   expect_s3_class(pred.nest, "data.table")
@@ -227,28 +213,26 @@ test_that("Ensembles using custom models work correctly", {
   custom.rpart$method <- "custom.rpart"
 
   # Define models to be used in ensemble
+  # Add an unnamed model to ensure that method names are extracted from model info
+  # Add a named custom model, to contrast the above
+  # Add a non-custom model
   tune.list <- list(
-    # Add an unnamed model to ensure that method names are extracted from model info
     caretModelSpec(method = custom.rf, tuneLength = 1L),
-    # Add a named custom model, to contrast the above
     myrpart = caretModelSpec(method = custom.rpart, tuneLength = 1L),
-    # Add a non-custom model
     treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
-  )
-  train.control <- trainControl(
-    method = "cv",
-    number = 2L,
-    classProbs = TRUE,
-    savePredictions = "final",
-    summaryFunction = twoClassSummary
   )
 
   # Create an ensemble using the above models
-  cl <- caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control)
-  expect_is(cl, "caretList")
-  cs <- caretEnsemble(cl, trControl = trainControl(
-    method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE
-  ))
+  cl <- caretList(X.class, Y.class, tuneList = tune.list)
+  cs <- caretEnsemble(
+    cl,
+    trControl = trainControl(
+      method = "cv",
+      number = 2L,
+      savePredictions = "final",
+      classProbs = TRUE
+    )
+  )
   expect_is(cs, "caretEnsemble")
 
   # Validate names assigned to ensembled models
@@ -283,8 +267,8 @@ test_that("Ensembles using custom models work correctly", {
   expect_equivalent(pred_one$No, 0.9244206, tol = 0.1)
 
   # Verify that not specifying a method attribute for custom models causes an error
+  #  Add a custom caret model WITHOUT a properly assigned method attribute
   tune.list <- list(
-    # Add a custom caret model WITHOUT a properly assigned method attribute
     caretModelSpec(method = getModelInfo("rf", regex = FALSE)[[1L]], tuneLength = 1L),
     treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
   )
