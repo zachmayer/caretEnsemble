@@ -29,7 +29,6 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:50, 1:2],
 #'   y = iris[1:50, 3],
@@ -54,7 +53,7 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
       is.numeric(new_y) || is.factor(new_y) || is.character(new_y),
       nrow(new_X) == length(new_y)
     )
-    new_X <- as.data.table(new_X)
+    new_X <- data.table::as.data.table(new_X)
   }
 
   # Validators
@@ -75,7 +74,7 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
     obs <- obs[["obs"]]
   }
   stopifnot(nrow(preds) == length(obs))
-  model <- train(preds, obs, ...)
+  model <- caret::train(preds, obs, ...)
 
   # Return final model
   out <- list(models = all.models, ens_model = model, error = model$results, excluded_class_id = excluded_class_id)
@@ -94,7 +93,7 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
 wtd.sd <- function(x, w, na.rm = FALSE) {
   stopifnot(is.numeric(x), is.numeric(w))
 
-  xWbar <- weighted.mean(x, w, na.rm = na.rm)
+  xWbar <- stats::weighted.mean(x, w, na.rm = na.rm)
   w <- w / mean(w, na.rm = na.rm)
 
   variance <- sum((w * (x - xWbar)^2L) / (sum(w, na.rm = na.rm) - 1L), na.rm = na.rm)
@@ -130,10 +129,10 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' @details Prediction weights are defined as variable importance in the stacked
 #' caret model. This is not available for all cases such as where the library
 #' model predictions are transformed before being passed to the stacking model.
+#' @importFrom stats predict
 #' @method predict caretStack
 #' @examples
 #' \dontrun{
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -155,8 +154,8 @@ predict.caretStack <- function(
     ...) {
   # Check the object
   stopifnot(
-    is(object$models, "caretList"),
-    is(object$ens_model, "train")
+    methods::is(object$models, "caretList"),
+    methods::is(object$ens_model, "train")
   )
 
   # Extract model types
@@ -214,7 +213,7 @@ predict.caretStack <- function(
   # In the future we could do SE by class, but that seems overcomplicated for now
   # As it is, this is pretty made up
   if (se || return_weights) {
-    imp <- as.matrix(varImp(object$ens_model)$importance)
+    imp <- as.matrix(caret::varImp(object$ens_model)$importance)
     imp_names <- rownames(imp)
     imp <- apply(imp, 2L, function(x) x / sum(x))
     row.names(imp) <- imp_names
@@ -234,7 +233,7 @@ predict.caretStack <- function(
     std_error <- data.table::copy(preds)
     data.table::setcolorder(std_error, names(imp))
     std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
-    std_error <- qnorm(level) * std_error
+    std_error <- stats::qnorm(level) * std_error
     if (ncol(meta_preds) == 1L) {
       meta_preds <- meta_preds[[1L]] # No names if one column (e.g. reg or binary with a dropped class)
     }
@@ -255,7 +254,7 @@ predict.caretStack <- function(
 #' @description Check if an object is a caretStack object
 #' @export
 is.caretStack <- function(object) {
-  is(object, "caretStack")
+  methods::is(object, "caretStack")
 }
 
 #' @title Summarize a caretStack object
@@ -265,7 +264,6 @@ is.caretStack <- function(object) {
 #' @export
 #' @examples
 #' \dontrun{
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -283,11 +281,9 @@ summary.caretStack <- function(object, ...) {
 #' @description This is a function to print a caretStack.
 #' @param x An object of class caretStack
 #' @param ... ignored
-#' @importFrom stats na.omit
 #' @export
 #' @examples
 #' \dontrun{
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -312,7 +308,6 @@ print.caretStack <- function(x, ...) {
 #' @method plot caretStack
 #' @examples
 #' \dontrun{
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -332,12 +327,9 @@ plot.caretStack <- function(x, ...) {
 #' this function only works if the ensembling model has the same number of resamples as the component models.
 #' @param x An object of class caretStack
 #' @param ... passed to dotplot
-#' @importFrom lattice dotplot
-#' @importFrom caret resamples
 #' @examples
 #' \dontrun{
 #' set.seed(42)
-#' library("rpart")
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -349,5 +341,5 @@ plot.caretStack <- function(x, ...) {
 #' }
 dotplot.caretStack <- function(x, ...) {
   resamps <- caret::resamples(x$models)
-  dotplot(resamps, ...)
+  lattice::dotplot(resamps, ...)
 }

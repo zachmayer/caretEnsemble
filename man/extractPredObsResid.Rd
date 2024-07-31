@@ -12,7 +12,7 @@ extractPredObsResid(object, show_class_id = 2L)
 \item{show_class_id}{For classification only: which class level to use for residuals}
 }
 \value{
-a data.table with predictions, observeds, and residuals
+a data.table::data.table with predictions, observeds, and residuals
 }
 \description{
 This function extracts the best predictions and observations from a train object

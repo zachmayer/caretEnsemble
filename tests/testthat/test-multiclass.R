@@ -1,7 +1,7 @@
 #############################################################################
-context("caretList and caretStack work for multiclass problems")
+testthat::context("caretList and caretStack work for multiclass problems")
 #############################################################################
-test_that("We can predict with caretList and caretStack multiclass problems", {
+testthat::test_that("We can predict with caretList and caretStack multiclass problems", {
   data(iris)
   model_list <- caretList(
     x = iris[, -5L],
@@ -10,21 +10,21 @@ test_that("We can predict with caretList and caretStack multiclass problems", {
   )
 
   p <- predict(model_list, newdata = iris[, -5L])
-  expect_is(p, "data.table")
-  expect_equal(nrow(p), nrow(iris))
+  testthat::expect_is(p, "data.table")
+  testthat::expect_equal(nrow(p), nrow(iris))
 
   ens <- caretStack(model_list, method = "rpart")
 
   p_raw <- predict(ens, newdata = iris[, -5L])
-  expect_s3_class(p_raw, "data.table")
-  expect_identical(nrow(p_raw), nrow(iris))
+  testthat::expect_s3_class(p_raw, "data.table")
+  testthat::expect_identical(nrow(p_raw), nrow(iris))
 
   p <- predict(ens, newdata = iris[, -5L])
-  expect_s3_class(p, "data.table")
-  expect_equal(nrow(p), nrow(iris))
+  testthat::expect_s3_class(p, "data.table")
+  testthat::expect_equal(nrow(p), nrow(iris))
 })
 
-test_that("Columns for caretList predictions are correct and ordered", {
+testthat::test_that("Columns for caretList predictions are correct and ordered", {
   data(iris)
   model_list <- caretList(
     x = iris[, -5L],
@@ -40,7 +40,7 @@ test_that("Columns for caretList predictions are correct and ordered", {
 
   # Check the number of rows and columns is correct
   p <- predict(model_list, newdata = iris[, -5L], excluded_class_id = 0L)
-  expect_equal(dim(p), c(nrow(iris), num_methods * num_classes))
+  testthat::expect_equal(dim(p), c(nrow(iris), num_methods * num_classes))
 
   methods <- names(model_list)
   classes <- levels(iris$Species)
@@ -48,13 +48,13 @@ test_that("Columns for caretList predictions are correct and ordered", {
   ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
 
   # Check the names of the columns are correct
-  expect_true(all(colnames(p) %in% ordered_colnames))
+  testthat::expect_true(all(colnames(p) %in% ordered_colnames))
 
   # Check that the columns are ordered correctly
-  expect_equal(colnames(p), ordered_colnames)
+  testthat::expect_equal(colnames(p), ordered_colnames)
 })
 
-test_that("Columns for caretStack are correct", {
+testthat::test_that("Columns for caretStack are correct", {
   data(iris)
   model_list <- caretList(
     x = iris[, -5L],
@@ -71,17 +71,17 @@ test_that("Columns for caretStack are correct", {
 
   # Check the number of rows and columns is correct
   p_raw <- predict(model_stack, newdata = iris[, -5L])
-  expect_identical(nrow(p_raw), nrow(iris))
+  testthat::expect_identical(nrow(p_raw), nrow(iris))
   p_prob <- predict(model_stack, newdata = iris[, -5L])
-  expect_equal(dim(p_prob), c(nrow(iris), num_classes))
+  testthat::expect_equal(dim(p_prob), c(nrow(iris), num_classes))
 
   classes <- levels(iris$Species)
 
   # Check that the columns are ordered correctly
-  expect_named(p_prob, classes)
+  testthat::expect_named(p_prob, classes)
 })
 
-test_that("Periods are supported in method and class names in caretList and caretStack", {
+testthat::test_that("Periods are supported in method and class names in caretList and caretStack", {
   data(iris)
   # Rename values and levels to have underscores
   levels(iris[, 5L]) <- c("setosa_1", "versicolor_2", "virginica_3")
@@ -111,18 +111,18 @@ test_that("Periods are supported in method and class names in caretList and care
 
   class_method_combinations <- expand.grid(classes, methods)
   ordered_colnames <- apply(class_method_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
-  expect_equal(colnames(p), ordered_colnames)
+  testthat::expect_equal(colnames(p), ordered_colnames)
 
   model_stack <- caretStack(model_list, method = "knn", trControl = trainControl(
     savePredictions = "final", classProbs = TRUE
   ))
   p_prob <- predict(model_stack, newdata = iris[, -5L])
-  expect_equal(colnames(p_prob), classes)
+  testthat::expect_equal(colnames(p_prob), classes)
   p_raw <- predict(model_stack, newdata = iris[, -5L])
-  expect_named(p_raw, classes)
+  testthat::expect_named(p_raw, classes)
 })
 
-test_that("We can make a confusion matrix", {
+testthat::test_that("We can make a confusion matrix", {
   data(iris)
 
   set.seed(42L)
@@ -146,15 +146,15 @@ test_that("We can make a confusion matrix", {
   classes <- apply(predictions, 1L, function(x) names(x)[which.max(x)])
   classes <- factor(classes, levels = levels(test_data[, 5L]))
   cm <- confusionMatrix(classes, test_data[, 5L])
-  expect_is(cm, "confusionMatrix")
+  testthat::expect_is(cm, "confusionMatrix")
 
   # Check dims
-  expect_equal(dim(cm$table), c(3L, 3L))
+  testthat::expect_equal(dim(cm$table), c(3L, 3L))
   # Accuracy should be greater than 0.9
-  expect_gt(cm$overall["Accuracy"], 0.9)
+  testthat::expect_gt(cm$overall["Accuracy"], 0.9)
 })
 
-test_that("Multiclass is not supported for caretEnsemble", {
+testthat::test_that("Multiclass is not supported for caretEnsemble", {
   data(iris)
   data(models.class)
   data(models.reg)
@@ -167,10 +167,10 @@ test_that("Multiclass is not supported for caretEnsemble", {
     )
   )
 
-  expect_error(caretEnsemble(model_list), "caretEnsemble only supports binary classification problems")
+  testthat::expect_error(caretEnsemble(model_list), "caretEnsemble only supports binary classification problems")
 })
 
-test_that("caretList and caretStack handle imbalanced multiclass data", {
+testthat::test_that("caretList and caretStack handle imbalanced multiclass data", {
   set.seed(123L)
   n <- 1000L
   X <- data.table::data.table(x1 = rnorm(n), x2 = rnorm(n))
@@ -182,17 +182,17 @@ test_that("caretList and caretStack handle imbalanced multiclass data", {
     methodList = c("rpart", "glmnet")
   )
 
-  expect_s3_class(model_list, "caretList")
-  expect_length(model_list, 2L)
+  testthat::expect_s3_class(model_list, "caretList")
+  testthat::expect_length(model_list, 2L)
 
   stack <- caretStack(model_list, method = "glmnet")
-  expect_s3_class(stack, "caretStack")
+  testthat::expect_s3_class(stack, "caretStack")
 
   preds <- predict(stack, newdata = X)
-  expect_named(preds, levels(y))
+  testthat::expect_named(preds, levels(y))
 })
 
-test_that("caretList and caretStack handle a large number of classes", {
+testthat::test_that("caretList and caretStack handle a large number of classes", {
   set.seed(123L)
   n <- 1000L
   X <- data.table::data.table(x1 = rnorm(n), x2 = rnorm(n))
@@ -204,16 +204,16 @@ test_that("caretList and caretStack handle a large number of classes", {
     methodList = "rpart"
   )
 
-  expect_s3_class(model_list, "caretList")
+  testthat::expect_s3_class(model_list, "caretList")
 
   stack <- caretStack(model_list, method = "rpart")
-  expect_s3_class(stack, "caretStack")
+  testthat::expect_s3_class(stack, "caretStack")
 
   preds <- predict(stack, newdata = X)
-  expect_equal(ncol(preds), nlevels(y))
+  testthat::expect_equal(ncol(preds), nlevels(y))
 })
 
-test_that("caretList and caretStack handle ordinal multiclass data", {
+testthat::test_that("caretList and caretStack handle ordinal multiclass data", {
   data(Boston, package = "MASS")
   Boston$chas <- as.factor(Boston$chas)
   Boston$rad <- factor(paste0("rad_", Boston$rad), ordered = TRUE)
@@ -224,18 +224,18 @@ test_that("caretList and caretStack handle ordinal multiclass data", {
     methodList = c("rpart", "glmnet")
   )
 
-  expect_s3_class(model_list, "caretList")
+  testthat::expect_s3_class(model_list, "caretList")
 
   stack <- caretStack(model_list, method = "rpart")
-  expect_s3_class(stack, "caretStack")
+  testthat::expect_s3_class(stack, "caretStack")
 
   preds <- predict(stack, newdata = Boston)
-  expect_s3_class(preds, "data.table")
-  expect_named(preds, levels(Boston$rad))
-  expect_equal(rowSums(preds), rep(1.0, nrow(Boston)), tol = 0.0001)
+  testthat::expect_s3_class(preds, "data.table")
+  testthat::expect_named(preds, levels(Boston$rad))
+  testthat::expect_equal(rowSums(preds), rep(1.0, nrow(Boston)), tol = 0.0001)
 })
 
-test_that("caretList and caretStack produce consistent probability predictions", {
+testthat::test_that("caretList and caretStack produce consistent probability predictions", {
   data(iris)
 
   model_list <- caretList(
@@ -247,13 +247,13 @@ test_that("caretList and caretStack produce consistent probability predictions",
   stack <- caretStack(model_list, method = "rpart")
 
   prob_preds <- predict(stack, newdata = iris[, -5L])
-  expect_equal(nrow(prob_preds), nrow(iris))
-  expect_equal(ncol(prob_preds), nlevels(iris$Species))
-  expect_true(all(rowSums(prob_preds) >= 0.99))
-  expect_true(all(rowSums(prob_preds) <= 1.01))
+  testthat::expect_equal(nrow(prob_preds), nrow(iris))
+  testthat::expect_equal(ncol(prob_preds), nlevels(iris$Species))
+  testthat::expect_true(all(rowSums(prob_preds) >= 0.99))
+  testthat::expect_true(all(rowSums(prob_preds) <= 1.01))
 })
 
-test_that("caretList and caretStack handle new levels in prediction data", {
+testthat::test_that("caretList and caretStack handle new levels in prediction data", {
   data(iris)
   idx <- seq_len(nrow(iris))
   idx_train <- sample(idx, 120L)
@@ -272,5 +272,5 @@ test_that("caretList and caretStack handle new levels in prediction data", {
   stack <- caretStack(model_list, method = "rpart")
 
   preds <- predict(stack, newdata = test_data)
-  expect_true(all(levels(preds) %in% levels(train_data$Species)))
+  testthat::expect_true(all(levels(preds) %in% levels(train_data$Species)))
 })

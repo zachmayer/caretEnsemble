@@ -61,11 +61,10 @@ checkCustomModel <- function(x) {
 #' @description This function uses modelLookup from caret to ensure the list of
 #' methods supplied by the user are all models caret can fit.
 #' @param x a list of user-supplied tuning parameters and methods
-#' @importFrom caret modelLookup
 #' @return NULL
 methodCheck <- function(x) {
   # Fetch list of existing caret models
-  supported_models <- unique(modelLookup()$model)
+  supported_models <- unique(caret::modelLookup()$model)
 
   # Split given model methods based on whether or not they
   # are specified as strings or model info lists (ie custom models)
@@ -111,7 +110,6 @@ extractCaretTarget <- function(...) {
 #' or other type (e.g. sparse matrix). See Details below.
 #' @param y a numeric or factor vector containing the outcome for each sample.
 #' @param ... ignored
-#' @method extractCaretTarget default
 extractCaretTarget.default <- function(x, y, ...) {
   y
 }
@@ -121,9 +119,8 @@ extractCaretTarget.default <- function(x, y, ...) {
 #' @param form A formula of the form y ~ x1 + x2 + ...
 #' @param data Data frame from which variables specified in formula are preferentially to be taken.
 #' @param ... ignored
-#' @method extractCaretTarget formula
 extractCaretTarget.formula <- function(form, data, ...) {
-  y <- model.response(model.frame(form, data))
+  y <- stats::model.response(stats::model.frame(form, data))
   names(y) <- NULL
   y
 }
@@ -150,7 +147,6 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #' @param trim logical should the train models be trimmed to save memory and speed up stacking
 #' @return A list of \code{\link[caret]{train}} objects. If the model fails to build,
 #' it is dropped from the list.
-#' @importFrom caret trainControl train
 #' @export
 #' @examples
 #' \dontrun{
@@ -250,7 +246,7 @@ caretList <- function(
 #' @param object an R object
 #' @export
 is.caretList <- function(object) {
-  is(object, "caretList")
+  methods::is(object, "caretList")
 }
 
 #' @title Convert object to caretList object
@@ -279,7 +275,6 @@ as.caretList.default <- function(object) {
 #' @param object list of caret models
 #' @return a \code{\link{caretList}} object
 #' @export
-#' @method as.caretList list
 as.caretList.list <- function(object) {
   # Check that the object is a list
   if (!inherits(object, "list")) {
@@ -287,7 +282,7 @@ as.caretList.list <- function(object) {
   }
 
   # Check that each element in the list is of class train
-  if (!all(sapply(object, is, "train"))) {
+  if (!all(sapply(object, methods::is, "train"))) {
     stop("object requires all elements of list to be caret models")
   }
 
@@ -327,10 +322,9 @@ as.caretList.list <- function(object) {
 #' bar is shown. Default FALSE.
 #' @param excluded_class_id Integer. The class id to drop when predicting for multiclass
 #' @param ... Other arguments to pass to \code{\link[caret]{predict.train}}
-#' @importFrom pbapply pblapply
-#' @importFrom data.table as.data.table setnames
-#' @export
+#' @importFrom stats predict
 #' @method predict caretList
+#' @export
 predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...) {
   stopifnot(is.caretList(object))
 
@@ -366,11 +360,12 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
     model_name <- names(object)[i]
     if (ncol(p) == 1L) {
       # For a single column, name it after the model (e.g. regression or binary with an excluded class)
-      setnames(p, names(p), model_name)
+      new_names <- model_name
     } else {
       # For multiple columns, name them including the model (e.g. multiclass)
-      setnames(p, names(p), paste(model_name, names(p), sep = "_"))
+      new_names <- paste(model_name, names(p), sep = "_")
     }
+    data.table::setnames(p, names(p), new_names)
   }
   preds <- unname(preds)
 

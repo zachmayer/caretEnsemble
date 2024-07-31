@@ -4,7 +4,7 @@
 \alias{dotplot.caretStack}
 \title{Comparison dotplot for a caretStack object}
 \usage{
-\method{dotplot}{caretStack}(x, ...)
+dotplot.caretStack(x, ...)
 }
 \arguments{
 \item{x}{An object of class caretStack}
@@ -19,7 +19,6 @@ this function only works if the ensembling model has the same number of resample
 \examples{
 \dontrun{
 set.seed(42)
-library("rpart")
 models <- caretList(
   x = iris[1:100, 1:2],
   y = iris[1:100, 3],

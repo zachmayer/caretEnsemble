@@ -16,7 +16,6 @@ This is a function to print a caretStack.
 }
 \examples{
 \dontrun{
-library("rpart")
 models <- caretList(
   x = iris[1:100, 1:2],
   y = iris[1:100, 3],
