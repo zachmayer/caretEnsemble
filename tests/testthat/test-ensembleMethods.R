@@ -72,10 +72,7 @@ test_that("Metric is used correctly", {
   )
 
   # Make ensemble
-  # varImp struggles with the rf in our test suite, why?
-  models.subset <- models.reg[2L:4L]
-  class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2L))
+  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(number = 2L))
 
   # Get an incorrect metric
   err <- "metric %in% names(x$results) is not TRUE"
@@ -90,8 +87,8 @@ test_that("Metric is used correctly", {
 
   # Correct metric
   expect_equal(getMetric(ens.reg$models[[1L]], "RMSE"), 0.3146584, tol = 0.1)
-  expect_equal(getMetric(ens.reg$models[[2L]], "RMSE"), 0.439482, tol = 0.1)
-  expect_equal(getMetric(ens.reg$models[[3L]], "RMSE"), 0.3361409, tol = 0.1)
+  expect_equal(getMetric(ens.reg$models[[2L]], "RMSE"), 0.308, tol = 0.1)
+  expect_equal(getMetric(ens.reg$models[[3L]], "RMSE"), 0.444, tol = 0.1)
 
   # Correct metric
   expect_equal(getMetric(ens.class$models[[1L]], "ROC", return_sd = TRUE), 0.05897897, tol = 0.1)
@@ -159,13 +156,11 @@ test_that("Do model results in caretEnsemble match component models - classifica
       number = 2L, summaryFunction = twoClassSummary, classProbs = TRUE
     )
   )
-  models.subset <- models.reg[2L:4L]
-  class(models.subset) <- "caretList"
-  ens.reg <- caretEnsemble(models.subset, trControl = trainControl(number = 2L))
+  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(number = 2L))
   modres1 <- extractModelMetrics(ens.class)
   modres2 <- extractModelMetrics(ens.reg)
   expect_s3_class(modres2, "data.table")
-  expect_equal(modres2$model_name, names(models.subset))
+  expect_equal(modres2$model_name, names(models.reg))
 })
 
 test_that("Do model results in caretEnsemble match component models - regression", {

@@ -107,8 +107,8 @@ table.table-condensed {
       </ul>
       <div class="tab-content" data-tabsetid="covr">
         <div class="tab-pane active" title="Files" data-value="Files" id="tab-covr-1">
-          <div class="datatables html-widget html-fill-item" id="htmlwidget-f0a71f42359515db6b04" style="width:100%;height:500px;"></div>
-          <script type="application/json" data-for="htmlwidget-f0a71f42359515db6b04">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[["<a href=\"#\">R/caretEnsemble.R<\/a>","<a href=\"#\">R/caretList.R<\/a>","<a href=\"#\">R/caretStack.R<\/a>","<a href=\"#\">R/caretPredict.R<\/a>","<a href=\"#\">R/S3GenericExtenstions.R<\/a>","<a href=\"#\">R/caretTrain.R<\/a>","<a href=\"#\">R/helper_functions.R<\/a>"],[383,394,353,186,100,57,21],[156,126,95,76,24,18,5],[156,126,95,76,24,18,5],[0,0,0,0,0,0,0],["19","133","2016","386","6","186","381"],["100.00%","100.00%","100.00%","100.00%","100.00%","100.00%","100.00%"]],"container":"<table class=\"row-border\">\n  <thead>\n    <tr>\n      <th>File<\/th>\n      <th>Lines<\/th>\n      <th>Relevant<\/th>\n      <th>Covered<\/th>\n      <th>Missed<\/th>\n      <th>Hits / Line<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"dom":"t","paging":false,"columnDefs":[{"targets":6,"createdCell":"function(td, cellData, rowData, row, col) {\n  var percent = cellData.replace(\"%\", \"\");\n  if (percent > 90) {\n    var grad = \"linear-gradient(90deg, #edfde7 \" + cellData + \", white \" + cellData + \")\";\n  } else if (percent > 75) {\n    var grad = \"linear-gradient(90deg, #f9ffe5 \" + cellData + \", white \" + cellData + \")\";\n  } else {\n    var grad = \"linear-gradient(90deg, #fcece9 \" + cellData + \", white \" + cellData + \")\";\n  }\n  $(td).css(\"background\", grad);\n}\n"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"File","targets":0},{"name":"Lines","targets":1},{"name":"Relevant","targets":2},{"name":"Covered","targets":3},{"name":"Missed","targets":4},{"name":"Hits / Line","targets":5},{"name":"Coverage","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"callback":"function(table) {\ntable.on('click.dt', 'a', function() {\n  files = $('div#files div');\n  files.not('div.hidden').addClass('hidden');\n  id = $(this).text();\n  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');\n  $('ul.nav a[data-value=Source]').text(id).tab('show');\n});\n}"},"evals":["options.columnDefs.0.createdCell","callback"],"jsHooks":[]}</script>
+          <div class="datatables html-widget html-fill-item" id="htmlwidget-fb6df71def363a1d44b3" style="width:100%;height:500px;"></div>
+          <script type="application/json" data-for="htmlwidget-fb6df71def363a1d44b3">{"x":{"filter":"none","vertical":false,"fillContainer":false,"data":[["<a href=\"#\">R/caretEnsemble.R<\/a>","<a href=\"#\">R/caretList.R<\/a>","<a href=\"#\">R/caretStack.R<\/a>","<a href=\"#\">R/caretPredict.R<\/a>","<a href=\"#\">R/S3GenericExtenstions.R<\/a>","<a href=\"#\">R/caretTrain.R<\/a>","<a href=\"#\">R/helper_functions.R<\/a>"],[383,394,353,186,100,57,21],[156,126,95,76,24,18,5],[156,126,95,76,24,18,5],[0,0,0,0,0,0,0],["19","133","2016","387","6","186","381"],["100.00%","100.00%","100.00%","100.00%","100.00%","100.00%","100.00%"]],"container":"<table class=\"row-border\">\n  <thead>\n    <tr>\n      <th>File<\/th>\n      <th>Lines<\/th>\n      <th>Relevant<\/th>\n      <th>Covered<\/th>\n      <th>Missed<\/th>\n      <th>Hits / Line<\/th>\n      <th>Coverage<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"searching":false,"dom":"t","paging":false,"columnDefs":[{"targets":6,"createdCell":"function(td, cellData, rowData, row, col) {\n  var percent = cellData.replace(\"%\", \"\");\n  if (percent > 90) {\n    var grad = \"linear-gradient(90deg, #edfde7 \" + cellData + \", white \" + cellData + \")\";\n  } else if (percent > 75) {\n    var grad = \"linear-gradient(90deg, #f9ffe5 \" + cellData + \", white \" + cellData + \")\";\n  } else {\n    var grad = \"linear-gradient(90deg, #fcece9 \" + cellData + \", white \" + cellData + \")\";\n  }\n  $(td).css(\"background\", grad);\n}\n"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"File","targets":0},{"name":"Lines","targets":1},{"name":"Relevant","targets":2},{"name":"Covered","targets":3},{"name":"Missed","targets":4},{"name":"Hits / Line","targets":5},{"name":"Coverage","targets":6}],"order":[],"autoWidth":false,"orderClasses":false},"callback":"function(table) {\ntable.on('click.dt', 'a', function() {\n  files = $('div#files div');\n  files.not('div.hidden').addClass('hidden');\n  id = $(this).text();\n  files.filter('div[id=\\'' + id + '\\']').removeClass('hidden');\n  $('ul.nav a[data-value=Source]').text(id).tab('show');\n});\n}"},"evals":["options.columnDefs.0.createdCell","callback"],"jsHooks":[]}</script>
         </div>
         <div class="tab-pane" title="Source" data-value="Source" id="tab-covr-2">
           <div id="files">
@@ -649,7 +649,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">77</td>
-                    <td class="coverage">885<em>x</em></td>
+                    <td class="coverage">887<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(is(object, "train"))</pre>
                     </td>
@@ -670,7 +670,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">80</td>
-                    <td class="coverage">884<em>x</em></td>
+                    <td class="coverage">886<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  model_type &lt;- object$modelType</pre>
                     </td>
@@ -691,7 +691,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">83</td>
-                    <td class="coverage">884<em>x</em></td>
+                    <td class="coverage">886<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  is_class &lt;- model_type == "Classification"</pre>
                     </td>
@@ -712,7 +712,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">86</td>
-                    <td class="coverage">884<em>x</em></td>
+                    <td class="coverage">886<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is_class &amp;&amp; !is.function(object$modelInfo$prob)) {</pre>
                     </td>
@@ -740,21 +740,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">90</td>
-                    <td class="coverage">883<em>x</em></td>
+                    <td class="coverage">885<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (validate_for_stacking) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">91</td>
-                    <td class="coverage">435<em>x</em></td>
+                    <td class="coverage">437<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    err &lt;- "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions."</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">92</td>
-                    <td class="coverage">435<em>x</em></td>
+                    <td class="coverage">437<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (is.null(object$control$savePredictions)) {</pre>
                     </td>
@@ -775,7 +775,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">95</td>
-                    <td class="coverage">434<em>x</em></td>
+                    <td class="coverage">436<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (!object$control$savePredictions %in% c("all", "final", TRUE)) {</pre>
                     </td>
@@ -796,7 +796,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">98</td>
-                    <td class="coverage">432<em>x</em></td>
+                    <td class="coverage">434<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (is_class &amp;&amp; !object$control$classProbs) {</pre>
                     </td>
@@ -838,7 +838,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">104</td>
-                    <td class="coverage">879<em>x</em></td>
+                    <td class="coverage">881<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  model_type</pre>
                     </td>
@@ -943,7 +943,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">119</td>
-                    <td class="coverage">825<em>x</em></td>
+                    <td class="coverage">827<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(is(object, "train"))</pre>
                     </td>
@@ -964,7 +964,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">122</td>
-                    <td class="coverage">825<em>x</em></td>
+                    <td class="coverage">827<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  model_type &lt;- extractModelType(object, validate_for_stacking = is.null(newdata))</pre>
                     </td>
@@ -985,7 +985,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">125</td>
-                    <td class="coverage">824<em>x</em></td>
+                    <td class="coverage">826<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(newdata)) {</pre>
                     </td>
@@ -999,7 +999,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">127</td>
-                    <td class="coverage">376<em>x</em></td>
+                    <td class="coverage">378<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    a &lt;- data.table::data.table(object$bestTune, key = names(object$bestTune))</pre>
                     </td>
@@ -1020,7 +1020,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">130</td>
-                    <td class="coverage">376<em>x</em></td>
+                    <td class="coverage">378<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    b &lt;- data.table::data.table(object$pred, key = names(object$bestTune))</pre>
                     </td>
@@ -1041,7 +1041,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">133</td>
-                    <td class="coverage">376<em>x</em></td>
+                    <td class="coverage">378<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    pred &lt;- b[a, ]</pre>
                     </td>
@@ -1062,14 +1062,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">136</td>
-                    <td class="coverage">376<em>x</em></td>
+                    <td class="coverage">378<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    keep_cols &lt;- "pred"</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">137</td>
-                    <td class="coverage">376<em>x</em></td>
+                    <td class="coverage">378<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (model_type == "Classification") {</pre>
                     </td>
@@ -1090,7 +1090,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">140</td>
-                    <td class="coverage">376<em>x</em></td>
+                    <td class="coverage">378<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    pred &lt;- pred[, c("rowIndex", keep_cols), drop = FALSE, with = FALSE]</pre>
                     </td>
@@ -1118,21 +1118,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">144</td>
-                    <td class="coverage">376<em>x</em></td>
+                    <td class="coverage">378<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    data.table::setkeyv(pred, "rowIndex")</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">145</td>
-                    <td class="coverage">376<em>x</em></td>
+                    <td class="coverage">378<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    pred &lt;- pred[, lapply(.SD, mean), by = "rowIndex"]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">146</td>
-                    <td class="coverage">375<em>x</em></td>
+                    <td class="coverage">377<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    data.table::setorderv(pred, "rowIndex")</pre>
                     </td>
@@ -1153,7 +1153,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">149</td>
-                    <td class="coverage">375<em>x</em></td>
+                    <td class="coverage">377<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    data.table::set(pred, j = "rowIndex", value = NULL)</pre>
                     </td>
@@ -1300,14 +1300,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">170</td>
-                    <td class="coverage">819<em>x</em></td>
+                    <td class="coverage">821<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(nrow(pred) == nrow(newdata))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">171</td>
-                    <td class="coverage">819<em>x</em></td>
+                    <td class="coverage">821<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (model_type == "Classification") {</pre>
                     </td>
@@ -1356,21 +1356,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">178</td>
-                    <td class="coverage">344<em>x</em></td>
+                    <td class="coverage">346<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    stopifnot(</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">179</td>
-                    <td class="coverage">344<em>x</em></td>
+                    <td class="coverage">346<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      ncol(pred) == 1L,</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">180</td>
-                    <td class="coverage">344<em>x</em></td>
+                    <td class="coverage">346<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      names(pred) == "pred"</pre>
                     </td>
@@ -1405,7 +1405,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">185</td>
-                    <td class="coverage">819<em>x</em></td>
+                    <td class="coverage">821<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  pred</pre>
                     </td>
@@ -3637,14 +3637,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">317</td>
-                    <td class="coverage">10<em>x</em></td>
+                    <td class="coverage">7<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  newObj &lt;- `[.listof`(object, index)</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">318</td>
-                    <td class="coverage">10<em>x</em></td>
+                    <td class="coverage">7<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  newObj</pre>
                     </td>
@@ -3973,21 +3973,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">365</td>
-                    <td class="coverage">729<em>x</em></td>
+                    <td class="coverage">731<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    p &lt;- preds[[i]]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">366</td>
-                    <td class="coverage">729<em>x</em></td>
+                    <td class="coverage">731<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    model_name &lt;- names(object)[i]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">367</td>
-                    <td class="coverage">729<em>x</em></td>
+                    <td class="coverage">731<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    if (ncol(p) == 1L) {</pre>
                     </td>
@@ -4001,7 +4001,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">369</td>
-                    <td class="coverage">637<em>x</em></td>
+                    <td class="coverage">639<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      setnames(p, names(p), model_name)</pre>
                     </td>
@@ -6729,7 +6729,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">10</td>
-                    <td class="coverage">177<em>x</em></td>
+                    <td class="coverage">179<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">      if (is(x, "train") &amp;&amp; !is.null(x$pred$obs) &amp;&amp; is.factor(x$pred$obs) &amp;&amp; nlevels(x$pred$obs) &gt; 2L) {</pre>
                     </td>
@@ -7170,14 +7170,14 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">73</td>
-                    <td class="coverage">116<em>x</em></td>
+                    <td class="coverage">118<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (is.null(metric)) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">74</td>
-                    <td class="coverage">96<em>x</em></td>
+                    <td class="coverage">98<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    metric &lt;- x$metric</pre>
                     </td>
@@ -7205,21 +7205,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">78</td>
-                    <td class="coverage">116<em>x</em></td>
+                    <td class="coverage">118<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  stopifnot(metric %in% names(x$results))</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">79</td>
-                    <td class="coverage">114<em>x</em></td>
+                    <td class="coverage">116<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  val &lt;- x$results[[metric]]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">80</td>
-                    <td class="coverage">114<em>x</em></td>
+                    <td class="coverage">116<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  idx &lt;- ifelse(x$maximize, which.max(val), which.min(val))</pre>
                     </td>
@@ -7240,21 +7240,21 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">83</td>
-                    <td class="coverage">114<em>x</em></td>
+                    <td class="coverage">116<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  if (return_sd) {</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">84</td>
-                    <td class="coverage">56<em>x</em></td>
+                    <td class="coverage">57<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    SD &lt;- x$results[[paste0(metric, "SD")]]</pre>
                     </td>
                   </tr>
                   <tr class="covered">
                     <td class="num">85</td>
-                    <td class="coverage">56<em>x</em></td>
+                    <td class="coverage">57<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    out &lt;- SD[idx]</pre>
                     </td>
@@ -7268,7 +7268,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">87</td>
-                    <td class="coverage">58<em>x</em></td>
+                    <td class="coverage">59<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">    out &lt;- val[idx]</pre>
                     </td>
@@ -7282,7 +7282,7 @@ table.table-condensed {
                   </tr>
                   <tr class="covered">
                     <td class="num">89</td>
-                    <td class="coverage">114<em>x</em></td>
+                    <td class="coverage">116<em>x</em></td>
                     <td class="col-sm-12">
                       <pre class="language-r">  out</pre>
                     </td>
