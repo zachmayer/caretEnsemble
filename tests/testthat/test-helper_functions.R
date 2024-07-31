@@ -1,7 +1,6 @@
 suppressMessages({
   library(testthat)
   library(caret)
-  library(rpart)
 })
 
 ########################################################################
@@ -24,28 +23,27 @@ test_that("No predictions generates an error", {
   models_multi <- caretList(
     iris[, 1L:2L], iris[, 5L],
     tuneLength = 1L, verbose = FALSE,
-    methodList = c("rf", "gbm"),
-    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
+    methodList = c("rf", "gbm")
   )
   expect_is(sapply(models_multi, extractModelType), "character")
 
   models <- caretList(
     iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
     tuneLength = 1L, verbose = FALSE,
-    methodList = c("rf", "gbm"),
-    trControl = trainControl(
-      method = "cv",
-      number = 2L,
-      savePredictions = "final",
-      classProbs = TRUE,
-      summaryFunction = twoClassSummary
-    )
+    methodList = c("rf", "gbm")
   )
   new_model <- train(
     iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
     tuneLength = 1L,
     method = "glmnet",
-    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
+    metric = "ROC",
+    trControl = trainControl(
+      method = "cv",
+      number = 2L,
+      classProbs = TRUE,
+      summaryFunction = twoClassSummary,
+      savePredictions = "final"
+    )
   )
   models2 <- c(new_model, models)
   models3 <- c(models, new_model)
@@ -133,50 +131,42 @@ test_that("wtd.sd handles NA values correctly", {
 test_that("caretList supports combined regression, binary, multiclass", {
   set.seed(42L)
 
-  myControl_reg <- trainControl(
-    method = "cv",
-    number = 5L,
-    savePredictions = "final"
-  )
-
-  myControl_bin <- trainControl(
-    method = "cv",
-    number = 10L,
-    savePredictions = "final",
-    classProbs = TRUE,
-    summaryFunction = twoClassSummary
-  )
-
-  myControl_multi <- trainControl(
-    method = "cv",
-    number = 10L,
-    savePredictions = "final",
-    classProbs = TRUE
-  )
-
-  x <- caretList(
+  # Regression models
+  reg_models <- caretList(
     Sepal.Length ~ Sepal.Width,
     iris,
-    methodList = c("glm", "lm"),
-    trControl = myControl_reg
+    methodList = c("glm", "lm")
   )
-  expect_is(predict(x), "data.table")
+  expect_is(predict(reg_models), "data.table")
 
-  # Add an rpart model
-  x$rpart <- train(Species ~ Sepal.Width, iris, method = "rpart", trControl = myControl_multi)
-  expect_is(sapply(x, extractModelType), "character")
-  expect_is(predict(x), "data.table")
-
-  set.seed(42L)
-  x <- caretList(
-    iris[1L:100L, -5L],
-    factor(ifelse(iris[1L:100L, "Species"] == "setosa", "Yes", "No")),
-    metric = "ROC",
-    methodList = c("lda", "rf"),
-    trControl = myControl_bin
+  # Binary model
+  bin_models <- caretList(
+    factor(ifelse(Species == "setosa", "Yes", "No")) ~ Sepal.Width,
+    iris,
+    methodList = c("lda", "rpart")
   )
-  x$rpart <- train(Species ~ Sepal.Width + Sepal.Length, iris, method = "rpart", trControl = myControl_multi)
-  expect_is(sapply(x, extractModelType), "character")
+  expect_is(predict(bin_models), "data.table")
+
+  # Multiclass model
+  multi_models <- caretList(
+    Species ~ Sepal.Width,
+    iris,
+    methodList = "rpart"
+  )
+  expect_is(predict(multi_models), "data.table")
+
+  # Combine them!
+  all_models <- c(reg_models, bin_models, multi_models)
+  expect_s3_class(all_models, "caretList")
+  expect_is(sapply(all_models, extractModelType), "character")
+
+  # Test preds
+  stacked_p <- predict(all_models)
+  new_p <- predict(all_models, newdata = iris[seq_len(10L), ])
+  expect_is(stacked_p, "data.table")
+  expect_is(new_p, "data.table")
+  expect_equal(nrow(stacked_p), nrow(iris))
+  expect_equal(nrow(new_p), 10L)
 })
 
 test_that("extractModelType shouldn't care about predictions", {
@@ -202,18 +192,10 @@ test_that("extractModelType stops when a classification model did not save probs
 
   test_that("Check errors in caretEnsemble for multiclass classification work", {
     data(iris)
-    myControl <- trainControl(
-      method = "cv",
-      number = 5L,
-      savePredictions = "final",
-      classProbs = TRUE,
-      index = createResample(iris[, 5L], 5L)
-    )
     model_list <- caretList(
       x = iris[, -5L],
       y = iris[, 5L],
-      methodList = c("rpart", "glmnet"),
-      trControl = myControl
+      methodList = c("rpart", "glmnet")
     )
 
     err <- "caretEnsemble only supports binary classification problems"
@@ -245,17 +227,10 @@ test_that("extractModelType stops when a classification model did not save probs
 
     # Make a model list
     data(iris)
-    myControl <- trainControl(
-      method = "cv", number = 5L,
-      savePredictions = "final",
-      index = createResample(iris[, 5L], 5L),
-      classProbs = TRUE
-    )
     model_list <- caretList(
       x = iris[, -5L],
       y = iris[, 5L],
-      methodList = c("rpart", "glmnet"),
-      trControl = myControl
+      methodList = c("rpart", "glmnet")
     )
 
     # Stacking with the excluded level should work

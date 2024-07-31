@@ -33,9 +33,7 @@ inTrain <- createDataPartition(y = Sonar$Class, p = 0.75, list = FALSE)
 training <- Sonar[inTrain, ]
 testing <- Sonar[-inTrain, ]
 ```
-Notice that we are explicitly setting the resampling `index` to being used in `trainControl`. If you do not set this index manually, `caretList` will attempt to set it for automatically, but it"s generally a good idea to set it yourself.
 
-Now we can use `caretList` to fit a series of models (each with the same `trControl`):
 ```{r, echo=TRUE, results="hide", warning=FALSE}
 model_list <- caretList(
   Class ~ .,
@@ -126,8 +124,6 @@ knitr::kable(varImp(greedy_ensemble))
 (The columns each sum up to 100.)
 
 ## caretStack
-caretStack allows us to move beyond simple blends of models to using "meta-models" to ensemble collections of predictive models. DO NOT use the `trainControl` object you used to fit the training models to fit the ensemble. The re-sampling indexes will be wrong. Fortunately, you do not need to be fastidious with re-sampling indexes for caretStack, as it only fits one model, and the defaults `train` uses will usually work fine:
-
 ```{r, echo=TRUE}
 glm_ensemble <- caretStack(
   model_list,
