@@ -1,7 +1,6 @@
 linters: linters_with_tags(
     tags = NULL,
     line_length_linter(120),
-    #cyclocomp_linter(19L),  # predict.caretStack() has a cyclomatic complexity of 17, caretList has 19
     todo_comment_linter = NULL, # TODO refactor
     object_name_linter = NULL # Probably never gonna remove this one
   )
