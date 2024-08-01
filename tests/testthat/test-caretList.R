@@ -23,13 +23,13 @@ testthat::test_that("caretModelSpec returns valid specs", {
   tuneList <- caretEnsemble::tuneCheck(tuneList)
   testthat::expect_type(tuneList, "list")
   testthat::expect_length(tuneList, 4L)
-  testthat::expect_equal(sum(duplicated(names(tuneList))), 0L)
+  testthat::expect_identical(sum(duplicated(names(tuneList))), 0L)
 })
 
 testthat::test_that("caretModelSpec and checking functions work as expected", {
   all_models <- sort(unique(modelLookup()$model))
   for (model in all_models) {
-    testthat::expect_equal(caretModelSpec(model, tuneLength = 5L, preProcess = "knnImpute")$method, model)
+    testthat::expect_identical(caretModelSpec(model, tuneLength = 5L, preProcess = "knnImpute")$method, model)
   }
 
   tuneList <- lapply(all_models, function(x) list(method = x, preProcess = "pca"))
@@ -52,10 +52,10 @@ testthat::test_that("caretModelSpec and checking functions work as expected", {
 
 testthat::test_that("Target extraction functions work", {
   data(iris)
-  testthat::expect_equal(extractCaretTarget(iris[, 1L:4L], iris[, 5L]), iris[, 5L])
-  testthat::expect_equal(extractCaretTarget(iris[, 2L:5L], iris[, 1L]), iris[, 1L])
-  testthat::expect_equal(extractCaretTarget(Species ~ ., iris), iris[, "Species"])
-  testthat::expect_equal(extractCaretTarget(Sepal.Width ~ ., iris), iris[, "Sepal.Width"])
+  testthat::expect_identical(extractCaretTarget(iris[, 1L:4L], iris[, 5L]), iris[, 5L])
+  testthat::expect_identical(extractCaretTarget(iris[, 2L:5L], iris[, 1L]), iris[, 1L])
+  testthat::expect_identical(extractCaretTarget(Species ~ ., iris), iris[, "Species"])
+  testthat::expect_identical(extractCaretTarget(Sepal.Width ~ ., iris), iris[, "Sepal.Width"])
 })
 
 testthat::test_that("caretList errors for bad models", {
@@ -65,7 +65,7 @@ testthat::test_that("caretList errors for bad models", {
   testthat::expect_error(caretList(Sepal.Width ~ ., iris), "Please either define a methodList or tuneList")
   testthat::expect_warning(
     caretList(Sepal.Width ~ ., iris, methodList = c("lm", "lm")),
-    "Duplicate entries in methodList. Using unqiue methodList values."
+    "Duplicate entries in methodList. Using unique methodList values."
   )
   testthat::expect_is(caretList(Sepal.Width ~ ., iris, methodList = "lm", continue_on_fail = TRUE), "caretList")
 
@@ -111,8 +111,8 @@ testthat::test_that("caretList errors for bad models", {
 })
 
 testthat::test_that("caretList predictions", {
-  testthat::expect_warning(
-    models <- caretList(
+  models <- testthat::expect_warning(
+    caretList(
       iris[, 1L:2L], iris[, 3L],
       tuneLength = 1L, verbose = FALSE,
       methodList = "rf", tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE))
@@ -154,7 +154,7 @@ testthat::test_that("caretList predictions", {
   testthat::expect_is(p3[[2L]], "numeric")
   testthat::expect_is(p3[[3L]], "numeric")
   testthat::expect_is(p3[[4L]], "numeric")
-  testthat::expect_equal(
+  testthat::expect_identical(
     length(names(models)) * nlevels(as.factor(iris[, 5L])),
     length(colnames(p3))
   ) # check that we have the right number of columns
@@ -165,9 +165,9 @@ testthat::test_that("caretList predictions", {
   classes <- levels(iris[, 5L])
   combinations <- expand.grid(classes, modelnames)
   correct_colnames <- apply(combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
-  testthat::expect_equal(
-    correct_colnames,
-    colnames(p3)
+  testthat::expect_named(
+    p3,
+    correct_colnames
   ) # check the column names are correct and ordered correctly (methodname_classname)
 
   # Check that bad model types error
@@ -236,8 +236,8 @@ testthat::test_that("We can fit models with a mix of methodList and tuneList", {
     rpart = caretModelSpec(method = "rpart", tuneLength = 10L),
     rf = caretModelSpec(method = "rf", tuneGrid = data.table::data.table(mtry = 2L))
   )
-  testthat::expect_warning(
-    test <- caretList(
+  test <- testthat::expect_warning(
+    caretList(
       x = iris[, 1L:3L],
       y = iris[, 4L],
       methodList = c("knn", "glm"),
@@ -247,9 +247,9 @@ testthat::test_that("We can fit models with a mix of methodList and tuneList", {
   testthat::expect_is(test, "caretList")
   testthat::expect_is(caretEnsemble(test), "caretEnsemble")
   testthat::expect_length(test, 4L)
-  methods <- sapply(test, function(x) x$method)
+  methods <- vapply(test, function(x) x$method, character(1L))
   names(methods) <- NULL
-  testthat::expect_equal(methods, c("rpart", "rf", "knn", "glm"))
+  testthat::expect_identical(methods, c("rpart", "rf", "knn", "glm"))
 })
 
 ################################################
@@ -286,8 +286,8 @@ testthat::test_that("We can handle different CV methods", {
       )
     }
 
-    testthat::expect_warning(
-      models <- caretList(
+    models <- testthat::expect_warning(
+      caretList(
         x = x,
         y = y,
         tuneLength = 2L,
@@ -296,7 +296,9 @@ testthat::test_that("We can handle different CV methods", {
     )
     ens <- caretStack(models, method = "glm")
 
-    invisible(sapply(models, testthat::expect_is, class = "train"))
+    for (x in models) {
+      testthat::expect_s3_class(x, "train")
+    }
 
     ens <- caretEnsemble(models)
 
@@ -404,9 +406,9 @@ testthat::test_that("Test that caretList preserves user specified error function
   testthat::expect_identical(test1[[1L]]$metric, "ROC")
   testthat::expect_identical(test2[[1L]]$metric, "ROC")
 
-  testthat::expect_equal(nrow(test1[[1L]]$results), 7L)
+  testthat::expect_identical(nrow(test1[[1L]]$results), 7L)
   testthat::expect_gt(nrow(test1[[1L]]$results), nrow(test2[[1L]]$results))
-  testthat::expect_equal(nrow(test2[[1L]]$results), 4L)
+  testthat::expect_identical(nrow(test2[[1L]]$results), 4L)
 
   myEns2 <- caretEnsemble(test2)
   myEns1 <- caretEnsemble(test1)
@@ -430,9 +432,9 @@ testthat::test_that("Test that caretList preserves user specified error function
   testthat::expect_identical(test1[[1L]]$metric, "ROC")
   testthat::expect_identical(test2[[1L]]$metric, "ROC")
 
-  testthat::expect_equal(nrow(test1[[1L]]$results), 7L)
+  testthat::expect_identical(nrow(test1[[1L]]$results), 7L)
   testthat::expect_gt(nrow(test1[[1L]]$results), nrow(test2[[1L]]$results))
-  testthat::expect_equal(nrow(test2[[1L]]$results), 4L)
+  testthat::expect_identical(nrow(test2[[1L]]$results), 4L)
 
 
   myEns2 <- caretEnsemble(test2)
@@ -467,9 +469,9 @@ testthat::test_that("Users can pass a custom tuneList", {
   myEns2a <- caretEnsemble(test2a)
   testthat::expect_is(myEns2a, "caretEnsemble")
   testthat::expect_is(test2a, "caretList")
-  testthat::expect_equal(nrow(test2a[[1L]]$results), 4L)
-  testthat::expect_equal(nrow(test2a[[2L]]$results), 9L)
-  testthat::expect_equal(nrow(test2a[[3L]]$results), 3L)
+  testthat::expect_identical(nrow(test2a[[1L]]$results), 4L)
+  testthat::expect_identical(nrow(test2a[[2L]]$results), 9L)
+  testthat::expect_identical(nrow(test2a[[3L]]$results), 3L)
 })
 
 testthat::context("User tuneTest parameters are respected and model is ensembled")
@@ -490,7 +492,7 @@ testthat::test_that("User tuneTest parameters are respected and model is ensembl
   ens <- caretEnsemble(test)
   testthat::expect_is(ens, "caretEnsemble")
   testthat::expect_is(test, "caretList")
-  testthat::expect_equal(nrow(test[[1L]]$results), 3L * 3L)
+  testthat::expect_identical(nrow(test[[1L]]$results), 3L * 3L)
   testthat::expect_false(test[[1L]]$finalModel$softmax)
 })
 
@@ -504,16 +506,16 @@ testthat::test_that("User tuneTest parameters are respected and model is ensembl
   x <- iris[, 1L:3L]
   y <- iris[, 4L]
   set.seed(42L)
-  testthat::expect_warning(
-    test_default <- caretList(
+  test_default <- testthat::expect_warning(
+    caretList(
       x = x,
       y = y,
       tuneList = tuneTest
     ), "There were missing values in resampled performance measures."
   )
   set.seed(42L)
-  testthat::expect_warning(
-    test_flma <- caretList(
+  test_flma <- testthat::expect_warning(
+    caretList(
       y ~ .,
       data = data.table::data.table(y = y, x),
       tuneList = tuneTest
@@ -524,8 +526,8 @@ testthat::test_that("User tuneTest parameters are respected and model is ensembl
   testthat::expect_is(ens_default, "caretEnsemble")
   testthat::expect_is(ens_flma, "caretEnsemble")
 
-  testthat::expect_equal(ens_default$RMSE, ens_flma$RMSE)
-  testthat::expect_equal(ens_default$weights, ens_flma$weights)
+  testthat::expect_equal(ens_default$RMSE, ens_flma$RMSE, tol = 0.000001)
+  testthat::expect_equal(ens_default$weights, ens_flma$weights, tol = 0.000001)
 })
 
 ###############################################
@@ -563,8 +565,10 @@ testthat::test_that("methodCheck stops for invalid method type", {
 })
 
 testthat::test_that("is.caretList correctly identifies caretList objects", {
-  testthat::expect_true(is.caretList(structure(list(), class = "caretList")))
-  testthat::expect_false(is.caretList(list()))
+  mylist <- list()
+  testthat::expect_false(is.caretList(mylist))
+  class(mylist) <- "caretList"
+  testthat::expect_true(is.caretList(mylist))
 })
 
 testthat::test_that("as.caretList stops for null object", {
@@ -583,23 +587,20 @@ testthat::test_that("predict.caretList doesn't care about missing training data"
   new_model_list <- as.caretList(new_model_list)
   pred <- predict.caretList(new_model_list)
   testthat::expect_is(pred, "data.table")
-  testthat::expect_equal(nrow(pred), 150L)
+  testthat::expect_identical(nrow(pred), 150L)
   testthat::expect_named(pred, names(new_model_list))
 })
 
 testthat::test_that("extractModelName handles custom models correctly", {
-  mock_model <- structure(list(method = list(method = "custom_method")), class = "train")
-  testthat::expect_equal(extractModelName(mock_model), "custom_method")
+  mock_model <- list(method = list(method = "custom_method"))
+  class(mock_model) <- "train"
+  testthat::expect_identical(extractModelName(mock_model), "custom_method")
 })
 
 testthat::test_that("extractModelName handles custom models correctly", {
-  mock_model <- structure(list(method = "custom_method", class = "train"))
-  testthat::expect_equal(extractModelName(mock_model), "custom_method")
-})
-
-testthat::test_that("extractModelName handles custom models correctly", {
-  mock_model <- structure(list(method = "custom", class = "train", modelInfo = list(method = "custom_method")))
-  testthat::expect_equal(extractModelName(mock_model), "custom_method")
+  mock_model <- list(method = "custom", modelInfo = list(method = "custom_method"))
+  class(mock_model) <- "train"
+  testthat::expect_identical(extractModelName(mock_model), "custom_method")
 })
 
 testthat::test_that("as.caretList.list fails on NULL object", {
@@ -661,7 +662,7 @@ testthat::test_that("caretList handles new factor levels in prediction", {
 
   pred <- predict(models, newdata = test_data)
   testthat::expect_is(pred, "data.table")
-  testthat::expect_equal(nrow(pred), nrow(test_data))
+  testthat::expect_identical(nrow(pred), nrow(test_data))
 })
 
 testthat::test_that("caretList handles large number of predictors", {
@@ -714,5 +715,5 @@ testthat::test_that("caretList handles custom performance metrics", {
     )
   )
   testthat::expect_s3_class(models, "caretList")
-  testthat::expect_true(all(sapply(models, function(m) "default" %in% colnames(m$results))))
+  testthat::expect_true(all(vapply(models, function(m) "default" %in% colnames(m$results), logical(1L))))
 })

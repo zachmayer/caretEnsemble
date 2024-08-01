@@ -22,7 +22,7 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
   # Fit
   if (continue_on_fail) {
     model <- tryCatch(do.call(caret::train, model_args), error = function(e) {
-      warning(conditionMessage(e))
+      warning(conditionMessage(e), call. = FALSE)
       NULL
     })
   } else {

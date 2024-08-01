@@ -39,7 +39,7 @@ testthat::test_that("caret::varImp works for caretEnsembles", {
       i <- caret::varImp(ens, scale = s)
       testthat::expect_s3_class(i, "data.table")
       testthat::expect_named(i, expected_names)
-      testthat::expect_equal(sort(i[["var"]]), sort(expected_var_names))
+      testthat::expect_identical(sort(i[["var"]]), sort(expected_var_names))
     }
   }
 })
@@ -48,10 +48,10 @@ testthat::test_that("We get the right dimensions back", {
   set.seed(2239L)
   ens.class <- caretEnsemble(models.class, trControl = caret::trainControl(method = "none"))
   ens.reg <- caretEnsemble(models.reg, trControl = caret::trainControl(method = "none"))
-  testthat::expect_equal(ncol(caret::varImp(ens.class)), 6L)
-  testthat::expect_equal(ncol(caret::varImp(ens.reg)), 6L)
-  testthat::expect_equal(nrow(caret::varImp(ens.class)), 6L)
-  testthat::expect_equal(nrow(caret::varImp(ens.reg)), 6L)
+  testthat::expect_identical(ncol(caret::varImp(ens.class)), 6L)
+  testthat::expect_identical(ncol(caret::varImp(ens.reg)), 6L)
+  testthat::expect_identical(nrow(caret::varImp(ens.class)), 6L)
+  testthat::expect_identical(nrow(caret::varImp(ens.reg)), 6L)
 })
 
 testthat::context("Do metric extraction functions work as expected")
@@ -126,11 +126,11 @@ testthat::test_that("No errors are thrown by a generics for ensembles", {
 
   tp <- plot(ens.class)
   tp2 <- plot(ens.reg)
-  testthat::expect_equal(nrow(tp$data), 4L)
-  testthat::expect_equal(nrow(tp2$data), 4L)
+  testthat::expect_identical(nrow(tp$data), 4L)
+  testthat::expect_identical(nrow(tp2$data), 4L)
 
-  testthat::expect_equal(tp$data$model_name, names(ens.class$models))
-  testthat::expect_equal(tp2$data$model_name, names(ens.reg$models))
+  testthat::expect_named(ens.class$models, tp$data$model_name)
+  testthat::expect_named(ens.reg$models, tp2$data$model_name)
 
   autoplot(ens.class)
   autoplot(ens.reg)
@@ -159,7 +159,7 @@ testthat::test_that("Do model results in caretEnsemble match component models - 
   modres1 <- extractModelMetrics(ens.class)
   modres2 <- extractModelMetrics(ens.reg)
   testthat::expect_s3_class(modres2, "data.table")
-  testthat::expect_equal(modres2$model_name, names(models.reg))
+  testthat::expect_named(models.reg, modres2$model_name)
 })
 
 testthat::test_that("Do model results in caretEnsemble match component models - regression", {

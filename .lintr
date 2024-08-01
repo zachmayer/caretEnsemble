@@ -1,34 +1,6 @@
 linters: linters_with_tags(
-    tags = c(
-        "best_practices", 
-        "common_mistakes", 
-        "consistency", 
-        "correctness", 
-        "default", 
-        "efficiency", 
-        "executing",
-        "package_development",
-        "pkg_testthat",
-        "readability",
-        "regex", 
-        "robustness", 
-        "style", 
-        "tidy_design"
-    ),  # TODO: add todo linter
-    return_linter(),
-    object_overwrite_linter(),
-    object_length_linter(),
+    tags = NULL,
     line_length_linter(120),
-    object_usage_linter(),
-    object_name_linter(),
-    cyclocomp_linter(19L),  # predict.caretStack() has a cyclomatic complexity of 17, caretList has 19
-    todo_comment_linter = NULL, # TODO refactor
-    implicit_assignment_linter = NULL, # TODO refactor
-    expect_identical_linter = NULL, # TODO big refactor
-    undesirable_function_linter = NULL, # TODO big refactor
-    nzchar_linter = NULL, # Whats the point of this lintr?
-    condition_message_linter = NULL, # Whats the point of this lintr?
-    condition_call_linter = NULL, # Whats the point of this lintr?
-    paste_linter = NULL, # Probably never gonna remove this one
-    object_name_linter = NULL # Probably never gonna remove this one
+    todo_comment_linter = NULL,
+    object_name_linter = NULL
   )

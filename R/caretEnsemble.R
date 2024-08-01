@@ -8,7 +8,7 @@ check_binary_classification <- function(list_of_models) {
     lapply(list_of_models, function(x) {
       # avoid regression models
       if (methods::is(x, "train") && !is.null(x$pred$obs) && is.factor(x$pred$obs) && nlevels(x$pred$obs) > 2L) {
-        stop("caretEnsemble only supports binary classification problems")
+        stop("caretEnsemble only supports binary classification problems", call. = FALSE)
       }
     })
   }
@@ -98,9 +98,9 @@ extractModelMetrics <- function(ensemble, metric = NULL) {
   stopifnot(is.caretEnsemble(ensemble))
   model_metrics <- data.table::data.table(
     model_name = names(ensemble$models),
-    metric = sapply(ensemble$models, "[[", "metric"),
-    value = sapply(ensemble$models, getMetric, return_sd = FALSE),
-    sd = sapply(ensemble$models, getMetric, return_sd = TRUE)
+    metric = vapply(ensemble$models, "[[", character(1L), "metric"),
+    value = vapply(ensemble$models, getMetric, numeric(1L), return_sd = FALSE),
+    sd = vapply(ensemble$models, getMetric, numeric(1L), return_sd = TRUE)
   )
   model_metrics
 }
@@ -119,17 +119,17 @@ extractModelMetrics <- function(ensemble, metric = NULL) {
 #' }
 summary.caretEnsemble <- function(object, ...) {
   types <- names(object$models)
-  types <- paste(types, collapse = ", ")
+  types <- toString(types)
   wghts <- stats::coef(object$ens_model$finalModel)
   metric <- object$ens_model$metric
   val <- getMetric(object$ens_model)
-  cat(paste0("The following models were ensembled: ", types, " \n"))
+  cat("The following models were ensembled:", types, " \n")
   cat("They were weighted: \n")
-  cat(paste0(paste0(round(wghts, 4L), collapse = " "), "\n"))
-  cat(paste0("The resulting ", metric, " is: ", round(val, 4L), "\n"))
+  cat(toString(round(wghts, 4L)), "\n")
+  cat("The resulting ", metric, "is:", round(val, 4L), "\n")
 
   # Add code to compare ensemble to individual models
-  cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
+  cat("The fit for each individual model on the", metric, "is: \n")
   print(extractModelMetrics(object), row.names = FALSE)
 }
 
@@ -172,7 +172,7 @@ varImp.caretEnsemble <- function(object, ...) {
 
   # Individual model importances
   # TODO: varImp.caretList should be a separate function
-  model_imp <- mapply(varImpDataTable, object$models, model_names, MoreArgs = list(...), SIMPLIFY = FALSE)
+  model_imp <- Map(varImpDataTable, object$models, model_names, MoreArgs = list(...))
   model_imp <- data.table::rbindlist(model_imp, fill = TRUE, use.names = TRUE)
   model_imp <- data.table::dcast.data.table(model_imp, var ~ model_name, value.var = "Overall", fill = 0.0)
 

@@ -8,41 +8,33 @@ validateExcludedClass <- function(arg) {
   # Handle the null case (usually old object where the missing level was not defined)
   if (is.null(arg)) {
     arg <- 1L
-    warning("No excluded_class_id set. Setting to 1L.")
+    warning("No excluded_class_id set. Setting to 1L.", call. = FALSE)
   }
   # Check the input
   if (!is.numeric(arg)) {
-    stop(paste0(
-      "classification excluded level must be numeric: ", arg
-    ))
+    stop("classification excluded level must be numeric: ", arg, call. = FALSE)
   }
   if (length(arg) != 1L) {
-    stop(paste0(
-      "classification excluded level must have a length of 1: length=", length(arg)
-    ))
+    stop("classification excluded level must have a length of 1: length=", length(arg), call. = FALSE)
   }
 
   # Convert to integer if possible
   if (is.integer(arg)) {
     out <- arg
   } else {
-    warning(paste0("classification excluded level is not an integer: ", arg))
+    warning("classification excluded level is not an integer: ", arg, call. = FALSE)
     if (is.numeric(arg)) {
       out <- floor(arg)
     }
-    suppressWarnings(out <- as.integer(out))
+    out <- suppressWarnings(as.integer(out))
   }
 
   # Check the output
   if (!is.finite(out)) {
-    stop(paste0(
-      "classification excluded level must be finite: ", arg
-    ))
+    stop("classification excluded level must be finite: ", arg, call. = FALSE)
   }
   if (out < 0L) {
-    stop(paste0(
-      "classification excluded level must be >= 0: ", arg
-    ))
+    stop("classification excluded level must be >= 0: ", arg, call. = FALSE)
   }
 
   out
@@ -84,19 +76,19 @@ extractModelType <- function(object, validate_for_stacking = TRUE) {
 
   # Validate for predictions
   if (is_class && !is.function(object$modelInfo$prob)) {
-    stop("No probability function found. Re-fit with a method that supports prob.")
+    stop("No probability function found. Re-fit with a method that supports prob.", call. = FALSE)
   }
   # Validate for stacked predictions
   if (validate_for_stacking) {
     err <- "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions."
     if (is.null(object$control$savePredictions)) {
-      stop(err)
+      stop(err, call. = FALSE)
     }
     if (!object$control$savePredictions %in% c("all", "final", TRUE)) {
-      stop(err)
+      stop(err, call. = FALSE)
     }
     if (is_class && !object$control$classProbs) {
-      stop("classProbs = FALSE. Re-fit with classProbs = TRUE in trainControl.")
+      stop("classProbs = FALSE. Re-fit with classProbs = TRUE in trainControl.", call. = FALSE)
     }
   }
 

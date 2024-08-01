@@ -39,13 +39,13 @@
 #' }
 caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id = 1L, ...) {
   if (!is.caretList(all.models)) {
-    warning("Attempting to coerce all.models to a caretList.")
+    warning("Attempting to coerce all.models to a caretList.", call. = FALSE)
     all.models <- as.caretList(all.models)
   }
 
   # Make sure either both or neither new_X and new_y are NULL
   if (is.null(new_X) != is.null(new_y)) {
-    stop("Both new_X and new_y must be NULL, or neither.")
+    stop("Both new_X and new_y must be NULL, or neither.", call. = FALSE)
   }
   if (!is.null(new_X)) {
     stopifnot(
@@ -80,6 +80,33 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
   out <- list(models = all.models, ens_model = model, error = model$results, excluded_class_id = excluded_class_id)
   class(out) <- "caretStack"
   out
+}
+
+#' @title Check caretStack object
+#' @description Make sure a caretStack has both a caretList and a train object
+#'
+#' @param object a caretStack object
+#' @internal
+check_caretStack <- function(object) {
+  stopifnot(
+    methods::is(object, "caretStack"),
+    methods::is(object$models, "caretList"),
+    methods::is(object$ens_model, "train")
+  )
+}
+
+#' @title Set excluded class id
+#' @description Set the excluded class id for a caretStack object
+#'
+#' @param object a caretStack object
+#' @param model_type the model type as a character vector with length 1
+#' @internal
+set_excluded_class_id <- function(object, model_type) {
+  if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
+    object[["excluded_class_id"]] <- 1L
+    warning("No excluded_class_id set. Setting to 1L.", call. = FALSE)
+  }
+  object
 }
 
 #' @title Calculate a weighted standard deviation
@@ -153,19 +180,13 @@ predict.caretStack <- function(
     verbose = FALSE,
     ...) {
   # Check the object
-  stopifnot(
-    methods::is(object$models, "caretList"),
-    methods::is(object$ens_model, "train")
-  )
+  check_caretStack(object)
 
   # Extract model types
   model_type <- object$ens_model$modelType
 
   # If the excluded class wasn't set at train time, set it
-  if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
-    object[["excluded_class_id"]] <- 1L
-    warning("No excluded_class_id set. Setting to 1L.")
-  }
+  object <- set_excluded_class_id(object, model_type)
 
   # If we're predicting on new data, or we need standard errors, we need predictions from the submodels
   # Note that if se==TRUE and newdata is NULL, we will be returning STACKED predicitons
@@ -223,7 +244,7 @@ predict.caretStack <- function(
       names(imp) %in% names(preds),
       names(preds) %in% names(imp)
     )) {
-      warning("Cannot calculate standard errors due to the preprocessing used in train")
+      warning("Cannot calculate standard errors due to the preprocessing used in train", call. = FALSE)
       se <- FALSE
     }
   }
@@ -294,7 +315,7 @@ summary.caretStack <- function(object, ...) {
 #' print(meta_model)
 #' }
 print.caretStack <- function(x, ...) {
-  base.models <- paste(names(x$models), collapse = ", ")
+  base.models <- toString(names(x$models))
   cat(sprintf("A %s ensemble of %s base models: %s", x$ens_model$method, length(x$models), base.models))
   cat("\n\nEnsemble results:\n")
   print(x$ens_model)

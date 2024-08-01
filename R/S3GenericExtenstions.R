@@ -39,7 +39,7 @@ c.caretList <- function(...) {
       names(x) <- x[[1L]]$method
       x
     } else {
-      stop("class of modelList1 must be 'caretList' or 'train'")
+      stop("class of modelList1 must be 'caretList' or 'train'", call. = FALSE)
     }
   }), recursive = FALSE)
 
@@ -86,7 +86,7 @@ c.train <- function(...) {
       names(x) <- x[[1L]]$method
       x
     } else {
-      stop("class of modelList1 must be 'caretList' or 'train'")
+      stop("class of modelList1 must be 'caretList' or 'train'", call. = FALSE)
     }
   }), recursive = FALSE)
 
