@@ -1,20 +1,5 @@
 linters: linters_with_tags(
-    tags = c(
-        "best_practices", 
-        "common_mistakes", 
-        "consistency", 
-        "correctness", 
-        "default", 
-        "efficiency", 
-        "executing",
-        "package_development",
-        "pkg_testthat",
-        "readability",
-        "regex", 
-        "robustness", 
-        "style", 
-        "tidy_design"
-    ),
+    tags = NULL,
     return_linter(),
     object_overwrite_linter(),
     object_length_linter(),
