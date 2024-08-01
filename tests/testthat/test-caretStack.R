@@ -290,7 +290,7 @@ testthat::test_that("caretStack handles custom performance function", {
 testthat::test_that("predict.caretStack works if excluded_class_id is not set", {
   ens <- caretStack(models.class)
   ens[["excluded_class_id"]] <- NULL
-  testthat::expect_warning(pred <- predict(ens, X.class), "No excluded_class_id set. Setting to 1L.")
+  pred <- testthat::expect_warning(predict(ens, X.class), "No excluded_class_id set. Setting to 1L.")
 
   # Note that we don't exclude the class from the ensemble predictions, but merely from the preprocessing
   testthat::expect_s3_class(pred, "data.table") # caret returns data.frame
@@ -305,8 +305,8 @@ testthat::test_that("caretStack coerces lists to caretLists", {
   model_list <- models.reg
   class(model_list) <- "list"
   names(model_list) <- NULL
-  testthat::expect_warning(
-    ens <- caretStack(model_list),
+  ens <- testthat::expect_warning(
+    caretStack(model_list),
     "Attempting to coerce all.models to a caretList."
   )
   testthat::expect_s3_class(ens, "caretStack")

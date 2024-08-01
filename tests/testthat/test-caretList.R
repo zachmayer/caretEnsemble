@@ -111,8 +111,8 @@ testthat::test_that("caretList errors for bad models", {
 })
 
 testthat::test_that("caretList predictions", {
-  testthat::expect_warning(
-    models <- caretList(
+  models <- testthat::expect_warning(
+    caretList(
       iris[, 1L:2L], iris[, 3L],
       tuneLength = 1L, verbose = FALSE,
       methodList = "rf", tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE))
@@ -236,8 +236,8 @@ testthat::test_that("We can fit models with a mix of methodList and tuneList", {
     rpart = caretModelSpec(method = "rpart", tuneLength = 10L),
     rf = caretModelSpec(method = "rf", tuneGrid = data.table::data.table(mtry = 2L))
   )
-  testthat::expect_warning(
-    test <- caretList(
+  test <- testthat::expect_warning(
+    caretList(
       x = iris[, 1L:3L],
       y = iris[, 4L],
       methodList = c("knn", "glm"),
@@ -286,8 +286,8 @@ testthat::test_that("We can handle different CV methods", {
       )
     }
 
-    testthat::expect_warning(
-      models <- caretList(
+    models <- testthat::expect_warning(
+      caretList(
         x = x,
         y = y,
         tuneLength = 2L,
@@ -504,16 +504,16 @@ testthat::test_that("User tuneTest parameters are respected and model is ensembl
   x <- iris[, 1L:3L]
   y <- iris[, 4L]
   set.seed(42L)
-  testthat::expect_warning(
-    test_default <- caretList(
+  test_default <- testthat::expect_warning(
+    caretList(
       x = x,
       y = y,
       tuneList = tuneTest
     ), "There were missing values in resampled performance measures."
   )
   set.seed(42L)
-  testthat::expect_warning(
-    test_flma <- caretList(
+  test_flma <- testthat::expect_warning(
+    caretList(
       y ~ .,
       data = data.table::data.table(y = y, x),
       tuneList = tuneTest

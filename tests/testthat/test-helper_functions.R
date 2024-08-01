@@ -273,10 +273,10 @@ testthat::test_that("validateExcludedClass stops for non-positive input", {
   testthat::expect_warning(testthat::expect_error(validateExcludedClass(invalid_input), err), wrn)
 })
 
-testthat::test_that("validateExcludedClass warns for non-integer input", {
+validated <- testthat::test_that("validateExcludedClass warns for non-integer input", {
   testthat::expect_equal(
     testthat::expect_warning(
-      validated <- validateExcludedClass(1.1),
+      validateExcludedClass(1.1),
       "classification excluded level is not an integer: 1.1"
     ), 1L
   )

@@ -30,7 +30,7 @@ validateExcludedClass <- function(arg) {
     if (is.numeric(arg)) {
       out <- floor(arg)
     }
-    suppressWarnings(out <- as.integer(out))
+    out <- suppressWarnings(as.integer(out))
   }
 
   # Check the output
