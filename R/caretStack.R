@@ -82,6 +82,33 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
   out
 }
 
+#' @title Check caretStack object
+#' @description Make sure a caretStack has both a caretList and a train object
+#'
+#' @param object a caretStack object
+#' @internal
+check_caretStack <- function(object) {
+  stopifnot(
+    methods::is(object, "caretStack"),
+    methods::is(object$models, "caretList"),
+    methods::is(object$ens_model, "train")
+  )
+}
+
+#' @title Set excluded class id
+#' @description Set the excluded class id for a caretStack object
+#'
+#' @param object a caretStack object
+#' @param model_type the model type as a character vector with length 1
+#' @internal
+set_excluded_class_id <- function(object, model_type) {
+  if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
+    object[["excluded_class_id"]] <- 1L
+    warning("No excluded_class_id set. Setting to 1L.", call. = FALSE)
+  }
+  object
+}
+
 #' @title Calculate a weighted standard deviation
 #' @description Used to weight deviations among ensembled model predictions
 #'
@@ -153,19 +180,13 @@ predict.caretStack <- function(
     verbose = FALSE,
     ...) {
   # Check the object
-  stopifnot(
-    methods::is(object$models, "caretList"),
-    methods::is(object$ens_model, "train")
-  )
+  check_caretStack(object)
 
   # Extract model types
   model_type <- object$ens_model$modelType
 
   # If the excluded class wasn't set at train time, set it
-  if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
-    object[["excluded_class_id"]] <- 1L
-    warning("No excluded_class_id set. Setting to 1L.", call. = FALSE)
-  }
+  object <- set_excluded_class_id(object, model_type)
 
   # If we're predicting on new data, or we need standard errors, we need predictions from the submodels
   # Note that if se==TRUE and newdata is NULL, we will be returning STACKED predicitons
