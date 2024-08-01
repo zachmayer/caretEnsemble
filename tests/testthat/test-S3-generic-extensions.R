@@ -177,7 +177,7 @@ testthat::test_that("as.caretList.list names lists without names", {
   class(models.no.name) <- "list"
   testthat::expect_null(names(models.no.name))
   cl <- as.caretList(models.no.name)
-  testthat::expect_named(cl, unname(sapply(models.class, "[[", "method")))
+  testthat::expect_named(cl, unname(vapply(models.class, "[[", character(1L), "method")))
 })
 testthat::test_that("as.caretList fails on non-list", {
   testthat::expect_error(as.caretList(1L), "object must be a list")

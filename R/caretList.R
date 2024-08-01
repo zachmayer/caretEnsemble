@@ -24,7 +24,7 @@ tuneCheck <- function(x) {
 
   model_methods <- lapply(x, function(m) m$method)
   methodCheck(model_methods)
-  method_names <- sapply(x, extractModelName)
+  method_names <- vapply(x, extractModelName, character(1L))
 
   # Name models
   if (is.null(names(x))) {
@@ -37,7 +37,7 @@ tuneCheck <- function(x) {
   names(x) <- make.names(names(x), unique = TRUE)
 
   # Check params
-  stopifnot(sapply(x, is.list))
+  stopifnot(vapply(x, is.list, logical(1L)))
   x
 }
 
@@ -230,7 +230,7 @@ caretList <- function(
   # Loop through the tuneLists and fit caret models with those specs
   modelList <- lapply(tuneList, caretTrain, global_args = global_args, continue_on_fail = continue_on_fail, trim = trim)
   names(modelList) <- names(tuneList)
-  nulls <- sapply(modelList, is.null)
+  nulls <- vapply(modelList, is.null, logical(1L))
   modelList <- modelList[!nulls]
 
   if (length(modelList) == 0L) {
@@ -282,7 +282,7 @@ as.caretList.list <- function(object) {
   }
 
   # Check that each element in the list is of class train
-  if (!all(sapply(object, methods::is, "train"))) {
+  if (!all(vapply(object, methods::is, logical(1L), "train"))) {
     stop("object requires all elements of list to be caret models")
   }
 
@@ -290,7 +290,7 @@ as.caretList.list <- function(object) {
   if (is.null(names(object))) {
     # If the model list used for predictions is not currently named,
     # then exctract the model names from each model individually.
-    names(object) <- sapply(object, extractModelName)
+    names(object) <- vapply(object, extractModelName, character(1L))
   }
 
   # Make sure the names are valid
@@ -343,7 +343,7 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
     is.list(preds),
     length(preds) >= 1L,
     length(preds) == length(object),
-    sapply(preds, data.table::is.data.table)
+    vapply(preds, data.table::is.data.table, logical(1L))
   )
 
   # All preds must have the same number of rows.
@@ -351,7 +351,7 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   # E.g. you could mix classification and regression models
   # caretPredict will aggregate multiple predictions for the same row (e.g. repeated CV)
   # caretPredict will make sure the rows are sorted by the original row order
-  pred_rows <- sapply(preds, nrow)
+  pred_rows <- vapply(preds, nrow, integer(1L))
   stopifnot(pred_rows == pred_rows[1L]) # TODO: informative error message
 
   # Name the predictions
@@ -376,7 +376,7 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
     !is.null(names(preds)),
     length(dim(preds)) == 2L
   )
-  all_regression <- all(sapply(object, function(x) x$modelType == "Regression"))
+  all_regression <- all(vapply(object, function(x) x$modelType == "Regression", logical(1L)))
   if (all_regression) {
     stopifnot(
       length(names(preds)) == length(object),

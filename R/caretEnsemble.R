@@ -98,9 +98,9 @@ extractModelMetrics <- function(ensemble, metric = NULL) {
   stopifnot(is.caretEnsemble(ensemble))
   model_metrics <- data.table::data.table(
     model_name = names(ensemble$models),
-    metric = sapply(ensemble$models, "[[", "metric"),
-    value = sapply(ensemble$models, getMetric, return_sd = FALSE),
-    sd = sapply(ensemble$models, getMetric, return_sd = TRUE)
+    metric = vapply(ensemble$models, "[[", character(1L), "metric"),
+    value = vapply(ensemble$models, getMetric, numeric(1L), return_sd = FALSE),
+    sd = vapply(ensemble$models, getMetric, numeric(1L), return_sd = TRUE)
   )
   model_metrics
 }
@@ -172,7 +172,7 @@ varImp.caretEnsemble <- function(object, ...) {
 
   # Individual model importances
   # TODO: varImp.caretList should be a separate function
-  model_imp <- mapply(varImpDataTable, object$models, model_names, MoreArgs = list(...), SIMPLIFY = FALSE)
+  model_imp <- Map(varImpDataTable, object$models, model_names, MoreArgs = list(...))
   model_imp <- data.table::rbindlist(model_imp, fill = TRUE, use.names = TRUE)
   model_imp <- data.table::dcast.data.table(model_imp, var ~ model_name, value.var = "Overall", fill = 0.0)
 

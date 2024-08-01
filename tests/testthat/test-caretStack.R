@@ -32,7 +32,7 @@ testthat::test_that("We can stack classification models", {
   testthat::expect_is(summary(ens.class), "summary.glm")
   invisible(capture.output(print(ens.class)))
   pred.class <- predict(ens.class, X.class)
-  testthat::expect_true(all(sapply(pred.class, is.numeric)))
+  testthat::expect_true(all(vapply(pred.class, is.numeric, logical(1L))))
   testthat::expect_identical(nrow(pred.class), 150L)
   raw.class <- predict(ens.class, X.class)
   testthat::expect_s3_class(raw.class, "data.table")
@@ -131,8 +131,10 @@ testthat::test_that("Test na.action pass through", {
 })
 
 testthat::test_that("is.caretStack correctly identifies caretStack objects", {
-  testthat::expect_true(is.caretStack(structure(list(), class = "caretStack")))
-  testthat::expect_false(is.caretStack(list()))
+  mylist <- list()
+  testthat::expect_false(is.caretStack(mylist))
+  class(mylist) <- "caretStack"
+  testthat::expect_true(is.caretStack(mylist))
 })
 
 testthat::test_that("predict.caretStack works correctly if the multiclass excluded level is too high", {
@@ -154,7 +156,8 @@ testthat::test_that("predict.caretStack works correctly if the multiclass exclud
   pred <- predict(meta_model, newdata = iris)
   testthat::expect_equal(nrow(pred), 150L)
   testthat::expect_equal(ncol(pred), 3L)
-  testthat::expect_true(all(sapply(pred, is.finite)))
+  all_finite <- function(x) all(is.finite(x))
+  testthat::expect_true(all(vapply(pred, all_finite, logical(1L))))
 })
 
 testthat::context("caretStack edge cases")

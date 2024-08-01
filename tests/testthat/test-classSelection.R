@@ -36,7 +36,7 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # level in the original data (i.e. Y.class). This check exists to
   # avoid regressions to bugs like this:
   # https://github.com/zachmayer/caretEnsemble/pull/190
-  unique.levels <- unique(sapply(model.ens$models, function(x) levels(x$pred$obs)[1L]))
+  unique.levels <- unique(vapply(model.ens$models, function(x) levels(x$pred$obs)[1L], character(1L)))
   testthat::expect_identical(unique.levels, Y.levels[1L])
 
   # Verify that the training data given to the ensemble model has the

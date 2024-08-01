@@ -247,7 +247,7 @@ testthat::test_that("We can fit models with a mix of methodList and tuneList", {
   testthat::expect_is(test, "caretList")
   testthat::expect_is(caretEnsemble(test), "caretEnsemble")
   testthat::expect_length(test, 4L)
-  methods <- sapply(test, function(x) x$method)
+  methods <- vapply(test, function(x) x$method, character(1L))
   names(methods) <- NULL
   testthat::expect_equal(methods, c("rpart", "rf", "knn", "glm"))
 })
@@ -296,7 +296,9 @@ testthat::test_that("We can handle different CV methods", {
     )
     ens <- caretStack(models, method = "glm")
 
-    invisible(sapply(models, testthat::expect_is, class = "train"))
+    for (x in models) {
+      testthat::expect_s3_class(x, "train")
+    }
 
     ens <- caretEnsemble(models)
 
@@ -563,8 +565,10 @@ testthat::test_that("methodCheck stops for invalid method type", {
 })
 
 testthat::test_that("is.caretList correctly identifies caretList objects", {
-  testthat::expect_true(is.caretList(structure(list(), class = "caretList")))
-  testthat::expect_false(is.caretList(list()))
+  mylist <- list()
+  testthat::expect_false(is.caretList(mylist))
+  class(mylist) <- "caretList"
+  testthat::expect_true(is.caretList(mylist))
 })
 
 testthat::test_that("as.caretList stops for null object", {
@@ -588,17 +592,14 @@ testthat::test_that("predict.caretList doesn't care about missing training data"
 })
 
 testthat::test_that("extractModelName handles custom models correctly", {
-  mock_model <- structure(list(method = list(method = "custom_method")), class = "train")
+  mock_model <- list(method = list(method = "custom_method"))
+  class(mock_model) <- "train"
   testthat::expect_equal(extractModelName(mock_model), "custom_method")
 })
 
 testthat::test_that("extractModelName handles custom models correctly", {
-  mock_model <- structure(list(method = "custom_method", class = "train"))
-  testthat::expect_equal(extractModelName(mock_model), "custom_method")
-})
-
-testthat::test_that("extractModelName handles custom models correctly", {
-  mock_model <- structure(list(method = "custom", class = "train", modelInfo = list(method = "custom_method")))
+  mock_model <- list(method = "custom", modelInfo = list(method = "custom_method"))
+  class(mock_model) <- "train"
   testthat::expect_equal(extractModelName(mock_model), "custom_method")
 })
 
@@ -714,5 +715,5 @@ testthat::test_that("caretList handles custom performance metrics", {
     )
   )
   testthat::expect_s3_class(models, "caretList")
-  testthat::expect_true(all(sapply(models, function(m) "default" %in% colnames(m$results))))
+  testthat::expect_true(all(vapply(models, function(m) "default" %in% colnames(m$results), logical(1L))))
 })

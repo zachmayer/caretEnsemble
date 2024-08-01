@@ -23,7 +23,7 @@ testthat::test_that("No predictions generates an error", {
     tuneLength = 1L, verbose = FALSE,
     methodList = c("rf", "gbm")
   )
-  testthat::expect_is(sapply(models_multi, extractModelType), "character")
+  testthat::expect_is(vapply(models_multi, extractModelType, character(1L)), "character")
 
   models <- caretList(
     iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
@@ -45,9 +45,9 @@ testthat::test_that("No predictions generates an error", {
   )
   models2 <- c(new_model, models)
   models3 <- c(models, new_model)
-  testthat::expect_is(sapply(models, extractModelType), "character")
-  testthat::expect_is(sapply(models2, extractModelType), "character")
-  testthat::expect_is(sapply(models3, extractModelType), "character")
+  testthat::expect_is(vapply(models, extractModelType, character(1L)), "character")
+  testthat::expect_is(vapply(models2, extractModelType, character(1L)), "character")
+  testthat::expect_is(vapply(models3, extractModelType, character(1L)), "character")
 })
 
 testthat::test_that("We can make the stacked predictions matrix", {
@@ -156,7 +156,7 @@ testthat::test_that("caretList supports combined regression, binary, multiclass"
   # Combine them!
   all_models <- c(reg_models, bin_models, multi_models)
   testthat::expect_s3_class(all_models, "caretList")
-  testthat::expect_is(sapply(all_models, extractModelType), "character")
+  testthat::expect_is(vapply(all_models, extractModelType, character(1L)), "character")
 
   # Test preds
   stacked_p <- predict(all_models)
@@ -170,8 +170,8 @@ testthat::test_that("caretList supports combined regression, binary, multiclass"
 testthat::test_that("extractModelType shouldn't care about predictions", {
   model_list <- models.class
   model_list[[1L]]$pred <- NULL
-  testthat::expect_is(sapply(model_list, extractModelType), "character")
-  testthat::expect_equal(unique(sapply(model_list, extractModelType)), "Classification")
+  testthat::expect_is(vapply(model_list, extractModelType, character(1L)), "character")
+  testthat::expect_equal(unique(vapply(model_list, extractModelType, character(1L))), "Classification")
 })
 
 testthat::test_that("extractModelType stops when a classification model can't predict probabilities", {
@@ -309,8 +309,8 @@ testthat::test_that("wtd.sd calculates weighted standard deviation correctly", {
 })
 
 testthat::test_that("extractModelType validates caretList correctly", {
-  testthat::expect_is(sapply(models.class, extractModelType), "character")
-  testthat::expect_is(sapply(models.reg, extractModelType), "character")
+  testthat::expect_is(vapply(models.class, extractModelType, character(1L)), "character")
+  testthat::expect_is(vapply(models.reg, extractModelType, character(1L)), "character")
 
   # Test error for non-caretList object
   testthat::expect_error(
@@ -321,12 +321,12 @@ testthat::test_that("extractModelType validates caretList correctly", {
 })
 
 testthat::test_that("extractModelType validates model types correctly", {
-  testthat::expect_is(sapply(models.class, extractModelType), "character")
-  testthat::expect_is(sapply(models.reg, extractModelType), "character")
+  testthat::expect_is(vapply(models.class, extractModelType, character(1L)), "character")
+  testthat::expect_is(vapply(models.reg, extractModelType, character(1L)), "character")
 
   # Test error for mixed model types
   mixed_list <- c(models.class, models.reg)
-  testthat::expect_is(sapply(mixed_list, extractModelType), "character")
+  testthat::expect_is(vapply(mixed_list, extractModelType, character(1L)), "character")
 })
 
 testthat::test_that("Stacked predictions for caret lists works", {
@@ -365,8 +365,8 @@ testthat::test_that("extractModelName extracts model names correctly", {
 })
 
 testthat::test_that("extractModelType extracts model types correctly", {
-  testthat::expect_identical(unique(sapply(models.class, extractModelType)), "Classification")
-  testthat::expect_identical(unique(sapply(models.reg, extractModelType)), "Regression")
+  testthat::expect_identical(unique(vapply(models.class, extractModelType, character(1L))), "Classification")
+  testthat::expect_identical(unique(vapply(models.reg, extractModelType, character(1L))), "Regression")
 })
 
 testthat::test_that("caretPredict extracts best predictions correctly", {
