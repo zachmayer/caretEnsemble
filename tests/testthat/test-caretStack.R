@@ -154,8 +154,8 @@ testthat::test_that("predict.caretStack works correctly if the multiclass exclud
     excluded_class_id = 4L
   )
   pred <- predict(meta_model, newdata = iris)
-  testthat::expect_equal(nrow(pred), 150L)
-  testthat::expect_equal(ncol(pred), 3L)
+  testthat::expect_identical(nrow(pred), 150L)
+  testthat::expect_identical(ncol(pred), 3L)
   all_finite <- function(x) all(is.finite(x))
   testthat::expect_true(all(vapply(pred, all_finite, logical(1L))))
 })
@@ -184,7 +184,7 @@ testthat::test_that("caretStack handles different stacking algorithms", {
       }
 
       testthat::expect_s3_class(stack, "caretStack")
-      testthat::expect_equal(stack$ens_model$method, method)
+      testthat::expect_identical(stack$ens_model$method, method)
 
       predictions <- predict(stack, newdata = test_data)
       testthat::expect_identical(nrow(predictions), nrow(test_data))
@@ -222,7 +222,7 @@ testthat::test_that("caretStack handles different metrics", {
       )
     )
     testthat::expect_s3_class(stack, "caretStack")
-    testthat::expect_equal(stack$ens_model$metric, metric)
+    testthat::expect_identical(stack$ens_model$metric, metric)
   }
 })
 
@@ -297,8 +297,8 @@ testthat::test_that("predict.caretStack works if excluded_class_id is not set", 
 
   # Note that we don't exclude the class from the ensemble predictions, but merely from the preprocessing
   testthat::expect_s3_class(pred, "data.table") # caret returns data.frame
-  testthat::expect_equal(nrow(pred), nrow(X.class))
-  testthat::expect_equal(ncol(pred), 2L)
+  testthat::expect_identical(nrow(pred), nrow(X.class))
+  testthat::expect_identical(ncol(pred), 2L)
   testthat::expect_named(pred, c("No", "Yes"))
 })
 
@@ -353,11 +353,11 @@ testthat::test_that("caretStack works if both new_X and new_Y are supplied", {
   testthat::expect_s3_class(pred_class_stack, "data.table")
   testthat::expect_s3_class(stack_reg_stack, "data.table")
 
-  testthat::expect_equal(nrow(pred_class_stack), N)
-  testthat::expect_equal(nrow(stack_reg_stack), N)
+  testthat::expect_identical(nrow(pred_class_stack), N)
+  testthat::expect_identical(nrow(stack_reg_stack), N)
 
-  testthat::expect_equal(ncol(pred_class_stack), 2L)
-  testthat::expect_equal(ncol(stack_reg_stack), 1L)
+  testthat::expect_identical(ncol(pred_class_stack), 2L)
+  testthat::expect_identical(ncol(stack_reg_stack), 1L)
 
   pred_class <- predict(stack_class, new_X = X.class)
   pred_reg <- predict(stack_reg, new_X = X.reg)
@@ -365,9 +365,9 @@ testthat::test_that("caretStack works if both new_X and new_Y are supplied", {
   testthat::expect_s3_class(pred_class, "data.table")
   testthat::expect_s3_class(pred_reg, "data.table")
 
-  testthat::expect_equal(nrow(pred_class), N)
-  testthat::expect_equal(nrow(pred_reg), N)
+  testthat::expect_identical(nrow(pred_class), N)
+  testthat::expect_identical(nrow(pred_reg), N)
 
-  testthat::expect_equal(ncol(pred_class), 2L)
-  testthat::expect_equal(ncol(pred_reg), 1L)
+  testthat::expect_identical(ncol(pred_class), 2L)
+  testthat::expect_identical(ncol(pred_reg), 1L)
 })

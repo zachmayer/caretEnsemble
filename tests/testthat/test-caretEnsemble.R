@@ -22,11 +22,11 @@ testthat::test_that("We can extract metrics", {
   )
   m1 <- getMetric(mod, "RMSE")
   m2 <- getMetric(mod, "RMSE")
-  testthat::expect_equal(m1, m2)
+  testthat::expect_identical(m1, m2)
 
   m1 <- getMetric(mod, "RMSE", return_sd = TRUE)
   m2 <- getMetric(mod, "RMSE", return_sd = TRUE)
-  testthat::expect_equal(m1, m2)
+  testthat::expect_identical(m1, m2)
 })
 
 testthat::test_that("We can extract resdiuals from train regression objects", {
@@ -70,7 +70,7 @@ testthat::test_that("We can ensemble regression models", {
   p2 <- predict(ens.reg, newdata = X.class, return_weights = TRUE, se = TRUE)
   testthat::expect_is(unlist(attr(p2, which = "weights")), "numeric")
   testthat::expect_s3_class(p2, "data.table")
-  testthat::expect_equal(ncol(p2), 3L)
+  testthat::expect_identical(ncol(p2), 3L)
   testthat::expect_named(p2, c("fit", "lwr", "upr"))
 
   p3 <- predict(ens.reg, newdata = X.class, return_weights = FALSE, se = FALSE)
@@ -111,8 +111,8 @@ testthat::test_that("We can ensemble models of different predictors", {
   # Can we predict from the list
   pred_list <- predict(nestedList, newdata = X.reg)
   testthat::expect_s3_class(pred_list, "data.table")
-  testthat::expect_equal(nrow(pred_list), 150L)
-  testthat::expect_equal(ncol(pred_list), length(nestedList))
+  testthat::expect_identical(nrow(pred_list), 150L)
+  testthat::expect_identical(ncol(pred_list), length(nestedList))
 
   # Can we predict from the ensemble
   ensNest <- caretEnsemble(nestedList)
@@ -180,14 +180,14 @@ testthat::test_that("caretEnsemble works for classification models", {
   testthat::expect_s3_class(pred_one, "data.table")
 
   # Check rows
-  testthat::expect_equal(nrow(pred_stacked), 150L)
-  testthat::expect_equal(nrow(pred_in_sample), 150L)
-  testthat::expect_equal(nrow(pred_one), 1L)
+  testthat::expect_identical(nrow(pred_stacked), 150L)
+  testthat::expect_identical(nrow(pred_in_sample), 150L)
+  testthat::expect_identical(nrow(pred_one), 1L)
 
   # Check cols
-  testthat::expect_equal(ncol(pred_stacked), 2L)
-  testthat::expect_equal(ncol(pred_in_sample), 2L)
-  testthat::expect_equal(ncol(pred_one), 2L)
+  testthat::expect_identical(ncol(pred_stacked), 2L)
+  testthat::expect_identical(ncol(pred_in_sample), 2L)
+  testthat::expect_identical(ncol(pred_one), 2L)
 
   # stacked predcitons should be similar to in sample predictions
   testthat::expect_equal(pred_stacked, pred_in_sample, tol = 0.2)
@@ -233,7 +233,7 @@ testthat::test_that("Ensembles using custom models work correctly", {
   testthat::expect_is(cs, "caretEnsemble")
 
   # Validate names assigned to ensembled models
-  testthat::expect_equal(sort(names(cs$models)), c("custom.rf", "myrpart", "treebag"))
+  testthat::expect_named(cs$models, c("custom.rf", "myrpart", "treebag"))
 
   # Validate ensemble predictions
   pred_stacked <- predict(cs) # stacked predictions
@@ -246,14 +246,14 @@ testthat::test_that("Ensembles using custom models work correctly", {
   testthat::expect_s3_class(pred_one, "data.table")
 
   # Check rows
-  testthat::expect_equal(nrow(pred_stacked), 150L)
-  testthat::expect_equal(nrow(pred_in_sample), 150L)
-  testthat::expect_equal(nrow(pred_one), 1L)
+  testthat::expect_identical(nrow(pred_stacked), 150L)
+  testthat::expect_identical(nrow(pred_in_sample), 150L)
+  testthat::expect_identical(nrow(pred_one), 1L)
 
   # Check cols
-  testthat::expect_equal(ncol(pred_stacked), 2L)
-  testthat::expect_equal(ncol(pred_in_sample), 2L)
-  testthat::expect_equal(ncol(pred_one), 2L)
+  testthat::expect_identical(ncol(pred_stacked), 2L)
+  testthat::expect_identical(ncol(pred_in_sample), 2L)
+  testthat::expect_identical(ncol(pred_one), 2L)
 
   # stacked predcitons should be similar to in sample predictions
   # These differ a lot!

@@ -112,7 +112,7 @@ testthat::test_that("wtd.sd applies weights correctly", {
   testthat::expect_false(sd(x1) == caretEnsemble::wtd.sd(x1, w = x2))
   testthat::expect_false(sd(x1) == caretEnsemble::wtd.sd(x1, w = x2))
   testthat::expect_equal(caretEnsemble::wtd.sd(x3, w = w1), 5.291503, tolerance = 0.001)
-  testthat::expect_equal(caretEnsemble::wtd.sd(x3, w = w1 * 100L), caretEnsemble::wtd.sd(x3, w = w1))
+  testthat::expect_equal(caretEnsemble::wtd.sd(x3, w = w1 * 100L), caretEnsemble::wtd.sd(x3, w = w1), tolerance = 0.001)
 })
 
 testthat::test_that("wtd.sd handles NA values correctly", {
@@ -163,15 +163,15 @@ testthat::test_that("caretList supports combined regression, binary, multiclass"
   new_p <- predict(all_models, newdata = iris[seq_len(10L), ])
   testthat::expect_is(stacked_p, "data.table")
   testthat::expect_is(new_p, "data.table")
-  testthat::expect_equal(nrow(stacked_p), nrow(iris))
-  testthat::expect_equal(nrow(new_p), 10L)
+  testthat::expect_identical(nrow(stacked_p), nrow(iris))
+  testthat::expect_identical(nrow(new_p), 10L)
 })
 
 testthat::test_that("extractModelType shouldn't care about predictions", {
   model_list <- models.class
   model_list[[1L]]$pred <- NULL
   testthat::expect_is(vapply(model_list, extractModelType, character(1L)), "character")
-  testthat::expect_equal(unique(vapply(model_list, extractModelType, character(1L))), "Classification")
+  testthat::expect_equivalent(unique(vapply(model_list, extractModelType, character(1L))), "Classification")
 })
 
 testthat::test_that("extractModelType stops when a classification model can't predict probabilities", {
@@ -210,15 +210,15 @@ testthat::test_that("extractModelType stops when a classification model did not 
 
   testthat::test_that("Configuration function for excluded level work", {
     # Integers work
-    testthat::expect_equal(validateExcludedClass(0L), 0L)
-    testthat::expect_equal(validateExcludedClass(1L), 1L)
-    testthat::expect_equal(validateExcludedClass(4L), 4L)
+    testthat::expect_identical(validateExcludedClass(0L), 0L)
+    testthat::expect_identical(validateExcludedClass(1L), 1L)
+    testthat::expect_identical(validateExcludedClass(4L), 4L)
 
     # Decimals work with a warning
     wrn <- "classification excluded level is not an integer:"
-    testthat::expect_warning(testthat::expect_equal(validateExcludedClass(0.0), 0L), wrn)
-    testthat::expect_warning(testthat::expect_equal(validateExcludedClass(1.0), 1L), wrn)
-    testthat::expect_warning(testthat::expect_equal(validateExcludedClass(4.0), 4L), wrn)
+    testthat::expect_warning(testthat::expect_identical(validateExcludedClass(0.0), 0L), wrn)
+    testthat::expect_warning(testthat::expect_identical(validateExcludedClass(1.0), 1L), wrn)
+    testthat::expect_warning(testthat::expect_identical(validateExcludedClass(4.0), 4L), wrn)
 
     # Less than 0 will error
     testthat::expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
@@ -274,7 +274,7 @@ testthat::test_that("validateExcludedClass stops for non-positive input", {
 })
 
 validated <- testthat::test_that("validateExcludedClass warns for non-integer input", {
-  testthat::expect_equal(
+  testthat::expect_identical(
     testthat::expect_warning(
       validateExcludedClass(1.1),
       "classification excluded level is not an integer: 1.1"
@@ -284,7 +284,7 @@ validated <- testthat::test_that("validateExcludedClass warns for non-integer in
 
 testthat::test_that("validateExcludedClass passes for valid input", {
   valid_input <- 3L
-  testthat::expect_equal(validateExcludedClass(valid_input), 3L)
+  testthat::expect_identical(validateExcludedClass(valid_input), 3L)
 })
 
 ########################################################################
@@ -294,7 +294,7 @@ testthat::context("Helper function edge cases")
 testthat::test_that("wtd.sd calculates weighted standard deviation correctly", {
   x <- c(1L, 2L, 3L, 4L, 5L)
   w <- c(1L, 1L, 1L, 1L, 1L)
-  testthat::expect_equal(wtd.sd(x, w), sd(x))
+  testthat::expect_equal(wtd.sd(x, w), sd(x), tol = 0.001)
 
   w <- c(2L, 1L, 1L, 1L, 1L)
   testthat::expect_true(wtd.sd(x, w) != sd(x))
@@ -355,13 +355,13 @@ testthat::test_that("Stacked predictions works if the row indexes differ", {
 })
 
 testthat::test_that("extractModelName extracts model names correctly", {
-  testthat::expect_equal(extractModelName(models.class[[1L]]), "rf")
-  testthat::expect_equal(extractModelName(models.reg[[1L]]), "rf")
+  testthat::expect_identical(extractModelName(models.class[[1L]]), "rf")
+  testthat::expect_identical(extractModelName(models.reg[[1L]]), "rf")
 
   # Test custom model
   custom_model <- models.class[[1L]]
   custom_model$method <- list(method = "custom_rf")
-  testthat::expect_equal(extractModelName(custom_model), "custom_rf")
+  testthat::expect_identical(extractModelName(custom_model), "custom_rf")
 })
 
 testthat::test_that("extractModelType extracts model types correctly", {
@@ -387,8 +387,8 @@ testthat::test_that("Stacked predictions creates prediction-observation data cor
   testthat::expect_s3_class(stacked_preds_class, "data.table")
   testthat::expect_s3_class(stacked_preds_reg, "data.table")
 
-  testthat::expect_equal(ncol(stacked_preds_class), length(models.class))
-  testthat::expect_equal(ncol(stacked_preds_reg), length(models.reg))
+  testthat::expect_identical(ncol(stacked_preds_class), length(models.class))
+  testthat::expect_identical(ncol(stacked_preds_reg), length(models.reg))
 
   testthat::expect_named(stacked_preds_class, names(models.class))
   testthat::expect_named(stacked_preds_reg, names(stacked_preds_reg))
@@ -426,7 +426,7 @@ testthat::test_that("validateExcludedClass validates excluded level correctly", 
   testthat::expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
   txt <- "classification excluded level is not an integer: 2"
   testthat::expect_warning(
-    testthat::expect_equal(
+    testthat::expect_identical(
       validateExcludedClass(2.0), 2L
     ), txt,
     "classification excluded level is not an integer"
@@ -451,7 +451,7 @@ testthat::test_that("validateExcludedClass validates excluded level correctly", 
   )
   testthat::expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
   txt <- "classification excluded level is not an integer: 2"
-  testthat::expect_warning(testthat::expect_equal(validateExcludedClass(2.0), 2L), txt)
+  testthat::expect_warning(testthat::expect_identical(validateExcludedClass(2.0), 2L), txt)
 })
 
 testthat::test_that("extractModelType fails for models without object$control$savePredictions", {

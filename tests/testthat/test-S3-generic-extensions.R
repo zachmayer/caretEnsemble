@@ -189,15 +189,15 @@ testthat::test_that("predict.caretList works for classification and regression",
 
   testthat::expect_is(class_preds, "data.table")
   testthat::expect_is(reg_preds, "data.table")
-  testthat::expect_equal(nrow(class_preds), nrow(X.class))
-  testthat::expect_equal(nrow(reg_preds), nrow(X.reg))
-  testthat::expect_equal(ncol(class_preds), length(models.class) * 2L)
-  testthat::expect_equal(ncol(reg_preds), length(models.reg))
+  testthat::expect_identical(nrow(class_preds), nrow(X.class))
+  testthat::expect_identical(nrow(reg_preds), nrow(X.reg))
+  testthat::expect_identical(ncol(class_preds), length(models.class) * 2L)
+  testthat::expect_identical(ncol(reg_preds), length(models.reg))
 })
 
 testthat::test_that("predict.caretList handles type='prob' for classification", {
   class_probs <- predict(models.class, newdata = X.class, excluded_class_id = 0L)
   testthat::expect_is(class_probs, "data.table")
-  testthat::expect_equal(nrow(class_probs), nrow(X.class))
-  testthat::expect_equal(ncol(class_probs), length(models.class) * nlevels(Y.class))
+  testthat::expect_identical(nrow(class_probs), nrow(X.class))
+  testthat::expect_identical(ncol(class_probs), length(models.class) * nlevels(Y.class))
 })
