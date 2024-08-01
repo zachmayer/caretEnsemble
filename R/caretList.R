@@ -30,7 +30,7 @@ tuneCheck <- function(x) {
   if (is.null(names(x))) {
     names(x) <- method_names
   }
-  i <- names(x) == ""
+  i <- !nzchar(names(x))
   if (any(i)) {
     names(x)[i] <- method_names[i]
   }

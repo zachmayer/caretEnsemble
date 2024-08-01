@@ -20,12 +20,10 @@ linters: linters_with_tags(
     object_length_linter(),
     line_length_linter(120),
     object_usage_linter(),
-    object_name_linter(),
     undesirable_function_linter(),
     expect_identical_linter(),
     cyclocomp_linter(19L),  # predict.caretStack() has a cyclomatic complexity of 17, caretList has 19
     todo_comment_linter = NULL, # TODO refactor
-    nzchar_linter = NULL, # Whats the point of this lintr?
     condition_message_linter = NULL, # Whats the point of this lintr?
     condition_call_linter = NULL, # Whats the point of this lintr?
     paste_linter = NULL, # Probably never gonna remove this one
