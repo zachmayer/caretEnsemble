@@ -51,7 +51,8 @@ checkCustomModel <- function(x) {
   if (is.null(x$method)) {
     stop(
       "Custom models must be defined with a \"method\" attribute containing the name",
-      "by which that model should be referenced. Example: my.glm.model$method <- \"custom_glm\""
+      "by which that model should be referenced. Example: my.glm.model$method <- \"custom_glm\"",
+      call. = FALSE
     )
   }
   x
@@ -78,7 +79,8 @@ methodCheck <- function(x) {
       stop(
         "Method \"", m, "\" is invalid. Methods must either be character names ",
         "supported by caret (e.g. \"gbm\") or modelInfo lists ",
-        "(e.g. getModelInfo(\"gbm\", regex=F))"
+        "(e.g. getModelInfo(\"gbm\", regex=F))",
+        call. = FALSE
       )
     }
   })
@@ -90,7 +92,7 @@ methodCheck <- function(x) {
 
   if (length(bad_models) > 0L) {
     msg <- paste(bad_models, collapse = ", ")
-    stop("The following models are not valid caret models: ", msg)
+    stop("The following models are not valid caret models: ", msg, call. = FALSE)
   }
 
   invisible(NULL)
@@ -177,10 +179,10 @@ caretList <- function(
     trim = TRUE) {
   # Checks
   if (is.null(tuneList) && is.null(methodList)) {
-    stop("Please either define a methodList or tuneList")
+    stop("Please either define a methodList or tuneList", call. = FALSE)
   }
   if (!is.null(methodList) && anyDuplicated(methodList) > 0L) {
-    warning("Duplicate entries in methodList. Using unqiue methodList values.")
+    warning("Duplicate entries in methodList. Using unqiue methodList values.", call. = FALSE)
     methodList <- unique(methodList)
   }
 
@@ -234,7 +236,7 @@ caretList <- function(
   modelList <- modelList[!nulls]
 
   if (length(modelList) == 0L) {
-    stop("caret:train failed for all models. Please inspect your data.")
+    stop("caret:train failed for all models. Please inspect your data.", call. = FALSE)
   }
   class(modelList) <- c("caretList", "list")
 
@@ -256,7 +258,7 @@ is.caretList <- function(object) {
 #' @export
 as.caretList <- function(object) {
   if (is.null(object)) {
-    stop("object is null")
+    stop("object is null", call. = FALSE)
   }
   UseMethod("as.caretList", object)
 }
@@ -267,7 +269,7 @@ as.caretList <- function(object) {
 #' @return NA
 #' @export
 as.caretList.default <- function(object) {
-  stop("object must be a list")
+  stop("object must be a list", call. = FALSE)
 }
 
 #' @title Convert list to caretList
@@ -278,12 +280,12 @@ as.caretList.default <- function(object) {
 as.caretList.list <- function(object) {
   # Check that the object is a list
   if (!inherits(object, "list")) {
-    stop("object must be a list of caret models")
+    stop("object must be a list of caret models", call. = FALSE)
   }
 
   # Check that each element in the list is of class train
   if (!all(vapply(object, methods::is, logical(1L), "train"))) {
-    stop("object requires all elements of list to be caret models")
+    stop("object requires all elements of list to be caret models", call. = FALSE)
   }
 
   # Make sure the class is named

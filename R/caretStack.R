@@ -39,13 +39,13 @@
 #' }
 caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id = 1L, ...) {
   if (!is.caretList(all.models)) {
-    warning("Attempting to coerce all.models to a caretList.")
+    warning("Attempting to coerce all.models to a caretList.", call. = FALSE)
     all.models <- as.caretList(all.models)
   }
 
   # Make sure either both or neither new_X and new_y are NULL
   if (is.null(new_X) != is.null(new_y)) {
-    stop("Both new_X and new_y must be NULL, or neither.")
+    stop("Both new_X and new_y must be NULL, or neither.", call. = FALSE)
   }
   if (!is.null(new_X)) {
     stopifnot(
@@ -164,7 +164,7 @@ predict.caretStack <- function(
   # If the excluded class wasn't set at train time, set it
   if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
     object[["excluded_class_id"]] <- 1L
-    warning("No excluded_class_id set. Setting to 1L.")
+    warning("No excluded_class_id set. Setting to 1L.", call. = FALSE)
   }
 
   # If we're predicting on new data, or we need standard errors, we need predictions from the submodels
@@ -223,7 +223,7 @@ predict.caretStack <- function(
       names(imp) %in% names(preds),
       names(preds) %in% names(imp)
     )) {
-      warning("Cannot calculate standard errors due to the preprocessing used in train")
+      warning("Cannot calculate standard errors due to the preprocessing used in train", call. = FALSE)
       se <- FALSE
     }
   }

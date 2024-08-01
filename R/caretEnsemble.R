@@ -8,7 +8,7 @@ check_binary_classification <- function(list_of_models) {
     lapply(list_of_models, function(x) {
       # avoid regression models
       if (methods::is(x, "train") && !is.null(x$pred$obs) && is.factor(x$pred$obs) && nlevels(x$pred$obs) > 2L) {
-        stop("caretEnsemble only supports binary classification problems")
+        stop("caretEnsemble only supports binary classification problems", call. = FALSE)
       }
     })
   }
