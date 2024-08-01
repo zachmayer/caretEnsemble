@@ -49,10 +49,10 @@ tuneCheck <- function(x) {
 #' @return validated model info list (i.e. x)
 checkCustomModel <- function(x) {
   if (is.null(x$method)) {
-    stop(paste(
+    stop(
       "Custom models must be defined with a \"method\" attribute containing the name",
       "by which that model should be referenced. Example: my.glm.model$method <- \"custom_glm\""
-    ))
+    )
   }
   x
 }
@@ -75,11 +75,11 @@ methodCheck <- function(x) {
     } else if (is.character(m)) {
       data.table::data.table(type = "native", model = m, stringsAsFactors = FALSE)
     } else {
-      stop(paste0(
+      stop(
         "Method \"", m, "\" is invalid. Methods must either be character names ",
         "supported by caret (e.g. \"gbm\") or modelInfo lists ",
         "(e.g. getModelInfo(\"gbm\", regex=F))"
-      ))
+      )
     }
   })
   models <- data.table::rbindlist(models)
@@ -90,7 +90,7 @@ methodCheck <- function(x) {
 
   if (length(bad_models) > 0L) {
     msg <- paste(bad_models, collapse = ", ")
-    stop(paste("The following models are not valid caret models:", msg))
+    stop("The following models are not valid caret models: ", msg)
   }
 
   invisible(NULL)

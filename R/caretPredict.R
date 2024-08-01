@@ -12,21 +12,21 @@ validateExcludedClass <- function(arg) {
   }
   # Check the input
   if (!is.numeric(arg)) {
-    stop(paste0(
+    stop(
       "classification excluded level must be numeric: ", arg
-    ))
+    )
   }
   if (length(arg) != 1L) {
-    stop(paste0(
+    stop(
       "classification excluded level must have a length of 1: length=", length(arg)
-    ))
+    )
   }
 
   # Convert to integer if possible
   if (is.integer(arg)) {
     out <- arg
   } else {
-    warning(paste0("classification excluded level is not an integer: ", arg))
+    warning("classification excluded level is not an integer: ", arg)
     if (is.numeric(arg)) {
       out <- floor(arg)
     }
@@ -35,14 +35,14 @@ validateExcludedClass <- function(arg) {
 
   # Check the output
   if (!is.finite(out)) {
-    stop(paste0(
+    stop(
       "classification excluded level must be finite: ", arg
-    ))
+    )
   }
   if (out < 0L) {
-    stop(paste0(
+    stop(
       "classification excluded level must be >= 0: ", arg
-    ))
+    )
   }
 
   out
