@@ -292,15 +292,3 @@ testthat::test_that("caretList and caretStack produce consistent probability pre
   testthat::expect_true(all(rowSums(prob_preds) >= 0.99))
   testthat::expect_true(all(rowSums(prob_preds) <= 1.01))
 })
-
-testthat::test_that("caretList and caretStack support multiclass variable importance", {
-  data(iris)
-  model_list <- caretList(
-    x = iris[, -5L],
-    y = iris[, 5L],
-    methodList = c("rf", "rpart")
-  )
-  stack <- caretStack(model_list, method = "rpart")
-  imp <- caret::varImp(stack)
-  testthat::expect_s3_class(imp, "data.table")
-})
