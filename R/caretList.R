@@ -91,7 +91,7 @@ methodCheck <- function(x) {
   bad_models <- setdiff(native_models, supported_models)
 
   if (length(bad_models) > 0L) {
-    msg <- paste(bad_models, collapse = ", ")
+    msg <- toString(bad_models)
     stop("The following models are not valid caret models: ", msg, call. = FALSE)
   }
 

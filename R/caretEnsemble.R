@@ -119,17 +119,17 @@ extractModelMetrics <- function(ensemble, metric = NULL) {
 #' }
 summary.caretEnsemble <- function(object, ...) {
   types <- names(object$models)
-  types <- paste(types, collapse = ", ")
+  types <- toString(types)
   wghts <- stats::coef(object$ens_model$finalModel)
   metric <- object$ens_model$metric
   val <- getMetric(object$ens_model)
-  cat(paste0("The following models were ensembled: ", types, " \n"))
+  cat("The following models were ensembled:", types, " \n")
   cat("They were weighted: \n")
-  cat(paste0(paste0(round(wghts, 4L), collapse = " "), "\n"))
-  cat(paste0("The resulting ", metric, " is: ", round(val, 4L), "\n"))
+  cat(toString(round(wghts, 4L)), "\n")
+  cat("The resulting ", metric, "is:", round(val, 4L), "\n")
 
   # Add code to compare ensemble to individual models
-  cat(paste0("The fit for each individual model on the ", metric, " is: \n"))
+  cat("The fit for each individual model on the", metric, "is: \n")
   print(extractModelMetrics(object), row.names = FALSE)
 }
 
