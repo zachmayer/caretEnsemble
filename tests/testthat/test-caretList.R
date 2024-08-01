@@ -65,7 +65,7 @@ testthat::test_that("caretList errors for bad models", {
   testthat::expect_error(caretList(Sepal.Width ~ ., iris), "Please either define a methodList or tuneList")
   testthat::expect_warning(
     caretList(Sepal.Width ~ ., iris, methodList = c("lm", "lm")),
-    "Duplicate entries in methodList. Using unqiue methodList values."
+    "Duplicate entries in methodList. Using unique methodList values."
   )
   testthat::expect_is(caretList(Sepal.Width ~ ., iris, methodList = "lm", continue_on_fail = TRUE), "caretList")
 

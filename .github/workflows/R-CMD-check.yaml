@@ -46,4 +46,4 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - run: make check-cran
+      - run: make check

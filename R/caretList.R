@@ -182,7 +182,7 @@ caretList <- function(
     stop("Please either define a methodList or tuneList", call. = FALSE)
   }
   if (!is.null(methodList) && anyDuplicated(methodList) > 0L) {
-    warning("Duplicate entries in methodList. Using unqiue methodList values.", call. = FALSE)
+    warning("Duplicate entries in methodList. Using unique methodList values.", call. = FALSE)
     methodList <- unique(methodList)
   }
 

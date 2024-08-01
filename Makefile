@@ -1,9 +1,9 @@
 # Makefile for R project
 
-.PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check-cran fix-style lint spell build-vignettes clean
+.PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check fix-style lint spell build-vignettes release clean
 
 # Default target
-all: clean fix-style document install build-vignettes lint spell test check-cran coverage
+all: clean fix-style document install build-vignettes lint spell test check coverage
 
 # Install dependencies
 install-deps:
@@ -65,8 +65,9 @@ coverage-test: coverage.rds
 coverage: cobertura.xml coverage-report.html coverage-test
 
 # Run R CMD check as CRAN
-check-cran: document
-	Rscript -e "devtools::check(cran=T, remote=T, manual=T, error_on='note')"
+check: document
+	Rscript -e "devtools::check(cran = FALSE, remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
+	Rscript -e "devtools::check(cran = TRUE , remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
 
 # Auto style the code
 fix-style:
@@ -91,6 +92,10 @@ spell:
 # Build vignettes
 build-vignettes:
 	Rscript -e "devtools::build_vignettes()"
+
+# Release to CRAN
+release:
+	Rscript -e "devtools::release()"
 	
 # Clean up generated files
 clean:
