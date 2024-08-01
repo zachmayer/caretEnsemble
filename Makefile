@@ -76,7 +76,7 @@ fix-style:
 
 # Check the code for lint
 lint:
-	Rscript -e "Sys.setenv(LINTR_ERROR_ON_LINT='true'); lintr::lint_package()"
+	Rscript -e "Sys.setenv(LINTR_ERROR_ON_LINT='true'); devtools::load_all(); lintr::lint_package(cache = FALSE)"
 
 # Check spelling
 spell:
@@ -108,5 +108,6 @@ clean:
 	rm -f .Rhistory
 	rm -rf lib/
 	rm -f caretEnsemble_test_plots.png
+	rm -f vignettes/caretEnsemble-intro.R
 	Rscript -e "devtools::clean_vignettes()"
 	Rscript -e "devtools::clean_dll()"

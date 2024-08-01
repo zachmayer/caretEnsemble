@@ -1,3 +1,148 @@
+#' @title Prediction wrapper for \code{\link[caret]{train}}
+#' @description This is a prediction wrapper for \code{\link[caret]{train}} with several features:
+#' - If newdata is null, return stacked predictions from the training job, rather than in-sample predictions.
+#' - Always returns probabilities for classification models.
+#' - Optionally drops one predicted class for classification models.
+#' - Always returns a \code{\link[data.table]{data.table}}
+#' @param object a \code{\link[caret]{train}} object
+#' @param newdata New data to use for predictions. If NULL, stacked predictions from the training data are returned.
+#' @param excluded_class_id an integer indicating the class to exclude. If 0L, no class is excluded
+#' @param ... additional arguments to pass to \code{\link[caret]{predict.train}}, if newdata is not NULL
+#' @return a data.table
+caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
+  stopifnot(methods::is(object, "train"))
+
+  # Extract the model type
+  model_type <- extractModelType(object, validate_for_stacking = is.null(newdata))
+
+  # If newdata is NULL, return the stacked predictions
+  if (is.null(newdata)) {
+    # Extract the best tune
+    a <- data.table::data.table(object$bestTune, key = names(object$bestTune))
+
+    # Extract the best predictions
+    b <- data.table::data.table(object$pred, key = names(object$bestTune))
+
+    # Subset pred data to the best tune only
+    pred <- b[a, ]
+
+    # Keep only the predictions
+    keep_cols <- "pred"
+    if (model_type == "Classification") {
+      keep_cols <- levels(object)
+    }
+    pred <- pred[, c("rowIndex", keep_cols), drop = FALSE, with = FALSE]
+
+    # If we have multiple resamples per row
+    # e.g. for repeated CV, we need to average the predictions
+    data.table::setkeyv(pred, "rowIndex")
+    pred <- pred[, lapply(.SD, mean), by = "rowIndex"]
+    data.table::setorderv(pred, "rowIndex")
+
+    # Remove the rowIndex
+    data.table::set(pred, j = "rowIndex", value = NULL)
+
+    # Otherwise, predict on newdata
+  } else {
+    if (model_type == "Classification") {
+      pred <- caret::predict.train(object, type = "prob", newdata = newdata, ...)
+    } else {
+      pred <- caret::predict.train(object, type = "raw", newdata = newdata, ...)
+      stopifnot(
+        is.vector(pred),
+        is.numeric(pred),
+        is.null(dim(pred))
+      )
+      pred <- unname(pred)
+    }
+    pred <- data.table::data.table(pred)
+  }
+
+  # In both cases (stacked predictions and new predictions), drop the excluded class
+  # Make sure in both cases we have consitent column names and column order
+  # Drop the excluded class for classificaiton
+  stopifnot(nrow(pred) == nrow(newdata))
+  if (model_type == "Classification") {
+    stopifnot(
+      ncol(pred) == nlevels(object),
+      names(pred) == levels(object)
+    )
+    pred <- dropExcludedClass(pred, all_classes = levels(object), excluded_class_id)
+  } else {
+    stopifnot(
+      ncol(pred) == 1L,
+      names(pred) == "pred"
+    )
+  }
+
+  # Retrun
+  pred
+}
+
+#' @title Wrapper to train caret models
+#' @description This function is a wrapper around the `train` function from the `caret` package.
+#' It allows for the passing of local and global arguments to the `train` function.
+#' It also allows for the option to continue on fail, and to trim the output model.
+#' Trimming the model removes components that are not needed for stacking, to save
+#' memory and speed up the stacking process. It also converts preds to a data.table.
+#' Its an internal function for use with caretList.
+#' @param local_args A list of arguments to pass to the `train` function.
+#' @param global_args A list of arguments to pass to the `train` function.
+#' @param continue_on_fail A logical indicating whether to continue if the `train` function fails.
+#'  If `TRUE`, the function will return `NULL` if the `train` function fails.
+#' @param trim A logical indicating whether to trim the output model.
+#' If `TRUE`, the function will remove some elements that are not needed from the output model.
+#' @return The output of the `train` function.
+#' @keywords internal
+caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE) {
+  # Combine args
+  # I think my handling here is correct (update globals with locals, which allows locals be partial)
+  # but it would be nice to have some tests
+  model_args <- utils::modifyList(global_args, local_args)
+
+  # Fit
+  if (continue_on_fail) {
+    model <- tryCatch(do.call(caret::train, model_args), error = function(e) {
+      warning(conditionMessage(e), call. = FALSE)
+      NULL
+    })
+  } else {
+    model <- do.call(caret::train, model_args)
+  }
+
+  # Use data.table for stacked predictions
+  if ("pred" %in% names(model)) {
+    model[["pred"]] <- data.table::data.table(model[["pred"]])
+  }
+
+  if (trim) {
+    # Remove some elements that are not needed from the final model
+    if (!is.null(model$modelInfo$trim)) {
+      model$finalModel <- model$modelInfo$trim(model$finalModel)
+    }
+
+    # Remove some elements that are not needed from the train model
+    # note that caret::trim will remove stuff we DO need, such as results, preds, besttune, etc.
+    removals <- c("call", "dots", "trainingData", "resampledCM")
+    for (i in removals) {
+      if (i %in% names(model)) {
+        model[[i]] <- NULL
+      }
+    }
+
+    # Remove some elements that are not needed from the model control (within the train model)
+    c_removals <- c("index", "indexOut", "indexFinal")
+    for (i in c_removals) {
+      if (i %in% names(model[["control"]])) {
+        model[["control"]][[i]] <- NULL
+      }
+    }
+  }
+
+  # Return
+  model
+}
+
 #' @title Validate the excluded class
 #' @description Helper function to ensure that the excluded level for classification is an integer.
 #' Set to 0L to exclude no class.
@@ -96,83 +241,142 @@ extractModelType <- function(object, validate_for_stacking = TRUE) {
   model_type
 }
 
-#' @title Prediction wrapper for \code{\link[caret]{train}}
-#' @description This is a prediction wrapper for \code{\link[caret]{train}} with several features:
-#' - If newdata is null, return stacked predictions from the training job, rather than in-sample predictions.
-#' - Always returns probabilities for classification models.
-#' - Optionally drops one predicted class for classification models.
-#' - Always returns a \code{\link[data.table]{data.table}}
-#' @param object a \code{\link[caret]{train}} object
-#' @param newdata New data to use for predictions. If NULL, stacked predictions from the training data are returned.
-#' @param excluded_class_id an integer indicating the class to exclude. If 0L, no class is excluded
-#' @param ... additional arguments to pass to \code{\link[caret]{predict.train}}, if newdata is not NULL
-#' @return a data.table
-caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
-  stopifnot(methods::is(object, "train"))
-
-  # Extract the model type
-  model_type <- extractModelType(object, validate_for_stacking = is.null(newdata))
-
-  # If newdata is NULL, return the stacked predictions
-  if (is.null(newdata)) {
-    # Extract the best tune
-    a <- data.table::data.table(object$bestTune, key = names(object$bestTune))
-
-    # Extract the best predictions
-    b <- data.table::data.table(object$pred, key = names(object$bestTune))
-
-    # Subset pred data to the best tune only
-    pred <- b[a, ]
-
-    # Keep only the predictions
-    keep_cols <- "pred"
-    if (model_type == "Classification") {
-      keep_cols <- levels(object)
-    }
-    pred <- pred[, c("rowIndex", keep_cols), drop = FALSE, with = FALSE]
-
-    # If we have multiple resamples per row
-    # e.g. for repeated CV, we need to average the predictions
-    data.table::setkeyv(pred, "rowIndex")
-    pred <- pred[, lapply(.SD, mean), by = "rowIndex"]
-    data.table::setorderv(pred, "rowIndex")
-
-    # Remove the rowIndex
-    data.table::set(pred, j = "rowIndex", value = NULL)
-
-    # Otherwise, predict on newdata
-  } else {
-    if (model_type == "Classification") {
-      pred <- caret::predict.train(object, type = "prob", newdata = newdata, ...)
+#' @title S3 definition for concatenating train objects
+#'
+#' @description take N objects of class train and concatenate into an object of class caretList for future ensembling
+#'
+#' @param ... the objects of class train to bind into a caretList
+#' @return a \code{\link{caretList}} object
+#' @export
+#' @examples
+#' \dontrun{
+#' rpartTrain <- train(Class ~ .,
+#'   data = Sonar,
+#'   trControl = ctrl1,
+#'   method = "rpart"
+#' )
+#'
+#' rfTrain <- train(Class ~ .,
+#'   data = Sonar,
+#'   trControl = ctrl1,
+#'   method = "rf"
+#' )
+#'
+#' bigList <- c(model_list1, model_list2)
+#' }
+#'
+c.train <- function(...) {
+  new_model_list <- unlist(lapply(list(...), function(x) {
+    if (inherits(x, "caretList")) {
+      x
+    } else if (inherits(x, "train")) {
+      x <- list(x)
+      names(x) <- x[[1L]]$method
+      x
     } else {
-      pred <- caret::predict.train(object, type = "raw", newdata = newdata, ...)
-      stopifnot(
-        is.vector(pred),
-        is.numeric(pred),
-        is.null(dim(pred))
-      )
-      pred <- unname(pred)
+      stop("class of modelList1 must be 'caretList' or 'train'", call. = FALSE)
     }
-    pred <- data.table::data.table(pred)
+  }), recursive = FALSE)
+
+  # Make sure names are unique
+  names(new_model_list) <- make.names(names(new_model_list), unique = TRUE)
+
+  # reset the class to caretList
+  class(new_model_list) <- "caretList"
+
+  new_model_list
+}
+
+#' @title Generic function to extract accuracy metrics from various model objects
+#' @description A generic function to extract cross-validated accuracy metrics from model objects.
+#' @param x An object from which to extract metrics.
+#' The specific method will be dispatched based on the class of \code{x}.
+#' @param ... Additional arguments passed to the specific methods.
+#' @return A \code{\link[data.table]{data.table}}
+#' @export
+#' @seealso \code{\link{extractMetric.train}},
+#' \code{\link{extractMetric.caretList}},
+#' \code{\link{extractMetric.caretStack}}
+extractMetric <- function(x, ...) {
+  UseMethod("extractMetric")
+}
+
+#' @title Extract accuracy metrics from a \code{\link[caret]{train}} model
+#' @description Extract the cross-validated accuracy metrics and their SDs from caret.
+#' @param x a train object
+#' @param metric a character string representing the metric to extract.
+#' @param ... ignored
+#' If NULL, uses the metric that was used to train the model.
+#' @return A numeric representing the metric desired metric.
+#' @export
+#' @method extractMetric train
+extractMetric.train <- function(x, metric = NULL, ...) {
+  if (is.null(metric) || !metric %in% names(x$results)) {
+    metric <- x$metric
   }
 
-  # In both cases (stacked predictions and new predictions), drop the excluded class
-  # Make sure in both cases we have consitent column names and column order
-  # Drop the excluded class for classificaiton
-  stopifnot(nrow(pred) == nrow(newdata))
-  if (model_type == "Classification") {
-    stopifnot(
-      ncol(pred) == nlevels(object),
-      names(pred) == levels(object)
-    )
-    pred <- dropExcludedClass(pred, all_classes = levels(object), excluded_class_id)
+  results <- data.table::data.table(x$results, key = names(x$bestTune))
+  best_tune <- data.table::data.table(x$bestTune, key = names(x$bestTune))
+
+  best_results <- results[best_tune, ]
+  value <- best_results[[metric]]
+  stdev <- best_results[[paste0(metric, "SD")]]
+  if (is.null(stdev)) stdev <- NA_real_
+
+  out <- data.table::data.table(
+    model_name = x$method,
+    metric = metric,
+    value = value,
+    sd = stdev
+  )
+  out
+}
+
+#' @title Extract the method name associated with a single train object
+#' @description Extracts the method name associated with a single train object. Note
+#' that for standard models (i.e. those already prespecified by caret), the
+#' "method" attribute on the train object is used directly while for custom
+#' models the "method" attribute within the model$modelInfo attribute is
+#' used instead.
+#' @param x a single caret train object
+#' @return Name associated with model
+extractModelName <- function(x) {
+  if (is.list(x$method)) {
+    checkCustomModel(x$method)$method
+  } else if (x$method == "custom") {
+    checkCustomModel(x$modelInfo)$method
   } else {
-    stopifnot(
-      ncol(pred) == 1L,
-      names(pred) == "pred"
-    )
+    x$method
   }
+}
 
-  # Return
-  pred
+#' @title Extract the best predictions and observations from a train object
+#' @description This function extracts the best predictions and observations from a train object
+#' and then calculates residuals. It only uses one class for classification models, by default class 2.
+#' @param object a \code{train} object
+#' @param show_class_id For classification only: which class level to use for residuals
+#' @return a data.table::data.table with predictions, observeds, and residuals
+extractPredObsResid <- function(object, show_class_id = 2L) {
+  if (is.null(object$pred)) {
+    stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
+  }
+  stopifnot(
+    methods::is(object, "train"),
+    is.data.frame(object$pred)
+  )
+  keep_cols <- c("pred", "obs", "rowIndex")
+  type <- object$modelType
+  predobs <- data.table::data.table(object$pred)
+  if (type == "Classification") {
+    show_class <- levels(object)[show_class_id]
+    data.table::set(predobs, j = "pred", value = predobs[[show_class]])
+    data.table::set(predobs, j = "obs", value = as.integer(predobs[["obs"]] == show_class))
+  }
+  predobs <- predobs[, keep_cols, with = FALSE]
+  data.table::setkeyv(predobs, "rowIndex")
+  predobs <- predobs[, lapply(.SD, mean), by = "rowIndex"]
+  r <- predobs[["obs"]] - predobs[["pred"]]
+  data.table::set(predobs, j = "resid", value = r)
+  data.table::setorderv(predobs, "rowIndex")
+  predobs
 }

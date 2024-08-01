@@ -13,7 +13,7 @@
 
 \item{show_class_id}{For classification only: which class level to show on the plot}
 
-\item{...}{additional arguments to pass to autoplot}
+\item{...}{ignored}
 }
 \value{
 A grid of diagnostic plots. Top left is the range of the performance

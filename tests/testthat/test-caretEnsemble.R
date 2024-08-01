@@ -14,21 +14,6 @@ data(Y.class)
 testthat::context("Test metric and residual extraction")
 #############################################################################
 
-testthat::test_that("We can extract metrics", {
-  data(iris)
-  mod <- caret::train(
-    iris[, 1L:2L], iris[, 3L],
-    method = "lm"
-  )
-  m1 <- getMetric(mod, "RMSE")
-  m2 <- getMetric(mod, "RMSE")
-  testthat::expect_identical(m1, m2)
-
-  m1 <- getMetric(mod, "RMSE", return_sd = TRUE)
-  m2 <- getMetric(mod, "RMSE", return_sd = TRUE)
-  testthat::expect_identical(m1, m2)
-})
-
 testthat::test_that("We can extract resdiuals from train regression objects", {
   data(iris)
   mod <- caret::train(
@@ -50,7 +35,7 @@ testthat::test_that("We can ensemble regression models", {
   pred.reg <- predict(ens.reg, newdata = X.reg)
   pred.reg2 <- predict(ens.reg, newdata = X.reg, se = TRUE)
 
-  testthat::expect_true(all(pred.reg == pred.reg2$fit))
+  testthat::expect_true(all(pred.reg == pred.reg2$pred))
 
   testthat::expect_error(predict(ens.reg, return_weights = "BOGUS"), "Error in se || return_weights")
 
@@ -71,15 +56,15 @@ testthat::test_that("We can ensemble regression models", {
   testthat::expect_is(unlist(attr(p2, which = "weights")), "numeric")
   testthat::expect_s3_class(p2, "data.table")
   testthat::expect_identical(ncol(p2), 3L)
-  testthat::expect_named(p2, c("fit", "lwr", "upr"))
+  testthat::expect_named(p2, c("pred", "lwr", "upr"))
 
   p3 <- predict(ens.reg, newdata = X.class, return_weights = FALSE, se = FALSE)
   testthat::expect_s3_class(p3, "data.table")
   testthat::expect_equivalent(p1, p3)
   testthat::expect_false(identical(p1, p3))
 
-  testthat::expect_equivalent(p2$fit, p1$pred)
-  testthat::expect_equivalent(p2$fit, p3$pred)
+  testthat::expect_equivalent(p2$pred, p1$pred)
+  testthat::expect_equivalent(p2$pred, p3$pred)
   testthat::expect_null(attr(p3, which = "weights"))
 })
 
@@ -271,4 +256,13 @@ testthat::test_that("Ensembles using custom models work correctly", {
   )
   msg <- "Custom models must be defined with a \"method\" attribute"
   testthat::expect_error(caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control), regexp = msg)
+})
+
+testthat::test_that("Ensembles fails if predictions are not saved", {
+  models_bad <- models.reg[[1L]]
+  models_bad$pred <- NULL
+  testthat::expect_error(
+    extractPredObsResid(models_bad),
+    "No predictions saved during training. Please set savePredictions = 'final' in trainControl"
+  )
 })

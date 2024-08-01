@@ -15,7 +15,7 @@ testthat::test_that("We can stack regression models", {
     method = "lm", preProcess = "pca"
   )
   testthat::expect_s3_class(ens.reg, "caretStack")
-  testthat::expect_is(summary(ens.reg), "summary.lm")
+  testthat::expect_s3_class(summary(ens.reg), "summary.caretStack")
   invisible(capture.output(print(ens.reg)))
   pred.reg <- predict(ens.reg, newdata = X.reg)
   testthat::expect_s3_class(pred.reg, "data.table")
@@ -29,7 +29,7 @@ testthat::test_that("We can stack classification models", {
     method = "glm"
   )
   testthat::expect_that(ens.class, is_a("caretStack"))
-  testthat::expect_is(summary(ens.class), "summary.glm")
+  testthat::expect_s3_class(summary(ens.class), "summary.caretStack")
   invisible(capture.output(print(ens.class)))
   pred.class <- predict(ens.class, X.class)
   testthat::expect_true(all(vapply(pred.class, is.numeric, logical(1L))))

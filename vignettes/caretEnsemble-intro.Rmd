@@ -107,14 +107,9 @@ knitr::kable(predict(greedy_ensemble, newdata = head(testing), excluded_class_id
 ```
 
 We can also use varImp to extract the variable importances from each member of the ensemble, as well as the final ensemble model:
-```{r, echo=TRUE, results="hide"}
-caret::varImp(greedy_ensemble)
+```{r, echo=TRUE, results="hidshowe"}
+round(caret::varImp(greedy_ensemble), 4L)
 ```
-```{r, echo=FALSE, results="asis"}
-knitr::kable(caret::varImp(greedy_ensemble))
-```
-
-(The columns each sum up to 100.)
 
 ## caretStack
 ```{r, echo=TRUE}

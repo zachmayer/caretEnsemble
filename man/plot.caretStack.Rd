@@ -4,25 +4,18 @@
 \alias{plot.caretStack}
 \title{Plot a caretStack object}
 \usage{
-\method{plot}{caretStack}(x, ...)
+\method{plot}{caretStack}(x, metric = NULL, ...)
 }
 \arguments{
-\item{x}{An object of class caretStack}
+\item{x}{a caretStack object}
 
-\item{...}{passed to plot}
+\item{metric}{which metric to plot.  If NULL, will use the default metric used to train the model.}
+
+\item{...}{ignored}
+}
+\value{
+a ggplot2 object
 }
 \description{
-This is a function to plot a caretStack.
-}
-\examples{
-\dontrun{
-models <- caretList(
-  x = iris[1:100, 1:2],
-  y = iris[1:100, 3],
-  trControl = trainControl(method = "cv"),
-  methodList = c("rpart", "glm")
-)
-meta_model <- caretStack(models, method = "rpart", tuneLength = 2)
-plot(meta_model)
-}
+This function plots the performance of each model in a caretList object.
 }

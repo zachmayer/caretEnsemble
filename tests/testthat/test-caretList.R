@@ -1,6 +1,14 @@
 # Test caretList
 set.seed(442L)
 
+data(models.reg)
+data(X.reg)
+data(Y.reg)
+
+data(models.class)
+data(X.class)
+data(Y.class)
+
 train <- caret::twoClassSim(
   n = 1000L, intercept = -8L, linearVars = 3L,
   noiseVars = 10L, corrVars = 4L, corrValue = 0.6
@@ -10,9 +18,6 @@ test <- caret::twoClassSim(
   noiseVars = 10L, corrVars = 4L, corrValue = 0.6
 )
 
-###############################################
-testthat::context("Ancillary caretList functions and errors")
-################################################
 testthat::test_that("caretModelSpec returns valid specs", {
   tuneList <- list(
     rf1 = caretModelSpec(),
@@ -716,4 +721,26 @@ testthat::test_that("caretList handles custom performance metrics", {
   )
   testthat::expect_s3_class(models, "caretList")
   testthat::expect_true(all(vapply(models, function(m) "default" %in% colnames(m$results), logical(1L))))
+})
+
+###############################################
+testthat::context("S3 methods")
+###############################################
+
+testthat::test_that("plot.caretList", {
+  for (model_list in list(models.reg, models.class)) {
+    plt <- plot(model_list)
+    testthat::expect_is(plt, "ggplot")
+    testthat::expect_identical(nrow(plt$data), 4L)
+    testthat::expect_named(model_list, plt$data$model_name)
+  }
+})
+
+testthat::test_that("summary.caretList", {
+  for (model_list in list(models.reg, models.class)) {
+    smry <- testthat::expect_silent(summary(model_list))
+    for (name in names(model_list)) {
+      testthat::expect_output(print(smry), name)
+    }
+  }
 })

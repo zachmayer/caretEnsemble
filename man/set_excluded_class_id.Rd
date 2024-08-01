@@ -14,3 +14,4 @@ set_excluded_class_id(object, model_type)
 \description{
 Set the excluded class id for a caretStack object
 }
+\keyword{internal}

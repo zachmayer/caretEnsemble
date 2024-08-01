@@ -42,7 +42,7 @@ A list of \code{\link[caret]{train}} objects. If the model fails to build,
 it is dropped from the list.
 }
 \description{
-Build a list of train objects suitable for ensembling using the \code{\link{caretEnsemble}}
+Build a list of train objects suitable for ensembling using the \code{\link{caretStack}}
 function.
 }
 \examples{
