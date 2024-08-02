@@ -19,10 +19,7 @@ train_model <- function(x, y, method = "rpart", ...) {
     y = y,
     method = method,
     ...,
-    trControl = caret::trainControl(
-      method = "cv",
-      number = 5L
-    )
+    trControl = caret::trainControl(method = "none")
   )
 }
 
@@ -98,24 +95,37 @@ testthat::test_that("permutationImportance works with a single feature important
     x3 = make_var(n)
   )
 
-  # Create a perfectly linear relationship
-  cf <- c(4L, 1L, 2L, 3L) # First is intercept
-  y <- (cbind(1L, as.matrix(x)) %*% cf)[, 1L]
-  y <- ifelse(y > 0L, "A", "B")
+  cf_set <- c(0L, 1L, 3L, 5L, 10L)
+  all_cfs <- expand.grid(
+    cf_set,
+    cf_set,
+    cf_set,
+    cf_set
+  )
 
-  # Fit the model and compute importance
-  model <- train_model(x, y, method = "glm")
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, c("intercept", "x1", "x2", "x3"))
+  for(i in seq_len(nrow(all_cfs))){
 
-  # Compare the importances to the real coefficients
-  cf_norm <- normalize_to_one(cf)
-  testthat::expect_equivalent(imp, cf_norm, tolerance = 0.1)
+    # Create a perfectly linear relationship
+    #cf <- c(4L, 1L, 2L, 3L) # First is intercept
+    cf <- unlist(all_cfs[10,])
+    y <- (cbind(1L, as.matrix(x)) %*% cf)[, 1L]
+    #y <- ifelse(y > 0L, "A", "B")
 
-  # Altrernative importance based on coefficients
-  # Note that the input data all has a mean of 0 and an sd of 1
-  model_imp <- normalize_to_one(coef(model$finalModel))
-  testthat::expect_equivalent(model_imp, cf_norm, tolerance = 0.1)
+    # Fit the model and compute importance
+    model <- train_model(x, y, method = "glm")
+    imp <- permutationImportance(model, x)
+    check_importance_scores(imp, c("intercept", "x1", "x2", "x3"))
+
+    # Compare the importances to the real coefficients
+    cf_norm <- normalize_to_one(cf)
+    testthat::expect_equivalent(imp, cf_norm, tolerance = 0.1)
+
+    # Altrernative importance based on coefficients
+    # Note that the input data all has a mean of 0 and an sd of 1
+    model_imp <- normalize_to_one(coef(model$finalModel))
+    testthat::expect_equivalent(model_imp, cf_norm, tolerance = 0.1)
+  }
+
 })
 
 testthat::test_that("permutationImportance works a single, contant, unimportant feature", {
