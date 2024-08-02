@@ -51,11 +51,11 @@ permutationImportance <- function(model, newdata, target) {
   )
 
   # Error of the NULL model
-  TSS <- mean((0L - target)^2L)
+  TSS <- sqrt(mean((0L - target)^2L))
 
   # Error of the NULL model
   preds_mean <- matrix(colMeans(target), nrow = N, ncol = ncol(target), byrow = TRUE)
-  SEE_intercept <- mean((0L - preds_mean)^2L)
+  SEE_intercept <- sqrt(mean((0L - preds_mean)^2L))
 
   # Error of the original model
   # aka SSM or Sum of Squares Model
@@ -75,11 +75,11 @@ permutationImportance <- function(model, newdata, target) {
     data.table::set(newdata, j = var, value = old_var[shuffle_idx])
     new_preds <- as.matrix(predict(model, newdata, type = ifelse(is_class, "prob", "raw")))
     data.table::set(newdata, j = var, value = old_var)
-    mean((new_preds - target)^2L)
+    sqrt(mean((new_preds - target)^2L))
   }, numeric(1L))
 
   # Add the intercept to the model errors
   imp <- c(intercept = SEE_intercept, SSE) / TSS
   imp <- imp / sum(imp)
-  round(imp, 4)
+  imp
 }

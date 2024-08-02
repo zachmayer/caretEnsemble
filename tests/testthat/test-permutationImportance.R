@@ -86,11 +86,11 @@ testthat::test_that("permutationImportance works with a single feature unimporta
   check_importance_scores(imp, c("intercept", "x1"))
 })
 
-testthat::test_that("permutationImportance works with a single feature important feature", {
-  devtools::load_all()
 
+# TODO: parameterize
+testthat::test_that("permutationImportance works with a single feature important feature", {
   set.seed(1234L)
-  make_var <- function(n) scale(stats::rnorm(n), center = T, scale = T)[, 1]
+  make_var <- function(n) scale(stats::rnorm(n), center = TRUE, scale = TRUE)[, 1L]
 
   n <- 1000L
   x <- data.table::data.table(
@@ -101,19 +101,16 @@ testthat::test_that("permutationImportance works with a single feature important
 
   # Create a perfectly linear relationship
   intercept <- 1L
-  cf <- c(2L, 3L, 4L)
-  y <- (intercept + as.matrix(x) %*% cf)[, 1]
+  cf <- c(2L, 7L, 0L)
+  y <- (intercept + as.matrix(x) %*% cf)[, 1L]
   model <- train_model(x, y, method = "lm")
 
   cf <- coef(model$finalModel)
-  print(round(abs(cf) / sum(abs(cf)), 4))
-
+  cf_im <- abs(cf) / sum(abs(cf))
   imp <- permutationImportance(model, x, y)
-  print(round(imp, 4))
-
-  testthat::expect_equivalent(cf, c(intercept, cf_1, cf_2), tolerance = 1e-6)
   check_importance_scores(imp, c("intercept", "x1", "x2", "x3"))
-  imp
+
+  testthat::expect_equivalent(cf_im, imp, tolerance = 0.1)
 })
 
 testthat::test_that("permutationImportance works a single, contant, unimportant feature", {
