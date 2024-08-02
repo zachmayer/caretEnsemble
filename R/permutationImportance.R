@@ -44,30 +44,42 @@ permutationImportance <- function(model, newdata, target) {
     target <- model.matrix(~ 0L + target)
   }
   target <- as.matrix(target)
-  stopifnot(is.numeric(target))
-
-  # Predict on the original data
-  original_preds <- as.matrix(predict(model, newdata, type = ifelse(is_class, "prob", "raw")))
   stopifnot(
-    is.numeric(original_preds),
-    dim(original_preds) == dim(target),
-    paste0("target", colnames(original_preds)) == colnames(target)
+    is.numeric(target),
+    is.finite(target),
+    length(dim(target)) == 2L
   )
 
-  # Shuffle the data
-  shuffle_idx <- sample.int(N)
+  # Error of the NULL model
+  TSS <- mean((0L - target)^2L)
 
+  # Error of the NULL model
+  preds_mean <- matrix(colMeans(target), nrow = N, ncol = ncol(target), byrow = TRUE)
+  SEE_intercept <- mean((0L - preds_mean)^2L)
+
+  # Error of the original model
+  # aka SSM or Sum of Squares Model
+  preds_orig <- as.matrix(predict(model, newdata, type = ifelse(is_class, "prob", "raw")))
+  stopifnot(
+    is.numeric(preds_orig),
+    is.finite(preds_orig),
+    dim(preds_orig) == dim(target),
+    paste0("target", colnames(preds_orig)) == colnames(target)
+  )
+
+  # Error of permuting each variable, or SSE
   # Loop through each variable, shuffle it, and calculate RMSE of the new predictions
-  RMSE <- vapply(names(newdata), function(var) {
+  shuffle_idx <- sample.int(N)
+  SSE <- vapply(names(newdata), function(var) {
     old_var <- data.table::copy(newdata[[var]])
     data.table::set(newdata, j = var, value = old_var[shuffle_idx])
     new_preds <- as.matrix(predict(model, newdata, type = ifelse(is_class, "prob", "raw")))
-    data.table::set(newdata, j = var, value = old_var[shuffle_idx])
-    sqrt(mean((new_preds - original_preds)^2L))
+    data.table::set(newdata, j = var, value = old_var)
+    mean((new_preds - target)^2L)
   }, numeric(1L))
-  RMSE
 
-  # Normalize, sort, and return
-  imp <- RMSE / sum(RMSE)
-  imp
+  # Add the intercept to the model errors
+  imp <- c(intercept = SEE_intercept, SSE) / TSS
+  imp <- imp / sum(imp)
+  round(imp, 4)
 }

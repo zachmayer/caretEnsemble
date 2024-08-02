@@ -12,12 +12,13 @@ create_dataset <- function(n = 200L, p = 5L, classification = TRUE) {
 }
 
 # Helper function to train a model
-train_model <- function(x, y, method = "rpart") {
+train_model <- function(x, y, method = "rpart", ...) {
   set.seed(1234L)
   caret::train(
     x = x,
     y = y,
     method = method,
+    ...,
     trControl = caret::trainControl(
       method = "cv",
       number = 5L
@@ -28,9 +29,10 @@ train_model <- function(x, y, method = "rpart") {
 # Helper function to check test results
 check_importance_scores <- function(
     imp,
-    expected_names = paste0("x", seq_len(5L)),
+    expected_names = c("intercept", paste0("x", seq_len(5L))),
     expected_length = length(expected_names)) {
   testthat::expect_type(imp, "double")
+  testthat::expect_true(all(is.finite(imp)))
   testthat::expect_named(imp, expected_names)
   testthat::expect_length(imp, expected_length)
   testthat::expect_true(all(imp >= 0L & imp <= 1L))
@@ -72,20 +74,50 @@ testthat::test_that("permutationImportance works for multiclass classification",
 
   model <- train_model(x, y)
   imp <- permutationImportance(model, x, y)
-  check_importance_scores(imp, c("x1", "x2", "x3"))
+  check_importance_scores(imp, c("intercept", "x1", "x2", "x3"))
 })
 
-testthat::test_that("permutationImportance handles edge cases", {
-  # Test with a single feature
+testthat::test_that("permutationImportance works with a single feature unimportant feature", {
   n <- 100L
   x <- data.table::data.table(x1 = stats::rnorm(n))
   y <- factor(sample(c("A", "B"), n, replace = TRUE))
   model <- train_model(x, y)
-  imp <- permutationImportance(model, x, y) # TODO: FIX ME
-  check_importance_scores(imp, "x1")
-  testthat::expect_equal(imp_single, 1L, tol = 0.001)
+  imp <- permutationImportance(model, x, y)
+  check_importance_scores(imp, c("intercept", "x1"))
+})
 
-  # Test with constant features
+testthat::test_that("permutationImportance works with a single feature important feature", {
+  devtools::load_all()
+
+  set.seed(1234L)
+  make_var <- function(n) scale(stats::rnorm(n), center = T, scale = T)[, 1]
+
+  n <- 1000L
+  x <- data.table::data.table(
+    x1 = make_var(n),
+    x2 = make_var(n),
+    x3 = make_var(n)
+  )
+
+  # Create a perfectly linear relationship
+  intercept <- 1L
+  cf <- c(2L, 3L, 4L)
+  y <- (intercept + as.matrix(x) %*% cf)[, 1]
+  model <- train_model(x, y, method = "lm")
+
+  cf <- coef(model$finalModel)
+  print(round(abs(cf) / sum(abs(cf)), 4))
+
+  imp <- permutationImportance(model, x, y)
+  print(round(imp, 4))
+
+  testthat::expect_equivalent(cf, c(intercept, cf_1, cf_2), tolerance = 1e-6)
+  check_importance_scores(imp, c("intercept", "x1", "x2", "x3"))
+  imp
+})
+
+testthat::test_that("permutationImportance works a single, contant, unimportant feature", {
+  n <- 100L
   x <- data.table::data.table(
     x1 = rep(1L, n),
     x2 = stats::rnorm(n)
@@ -93,10 +125,25 @@ testthat::test_that("permutationImportance handles edge cases", {
   y <- factor(sample(c("A", "B"), n, replace = TRUE))
   model <- train_model(x, y)
   imp <- permutationImportance(model, x, y)
-  check_importance_scores(imp, c("x1", "x2"))
+  check_importance_scores(imp, c("intercept", "x1", "x2"))
   testthat::expect_lt(imp["x1"], imp["x2"])
+})
 
-  # Test with perfect predictor
+testthat::test_that("permutationImportance works a single, contant, important feature", {
+  n <- 100L
+  x <- data.table::data.table(
+    x1 = rep(1L, n),
+    x2 = stats::rnorm(n)
+  )
+  y <- factor(sample(c("A", "B"), n, replace = TRUE))
+  model <- train_model(x, y)
+  imp <- permutationImportance(model, x, y)
+  check_importance_scores(imp, c("intercept", "x1", "x2"))
+  testthat::expect_lt(imp["x1"], imp["x2"])
+})
+
+testthat::test_that("permutationImportance works with perfect predictor", {
+  n <- 100L
   x <- data.table::data.table(
     x1 = rep(c(0L, 1L), each = n / 2L),
     x2 = stats::rnorm(n)
@@ -104,6 +151,6 @@ testthat::test_that("permutationImportance handles edge cases", {
   y <- factor(rep(c("A", "B"), each = n / 2L))
   model <- train_model(x, y)
   imp <- permutationImportance(model, x, y)
-  check_importance_scores(imp, c("x1", "x2"))
-  testthat::expect_gt(imp["x1"], imp["x2"]) # TODO: FIX ME
+  check_importance_scores(imp, c("intercept", "x1", "x2"))
+  testthat::expect_gt(imp["x1"], imp["x2"])
 })
