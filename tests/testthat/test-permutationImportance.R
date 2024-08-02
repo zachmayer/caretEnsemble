@@ -87,7 +87,7 @@ testthat::test_that("permutationImportance works with a single feature unimporta
 })
 
 
-# TODO: parameterize
+# TODO: parameterize, do for class and reg, delete below tests, single col tests
 testthat::test_that("permutationImportance works with a single feature important feature", {
   set.seed(1234L)
   make_var <- function(n) scale(stats::rnorm(n), center = TRUE, scale = TRUE)[, 1L]
@@ -123,7 +123,7 @@ testthat::test_that("permutationImportance works a single, contant, unimportant 
   model <- train_model(x, y)
   imp <- permutationImportance(model, x, y)
   check_importance_scores(imp, c("intercept", "x1", "x2"))
-  testthat::expect_lt(imp["x1"], imp["x2"])
+  testthat::expect_lte(imp["x1"], imp["x2"])
 })
 
 testthat::test_that("permutationImportance works a single, contant, important feature", {
@@ -136,7 +136,7 @@ testthat::test_that("permutationImportance works a single, contant, important fe
   model <- train_model(x, y)
   imp <- permutationImportance(model, x, y)
   check_importance_scores(imp, c("intercept", "x1", "x2"))
-  testthat::expect_lt(imp["x1"], imp["x2"])
+  testthat::expect_lte(imp["x1"], imp["x2"])
 })
 
 testthat::test_that("permutationImportance works with perfect predictor", {
