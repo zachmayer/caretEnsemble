@@ -1,3 +1,12 @@
+#' @title Normalize to One
+#' @description Normalize a vector to sum to one.
+#' @param x
+#' @return A numeric vector.
+#' @keywords internal
+normalize_to_one <- function(x) {
+  x / sum(x)
+}
+
 #' @title Is Classifier
 #' @description Check if a model is a classifier.
 #' @param model A train object from the caret package.
@@ -21,65 +30,46 @@ isClassifier <- function(model) {
 #' @param target The target variable.
 #' @return A named numeric vector of variable importances.
 #' @export
-permutationImportance <- function(model, newdata, target) {
+permutationImportance <- function(model, newdata) {
   # Checks
   stopifnot(
     methods::is(model, "train") || methods::is(model, "caretStack"),
     methods::is(newdata, "data.frame")
   )
+  is_class <- isClassifier(model)
 
   # Make a copy of the data, since we'll be shuffling it
   # If this process dies partway through, we don't want
   # to have randomly modidifed the original data in place
-  newdata <- data.table::as.data.table(data.table::copy(newdata))
-  N <- nrow(newdata)
+  newdata <- data.table::as.data.table(data.table::copy(newdata[1L, ]))
 
-  # Turn class target into a matrix
-  is_class <- isClassifier(model)
-  if (is_class) {
-    stopifnot(is.factor(target) || is.character(target))
-    if (is.character(target)) {
-      target <- factor(target, levels = levels(model))
-    }
-    target <- model.matrix(~ 0L + target)
-  }
-  target <- as.matrix(target)
-  stopifnot(
-    is.numeric(target),
-    is.finite(target),
-    length(dim(target)) == 2L
-  )
-
-  # Error of the NULL model
-  TSS <- sqrt(mean((0L - target)^2L))
-
-  # Error of the NULL model
-  preds_mean <- matrix(colMeans(target), nrow = N, ncol = ncol(target), byrow = TRUE)
-  SEE_intercept <- sqrt(mean((0L - preds_mean)^2L))
-
-  # Error of the original model
-  # aka SSM or Sum of Squares Model
+  # Make the original predictions
   preds_orig <- as.matrix(predict(model, newdata, type = ifelse(is_class, "prob", "raw")))
   stopifnot(
     is.numeric(preds_orig),
-    is.finite(preds_orig),
-    dim(preds_orig) == dim(target),
-    paste0("target", colnames(preds_orig)) == colnames(target)
+    is.finite(preds_orig)
   )
 
-  # Error of permuting each variable, or SSE
-  # Loop through each variable, shuffle it, and calculate RMSE of the new predictions
-  shuffle_idx <- sample.int(N)
-  SSE <- vapply(names(newdata), function(var) {
+  # Find the intercept
+  newdata_zero <- data.table::as.data.table(data.table::copy(newdata))
+  for (var in names(newdata_zero)) {
+    data.table::set(newdata_zero, j = var, value = 0.0)
+  }
+  pred_zero <- predict(model, newdata_zero, type = ifelse(is_class, "prob", "raw"))
+  pred_zero <- as.matrix(pred_zero)
+  intercept <- sqrt(mean((pred_zero)^2L))
+
+  # Find each "coefficient"
+  CFs <- vapply(names(newdata), function(var) {
     old_var <- data.table::copy(newdata[[var]])
-    data.table::set(newdata, j = var, value = old_var[shuffle_idx])
+    data.table::set(newdata, j = var, value = 0.0)
     new_preds <- as.matrix(predict(model, newdata, type = ifelse(is_class, "prob", "raw")))
     data.table::set(newdata, j = var, value = old_var)
-    sqrt(mean((new_preds - target)^2L))
+    sqrt(mean((new_preds - preds_orig)^2L))
   }, numeric(1L))
 
   # Add the intercept to the model errors
-  imp <- c(intercept = SEE_intercept, SSE) / TSS
-  imp <- imp / sum(imp)
+  imp <- c(intercept = intercept, CFs)
+  imp <- normalize_to_one(imp)
   imp
 }
