@@ -39,14 +39,14 @@ check_importance_scores <- function(
 testthat::test_that("permutationImportance works for binary classification", {
   dt <- create_dataset(classification = TRUE)
   model <- train_model(dt[["X"]], dt[["y"]])
-  imp <- permutationImportance(model, dt[["X"]])
+  imp <- permutationImportance(model, dt[["X"]], dt[["y"]])
   check_importance_scores(imp)
 })
 
 testthat::test_that("permutationImportance works for regression", {
   dt <- create_dataset(classification = FALSE)
   model <- train_model(dt[["X"]], dt[["y"]])
-  imp <- permutationImportance(model, dt[["X"]])
+  imp <- permutationImportance(model, dt[["X"]], dt[["y"]])
   check_importance_scores(imp)
 })
 
@@ -70,8 +70,8 @@ testthat::test_that("permutationImportance works for multiclass classification",
   y <- factor(apply(probabilities, 1L, function(prob) sample(c("A", "B", "C"), 1L, prob = prob)))
 
   model <- train_model(x, y)
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, c("intercept", "x1", "x2", "x3"))
+  imp <- permutationImportance(model, x, y)
+  check_importance_scores(imp, c("x1", "x2", "x3"))
 })
 
 testthat::test_that("permutationImportance works with a single feature unimportant feature", {
@@ -79,13 +79,14 @@ testthat::test_that("permutationImportance works with a single feature unimporta
   x <- data.table::data.table(x1 = stats::rnorm(n))
   y <- factor(sample(c("A", "B"), n, replace = TRUE))
   model <- train_model(x, y)
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, c("intercept", "x1"))
+  imp <- permutationImportance(model, x, y)
+  check_importance_scores(imp, "x1")
 })
 
-# TODO: parameterize, do for class and reg, delete below tests, single col tests
+
 testthat::test_that("permutationImportance works with a single feature important feature", {
   set.seed(1234L)
+  devtools::load_all()
   make_var <- function(n) scale(stats::rnorm(n), center = TRUE, scale = TRUE)[, 1L]
 
   n <- 1000L
@@ -95,37 +96,44 @@ testthat::test_that("permutationImportance works with a single feature important
     x3 = make_var(n)
   )
 
-  cf_set <- c(0L, 1L, 3L, 5L, 10L)
+  cf_set <- c(0L, 1L, 5L, 10L)
   all_cfs <- expand.grid(
-    cf_set,
+    c(0L, 1L, 3L, 5L),
     cf_set,
     cf_set,
     cf_set
   )
 
-  for(i in seq_len(nrow(all_cfs))){
+  for (do_class in c(FALSE, TRUE)) {
+    for (i in seq_len(nrow(all_cfs))) {
+      # Create a perfectly linear relationship
+      cf <- unname(unlist(all_cfs[i, ]))
+      y <- (cbind(1L, as.matrix(x)) %*% cf)[, 1L]
+      classes <- c("A", "B")
+      if (do_class) {
+        y <- factor(ifelse(y > 0L, classes[1L], classes[2L]), levels = classes)
+      }
 
-    # Create a perfectly linear relationship
-    #cf <- c(4L, 1L, 2L, 3L) # First is intercept
-    cf <- unlist(all_cfs[10,])
-    y <- (cbind(1L, as.matrix(x)) %*% cf)[, 1L]
-    #y <- ifelse(y > 0L, "A", "B")
+      # Fit the model and compute importance
+      model <- suppressWarnings(train_model(x, y, method = "glm"))
+      imp <- permutationImportance(model, x, y)
+      check_importance_scores(imp, c("x1", "x2", "x3"))
 
-    # Fit the model and compute importance
-    model <- train_model(x, y, method = "glm")
-    imp <- permutationImportance(model, x)
-    check_importance_scores(imp, c("intercept", "x1", "x2", "x3"))
+      # Altrernative importance based on coefficients
+      # Note that the input data all has a mean of 0 and an sd of 1
+      glm_imp <- normalize_to_one(abs(coef(model$finalModel)))
+      testthat::expect_equivalent(glm_imp, cf_norm, tolerance = 0.1)
 
-    # Compare the importances to the real coefficients
-    cf_norm <- normalize_to_one(cf)
-    testthat::expect_equivalent(imp, cf_norm, tolerance = 0.1)
-
-    # Altrernative importance based on coefficients
-    # Note that the input data all has a mean of 0 and an sd of 1
-    model_imp <- normalize_to_one(coef(model$finalModel))
-    testthat::expect_equivalent(model_imp, cf_norm, tolerance = 0.1)
+      # Compare the importances to the real coefficients
+      # For regression, the importances should be close to the coefficients
+      # For classification without an intercept, the same
+      # For classificaiton with an intercept its a lot more complicated
+      if (!do_class || cf[[1L]] == 0.0) {
+        cf_norm <- normalize_to_one(cf[-1L])
+      }
+      testthat::expect_equivalent(imp, cf_norm, tolerance = 0.1)
+    }
   }
-
 })
 
 testthat::test_that("permutationImportance works a single, contant, unimportant feature", {
