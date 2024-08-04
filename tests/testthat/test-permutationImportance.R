@@ -26,7 +26,7 @@ train_model <- function(x, y, method = "rpart", ...) {
 # Helper function to check test results
 check_importance_scores <- function(
     imp,
-    expected_names = c("intercept", paste0("x", seq_len(5L))),
+    expected_names =  paste0("x", seq_len(5L)),
     expected_length = length(expected_names)) {
   testthat::expect_type(imp, "double")
   testthat::expect_true(all(is.finite(imp)))
@@ -83,10 +83,8 @@ testthat::test_that("permutationImportance works with a single feature unimporta
   check_importance_scores(imp, "x1")
 })
 
-
 testthat::test_that("permutationImportance works with a single feature important feature", {
   set.seed(1234L)
-  devtools::load_all()
   make_var <- function(n) scale(stats::rnorm(n), center = TRUE, scale = TRUE)[, 1L]
 
   n <- 1000L
