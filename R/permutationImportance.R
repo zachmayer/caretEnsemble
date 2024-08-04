@@ -4,6 +4,7 @@
 #' @return A numeric vector.
 #' @keywords internal
 normalize_to_one <- function(x) {
+ x <- pmax(x, 0.0)
   x_sum <- sum(x)
   if (x_sum == 0.0) {
     return(rep(1.0 / length(x), length(x)))
@@ -76,9 +77,10 @@ target_to_matrix <- function(target, is_class, levels) {
 #' @param model A train object from the caret package.
 #' @param newdata A data.frame of new data to use to compute importances.  Can be the training data.
 #' @param target The target variable.
+#' @param normalize A logical indicating whether to normalize the importances to sum to one.
 #' @return A named numeric vector of variable importances.
 #' @export
-permutationImportance <- function(model, newdata, target) {
+permutationImportance <- function(model, newdata, target, normalize = TRUE) {
   # Checks
   stopifnot(
     methods::is(model, "train") || methods::is(model, "caretStack"),
@@ -141,6 +143,6 @@ permutationImportance <- function(model, newdata, target) {
   # mae for a variable is close to zero it means the variable
   # is not important.
   imp <- (mae_vars - mae_model) / (mae_zero - mae_model)
-  imp <- normalize_to_one(imp)
+  if(normalize) imp <- normalize_to_one(imp)
   imp
 }
