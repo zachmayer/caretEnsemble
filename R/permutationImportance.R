@@ -4,7 +4,7 @@
 #' @return A numeric vector.
 #' @keywords internal
 normalize_to_one <- function(x) {
- x <- pmax(x, 0.0)
+  x <- abs(x)
   x_sum <- sum(x)
   if (x_sum == 0.0) {
     return(rep(1.0 / length(x), length(x)))
@@ -129,10 +129,6 @@ permutationImportance <- function(model, newdata, target, normalize = TRUE) {
     mae(new_preds, target)
   }, numeric(1L))
 
-  # Error for the intercept (aka no variables)
-  preds_intercept <- matrix(colMeans(preds_orig), nrow = N, ncol = ncol(preds_orig), byrow = TRUE)
-  mae_intercept <- mae(preds_intercept, target)
-
   # Error predicting all zeros
   mae_zero <- mae(0L, target)
 
@@ -143,6 +139,6 @@ permutationImportance <- function(model, newdata, target, normalize = TRUE) {
   # mae for a variable is close to zero it means the variable
   # is not important.
   imp <- (mae_vars - mae_model) / (mae_zero - mae_model)
-  if(normalize) imp <- normalize_to_one(imp)
+  if (normalize) imp <- normalize_to_one(imp)
   imp
 }
