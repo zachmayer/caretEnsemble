@@ -1,5 +1,6 @@
 data(models.class)
 data(models.reg)
+data(iris)
 
 # Helper function to create a simple dataset
 create_dataset <- function(n = 200L, p = 5L, classification = TRUE) {
@@ -140,10 +141,6 @@ testthat::test_that("permutationImportance works with a single important feature
   }
 })
 
-# TODO: add cases to check normalization
-# Overfit, bad predictor on new data (should be negative)
-# Bad model, shuffling makes it better
-
 testthat::test_that("permutationImportance works a single, contant, unimportant feature", {
   n <- 100L
   x <- data.table::data.table(
@@ -157,10 +154,7 @@ testthat::test_that("permutationImportance works a single, contant, unimportant 
   testthat::expect_lte(imp["x1"], imp["x2"])
 })
 
-testthat::test_that("permutationImportance works a single, contant, important feature", {
-  # TODO: PERMUTING WONT WORK IN THIS CASE AS THE FEATURE IS CONSTANT
-  # THIS IS ESSENTIALLY AN INTERCEPT
-  # REMOVE THIS, AS WE'RE NOT DOING INTERCEPTS
+testthat::test_that("permutationImportance works a single, contant, important feature - aka intercept only", {
   n <- 100L
   x <- data.table::data.table(
     x1 = rep(1L, n),
@@ -184,4 +178,80 @@ testthat::test_that("permutationImportance works with perfect predictor", {
   imp <- permutationImportance(model, x)
   check_importance_scores(imp, c("x1", "x2"))
   testthat::expect_gt(imp["x1"], imp["x2"])
+})
+
+testthat::test_that("permutationImportance works for multiclass classification and various edge cases", {
+  model <- train_model(iris[, -5L], iris$Species, method = "rpart")
+  imp <- permutationImportance(model, iris[, -5L])
+  check_importance_scores(imp, names(iris[, -5L]))
+})
+
+testthat::context("permutationImportance edge cases")
+testthat::test_that("permutationImportance normalizes to uniform distribution for all zero importances", {
+  n <- 100L
+  x <- data.table::data.table(x1 = rep(0L, n), x2 = rep(0L, n), x3 = rep(0L, n))
+  y <- rep(0L, n)
+  model <- train_model(x, y, method = "lm")
+  imp <- permutationImportance(model, x)
+  check_importance_scores(imp, names(x))
+  testthat::expect_equivalent(imp, normalize_to_one(rep(0L, length(imp))), tolerance = 1e-6)
+})
+
+testthat::test_that("permutationImportance assigns full importance to perfect predictor", {
+  set.seed(1234L)
+  n <- 100L
+  vars <- 25L
+  x <- data.table::data.table(
+    matrix(rnorm(n * vars), nrow = n, ncol = vars)
+  )
+  data.table::setnames(x, paste0("x", seq_len(vars)))
+  y <- x$x1
+  model <- train_model(x, y, method = "lm")
+  imp <- permutationImportance(model, x)
+  check_importance_scores(imp, names(x))
+  testthat::expect_equal(imp[["x1"]], 1L, tol = 1e-8)
+  testthat::expect_equal(sum(imp[-1L]), 0L, tol = 1e-8)
+})
+
+testthat::test_that("permutationImportance handles highly collinear features", {
+  set.seed(5678L)
+  n <- 100L
+  x <- data.table::data.table(
+    x1 = rnorm(n),
+    x2 = rnorm(n)
+  )
+  x$x3 <- x$x1 + rnorm(n, sd = 0.01)
+  y <- x$x1 + x$x2
+  model <- train_model(x, y, method = "lm")
+  imp <- permutationImportance(model, x)
+  check_importance_scores(imp, names(x))
+  testthat::expect_equal(imp[["x3"]], 0L, tol = 1e-6)
+})
+
+testthat::test_that("permutationImportance works with very small dataset", {
+  set.seed(9876L)
+  n <- 5L
+  x <- data.table::data.table(
+    x1 = rnorm(n),
+    x2 = rnorm(n),
+    x3 = rnorm(n)
+  )
+  y <- x$x1 + rnorm(n)
+  model <- train_model(x, y, method = "lm")
+  imp <- permutationImportance(model, x)
+  check_importance_scores(imp, names(x))
+})
+
+testthat::test_that("permutationImportance handles identical features", {
+  n <- 100L
+  x <- data.table::data.table(
+    x1 = rnorm(n),
+    x2 = rnorm(n)
+  )
+  x$x3 <- x$x1
+  y <- x$x1 + x$x2 + rnorm(n)
+  model <- train_model(x, y, method = "glmnet")
+  imp <- permutationImportance(model, x)
+  check_importance_scores(imp, names(x))
+  testthat::expect_equal(imp[["x1"]], imp[["x3"]], tol = 1e-1)
 })
