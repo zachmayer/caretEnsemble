@@ -40,34 +40,12 @@ isClassifier <- function(model) {
   out
 }
 
-#' @title Target to Matrix
-#' @description Convert a target variable to a matrix.
-#' @param target A vector of target values.
-#' @param is_class A logical indicating whether the target is for a classifier or regressor
-#' @return A matrix.
-#' @keywords internal
-target_to_matrix <- function(target, is_class, levels) {
-  if (is_class) {
-    stopifnot(is.factor(target) || is.character(target))
-    if (is.character(target)) {
-      target <- factor(target, levels)
-    }
-    target <- model.matrix(~ 0L + target)
-  }
-  target <- as.matrix(target)
-  stopifnot(
-    is.numeric(target),
-    is.finite(target),
-    length(dim(target)) == 2L
-  )
-  target
-}
 
 #' @title Shuffled MAE
 #' @description Compute the mean absolute error of a model's predictions when a variable is shuffled.
 #' @param original_data A data.table of the original data.
 #' @param target A matrix of target values.
-#' @param shuffle_index A vector of shuffled indices.
+#' @param shuffle_idx A vector of shuffled indices.
 #' @return A numeric vector of mean absolute errors.
 #' @keywords internal
 shuffled_mae <- function(model, original_data, target, pred_type, shuffle_idx) {
@@ -99,32 +77,30 @@ shuffled_mae <- function(model, original_data, target, pred_type, shuffle_idx) {
 }
 
 #' @title Permutation Importance
-#' @description Permute each varible in a dataset and use the change in predictions to
-#' calculate the importance of each variable. Based on sci-kit learn's implementation
-#' of permutation importance: https://scikit-learn.org/stable/modules/permutation_importance.html
-#' We compute the model's predictions on the newdata, and compare RMSE to the target
-#' (for classificaition, this is like using a Brier score). We then shuffle each variable
-#' and recompute the predictions. The difference in RMSE is the importance of that variable.
-#' Note that we normalize a little differently: we also compute the RMSE of the shuffled
-#' original predictions as an upper bound on the RMSE and divide by this value.
-#' So a variable that, when shuffled, causesd predictions as bad as shuffling the output
+#' @description Permute each variable in a dataset and use the change in predictions to
+#' calculate the importance of each variable. Based on the scikit learn implementation
+#' of permutation importance: \url{https://scikit-learn.org/stable/modules/permutation_importance.html}.
+#' However, we don't compare to the target by a metric. We JUST look at the change in the
+#' model's predictions, as measured by MAE. (for classification, this is like using a Brier score).
+#' We shuffle each variable and recompute the predictions before and after the shuffle.
+#' The difference in MAE. is the importance of that variable. We normalize by computing the MAE of the shuffled
+#' original predictions as an upper bound on the MAE and divide by this value.
+#' So a variable that, when shuffled, caused predictions as bad as shuffling the output
 #' predictions, we know that variable is 100% of the model's predictive power.
 #' Similarly, as with regular permutation importance, a variable that, when shuffled,
-#' gives the same RMSE as the unshuffled model has an importance of 0.  And negative
-#' importance means shuffling the variable improves the models prediction's, which is a
-#' sign of overfitting: thaat variable hurts the model's generalization power.
+#' gives the same MAE as the original model has an importance of 0.
 #'
-#' Note
+#' This method cannot yield negative importances. It is merely a measure of how much the models uses
+#' the variable, and does not tell you which variables help or hurt generalization. Use the model's
+#' cross-validated metrics to assess generalization.
 #' @param model A train object from the caret package.
-#' @param newdata A data.frame of new data to use to compute importances.  Can be the training data.
-#' @param target The target variable.
+#' @param newdata A data.frame of new data to use to compute importances. Can be the training data.
 #' @param normalize A logical indicating whether to normalize the importances to sum to one.
 #' @return A named numeric vector of variable importances.
 #' @export
 permutationImportance <- function(
     model,
-    newdata, # TODO: RENAME ARGS?
-    target, # TODO: RENAME ARGS?
+    newdata,
     normalize = TRUE) {
   # Checks
   stopifnot(
@@ -132,37 +108,28 @@ permutationImportance <- function(
     methods::is(newdata, "data.frame")
   )
 
-  # Make a copy of the data, since we'll be shuffling it
-  # If this process dies partway through, we don't want
-  # to have randomly modidifed the original data in place
-  N <- nrow(newdata)
-  shuffle_idx <- sample.int(N)
-
-  # Turn class target into a matrix
   is_class <- isClassifier(model)
   pred_type <- ifelse(is_class, "prob", "raw")
-  target <- target_to_matrix(target, is_class, levels = levels(model))
-  stopifnot(N == nrow(target))
+
+  N <- nrow(newdata)
+  shuffle_idx <- sample.int(N)
 
   # Error of the original model.
   # This is the baseline for computing importance
   preds_orig <- as.matrix(predict(model, newdata, type = pred_type))
   stopifnot(
     is.numeric(preds_orig),
-    is.finite(preds_orig),
-    dim(preds_orig) == dim(target),
-    paste0("target", colnames(preds_orig)) == colnames(target)
+    is.finite(preds_orig)
   )
-  mae_model <- mae(preds_orig, target)
 
   # Error of shuffled variables
-  mae_vars <- shuffled_mae(model, newdata, target, pred_type, shuffle_idx)
+  mae_vars <- shuffled_mae(model, newdata, preds_orig, pred_type, shuffle_idx)
 
   # Error from random predictions with no model
   # This is sort of the intercept.
   # This is basically the worst the model can be
   # But still uses the distribution of the predictions
-  mae_no_model <- mae(preds_orig[shuffle_idx, ], target)
+  mae_no_model <- mae(preds_orig[shuffle_idx, ], preds_orig)
   if (mae_no_model == 0.0) mae_no_model <- 1.0
 
   # Normalize the errors into importances
@@ -171,7 +138,7 @@ permutationImportance <- function(
   # comes from that variable. On the other hand, if the
   # mae for a variable is close to zero it means the variable
   # is not important.
-  imp <- (mae_vars - mae_model) / mae_no_model
+  imp <- mae_vars / mae_no_model
   if (normalize) imp <- normalize_to_one(imp)
   imp
 }

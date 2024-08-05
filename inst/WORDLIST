@@ -43,6 +43,7 @@ resid
 roxygen
 rpart
 savePredictions
+scikit
 trainControl
 travis
 tuneGrid

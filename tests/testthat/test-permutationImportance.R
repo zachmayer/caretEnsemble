@@ -1,3 +1,6 @@
+data(models.class)
+data(models.reg)
+
 # Helper function to create a simple dataset
 create_dataset <- function(n = 200L, p = 5L, classification = TRUE) {
   set.seed(42L)
@@ -36,17 +39,23 @@ check_importance_scores <- function(
   testthat::expect_equal(sum(imp), 1L, tolerance = 1e-6)
 }
 
-testthat::test_that("permutationImportance works for binary classification", {
-  dt <- create_dataset(classification = TRUE)
-  model <- train_model(dt[["X"]], dt[["y"]])
-  imp <- permutationImportance(model, dt[["X"]], dt[["y"]])
-  check_importance_scores(imp)
+testthat::test_that("isClassifier works for train models", {
+  testthat::expect_true(isClassifier(models.class[[1L]]))
+  testthat::expect_false(isClassifier(models.reg[[1L]]))
+})
+
+testthat::test_that("isClassifier works for caretStacks models", {
+  ens_class <- caretEnsemble(models.class)
+  ens_reg <- caretEnsemble(models.reg)
+
+  testthat::expect_true(isClassifier(ens_class))
+  testthat::expect_false(isClassifier(ens_reg))
 })
 
 testthat::test_that("permutationImportance works for regression", {
   dt <- create_dataset(classification = FALSE)
   model <- train_model(dt[["X"]], dt[["y"]])
-  imp <- permutationImportance(model, dt[["X"]], dt[["y"]])
+  imp <- permutationImportance(model, dt[["X"]])
   check_importance_scores(imp)
 })
 
@@ -70,7 +79,7 @@ testthat::test_that("permutationImportance works for multiclass classification",
   y <- factor(apply(probabilities, 1L, function(prob) sample(c("A", "B", "C"), 1L, prob = prob)))
 
   model <- train_model(x, y)
-  imp <- permutationImportance(model, x, y)
+  imp <- permutationImportance(model, x)
   check_importance_scores(imp, c("x1", "x2", "x3"))
 })
 
@@ -79,7 +88,7 @@ testthat::test_that("permutationImportance works with a single feature unimporta
   x <- data.table::data.table(x1 = stats::rnorm(n))
   y <- factor(sample(c("A", "B"), n, replace = TRUE))
   model <- train_model(x, y)
-  imp <- permutationImportance(model, x, y)
+  imp <- permutationImportance(model, x)
   check_importance_scores(imp, "x1")
 })
 
@@ -104,6 +113,7 @@ testthat::test_that("permutationImportance works with a single important feature
   )
 
   evaluate_model <- function(cf, do_class) {
+    cf <- unname(unlist(cf))
     y <- (cbind(1L, as.matrix(x)) %*% cf)[, 1L]
     if (do_class) {
       classes <- c("A", "B")
@@ -113,7 +123,7 @@ testthat::test_that("permutationImportance works with a single important feature
       }
     }
     model <- suppressWarnings(train_model(x, y, method = "glm"))
-    imp <- permutationImportance(model, x, y)
+    imp <- permutationImportance(model, x)
     check_importance_scores(imp, c("x1", "x2", "x3"))
 
     glm_imp <- normalize_to_one(abs(coef(model$finalModel))[-1L])
@@ -126,9 +136,7 @@ testthat::test_that("permutationImportance works with a single important feature
   }
 
   for (do_class in c(FALSE, TRUE)) {
-    apply(all_cfs, 1L, function(cf) {
-      evaluate_model(unname(unlist(cf)), do_class)
-    })
+    apply(all_cfs, 1L, evaluate_model, do_class)
   }
 })
 
@@ -144,7 +152,7 @@ testthat::test_that("permutationImportance works a single, contant, unimportant 
   )
   y <- stats::rnorm(n)
   model <- train_model(x, y)
-  imp <- permutationImportance(model, x, y)
+  imp <- permutationImportance(model, x)
   check_importance_scores(imp, c("x1", "x2"))
   testthat::expect_lte(imp["x1"], imp["x2"])
 })
@@ -160,7 +168,7 @@ testthat::test_that("permutationImportance works a single, contant, important fe
   )
   y <- x$x1 + stats::rnorm(n) / 10L
   model <- train_model(x, y)
-  imp <- permutationImportance(model, x, y)
+  imp <- permutationImportance(model, x)
   check_importance_scores(imp, c("x1", "x2"))
   testthat::expect_lte(imp["x1"], imp["x2"])
 })
@@ -173,7 +181,7 @@ testthat::test_that("permutationImportance works with perfect predictor", {
   )
   y <- x$x1
   model <- train_model(x, y, method = "lm")
-  imp <- permutationImportance(model, x, y)
+  imp <- permutationImportance(model, x)
   check_importance_scores(imp, c("x1", "x2"))
   testthat::expect_gt(imp["x1"], imp["x2"])
 })
