@@ -85,7 +85,6 @@ testthat::test_that("permutationImportance works with a single feature unimporta
 
 testthat::test_that("permutationImportance works with a single feature important feature", {
   set.seed(1234L)
-  devtools::load_all()
   make_var <- function(n) scale(stats::rnorm(n), center = TRUE, scale = TRUE)[, 1L]
 
   n <- 1000L
@@ -146,35 +145,38 @@ testthat::test_that("permutationImportance works a single, contant, unimportant 
     x1 = rep(1L, n),
     x2 = stats::rnorm(n)
   )
-  y <- factor(sample(c("A", "B"), n, replace = TRUE))
+  y <- stats::rnorm(n)
   model <- train_model(x, y)
   imp <- permutationImportance(model, x, y)
-  check_importance_scores(imp, c("intercept", "x1", "x2"))
+  check_importance_scores(imp, c("x1", "x2"))
   testthat::expect_lte(imp["x1"], imp["x2"])
 })
 
 testthat::test_that("permutationImportance works a single, contant, important feature", {
+  # TODO: PERMUTING WONT WORK IN THIS CASE AS THE FEATURE IS CONSTANT
+  # THIS IS ESSENTIALLY AN INTERCEPT
+  # REMOVE THIS, AS WE'RE NOT DOING INTERCEPTS
   n <- 100L
   x <- data.table::data.table(
     x1 = rep(1L, n),
     x2 = stats::rnorm(n)
   )
-  y <- factor(sample(c("A", "B"), n, replace = TRUE))
+  y <- x$x1 + stats::rnorm(n) / 10L
   model <- train_model(x, y)
   imp <- permutationImportance(model, x, y)
-  check_importance_scores(imp, c("intercept", "x1", "x2"))
+  check_importance_scores(imp, c("x1", "x2"))
   testthat::expect_lte(imp["x1"], imp["x2"])
 })
 
 testthat::test_that("permutationImportance works with perfect predictor", {
   n <- 100L
   x <- data.table::data.table(
-    x1 = rep(c(0L, 1L), each = n / 2L),
+    x1 = stats::rnorm(n),
     x2 = stats::rnorm(n)
   )
-  y <- factor(rep(c("A", "B"), each = n / 2L))
-  model <- train_model(x, y)
+  y <- x$x1
+  model <- train_model(x, y, method = "lm")
   imp <- permutationImportance(model, x, y)
-  check_importance_scores(imp, c("intercept", "x1", "x2"))
+  check_importance_scores(imp, c("x1", "x2"))
   testthat::expect_gt(imp["x1"], imp["x2"])
 })

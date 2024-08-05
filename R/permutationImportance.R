@@ -94,10 +94,12 @@ permutationImportance <- function(model, newdata, target, normalize = TRUE) {
   # If this process dies partway through, we don't want
   # to have randomly modidifed the original data in place
   N <- nrow(newdata)
+  shuffle_idx <- sample.int(N)
+
   original_data <- data.table::as.data.table(data.table::copy(newdata))
   shuffled_data <- data.table::as.data.table(data.table::copy(original_data))
+
   keyname <- "aca75a39eb385d7de8d9caef41ec0521442f499211fee946f03835c57ee33d35"
-  shuffle_idx <- sample.int(N)
   data.table::set(shuffled_data, j = keyname, value = shuffle_idx)
   data.table::setkeyv(shuffled_data, keyname)
   data.table::set(shuffled_data, j = keyname, value = NULL)
@@ -132,9 +134,9 @@ permutationImportance <- function(model, newdata, target, normalize = TRUE) {
     mae(new_preds, target)
   }, numeric(1L))
 
-  # Error predicting all zeros
-  mae_zero <- mae(0L, target)
-  if (mae_zero == 0.0) mae_zero <- 1.0
+  # Error from random predictions with no model
+  mae_no_model <- mae(preds_orig[shuffle_idx, ], target)
+  if (mae_no_model == 0.0) mae_no_model <- 1.0
 
   # Normalize the errors into importances
   # If the mae for a variable is equal to the mae of 0
@@ -142,7 +144,7 @@ permutationImportance <- function(model, newdata, target, normalize = TRUE) {
   # comes from that variable. On the other hand, if the
   # mae for a variable is close to zero it means the variable
   # is not important.
-  imp <- (mae_vars - mae_model) / mae_zero
+  imp <- (mae_vars - mae_model) / mae_no_model
   if (normalize) imp <- normalize_to_one(imp)
   imp
 }
