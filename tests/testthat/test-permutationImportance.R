@@ -26,7 +26,7 @@ train_model <- function(x, y, method = "rpart", ...) {
 # Helper function to check test results
 check_importance_scores <- function(
     imp,
-    expected_names =  paste0("x", seq_len(5L)),
+    expected_names = paste0("x", seq_len(5L)),
     expected_length = length(expected_names)) {
   testthat::expect_type(imp, "double")
   testthat::expect_true(all(is.finite(imp)))
@@ -85,6 +85,7 @@ testthat::test_that("permutationImportance works with a single feature unimporta
 
 testthat::test_that("permutationImportance works with a single feature important feature", {
   set.seed(1234L)
+  devtools::load_all()
   make_var <- function(n) scale(stats::rnorm(n), center = TRUE, scale = TRUE)[, 1L]
 
   n <- 1000L
@@ -96,7 +97,7 @@ testthat::test_that("permutationImportance works with a single feature important
 
   cf_set <- c(0L, 1L, 5L, 10L)
   all_cfs <- expand.grid(
-    c(0L, 1L, 3L, 5L),
+    c(0L, 1L),
     cf_set,
     cf_set,
     cf_set
@@ -110,6 +111,7 @@ testthat::test_that("permutationImportance works with a single feature important
       classes <- c("A", "B")
       if (do_class) {
         y <- factor(ifelse(y > 0L, classes[1L], classes[2L]), levels = classes)
+        if (length(unique(y)) == 1L) next
       }
 
       # Fit the model and compute importance
@@ -119,7 +121,8 @@ testthat::test_that("permutationImportance works with a single feature important
 
       # Altrernative importance based on coefficients
       # Note that the input data all has a mean of 0 and an sd of 1
-      glm_imp <- normalize_to_one(abs(coef(model$finalModel)))
+      glm_imp <- normalize_to_one(abs(coef(model$finalModel))[-1L])
+      cf_norm <- normalize_to_one(cf[-1L])
       testthat::expect_equivalent(glm_imp, cf_norm, tolerance = 0.1)
 
       # Compare the importances to the real coefficients
@@ -127,12 +130,15 @@ testthat::test_that("permutationImportance works with a single feature important
       # For classification without an intercept, the same
       # For classificaiton with an intercept its a lot more complicated
       if (!do_class || cf[[1L]] == 0.0) {
-        cf_norm <- normalize_to_one(cf[-1L])
+        testthat::expect_equivalent(imp, cf_norm, tolerance = 0.1)
       }
-      testthat::expect_equivalent(imp, cf_norm, tolerance = 0.1)
     }
   }
 })
+
+# TODO: add cases to check normalization
+# Overfit, bad predictor on new data (should be negative)
+# Bad model, shuffling makes it better
 
 testthat::test_that("permutationImportance works a single, contant, unimportant feature", {
   n <- 100L

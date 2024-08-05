@@ -7,9 +7,12 @@ normalize_to_one <- function(x) {
   x <- abs(x)
   x_sum <- sum(x)
   if (x_sum == 0.0) {
-    return(rep(1.0 / length(x), length(x)))
+    out <- rep(1.0 / length(x), length(x))
+    names(out) <- names(x)
+  } else {
+    out <- x / x_sum
   }
-  x / x_sum
+  out
 }
 
 #' @title Compute MAE
@@ -131,6 +134,7 @@ permutationImportance <- function(model, newdata, target, normalize = TRUE) {
 
   # Error predicting all zeros
   mae_zero <- mae(0L, target)
+  if (mae_zero == 0.0) mae_zero <- 1.0
 
   # Normalize the errors into importances
   # If the mae for a variable is equal to the mae of 0
@@ -138,7 +142,7 @@ permutationImportance <- function(model, newdata, target, normalize = TRUE) {
   # comes from that variable. On the other hand, if the
   # mae for a variable is close to zero it means the variable
   # is not important.
-  imp <- (mae_vars - mae_model) / (mae_zero - mae_model)
+  imp <- (mae_vars - mae_model) / mae_zero
   if (normalize) imp <- normalize_to_one(imp)
   imp
 }
