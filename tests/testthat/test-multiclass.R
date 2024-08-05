@@ -274,3 +274,21 @@ testthat::test_that("caretList and caretStack handle new levels in prediction da
   preds <- predict(stack, newdata = test_data)
   testthat::expect_true(all(levels(preds) %in% levels(train_data$Species)))
 })
+
+testthat::test_that("caretList and caretStack produce consistent probability predictions", {
+  data(iris)
+
+  model_list <- caretList(
+    x = iris[, -5L],
+    y = iris[, 5L],
+    methodList = c("rpart", "glmnet")
+  )
+
+  stack <- caretStack(model_list, method = "rpart")
+
+  prob_preds <- predict(stack, newdata = iris[, -5L])
+  testthat::expect_identical(nrow(prob_preds), nrow(iris))
+  testthat::expect_identical(ncol(prob_preds), nlevels(iris$Species))
+  testthat::expect_true(all(rowSums(prob_preds) >= 0.99))
+  testthat::expect_true(all(rowSums(prob_preds) <= 1.01))
+})
