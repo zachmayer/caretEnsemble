@@ -80,10 +80,24 @@ target_to_matrix <- function(target, is_class, levels) {
 #' @param model A train object from the caret package.
 #' @param newdata A data.frame of new data to use to compute importances.  Can be the training data.
 #' @param target The target variable.
+#' @param include_intercept A logical indicating whether to include the intercept in the importances.
 #' @param normalize A logical indicating whether to normalize the importances to sum to one.
 #' @return A named numeric vector of variable importances.
 #' @export
-permutationImportance <- function(model, newdata, target, normalize = TRUE) {
+# TODO: add to description some discussion of whats permuted, and what 0 vs 1 means vs negative
+# TODO: DO WE NEED Y?  CAN WE JUST COMPARE TO THE PREDS?  MIGHT BE BETTER FOR CLASS
+# TODO: Validate logic for model vs vars vs intercept.  I think its right because
+# model: vars original, intercept original
+# vars:  vars original, intercept original, one var permuted
+# intercept: intercept original, all vars permuted
+# zero: intercept permuted, all vars permuted
+permutationImportance <- function(
+    model, 
+    newdata,   # TODO: RENAME ARGS?
+    target,   # TODO: RENAME ARGS?
+    include_intercept = TRUE,
+    normalize = TRUE
+    ) {
   # Checks
   stopifnot(
     methods::is(model, "train") || methods::is(model, "caretStack"),
@@ -133,6 +147,15 @@ permutationImportance <- function(model, newdata, target, normalize = TRUE) {
 
     mae(new_preds, target)
   }, numeric(1L))
+  mae_vars - mae_model
+
+  # Error from the intercept
+  if(include_intercept) {
+    preds_intercept <- as.matrix(predict(model, shuffled_data, type = pred_type))
+    mae_intercept <- mae(preds_intercept, target)
+    mae_intercept <- mae_intercept - max(mae_vars)
+    mae_vars <- c("intercept"= mae_intercept, mae_vars)
+  }
 
   # Error from random predictions with no model
   mae_no_model <- mae(preds_orig[shuffle_idx, ], target)
@@ -144,7 +167,7 @@ permutationImportance <- function(model, newdata, target, normalize = TRUE) {
   # comes from that variable. On the other hand, if the
   # mae for a variable is close to zero it means the variable
   # is not important.
-  imp <- (mae_vars - mae_model) / mae_no_model
+  imp <- mae_vars / mae_no_model
   if (normalize) imp <- normalize_to_one(imp)
   imp
 }
