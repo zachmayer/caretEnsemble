@@ -19,18 +19,9 @@ normalize_to_one <- function(x) {
 #' @description Compute the mean absolute error between two vectors.
 #' @param a A numeric vector.
 #' @param b A numeric vector.
-#' @param log_odds A logical indicating whether the vectors should be converted to log odds
-#' @param delta If log_odds, the probabilities will be capped at delta and 1 - delta
 #' @return A numeric scalar.
 #' @keywords internal
-mae <- function(a, b, log_odds = FALSE, delta = 1e-8) {
-  if (log_odds) {
-    a <- pmax(delta, pmin(1.0 - delta, a))
-    b <- pmax(delta, pmin(1.0 - delta, b))
-
-    a <- qlogis(a)
-    b <- qlogis(b)
-  }
+mae <- function(a, b) {
   mean(abs(a - b))
 }
 
@@ -72,32 +63,69 @@ target_to_matrix <- function(target, is_class, levels) {
   target
 }
 
+#' @title Shuffled MAE
+#' @description Compute the mean absolute error of a model's predictions when a variable is shuffled.
+#' @param original_data A data.table of the original data.
+#' @param target A matrix of target values.
+#' @param shuffle_index A vector of shuffled indices.
+#' @return A numeric vector of mean absolute errors.
+#' @keywords internal
+shuffled_mae <- function(model, original_data, target, pred_type, shuffle_idx) {
+  # Make a copy of the data, since we'll be shuffling it
+  # If this process dies partway through, we don't want
+  # to have randomly modidifed the original data in place
+  original_data <- data.table::as.data.table(data.table::copy(original_data))
+  shuffled_data <- data.table::as.data.table(data.table::copy(original_data))
+
+  keyname <- "aca75a39eb385d7de8d9caef41ec0521442f499211fee946f03835c57ee33d35"
+  data.table::set(shuffled_data, j = keyname, value = shuffle_idx)
+  data.table::setkeyv(shuffled_data, keyname)
+  data.table::set(shuffled_data, j = keyname, value = NULL)
+
+  # Error for each variable
+  # Loop through each variable, shuffle it, and calculate mae of the new predictions
+  mae_vars <- vapply(names(original_data), function(var) {
+    old_var <- original_data[[var]]
+    new_var <- shuffled_data[[var]]
+
+    data.table::set(original_data, j = var, value = new_var)
+    new_preds <- as.matrix(predict(model, original_data, type = pred_type))
+    data.table::set(original_data, j = var, value = old_var)
+
+    mae(new_preds, target)
+  }, numeric(1L))
+
+  mae_vars
+}
+
 #' @title Permutation Importance
 #' @description Permute each varible in a dataset and use the change in predictions to
 #' calculate the importance of each variable. Based on sci-kit learn's implementation
 #' of permutation importance: https://scikit-learn.org/stable/modules/permutation_importance.html
-#' how do I do a link in roxygen2?  https://stackoverflow.com/questions/27731400/how-to-create-a-link-in-roxygen2
+#' We compute the model's predictions on the newdata, and compare RMSE to the target
+#' (for classificaition, this is like using a Brier score). We then shuffle each variable
+#' and recompute the predictions. The difference in RMSE is the importance of that variable.
+#' Note that we normalize a little differently: we also compute the RMSE of the shuffled
+#' original predictions as an upper bound on the RMSE and divide by this value.
+#' So a variable that, when shuffled, causesd predictions as bad as shuffling the output
+#' predictions, we know that variable is 100% of the model's predictive power.
+#' Similarly, as with regular permutation importance, a variable that, when shuffled,
+#' gives the same RMSE as the unshuffled model has an importance of 0.  And negative
+#' importance means shuffling the variable improves the models prediction's, which is a
+#' sign of overfitting: thaat variable hurts the model's generalization power.
+#'
+#' Note
 #' @param model A train object from the caret package.
 #' @param newdata A data.frame of new data to use to compute importances.  Can be the training data.
 #' @param target The target variable.
-#' @param include_intercept A logical indicating whether to include the intercept in the importances.
 #' @param normalize A logical indicating whether to normalize the importances to sum to one.
 #' @return A named numeric vector of variable importances.
 #' @export
-# TODO: add to description some discussion of whats permuted, and what 0 vs 1 means vs negative
-# TODO: DO WE NEED Y?  CAN WE JUST COMPARE TO THE PREDS?  MIGHT BE BETTER FOR CLASS
-# TODO: Validate logic for model vs vars vs intercept.  I think its right because
-# model: vars original, intercept original
-# vars:  vars original, intercept original, one var permuted
-# intercept: intercept original, all vars permuted
-# zero: intercept permuted, all vars permuted
 permutationImportance <- function(
-    model, 
-    newdata,   # TODO: RENAME ARGS?
-    target,   # TODO: RENAME ARGS?
-    include_intercept = TRUE,
-    normalize = TRUE
-    ) {
+    model,
+    newdata, # TODO: RENAME ARGS?
+    target, # TODO: RENAME ARGS?
+    normalize = TRUE) {
   # Checks
   stopifnot(
     methods::is(model, "train") || methods::is(model, "caretStack"),
@@ -109,14 +137,6 @@ permutationImportance <- function(
   # to have randomly modidifed the original data in place
   N <- nrow(newdata)
   shuffle_idx <- sample.int(N)
-
-  original_data <- data.table::as.data.table(data.table::copy(newdata))
-  shuffled_data <- data.table::as.data.table(data.table::copy(original_data))
-
-  keyname <- "aca75a39eb385d7de8d9caef41ec0521442f499211fee946f03835c57ee33d35"
-  data.table::set(shuffled_data, j = keyname, value = shuffle_idx)
-  data.table::setkeyv(shuffled_data, keyname)
-  data.table::set(shuffled_data, j = keyname, value = NULL)
 
   # Turn class target into a matrix
   is_class <- isClassifier(model)
@@ -135,29 +155,13 @@ permutationImportance <- function(
   )
   mae_model <- mae(preds_orig, target)
 
-  # Error for each variable
-  # Loop through each variable, shuffle it, and calculate mae of the new predictions
-  mae_vars <- vapply(names(newdata), function(var) {
-    old_var <- data.table::copy(original_data[[var]])
-    new_var <- data.table::copy(shuffled_data[[var]])
-
-    data.table::set(original_data, j = var, value = new_var)
-    new_preds <- as.matrix(predict(model, original_data, type = pred_type))
-    data.table::set(original_data, j = var, value = old_var)
-
-    mae(new_preds, target)
-  }, numeric(1L))
-  mae_vars - mae_model
-
-  # Error from the intercept
-  if(include_intercept) {
-    preds_intercept <- as.matrix(predict(model, shuffled_data, type = pred_type))
-    mae_intercept <- mae(preds_intercept, target)
-    mae_intercept <- mae_intercept - max(mae_vars)
-    mae_vars <- c("intercept"= mae_intercept, mae_vars)
-  }
+  # Error of shuffled variables
+  mae_vars <- shuffled_mae(model, newdata, target, pred_type, shuffle_idx)
 
   # Error from random predictions with no model
+  # This is sort of the intercept.
+  # This is basically the worst the model can be
+  # But still uses the distribution of the predictions
   mae_no_model <- mae(preds_orig[shuffle_idx, ], target)
   if (mae_no_model == 0.0) mae_no_model <- 1.0
 
@@ -167,7 +171,7 @@ permutationImportance <- function(
   # comes from that variable. On the other hand, if the
   # mae for a variable is close to zero it means the variable
   # is not important.
-  imp <- mae_vars / mae_no_model
+  imp <- (mae_vars - mae_model) / mae_no_model
   if (normalize) imp <- normalize_to_one(imp)
   imp
 }

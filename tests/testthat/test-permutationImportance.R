@@ -83,8 +83,9 @@ testthat::test_that("permutationImportance works with a single feature unimporta
   check_importance_scores(imp, "x1")
 })
 
-testthat::test_that("permutationImportance works with a single feature important feature", {
+testthat::test_that("permutationImportance works with a single important feature", {
   set.seed(1234L)
+
   make_var <- function(n) scale(stats::rnorm(n), center = TRUE, scale = TRUE)[, 1L]
 
   n <- 1000L
@@ -102,36 +103,32 @@ testthat::test_that("permutationImportance works with a single feature important
     cf_set
   )
 
-  for (do_class in c(FALSE, TRUE)) {
-    for (i in seq_len(nrow(all_cfs))) {
-      # Create a perfectly linear relationship
-      cf <- unname(unlist(all_cfs[i, ]))
-      y <- (cbind(1L, as.matrix(x)) %*% cf)[, 1L]
+  evaluate_model <- function(cf, do_class) {
+    y <- (cbind(1L, as.matrix(x)) %*% cf)[, 1L]
+    if (do_class) {
       classes <- c("A", "B")
-      if (do_class) {
-        y <- factor(ifelse(y > 0L, classes[1L], classes[2L]), levels = classes)
-        if (length(unique(y)) == 1L) next
-      }
-
-      # Fit the model and compute importance
-      model <- suppressWarnings(train_model(x, y, method = "glm"))
-      imp <- permutationImportance(model, x, y)
-      check_importance_scores(imp, c("x1", "x2", "x3"))
-
-      # Altrernative importance based on coefficients
-      # Note that the input data all has a mean of 0 and an sd of 1
-      glm_imp <- normalize_to_one(abs(coef(model$finalModel))[-1L])
-      cf_norm <- normalize_to_one(cf[-1L])
-      testthat::expect_equivalent(glm_imp, cf_norm, tolerance = 0.1)
-
-      # Compare the importances to the real coefficients
-      # For regression, the importances should be close to the coefficients
-      # For classification without an intercept, the same
-      # For classificaiton with an intercept its a lot more complicated
-      if (!do_class || cf[[1L]] == 0.0) {
-        testthat::expect_equivalent(imp, cf_norm, tolerance = 0.1)
+      y <- factor(ifelse(y > 0L, classes[1L], classes[2L]), levels = classes)
+      if (length(unique(y)) == 1L) {
+        return(NULL)
       }
     }
+    model <- suppressWarnings(train_model(x, y, method = "glm"))
+    imp <- permutationImportance(model, x, y)
+    check_importance_scores(imp, c("x1", "x2", "x3"))
+
+    glm_imp <- normalize_to_one(abs(coef(model$finalModel))[-1L])
+    cf_norm <- normalize_to_one(cf[-1L])
+    testthat::expect_equivalent(glm_imp, cf_norm, tolerance = 0.1)
+
+    if (!do_class || cf[[1L]] == 0.0) {
+      testthat::expect_equivalent(imp, cf_norm, tolerance = 0.1)
+    }
+  }
+
+  for (do_class in c(FALSE, TRUE)) {
+    apply(all_cfs, 1L, function(cf) {
+      evaluate_model(unname(unlist(cf)), do_class)
+    })
   }
 })
 
