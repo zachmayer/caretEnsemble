@@ -160,6 +160,11 @@ predict.caretStack <- function(
     excluded_class_id <- 0L
   }
 
+  # Calculate variable importance if needed
+  if (se || return_weights) {
+    imp <- caret::varImp(object, newdata = newdata, normalize = TRUE)
+  }
+
   # Get predictions from the submodels on the new data
   # If there's no new data, we just use stacked predictions from the ensemble model
   if (!is.null(newdata)) {
@@ -190,35 +195,22 @@ predict.caretStack <- function(
   # of the sub_model_preds.
   meta_preds <- caretPredict(object$ens_model, newdata = newdata, excluded_class_id = excluded_class_id, ...)
 
-  # Calculate variable importance if needed
-  if (se || return_weights) {
-    imp <- caret::varImp(object, newdata = sub_model_preds, normalize = TRUE)
-  }
-
   # Decide output:
   # IF SE, data.table of predictins, lower, and upper bounds
   # IF return_class_only, factor of class levels
   # ELSE, data.table of predictions
   if (se) {
-    if (all(
-      length(imp) == ncol(sub_model_preds),
-      names(imp) %in% names(sub_model_preds),
-      names(sub_model_preds) %in% names(imp)
-    )) {
-      std_error <- as.matrix(sub_model_preds[, names(imp), with = FALSE])
-      std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
-      std_error <- stats::qnorm(level) * std_error
-      if (ncol(meta_preds) == 1L) {
-        meta_preds <- meta_preds[[1L]]
-      }
-      out <- data.table::data.table(
-        pred = meta_preds,
-        lwr = meta_preds - std_error,
-        upr = meta_preds + std_error
-      )
-    } else {
-      warning("Cannot calculate standard errors due to the preprocessing used in train", call. = FALSE)
+    std_error <- as.matrix(sub_model_preds[, names(imp), with = FALSE])
+    std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
+    std_error <- stats::qnorm(level) * std_error
+    if (ncol(meta_preds) == 1L) {
+      meta_preds <- meta_preds[[1L]]
     }
+    out <- data.table::data.table(
+      pred = meta_preds,
+      lwr = meta_preds - std_error,
+      upr = meta_preds + std_error
+    )
   } else if (return_class_only) {
     # Map to class levels
     # TODO: HANDLE ORDINAL and TESTS FOR THIS
@@ -377,6 +369,9 @@ varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
 #' this function only works if the ensembling model has the same number of resamples as the component models.
 #' @param x An object of class caretStack
 #' @param ... passed to dotplot
+#' @method dotplot caretStack
+#' @importFrom lattice dotplot
+#' @export
 #' @examples
 #' \dontrun{
 #' set.seed(42)

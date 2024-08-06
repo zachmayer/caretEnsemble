@@ -1,116 +1,115 @@
 data(models.reg)
 data(X.reg)
 data(Y.reg)
-
 data(models.class)
 data(X.class)
 data(Y.class)
 
+ens.class <- caretStack(
+  models.class,
+  method = "glm",
+  preProcess = "pca",
+  trControl = caret::trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = TRUE)
+)
+
+ens.reg <- caretStack(
+  models.reg,
+  method = "lm",
+  preProcess = "pca",
+  trControl = caret::trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = FALSE)
+)
+
 testthat::context("Does stacking and prediction work?")
 
-testthat::test_that("We can stack regression models", {
-  set.seed(96367L)
-  ens.reg <- caretStack(
-    models.reg,
-    method = "lm", preProcess = "pca"
-  )
-  testthat::expect_s3_class(ens.reg, "caretStack")
-  testthat::expect_s3_class(summary(ens.reg), "summary.caretStack")
-  invisible(capture.output(print(ens.reg)))
-  pred.reg <- predict(ens.reg, newdata = X.reg)
-  testthat::expect_s3_class(pred.reg, "data.table")
-  testthat::expect_identical(nrow(pred.reg), 150L)
+testthat::test_that("We can make predictions from stacks, including cases where the stacked model has preprocessing", {
+  ens_list <- list(class = ens.class, reg = ens.reg)
+  X_list <- list(class = X.class, reg = X.reg)
+
+  for (model_name in names(ens_list)) {
+    # S3 methods
+    ens <- ens_list[[model_name]]
+    testthat::expect_s3_class(ens, "caretStack")
+    testthat::expect_s3_class(summary(ens), "summary.caretStack")
+    testthat::expect_s3_class(plot(ens), "ggplot")
+    invisible(capture.output(print(ens)))
+
+    # Predictions
+    param_grid <- expand.grid(
+      se = c(TRUE, FALSE),
+      return_weights = c(TRUE, FALSE),
+      newdata = c(TRUE, FALSE)
+    )
+    for (i in seq_len(nrow(param_grid))) {
+      params <- param_grid[i, ]
+      X <- X_list[[model_name]]
+      expected_rows <- nrow(X)
+      newdata <- NULL
+      if (params$newdata) {
+        newdata <- X[1L:50L, ]
+        expected_rows <- 50L
+      }
+      pred <- predict(ens, newdata = newdata, se = params$se, return_weights = params$return_weights)
+      testthat::expect_s3_class(pred, "data.table")
+      testthat::expect_identical(nrow(pred), expected_rows)
+      testthat::expect_true(all(vapply(pred, is.numeric, logical(1L))))
+    }
+  }
 })
 
-testthat::test_that("We can stack classification models", {
-  set.seed(42L)
-  ens.class <- caretStack(
-    models.class,
-    method = "glm"
-  )
-  testthat::expect_that(ens.class, is_a("caretStack"))
-  testthat::expect_s3_class(summary(ens.class), "summary.caretStack")
-  invisible(capture.output(print(ens.class)))
-  pred.class <- predict(ens.class, X.class)
-  testthat::expect_true(all(vapply(pred.class, is.numeric, logical(1L))))
-  testthat::expect_identical(nrow(pred.class), 150L)
-  raw.class <- predict(ens.class, X.class)
-  testthat::expect_s3_class(raw.class, "data.table")
-  testthat::expect_identical(nrow(raw.class), 150L)
+testthat::test_that("For classificaiton, we can predict the class labels", {
+  pred.class <- predict(ens.class, X.class, return_class_only = TRUE)
+  expect_is(pred.class, "factor")
+  expect_length(pred.class, nrow(X.class))
 })
 
 testthat::test_that("caretStack plots", {
-  test_plot_file <- "caretEnsemble_test_plots.png"
-  ens.reg <- caretStack(
+  ens.gbm <- caretStack(
     models.reg,
     method = "gbm", tuneLength = 2L, verbose = FALSE
   )
-  png(filename = test_plot_file)
-  plot(ens.reg)
-  lattice::dotplot(ens.reg, metric = "RMSE")
-  dev.off()
-  unlink(test_plot_file)
-  testthat::expect_s3_class(ens.reg, "caretStack")
+  testthat::expect_s3_class(ens.gbm, "caretStack")
+
+  plt <- plot(ens.gbm)
+  expect_s3_class(plt, "ggplot")
+
+  dotplot <- lattice::dotplot(ens.gbm, metric = "RMSE")
+  expect_s3_class(dotplot, "trellis")
 })
 
-testthat::context("Prediction errors for caretStack work as expected")
-
-testthat::test_that("Failure to calculate se occurs gracefully", {
-  ens.class <- caretStack(
-    models.class,
-    method = "glm", preProcess = "pca"
+testthat::test_that("Prediction names are correct with SE", {
+  testthat::expect_named(
+    predict(ens.reg, X.reg, se = TRUE, excluded_class_id = 0L),
+    c("pred", "lwr", "upr")
   )
 
-  w <- "Cannot calculate standard errors due to the preprocessing used in train"
-  testthat::expect_warning(predict(ens.class, X.class, se = TRUE), w)
-  testthat::expect_s3_class(predict(ens.class, X.class), "data.table")
-  testthat::expect_warning(testthat::expect_s3_class(predict(ens.class, X.class, se = TRUE), "data.table"), w)
-  testthat::expect_warning(testthat::expect_equivalent(
+  testthat::expect_named(
+    predict(ens.class, X.class, se = TRUE, excluded_class_id = 1L),
+    c("pred", "lwr", "upr")
+  )
+
+  testthat::expect_named(
+    predict(ens.class, X.class, se = TRUE, excluded_class_id = 0L),
+    c("pred.No", "pred.Yes", "lwr.No", "lwr.Yes", "upr.No", "upr.Yes")
+  )
+})
+
+testthat::test_that("Prediction parameter equivalence", {
+  testthat::expect_equivalent(
     predict(ens.class, X.class, return_weights = TRUE),
-    predict(ens.class, X.class)
-  ), w)
-  ens.reg <- caretStack(
-    models.reg,
-    method = "glm", preProcess = "pca"
+    predict(ens.class, X.class, return_weights = FALSE)
   )
-  testthat::expect_warning(testthat::expect_s3_class(predict(ens.reg, X.reg, se = TRUE), "data.table"), w)
-
-  testthat::expect_warning(testthat::expect_s3_class(predict(ens.class, X.class, se = TRUE), "data.table"), w)
-  testthat::expect_warning(
-    testthat::expect_s3_class(
-      predict(ens.class, X.class, se = TRUE, return_weights = TRUE),
-      "data.table"
-    ), w
-  )
-
-  testthat::expect_warning(
-    testthat::expect_named(
-      predict(ens.class, X.class, se = TRUE, excluded_class_id = 0L),
-      c("No", "Yes")
-    ), w
-  )
-  testthat::expect_warning(
-    testthat::expect_false(
-      identical(
-        predict(ens.class, X.class, return_weights = TRUE),
-        predict(ens.class, X.class, return_weights = FALSE)
-      )
-    ), w
-  )
-  testthat::expect_warning(testthat::expect_false(
-    identical(
-      predict(ens.class, X.class, se = TRUE),
-      predict(ens.class, X.class, se = TRUE, return_weights = TRUE)
-    )
-  ), w)
-  testthat::expect_warning(testthat::expect_equivalent(
-    predict(ens.class, X.class, se = TRUE, level = 0.8, return_weights = TRUE),
-    predict(ens.class, X.class, se = TRUE, level = 0.8, return_weights = FALSE)
-  ), w)
-  testthat::expect_warning(testthat::expect_equivalent(
+  testthat::expect_equivalent(
     predict(ens.class, X.class, level = 0.8, return_weights = TRUE),
     predict(ens.class, X.class, level = 0.8, return_weights = FALSE)
-  ), w)
+  )
+
+  # Note that SE is stochastic, since it uses permutation importance
+  set.seed(42L)
+  p1 <- predict(ens.class, X.class, se = TRUE, level = 0.8, return_weights = TRUE)
+  set.seed(42L)
+  p2 <- predict(ens.class, X.class, se = TRUE, level = 0.8, return_weights = FALSE)
+
+  testthat::expect_equivalent(p1, p2)
 })
 
 testthat::test_that("Test na.action pass through", {
@@ -370,4 +369,27 @@ testthat::test_that("caretStack works if both new_X and new_Y are supplied", {
 
   testthat::expect_identical(ncol(pred_class), 2L)
   testthat::expect_identical(ncol(pred_reg), 1L)
+})
+
+testthat::test_that("varImp works in for class and reg in sample", {
+  for (ens in list(ens.class, ens.reg)) {
+    imp <- varImp(ens)
+    expect_is(imp, "numeric")
+    expect_named(imp, names(ens$models))
+    expect_equal(sum(imp), 1.0, tolerance = 1e-6)
+  }
+})
+
+testthat::test_that("varImp works in for class on new data", {
+  imp <- varImp(ens.class, X.class)
+  expect_is(imp, "numeric")
+  expect_named(imp, names(ens.class$models))
+  expect_equal(sum(imp), 1.0, tolerance = 1e-6)
+})
+
+testthat::test_that("varImp works in for reg on new data", {
+  imp <- varImp(ens.reg, X.class)
+  expect_is(imp, "numeric")
+  expect_named(imp, names(ens.reg$models))
+  expect_equal(sum(imp), 1.0, tolerance = 1e-6)
 })
