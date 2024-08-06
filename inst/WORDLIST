@@ -21,10 +21,15 @@ devtools
 dotplot
 ensembled
 ensembling
+extractMetric
 et
+ggplot
+ggplot2
 github
 glm
 importances
+kable
+knitr
 linters
 methodList
 modelInfo

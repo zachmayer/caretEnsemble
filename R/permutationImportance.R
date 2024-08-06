@@ -1,6 +1,6 @@
 #' @title Normalize to One
 #' @description Normalize a vector to sum to one.
-#' @param x
+#' @param x A numeric vector.
 #' @return A numeric vector.
 #' @keywords internal
 normalize_to_one <- function(x) {
@@ -67,7 +67,7 @@ shuffled_mae <- function(model, original_data, target, pred_type, shuffle_idx) {
     new_var <- shuffled_data[[var]]
 
     data.table::set(original_data, j = var, value = new_var)
-    new_preds <- as.matrix(predict(model, original_data, type = pred_type))
+    new_preds <- as.matrix(stats::predict(model, original_data, type = pred_type))
     data.table::set(original_data, j = var, value = old_var)
 
     mae(new_preds, target)
@@ -116,7 +116,7 @@ permutationImportance <- function(
 
   # Error of the original model.
   # This is the baseline for computing importance
-  preds_orig <- as.matrix(predict(model, newdata, type = pred_type))
+  preds_orig <- as.matrix(stats::predict(model, newdata, type = pred_type))
   stopifnot(
     is.numeric(preds_orig),
     is.finite(preds_orig)

@@ -16,11 +16,11 @@
 #' @param all.models a caretList, or an object coercible to a caretList (such as a list of train objects)
 #' @param new_X Data to predict on for the caretList, prior to training the stack (for transfer learning).
 #' if NULL, the stacked predictions will be extracted from the caretList models.
-#' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
 #' @param new_y The outcome variable to predict on for the caretList, prior to training the stack
 #' (for transfer learning).
 #' If NULL, will use the observed levels from the first model in the caret stack
 #' If 0, will include all levels.
+#' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
 #' @param ... additional arguments to pass to the stacking model
 #' @return S3 caretStack object
 #' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).
@@ -37,7 +37,12 @@
 #' )
 #' caretStack(models, method = "glm")
 #' }
-caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id = 1L, ...) {
+caretStack <- function(
+    all.models,
+    new_X = NULL,
+    new_y = NULL,
+    excluded_class_id = 1L,
+    ...) {
   if (!is.caretList(all.models)) {
     warning("Attempting to coerce all.models to a caretList.", call. = FALSE)
     all.models <- as.caretList(all.models)
@@ -77,55 +82,13 @@ caretStack <- function(all.models, new_X = NULL, new_y = NULL, excluded_class_id
   model <- caret::train(preds, obs, ...)
 
   # Return final model
-  out <- list(models = all.models, ens_model = model, error = model$results, excluded_class_id = excluded_class_id)
-  class(out) <- "caretStack"
-  out
-}
-
-#' @title Check caretStack object
-#' @description Make sure a caretStack has both a caretList and a train object
-#'
-#' @param object a caretStack object
-#' @internal
-check_caretStack <- function(object) {
-  stopifnot(
-    methods::is(object, "caretStack"),
-    methods::is(object$models, "caretList"),
-    methods::is(object$ens_model, "train")
+  out <- list(
+    models = all.models,
+    ens_model = model,
+    error = model$results,
+    excluded_class_id = excluded_class_id
   )
-}
-
-#' @title Set excluded class id
-#' @description Set the excluded class id for a caretStack object
-#'
-#' @param object a caretStack object
-#' @param model_type the model type as a character vector with length 1
-#' @internal
-set_excluded_class_id <- function(object, model_type) {
-  if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
-    object[["excluded_class_id"]] <- 1L
-    warning("No excluded_class_id set. Setting to 1L.", call. = FALSE)
-  }
-  object
-}
-
-#' @title Calculate a weighted standard deviation
-#' @description Used to weight deviations among ensembled model predictions
-#'
-#' @param x a numeric vector
-#' @param w a vector of weights equal to length of x
-#' @param na.rm a logical indicating how to handle missing values, default = TRUE
-#' @export
-# https://stats.stackexchange.com/a/61285
-wtd.sd <- function(x, w, na.rm = FALSE) {
-  stopifnot(is.numeric(x), is.numeric(w))
-
-  xWbar <- stats::weighted.mean(x, w, na.rm = na.rm)
-  w <- w / mean(w, na.rm = na.rm)
-
-  variance <- sum((w * (x - xWbar)^2L) / (sum(w, na.rm = na.rm) - 1L), na.rm = na.rm)
-  out <- sqrt(variance)
-
+  class(out) <- "caretStack"
   out
 }
 
@@ -156,7 +119,6 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' @details Prediction weights are defined as variable importance in the stacked
 #' caret model. This is not available for all cases such as where the library
 #' model predictions are transformed before being passed to the stacking model.
-#' @importFrom stats predict
 #' @method predict caretStack
 #' @examples
 #' \dontrun{
@@ -194,7 +156,7 @@ predict.caretStack <- function(
     newdata <- data.table::as.data.table(newdata)
   }
   if (se || !is.null(newdata)) {
-    preds <- predict(
+    preds <- stats::predict(
       object$models,
       newdata = newdata,
       verbose = verbose,
@@ -259,7 +221,7 @@ predict.caretStack <- function(
       meta_preds <- meta_preds[[1L]] # No names if one column (e.g. reg or binary with a dropped class)
     }
     out <- data.table::data.table(
-      fit = meta_preds,
+      pred = meta_preds,
       lwr = meta_preds - std_error,
       upr = meta_preds + std_error
     )
@@ -270,32 +232,59 @@ predict.caretStack <- function(
   out
 }
 
+#' @title Check caretStack object
+#' @description Make sure a caretStack has both a caretList and a train object
+#'
+#' @param object a caretStack object
+#' @keywords internal
+check_caretStack <- function(object) {
+  stopifnot(
+    methods::is(object, "caretStack"),
+    methods::is(object$models, "caretList"),
+    methods::is(object$ens_model, "train")
+  )
+}
+
+#' @title Set excluded class id
+#' @description Set the excluded class id for a caretStack object
+#'
+#' @param object a caretStack object
+#' @param model_type the model type as a character vector with length 1
+#' @keywords internal
+set_excluded_class_id <- function(object, model_type) {
+  if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
+    object[["excluded_class_id"]] <- 1L
+    warning("No excluded_class_id set. Setting to 1L.", call. = FALSE)
+  }
+  object
+}
+
+#' @title Calculate a weighted standard deviation
+#' @description Used to weight deviations among ensembled model predictions
+#'
+#' @param x a numeric vector
+#' @param w a vector of weights equal to length of x
+#' @param na.rm a logical indicating how to handle missing values, default = TRUE
+#' @export
+# https://stats.stackexchange.com/a/61285
+wtd.sd <- function(x, w, na.rm = FALSE) {
+  stopifnot(is.numeric(x), is.numeric(w))
+
+  xWbar <- stats::weighted.mean(x, w, na.rm = na.rm)
+  w <- w / mean(w, na.rm = na.rm)
+
+  variance <- sum((w * (x - xWbar)^2L) / (sum(w, na.rm = na.rm) - 1L), na.rm = na.rm)
+  out <- sqrt(variance)
+
+  out
+}
+
 #' @title Check if an object is a caretStack object
 #' @param object an R object
 #' @description Check if an object is a caretStack object
 #' @export
 is.caretStack <- function(object) {
   methods::is(object, "caretStack")
-}
-
-#' @title Summarize a caretStack object
-#' @description This is a function to summarize a caretStack.
-#' @param object An object of class caretStack
-#' @param ... ignored
-#' @export
-#' @examples
-#' \dontrun{
-#' models <- caretList(
-#'   x = iris[1:100, 1:2],
-#'   y = iris[1:100, 3],
-#'   trControl = trainControl(method = "cv"),
-#'   methodList = c("rpart", "glm")
-#' )
-#' meta_model <- caretStack(models, method = "lm")
-#' summary(meta_model)
-#' }
-summary.caretStack <- function(object, ...) {
-  summary(object$ens_model)
 }
 
 #' @title Print a caretStack object
@@ -315,18 +304,15 @@ summary.caretStack <- function(object, ...) {
 #' print(meta_model)
 #' }
 print.caretStack <- function(x, ...) {
-  base.models <- toString(names(x$models))
-  cat(sprintf("A %s ensemble of %s base models: %s", x$ens_model$method, length(x$models), base.models))
-  cat("\n\nEnsemble results:\n")
+  cat("The following models were ensembled:", toString(names(x$models)), " \n")
   print(x$ens_model)
 }
 
-#' @title Plot a caretStack object
-#' @description This is a function to plot a caretStack.
-#' @param x An object of class caretStack
-#' @param ... passed to plot
+#' @title Summarize a caretStack object
+#' @description This is a function to summarize a caretStack.
+#' @param object An object of class caretStack
+#' @param ... ignored
 #' @export
-#' @method plot caretStack
 #' @examples
 #' \dontrun{
 #' models <- caretList(
@@ -335,11 +321,48 @@ print.caretStack <- function(x, ...) {
 #'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method = "rpart", tuneLength = 2)
-#' plot(meta_model)
+#' meta_model <- caretStack(models, method = "lm")
+#' summary(meta_model)
 #' }
-plot.caretStack <- function(x, ...) {
-  plot(x$ens_model, ...)
+summary.caretStack <- function(object, ...) {
+  metric <- object$ens_model$metric
+  out <- list(
+    models = toString(names(object$models)),
+    imp = round(caret::varImp(object), 4L),
+    metric = metric,
+    results = extractMetric(object, metric = metric)
+  )
+  class(out) <- "summary.caretStack"
+  out
+}
+
+#' @title Print a summary.caretStack object
+#' @description This is a function to print a summary.caretStack.
+#' @param x An object of class summary.caretStack
+#' @param ... ignored
+#' @method print summary.caretStack
+#' @export
+print.summary.caretStack <- function(x, ...) {
+  cat("The following models were ensembled:", x$models, " \n")
+  cat("\nModel Importance:\n")
+  print(x$imp)
+  cat("\nModel accuracy:\n")
+  print(x$results)
+}
+
+#' @title Variable importance for caretStack
+#' @description This is a function to extract variable importance from a caretStack.
+#' @param object An object of class caretStack
+#' @param newdata the data to use for computing importance. If NULL, will use the stacked predictions from the models.
+#' @param normalize a logical indicating whether to normalize the importances to sum to one.
+#' @param ... passed to predict.caretList
+#' @importFrom caret varImp
+#' @method varImp caretStack
+#' @export
+varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
+  preds <- predict.caretList(object$models, newdata = newdata, excluded_class_id = object$excluded_class_id, ...)
+  imp <- permutationImportance(object$ens_model, preds, normalize = normalize)
+  imp
 }
 
 #' @title Comparison dotplot for a caretStack object
@@ -363,4 +386,164 @@ plot.caretStack <- function(x, ...) {
 dotplot.caretStack <- function(x, ...) {
   resamps <- caret::resamples(x$models)
   lattice::dotplot(resamps, ...)
+}
+
+#' @title Extract accuracy metrics from a \code{\link[caretEnsemble]{caretStack}} object
+#' @description Extract the cross-validated accuracy metrics from the ensemble model
+#' and individual models in a caretStack.
+#' @param x a caretStack object
+#' @param ... passed to extractMetric.train and extractMetric.caretList
+#' @return A data.table with metrics from the ensemble model and individual models.
+#' @export
+#' @method extractMetric caretStack
+extractMetric.caretStack <- function(x, ...) {
+  ensemble_metrics <- extractMetric.train(x$ens_model, ...)
+  individual_metrics <- extractMetric.caretList(x$models, ...)
+
+  # Update model_name for ensemble
+  data.table::set(ensemble_metrics, j = "model_name", value = "ensemble")
+
+  # Combine metrics
+  all_metrics <- rbind(ensemble_metrics, individual_metrics)
+  all_metrics
+}
+
+#' @title Plot a caretStack object
+#' @description This function plots the performance of each model in a caretList object.
+#' @param x a caretStack object
+#' @param metric which metric to plot.  If NULL, will use the default metric used to train the model.
+#' @param ... ignored
+#' @return a ggplot2 object
+#' @method plot caretStack
+#' @export
+plot.caretStack <- function(x, metric = NULL, ...) {
+  dat <- extractMetric(x, metric = metric)
+  plt <- ggplot2::ggplot(
+    dat,
+    ggplot2::aes(
+      x = .data[["model_name"]],
+      y = .data[["value"]],
+      ymin = .data[["value"]] - .data[["sd"]],
+      ymax = .data[["value"]] + .data[["sd"]],
+      color = .data[["metric"]]
+    )
+  ) +
+    ggplot2::geom_pointrange() +
+    ggplot2::theme_bw() +
+    ggplot2::labs(x = "Model", y = "Metric Value")
+  plt
+}
+
+#' @title Convenience function for more in-depth diagnostic plots of caretStack objects
+#' @description This function provides a more robust series of diagnostic plots
+#' for a caretEnsemble object.
+#' @param object a \code{caretStack} object
+#' @param xvars a vector of the names of x variables to plot against residuals
+#' @param show_class_id For classification only: which class level to show on the plot
+#' @param ... ignored
+#' @return A grid of diagnostic plots. Top left is the range of the performance
+#' metric across each component model along with its standard deviation. Top right
+#' is the residuals from the ensembled model plotted against fitted values.
+#' Middle left is a bar graph of the weights of the component models. Middle
+#' right is the disagreement in the residuals of the component models (unweighted)
+#' across the fitted values. Bottom left and bottom right are the plots of the
+#' residuals against two random or user specified variables.
+#' @importFrom ggplot2 autoplot
+#' @importFrom patchwork plot_layout
+#' @method autoplot caretStack
+#' @export
+#' @examples
+#' \dontrun{
+#' set.seed(42)
+#' data(models.reg)
+#' ens <- caretStack(
+#'   models.reg,
+#'   trControl = caret::trainControl(
+#'     method = "cv", savePredictions = "final"
+#'   )
+#' )
+#' autoplot(ens)
+#' }
+autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
+  stopifnot(methods::is(object, "caretStack"))
+  ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
+
+  # Performance metrics by model
+  g1 <- plot(object) + ggplot2::labs(title = "Metric and SD For Component Models")
+
+  # Residuals vs Fitted
+  # Disable the object usage linter in here — it raises false positives for .SD and .data
+  g2 <- ggplot2::ggplot(ensemble_data, ggplot2::aes(.data[["pred"]], .data[["resid"]])) +
+    ggplot2::geom_point() +
+    ggplot2::geom_smooth(se = FALSE) +
+    ggplot2::scale_x_continuous("Fitted Values") +
+    ggplot2::scale_y_continuous("Residual") +
+    ggplot2::labs(title = "Residuals vs Fitted") +
+    ggplot2::theme_bw()
+
+  # Model Weights
+  wghtFrame <- data.table::as.data.table(stats::coef(object[["ens_model"]][["finalModel"]]))
+  data.table::set(wghtFrame, j = "method", value = row.names(wghtFrame))
+  names(wghtFrame) <- c("weights", "method")
+  g3 <- ggplot2::ggplot(wghtFrame, ggplot2::aes(.data[["method"]], .data[["weights"]])) +
+    ggplot2::geom_bar(stat = "identity", fill = I("gray50"), color = I("black")) +
+    ggplot2::labs(title = "Model Weights", x = "Method", y = "Weights") +
+    ggplot2::theme_bw()
+
+  # Disagreement in sub-model residuals
+  sub_model_data <- lapply(object$models, extractPredObsResid, show_class_id = show_class_id)
+  for (model_name in names(sub_model_data)) {
+    data.table::set(sub_model_data[[model_name]], j = "model", value = model_name)
+  }
+  sub_model_data <- data.table::rbindlist(sub_model_data, use.names = TRUE, fill = TRUE)
+  sub_model_summary <- sub_model_data[, list(
+    ymin = min(.SD[["resid"]]),
+    ymax = max(.SD[["resid"]]),
+    yavg = stats::median(.SD[["resid"]]),
+    yhat = .SD[["pred"]][1L]
+  ), by = "rowIndex"]
+  g4 <- ggplot2::ggplot(sub_model_summary, ggplot2::aes(
+    x = .data[["yhat"]],
+    y = .data[["yavg"]]
+  )) +
+    ggplot2::geom_linerange(alpha = I(0.5), ggplot2::aes(
+      ymin = .data[["ymin"]],
+      ymax = .data[["ymax"]]
+    )) +
+    ggplot2::geom_point(size = I(3L), alpha = I(0.8)) +
+    ggplot2::theme_bw() +
+    ggplot2::geom_smooth(
+      method = "lm", se = FALSE,
+      linewidth = I(1.1), color = I("red"), linetype = 2L
+    ) +
+    ggplot2::labs(
+      x = "Fitted Values", y = "Range of Resid.",
+      title = "Model Disagreement Across Fitted Values"
+    )
+
+  # Residuals vs X variables
+  x_data <- data.table::data.table(object$models[[1L]]$trainingData)
+  if (is.null(xvars)) {
+    xvars <- names(x_data)
+    xvars <- setdiff(xvars, c(".outcome", ".weights", "(Intercept)"))
+    xvars <- sample(xvars, 2L)
+  }
+  data.table::set(x_data, j = "rowIndex", value = seq_len(nrow(x_data)))
+  plotdf <- merge(ensemble_data, x_data, by = "rowIndex")
+  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1L]]], .data[["resid"]])) +
+    ggplot2::geom_point() +
+    ggplot2::geom_smooth(se = FALSE) +
+    ggplot2::scale_x_continuous(xvars[1L]) +
+    ggplot2::scale_y_continuous("Residuals") +
+    ggplot2::labs(title = paste0("Residuals Against ", xvars[1L])) +
+    ggplot2::theme_bw()
+  g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[2L]]], .data[["resid"]])) +
+    ggplot2::geom_point() +
+    ggplot2::geom_smooth(se = FALSE) +
+    ggplot2::scale_x_continuous(xvars[2L]) +
+    ggplot2::scale_y_continuous("Residuals") +
+    ggplot2::labs(title = paste0("Residuals Against ", xvars[2L])) +
+    ggplot2::theme_bw()
+  out <- g1 + g2 / (g3 + g4) / (g5 + g6)
+  out
 }

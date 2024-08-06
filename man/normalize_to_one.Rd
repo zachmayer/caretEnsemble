@@ -6,6 +6,9 @@
 \usage{
 normalize_to_one(x)
 }
+\arguments{
+\item{x}{A numeric vector.}
+}
 \value{
 A numeric vector.
 }

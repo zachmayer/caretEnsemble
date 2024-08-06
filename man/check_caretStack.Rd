@@ -12,3 +12,4 @@ check_caretStack(object)
 \description{
 Make sure a caretStack has both a caretList and a train object
 }
+\keyword{internal}
