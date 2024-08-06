@@ -32,7 +32,7 @@ testthat::test_that("caretModelSpec returns valid specs", {
 })
 
 testthat::test_that("caretModelSpec and checking functions work as expected", {
-  all_models <- sort(unique(modelLookup()$model))
+  all_models <- sort(unique(caret::modelLookup()$model))
   for (model in all_models) {
     testthat::expect_identical(caretModelSpec(model, tuneLength = 5L, preProcess = "knnImpute")$method, model)
   }
