@@ -10,6 +10,9 @@ data(models.class)
 data(X.class)
 data(Y.class)
 
+set.seed(1234)
+ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "cv", number = 2L, savePredictions = "final"))
+
 #############################################################################
 testthat::context("Test metric and residual extraction")
 #############################################################################
@@ -30,7 +33,7 @@ testthat::context("Does ensembling and prediction work?")
 #############################################################################
 
 testthat::test_that("We can ensemble regression models", {
-  ens.reg <- caretEnsemble(models.reg)
+
   testthat::expect_that(ens.reg, is_a("caretEnsemble"))
   pred.reg <- predict(ens.reg, newdata = X.reg)
   pred.reg2 <- predict(ens.reg, newdata = X.reg, se = TRUE)
@@ -116,7 +119,6 @@ testthat::context("Does ensemble prediction work with new data")
 
 testthat::test_that("caretEnsemble works for regression models", {
   set.seed(1234L)
-  ens.reg <- caretEnsemble(models.reg, trControl = trainControl(method = "cv", number = 2L, savePredictions = "final"))
   testthat::expect_is(ens.reg, "caretEnsemble")
 
   # Predictions

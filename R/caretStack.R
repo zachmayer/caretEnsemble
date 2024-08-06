@@ -146,89 +146,95 @@ predict.caretStack <- function(
 
   # Extract model types
   model_type <- object$ens_model$modelType
+  is_class <- model_type == "Classification"
 
   # If the excluded class wasn't set at train time, set it
   object <- set_excluded_class_id(object, model_type)
 
-  # If we're predicting on new data, or we need standard errors, we need predictions from the submodels
-  # Note that if se==TRUE and newdata is NULL, we will be returning STACKED predicitons
-  if (!is.null(newdata)) {
-    newdata <- data.table::as.data.table(newdata)
-  }
-  if (se || !is.null(newdata)) {
-    preds <- stats::predict(
-      object$models,
-      newdata = newdata,
-      verbose = verbose,
-      excluded_class_id = object[["excluded_class_id"]]
-    )
-    if (!is.null(newdata)) {
-      newdata <- preds
-    }
-  }
-
   # Check return_class_only
   if (return_class_only) {
     stopifnot(
-      model_type == "Classification",
+      is_class,
       !se
     )
     excluded_class_id <- 0L
   }
 
-  # Now predict on the stack
-  # If newdata is NULL, this will be stacked predictions
-  # If newdata is present, this will be predictions on the preds,
-  # which will be the caretList predictions on the newdata.
-  meta_preds <- caretPredict(object$ens_model, newdata = newdata, excluded_class_id = excluded_class_id, ...)
-  out <- meta_preds
+  # Get predictions from the submodels on the new data
+  # If there's no new data, we just use stacked predictions from the ensemble model
+  if (!is.null(newdata)) {
+    # These will be regular predictions
+    newdata <- data.table::as.data.table(newdata)
+    sub_model_preds <- stats::predict(
+      object$models,
+      newdata = newdata,
+      verbose = verbose,
+      excluded_class_id = object[["excluded_class_id"]]
+    )
+    newdata <- sub_model_preds
+  } else if (se) {
+    # These will be stacked predictions
+    sub_model_preds <- stats::predict(
+      object$models,
+      newdata = newdata,
+      verbose = verbose,
+      excluded_class_id = object[["excluded_class_id"]]
+    )
+  } else {
+    sub_model_preds <- NULL
+  }
 
-  # Map to class levels
-  # TODO: HANDLE ORDINAL and TESTS FOR THIS
-  if (return_class_only) {
-    class_id <- apply(out, 1L, which.max)
+  # Now predict on the stack
+  # If newdata is NULL, this will be stacked predictions from caret::train
+  # If newdata is present, this will be regular predictions on top
+  # of the sub_model_preds.
+  meta_preds <- caretPredict(object$ens_model, newdata = newdata, excluded_class_id = excluded_class_id, ...)
+
+  # Calculate variable importance if needed
+  if (se || return_weights) {
+    imp <- caret::varImp(object, newdata = sub_model_preds, normalize = TRUE)
+  }
+
+  # Decide output:
+  # IF SE, data.table of predictins, lower, and upper bounds
+  # IF return_class_only, factor of class levels
+  # ELSE, data.table of predictions
+  if (se) {
+    if (all(
+      length(imp) == ncol(sub_model_preds),
+      names(imp) %in% names(sub_model_preds),
+      names(sub_model_preds) %in% names(imp)
+    )) {
+      std_error <- as.matrix(sub_model_preds[, names(imp), with = FALSE])
+      std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
+      std_error <- stats::qnorm(level) * std_error
+      if (ncol(meta_preds) == 1L) {
+        meta_preds <- meta_preds[[1L]]
+      }
+      out <- data.table::data.table(
+        pred = meta_preds,
+        lwr = meta_preds - std_error,
+        upr = meta_preds + std_error
+      )
+    } else {
+      warning("Cannot calculate standard errors due to the preprocessing used in train", call. = FALSE)
+    }
+  } else if (return_class_only) {
+    # Map to class levels
+    # TODO: HANDLE ORDINAL and TESTS FOR THIS
+    class_id <- apply(meta_preds, 1L, which.max)
     class_levels <- levels(object$ens_model)
     out <- factor(class_levels[class_id], class_levels)
+  } else {
+    out <- meta_preds
   }
 
-  # Calculate the model importances if we need them
-  # For multiclass, this weights all classes evenly, which is... fine for now
-  # In the future we could do SE by class, but that seems overcomplicated for now
-  # As it is, this is pretty made up
-  if (se || return_weights) {
-    imp <- as.matrix(caret::varImp(object$ens_model)$importance)
-    imp_names <- rownames(imp)
-    imp <- apply(imp, 2L, function(x) x / sum(x))
-    row.names(imp) <- imp_names
-    imp <- rowMeans(imp)
-    if (!all(
-      length(imp) == ncol(preds),
-      names(imp) %in% names(preds),
-      names(preds) %in% names(imp)
-    )) {
-      warning("Cannot calculate standard errors due to the preprocessing used in train", call. = FALSE)
-      se <- FALSE
-    }
-  }
-
-  # Calculate SEs if we need them
-  if (se) {
-    std_error <- data.table::copy(preds)
-    data.table::setcolorder(std_error, names(imp))
-    std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
-    std_error <- stats::qnorm(level) * std_error
-    if (ncol(meta_preds) == 1L) {
-      meta_preds <- meta_preds[[1L]] # No names if one column (e.g. reg or binary with a dropped class)
-    }
-    out <- data.table::data.table(
-      pred = meta_preds,
-      lwr = meta_preds - std_error,
-      upr = meta_preds + std_error
-    )
-  }
+  # Add weights to output if needed
   if (return_weights) {
     attr(out, "weights") <- imp
   }
+
+  # Return
   out
 }
 
