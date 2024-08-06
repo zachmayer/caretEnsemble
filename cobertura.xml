@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE coverage SYSTEM "https://raw.githubusercontent.com/cobertura/cobertura/master/cobertura/src/site/htdocs/xml/coverage-04.dtd">
-<coverage line-rate="1" branch-rate="0" lines-covered="598" lines-valid="598" branches-covered="0" branches-valid="0" complexity="0" version="3.6.4" timestamp="2024-08-06 14:11:42.757358">
+<coverage line-rate="1" branch-rate="0" lines-covered="598" lines-valid="598" branches-covered="0" branches-valid="0" complexity="0" version="3.6.4" timestamp="2024-08-06 14:24:52.171872">
   <sources>
     <source>/Users/zach/source/caretEnsemble</source>
   </sources>
