@@ -160,9 +160,9 @@ predict.caretStack <- function(
   # We also need these if we're calculting standard errors for the predictions
   sub_model_preds <- if (!is.null(newdata) || se) {
     stats::predict(
-      object$models, 
-      newdata = data.table::as.data.table(newdata),
-      verbose = verbose, 
+      object$models,
+      newdata = newdata,
+      verbose = verbose,
       excluded_class_id = object[["excluded_class_id"]]
     )
   }
@@ -172,8 +172,8 @@ predict.caretStack <- function(
   # If newdata is present, this will be regular predictions on top
   # of the sub_model_preds.
   meta_preds <- caretPredict(
-    object$ens_model, 
-    newdata = if (!is.null(newdata)) sub_model_preds
+    object$ens_model,
+    newdata = if (!is.null(newdata)) sub_model_preds,
     excluded_class_id = excluded_class_id,
     ...
   )
