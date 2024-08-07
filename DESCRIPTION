@@ -1,7 +1,7 @@
 Package: caretEnsemble
 Type: Package
 Title: Ensembles of Caret Models
-Version: 2.0.4
+Version: 4.0.0
 Date: 2024-08-06
 Authors@R: c(person(c("Zachary", "A."), "Deane-Mayer", role = c("aut", "cre"),
     email = "zach.mayer@gmail.com"),
@@ -22,23 +22,15 @@ Suggests:
     devtools,
     lintr,
     covr,
-    randomForest,
     glmnet,
     rpart,
-    kernlab,
     nnet,
-    e1071,
-    ipred,
-    pROC,
     knitr,
     mlbench,
     MASS,
     gbm,
-    plyr,
-    klaR,
     rmarkdown,
     usethis,
-    sass,
     spelling
 Imports:
     methods,
