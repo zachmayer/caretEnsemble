@@ -177,6 +177,9 @@ predict.caretStack <- function(
     newdata <- sub_model_preds
   } else if (se) {
     # These will be stacked predictions
+    # We need them if we want standard errors, but dont have newdata
+    # In this case we calculate standard errors from the stacked predictions
+    # on the training data
     sub_model_preds <- stats::predict(
       object$models,
       newdata = newdata,
