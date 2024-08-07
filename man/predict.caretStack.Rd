@@ -9,7 +9,6 @@
   newdata = NULL,
   se = FALSE,
   level = 0.95,
-  return_weights = FALSE,
   excluded_class_id = 0L,
   return_class_only = FALSE,
   verbose = FALSE,
@@ -23,9 +22,7 @@
 
 \item{se}{logical, should prediction errors be produced? Default is false.}
 
-\item{level}{tolerance/confidence level}
-
-\item{return_weights}{a logical indicating whether prediction weights for each model
+\item{level}{tolerance/confidence level
 should be returned}
 
 \item{excluded_class_id}{Which class to exclude from predictions. Note that if the caretStack

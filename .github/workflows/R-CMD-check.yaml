@@ -18,13 +18,21 @@ jobs:
 
     strategy:
       fail-fast: false
-      matrix:
-        config:
+      matrix:    # https://en.wikipedia.org/wiki/R_(programming_language)#Version_names
+        config:  # https://github.com/r-hub/rversions  rversions::r_versions()
+
+          # macOS / Widnows on latest
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
+  
+          # Ubuntu on latest, devel, release, oldrel as well as version in DESCRIPTION
+          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,  r: 'release'}  # rversions::r_release()
+          - {os: ubuntu-latest,  r: 'oldrel-1'}  # rversions::r_oldrel()
+          - {os: ubuntu-latest,  r: 'oldrel-2'}
+          - {os: ubuntu-latest,  r: 'oldrel-3'}
+          # - {os: ubuntu-latest,  r: 'oldrel-4'}  After the next major release add this back in
+          - {os: ubuntu-latest,  r: '4.1.0'}  # Oldest supported release. 2021-05-18: 3+ years old
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}

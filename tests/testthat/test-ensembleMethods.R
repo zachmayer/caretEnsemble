@@ -89,25 +89,17 @@ testthat::test_that("precict.caretEnsemble with and without se and weights", {
   for (ens in list(ens.class, ens.reg)) {
     is_class <- isClassifier(ens)
     for (se in c(FALSE, TRUE)) {
-      for (return_weights in c(FALSE, TRUE)) {
-        p <- predict(
-          ens,
-          newdata = X.reg,
-          se = se,
-          return_weights = return_weights,
-          excluded_class_id = 1L
-        )
-        expect_s3_class(p, "data.table")
-        if (se) {
-          testthat::expect_named(p, c("pred", "lwr", "upr"))
-        } else {
-          testthat::expect_named(p, ifelse(is_class, "Yes", "pred"))
-        }
-        if (return_weights) {
-          testthat::expect_is(unlist(attr(p, which = "weights")), "numeric")
-        } else {
-          testthat::expect_null(attr(p, which = "weights"))
-        }
+      p <- predict(
+        ens,
+        newdata = X.reg,
+        se = se,
+        excluded_class_id = 1L
+      )
+      expect_s3_class(p, "data.table")
+      if (se) {
+        testthat::expect_named(p, c("pred", "lwr", "upr"))
+      } else {
+        testthat::expect_named(p, ifelse(is_class, "Yes", "pred"))
       }
     }
   }

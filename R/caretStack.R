@@ -100,7 +100,6 @@ caretStack <- function(
 #' @param newdata a new dataframe to make predictions on
 #' @param se logical, should prediction errors be produced? Default is false.
 #' @param level tolerance/confidence level
-#' @param return_weights a logical indicating whether prediction weights for each model
 #' should be returned
 #' @param excluded_class_id Which class to exclude from predictions. Note that if the caretStack
 #' was trained with an excluded_class_id, that class is ALWAYS excluded from the predictions from the
@@ -136,7 +135,6 @@ predict.caretStack <- function(
     newdata = NULL,
     se = FALSE,
     level = 0.95,
-    return_weights = FALSE,
     excluded_class_id = 0L,
     return_class_only = FALSE,
     verbose = FALSE,
@@ -153,59 +151,43 @@ predict.caretStack <- function(
 
   # Check return_class_only
   if (return_class_only) {
-    stopifnot(
-      is_class,
-      !se
-    )
+    stopifnot(is_class, !se)
     excluded_class_id <- 0L
   }
 
-  # Calculate variable importance if needed
-  if (se || return_weights) {
-    imp <- caret::varImp(object, newdata = newdata, normalize = TRUE)
-  }
-
   # Get predictions from the submodels on the new data
-  # If there's no new data, we just use stacked predictions from the ensemble model
-  if (!is.null(newdata)) {
-    # These will be regular predictions
-    newdata <- data.table::as.data.table(newdata)
-    sub_model_preds <- stats::predict(
+  # We need theres if there's newdata, for passing the base model predictions to the stack model
+  # We also need these if we're calculting standard errors for the predictions
+  sub_model_preds <- if (!is.null(newdata) || se) {
+    stats::predict(
       object$models,
       newdata = newdata,
       verbose = verbose,
       excluded_class_id = object[["excluded_class_id"]]
     )
-    newdata <- sub_model_preds
-  } else if (se) {
-    # These will be stacked predictions
-    sub_model_preds <- stats::predict(
-      object$models,
-      newdata = newdata,
-      verbose = verbose,
-      excluded_class_id = object[["excluded_class_id"]]
-    )
-  } else {
-    sub_model_preds <- NULL
   }
 
   # Now predict on the stack
   # If newdata is NULL, this will be stacked predictions from caret::train
   # If newdata is present, this will be regular predictions on top
   # of the sub_model_preds.
-  meta_preds <- caretPredict(object$ens_model, newdata = newdata, excluded_class_id = excluded_class_id, ...)
+  meta_preds <- caretPredict(
+    object$ens_model,
+    newdata = if (!is.null(newdata)) sub_model_preds,
+    excluded_class_id = excluded_class_id,
+    ...
+  )
 
   # Decide output:
   # IF SE, data.table of predictins, lower, and upper bounds
   # IF return_class_only, factor of class levels
   # ELSE, data.table of predictions
   if (se) {
+    imp <- caret::varImp(object, newdata = newdata, normalize = TRUE)
     std_error <- as.matrix(sub_model_preds[, names(imp), with = FALSE])
     std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
     std_error <- stats::qnorm(level) * std_error
-    if (ncol(meta_preds) == 1L) {
-      meta_preds <- meta_preds[[1L]]
-    }
+    meta_preds <- if (ncol(meta_preds) == 1L) meta_preds[[1L]] else meta_preds
     out <- data.table::data.table(
       pred = meta_preds,
       lwr = meta_preds - std_error,
@@ -219,11 +201,6 @@ predict.caretStack <- function(
     out <- factor(class_levels[class_id], class_levels)
   } else {
     out <- meta_preds
-  }
-
-  # Add weights to output if needed
-  if (return_weights) {
-    attr(out, "weights") <- imp
   }
 
   # Return
@@ -465,6 +442,7 @@ plot.caretStack <- function(x, metric = NULL, ...) {
 #' )
 #' autoplot(ens)
 #' }
+# https://github.com/thomasp85/patchwork/issues/226 — why we need importFrom patchwork plot_layout
 autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(methods::is(object, "caretStack"))
   ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)

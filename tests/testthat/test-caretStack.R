@@ -36,7 +36,6 @@ testthat::test_that("We can make predictions from stacks, including cases where 
     # Predictions
     param_grid <- expand.grid(
       se = c(TRUE, FALSE),
-      return_weights = c(TRUE, FALSE),
       newdata = c(TRUE, FALSE)
     )
     for (i in seq_len(nrow(param_grid))) {
@@ -48,7 +47,7 @@ testthat::test_that("We can make predictions from stacks, including cases where 
         newdata <- X[1L:50L, ]
         expected_rows <- 50L
       }
-      pred <- predict(ens, newdata = newdata, se = params$se, return_weights = params$return_weights)
+      pred <- predict(ens, newdata = newdata, se = params$se)
       testthat::expect_s3_class(pred, "data.table")
       testthat::expect_identical(nrow(pred), expected_rows)
       testthat::expect_true(all(vapply(pred, is.numeric, logical(1L))))
@@ -93,21 +92,13 @@ testthat::test_that("Prediction names are correct with SE", {
   )
 })
 
-testthat::test_that("Prediction parameter equivalence", {
-  testthat::expect_equivalent(
-    predict(ens.class, X.class, return_weights = TRUE),
-    predict(ens.class, X.class, return_weights = FALSE)
-  )
-  testthat::expect_equivalent(
-    predict(ens.class, X.class, level = 0.8, return_weights = TRUE),
-    predict(ens.class, X.class, level = 0.8, return_weights = FALSE)
-  )
-
+testthat::test_that("Prediction equivalence", {
   # Note that SE is stochastic, since it uses permutation importance
+
   set.seed(42L)
-  p1 <- predict(ens.class, X.class, se = TRUE, level = 0.8, return_weights = TRUE)
+  p1 <- predict(ens.class, X.class, se = TRUE, level = 0.8)
   set.seed(42L)
-  p2 <- predict(ens.class, X.class, se = TRUE, level = 0.8, return_weights = FALSE)
+  p2 <- predict(ens.class, X.class, se = TRUE, level = 0.8)
 
   testthat::expect_equivalent(p1, p2)
 })
