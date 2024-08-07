@@ -27,6 +27,7 @@ Suggests:
     lintr,
     mlbench,
     nnet,
+    randomForest,
     rmarkdown,
     rpart,
     spelling,
