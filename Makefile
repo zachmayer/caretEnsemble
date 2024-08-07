@@ -1,6 +1,6 @@
 # Makefile for R project
 
-.PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check fix-style lint spell build-vignettes release clean
+.PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check fix-style lint spell build-vignettes release clean build
 
 # Default target
 all: clean fix-style document install build-vignettes lint spell test check coverage
@@ -88,6 +88,9 @@ spell:
 			stop(error); \
 		}; \
 	"
+
+build:
+	Rscript -e "devtools::build()"
 
 # Build vignettes
 build-vignettes:

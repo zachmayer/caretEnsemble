@@ -1,7 +1,7 @@
 Package: caretEnsemble
 Type: Package
 Title: Ensembles of Caret Models
-Version: 2.0.4
+Version: 4.0.0
 Date: 2024-08-06
 Authors@R: c(person(c("Zachary", "A."), "Deane-Mayer", role = c("aut", "cre"),
     email = "zach.mayer@gmail.com"),
@@ -17,38 +17,31 @@ Description: Functions for creating ensembles of caret models: caretList()
 Depends:
     R (>= 3.2.0)
 Suggests:
-    caTools,
-    testthat,
-    devtools,
-    lintr,
-    covr,
-    randomForest,
-    glmnet,
-    rpart,
-    kernlab,
-    nnet,
-    e1071,
-    ipred,
-    pROC,
-    knitr,
-    mlbench,
     MASS,
+    caTools,
+    covr,
+    devtools,
     gbm,
-    plyr,
-    klaR,
+    glmnet,
+    knitr,
+    lintr,
+    mlbench,
+    nnet,
+    randomForest,
     rmarkdown,
-    usethis,
-    sass,
-    spelling
+    rpart,
+    spelling,
+    testthat,
+    usethis
 Imports:
-    methods,
-    pbapply,
+    caret,
+    data.table,
     ggplot2,
     lattice,
-    data.table,
-    caret,
-    rlang,
-    patchwork
+    methods,
+    patchwork,
+    pbapply,
+    rlang
 License: MIT + file LICENSE
 VignetteBuilder: knitr
 RoxygenNote: 7.3.2

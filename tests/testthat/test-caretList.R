@@ -381,7 +381,7 @@ testthat::test_that("Longer tests for Classification models", {
     x = train[, -23L],
     y = train[, "Class"],
     metric = "ROC",
-    methodList = c("svmLinear", "knn", "glm")
+    methodList = c("rpart", "knn", "glm")
   )
 
   testthat::expect_is(test2, "caretList")
@@ -460,8 +460,8 @@ testthat::test_that("Users can pass a custom tuneList", {
       tuneLength = 9L
     ),
     svmRadial = caretModelSpec(
-      method = "svmRadial",
-      tuneLength = 3L
+      method = "lda2",
+      tuneLength = 1L
     )
   )
 
@@ -476,7 +476,7 @@ testthat::test_that("Users can pass a custom tuneList", {
   testthat::expect_is(test2a, "caretList")
   testthat::expect_identical(nrow(test2a[[1L]]$results), 4L)
   testthat::expect_identical(nrow(test2a[[2L]]$results), 9L)
-  testthat::expect_identical(nrow(test2a[[3L]]$results), 3L)
+  testthat::expect_identical(nrow(test2a[[3L]]$results), 1L)
 })
 
 testthat::context("User tuneTest parameters are respected and model is ensembled")
