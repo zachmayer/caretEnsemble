@@ -20,9 +20,9 @@ test <- caret::twoClassSim(
 
 testthat::test_that("caretModelSpec returns valid specs", {
   tuneList <- list(
-    rf1 = caretModelSpec(),
-    rf2 = caretModelSpec(method = "rf", tuneLength = 5L),
-    caretModelSpec(method = "rpart"),
+    caretModelSpec(),
+    rp1 = caretModelSpec(method = "rpart"),
+    rp2 = caretModelSpec(method = "rpart", tuneLength = 2L),
     caretModelSpec(method = "knn", tuneLength = 10L)
   )
   tuneList <- caretEnsemble::tuneCheck(tuneList)
@@ -120,7 +120,7 @@ testthat::test_that("caretList predictions", {
     caretList(
       iris[, 1L:2L], iris[, 3L],
       tuneLength = 1L, verbose = FALSE,
-      methodList = "rf", tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE))
+      methodList = "rpart", tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE))
     ), "There were missing values in resampled performance measures."
   )
 
@@ -143,7 +143,7 @@ testthat::test_that("caretList predictions", {
   models <- caretList(
     iris[, 1L:2L], iris[, 5L],
     tuneLength = 1L, verbose = FALSE,
-    methodList = "rf",
+    methodList = "rpart",
     tuneList = list(nnet = caretModelSpec(method = "nnet", trace = FALSE))
   )
 
@@ -238,8 +238,8 @@ testthat::context("We can fit models with a mix of methodList and tuneList")
 ################################################
 testthat::test_that("We can fit models with a mix of methodList and tuneList", {
   myList <- list(
-    rpart = caretModelSpec(method = "rpart", tuneLength = 10L),
-    rf = caretModelSpec(method = "rf", tuneGrid = data.table::data.table(mtry = 2L))
+    rpart1 = caretModelSpec(method = "rpart", tuneLength = 10L),
+    rpart2 = caretModelSpec(method = "rpart", tuneGrid = data.table::data.table(cp = 0.2))
   )
   test <- testthat::expect_warning(
     caretList(
@@ -254,7 +254,7 @@ testthat::test_that("We can fit models with a mix of methodList and tuneList", {
   testthat::expect_length(test, 4L)
   methods <- vapply(test, function(x) x$method, character(1L))
   names(methods) <- NULL
-  testthat::expect_identical(methods, c("rpart", "rf", "knn", "glm"))
+  testthat::expect_identical(methods, c("rpart1", "rpart2", "knn", "glm"))
 })
 
 ################################################
@@ -296,7 +296,7 @@ testthat::test_that("We can handle different CV methods", {
         x = x,
         y = y,
         tuneLength = 2L,
-        methodList = c("rpart", "rf")
+        methodList = "rpart"
       ), "There were missing values in resampled performance measures."
     )
     ens <- caretStack(models, method = "glm")
@@ -325,7 +325,7 @@ testthat::test_that("Non standard cv methods work", {
         y = iris[, 3L],
         tuneLength = 1L,
         data = iris,
-        method = "rf",
+        method = "rpart",
         trControl = caret::trainControl(
           method = m,
           savePredictions = "final"
@@ -662,7 +662,7 @@ testthat::test_that("caretList handles new factor levels in prediction", {
   models <- caretList(
     x = train_data[, 1L:4L],
     y = train_data[, 5L],
-    methodList = c("rpart", "rf")
+    methodList = "rpart"
   )
 
   pred <- predict(models, newdata = test_data)
@@ -710,7 +710,7 @@ testthat::test_that("caretList handles custom performance metrics", {
     x = iris[, 1L:4L],
     y = iris[, 5L],
     metric = "default",
-    methodList = c("rpart", "rf"),
+    methodList = "rpart",
     trControl = caret::trainControl(
       method = "cv",
       number = 2L,

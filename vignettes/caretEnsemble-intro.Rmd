@@ -51,8 +51,8 @@ model_list_big <- caretEnsemble::caretList(
   data = training,
   methodList = c("glmnet", "rpart"),
   tuneList = list(
-    rf1 = caretEnsemble::caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 2L)),
-    rf2 = caretEnsemble::caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 10L), preProcess = "pca"),
+    rf1 = caretEnsemble::caretModelSpec(method = "rpart", tuneGrid = data.frame(cp = 0.24)),
+    rf2 = caretEnsemble::caretModelSpec(method = "rpart", tuneLength = 2L, preProcess = "pca"),
     nn = caretEnsemble::caretModelSpec(method = "nnet", tuneLength = 2L, trace = FALSE)
   )
 )

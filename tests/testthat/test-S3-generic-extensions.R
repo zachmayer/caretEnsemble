@@ -27,7 +27,7 @@ model_list1 <- caretList(
   data = Sonar,
   trControl = my_control,
   tuneList = list(
-    glm = caretModelSpec(method = "rf"),
+    glm = caretModelSpec(method = "glm", preProcess = "ica"),
     rpart = caretModelSpec(method = "rpart")
   )
 )
@@ -51,8 +51,8 @@ testthat::test_that("c.caretEnsemble can bind two caretList objects", {
     data = Sonar,
     trControl = my_control,
     tuneList = list(
-      glm = caretModelSpec(method = "rpart", tuneLength = 2L),
-      rpart = caretModelSpec(method = "rf", tuneLength = 2L)
+      glm = caretModelSpec(method = "glm", preProcess = "ica"),
+      rpart = caretModelSpec(method = "rpart", tuneLength = 2L)
     )
   )
 

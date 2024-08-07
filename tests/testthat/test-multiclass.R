@@ -266,7 +266,7 @@ testthat::test_that("caretList and caretStack handle new levels in prediction da
   model_list <- caretList(
     x = train_data[, -5L],
     y = train_data[, 5L],
-    methodList = c("rf", "rpart")
+    methodList = "rpart"
   )
 
   stack <- caretStack(model_list, method = "rpart")

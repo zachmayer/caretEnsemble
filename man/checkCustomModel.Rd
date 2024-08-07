@@ -7,7 +7,7 @@
 checkCustomModel(x)
 }
 \arguments{
-\item{x}{a model info list (e.g. \code{getModelInfo("rf", regex=F)\[[1]]})}
+\item{x}{a model info list (e.g. \code{getModelInfo("rpart", regex=F)\[[1]]})}
 }
 \value{
 validated model info list (i.e. x)

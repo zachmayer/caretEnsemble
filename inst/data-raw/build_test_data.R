@@ -1,9 +1,14 @@
+# Note this needs extrac packages, and thus can't run on R < 4.1:
+# randomForest (4.1+)
+
 # Build test data
 data(iris)
 Y.reg <- iris[, 1L]
 X.reg <- model.matrix(~., iris[, -1L])
 X.class <- X.reg
 Y.class <- factor(ifelse(iris$Sepal.Length <= 6.2, "No", "Yes"))
+
+MODEL_METHODS <- c("rpart", "rf", "knn", "glm")
 
 # Reusable control
 myControl_reg <- caret::trainControl(
@@ -32,7 +37,7 @@ set.seed(482L)
 models.reg <- caretEnsemble::caretList(
   x = X.reg,
   y = Y.reg,
-  methodList = c("rf", "glm", "rpart", "treebag"),
+  methodList = MODEL_METHODS,
   trControl = myControl_reg
 )
 
@@ -41,7 +46,7 @@ set.seed(482L)
 models.class <- caretEnsemble::caretList(
   x = X.class,
   y = Y.class,
-  methodList = c("rf", "glm", "rpart", "treebag"),
+  methodList = MODEL_METHODS,
   trControl = myControl_class
 )
 

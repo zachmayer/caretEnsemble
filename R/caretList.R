@@ -271,8 +271,8 @@ as.caretList.list <- function(object) {
 #' model_list2 <- caretList(Class ~ .,
 #'   data = Sonar,
 #'   tuneList = list(
-#'     glm = caretModelSpec(method = "rpart"),
-#'     rpart = caretModelSpec(method = "rf")
+#'     glm = caretModelSpec(method = "glm"),
+#'     rpart = caretModelSpec(method = "rpart")
 #'   )
 #' )
 #'
@@ -319,8 +319,8 @@ c.caretList <- function(...) {
 #' @export
 #' @return a list of lists
 #' @examples
-#' caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
-caretModelSpec <- function(method = "rf", ...) {
+#' caretModelSpec("rpart", tuneLength = 5, preProcess = "ica")
+caretModelSpec <- function(method = "rpart", ...) {
   out <- c(list(method = method), list(...))
   out
 }
@@ -358,7 +358,7 @@ tuneCheck <- function(x) {
 #' @description Currently, this only ensures that all model info lists
 #' were also assigned a "method" attribute for consistency with usage
 #' of non-custom models
-#' @param x a model info list (e.g. \code{getModelInfo("rf", regex=F)\[[1]]})
+#' @param x a model info list (e.g. \code{getModelInfo("rpart", regex=F)\[[1]]})
 #' @return validated model info list (i.e. x)
 #' @keywords internal
 checkCustomModel <- function(x) {
