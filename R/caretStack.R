@@ -143,11 +143,10 @@ predict.caretStack <- function(
   check_caretStack(object)
 
   # Extract model types
-  model_type <- object$ens_model$modelType
-  is_class <- model_type == "Classification"
+  is_class <- isClassifier(object)
 
   # If the excluded class wasn't set at train time, set it
-  object <- set_excluded_class_id(object, model_type)
+  object <- set_excluded_class_id(object, is_class)
 
   # Check return_class_only
   if (return_class_only) {
@@ -224,10 +223,10 @@ check_caretStack <- function(object) {
 #' @description Set the excluded class id for a caretStack object
 #'
 #' @param object a caretStack object
-#' @param model_type the model type as a character vector with length 1
+#' @param is_class the model type as a logical vector with length 1
 #' @keywords internal
-set_excluded_class_id <- function(object, model_type) {
-  if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
+set_excluded_class_id <- function(object, is_class) {
+  if (is_class && is.null(object[["excluded_class_id"]])) {
     object[["excluded_class_id"]] <- 1L
     warning("No excluded_class_id set. Setting to 1L.", call. = FALSE)
   }

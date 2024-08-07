@@ -13,7 +13,7 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
   stopifnot(methods::is(object, "train"))
 
   # Extract the model type
-  model_type <- extractModelType(object, validate_for_stacking = is.null(newdata))
+  is_class <- isClassifierAndValidate(object, validate_for_stacking = is.null(newdata))
 
   # If newdata is NULL, return the stacked predictions
   if (is.null(newdata)) {
@@ -28,7 +28,7 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
 
     # Keep only the predictions
     keep_cols <- "pred"
-    if (model_type == "Classification") {
+    if (is_class) {
       keep_cols <- levels(object)
     }
     pred <- pred[, c("rowIndex", keep_cols), drop = FALSE, with = FALSE]
@@ -44,7 +44,7 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
 
     # Otherwise, predict on newdata
   } else {
-    if (model_type == "Classification") {
+    if (is_class) {
       pred <- caret::predict.train(object, type = "prob", newdata = newdata, ...)
     } else {
       pred <- caret::predict.train(object, type = "raw", newdata = newdata, ...)
@@ -62,7 +62,7 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
   # Make sure in both cases we have consitent column names and column order
   # Drop the excluded class for classificaiton
   stopifnot(nrow(pred) == nrow(newdata))
-  if (model_type == "Classification") {
+  if (is_class) {
     stopifnot(
       ncol(pred) == nlevels(object),
       names(pred) == levels(object)
@@ -202,45 +202,6 @@ dropExcludedClass <- function(x, all_classes, excluded_class_id) {
   x
 }
 
-#' @title Extract the model type from a \code{\link[caret]{train}} object
-#' @description Extract the model type from a \code{\link[caret]{train}} object.
-#' For classification, validates that the model can predict probabilities, and,
-#'  if stacked predictions are requested, that classProbs = TRUE.
-#' @param object a \code{\link[caret]{train}} object
-#' @param validate_for_stacking a logical indicating whether to validate the object for stacked predictions
-#' @return a character string
-#' @keywords internal
-extractModelType <- function(object, validate_for_stacking = TRUE) {
-  stopifnot(methods::is(object, "train"))
-
-  # Extract type
-  model_type <- object$modelType
-
-  # Class or reg?
-  is_class <- model_type == "Classification"
-
-  # Validate for predictions
-  if (is_class && !is.function(object$modelInfo$prob)) {
-    stop("No probability function found. Re-fit with a method that supports prob.", call. = FALSE)
-  }
-  # Validate for stacked predictions
-  if (validate_for_stacking) {
-    err <- "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions."
-    if (is.null(object$control$savePredictions)) {
-      stop(err, call. = FALSE)
-    }
-    if (!object$control$savePredictions %in% c("all", "final", TRUE)) {
-      stop(err, call. = FALSE)
-    }
-    if (is_class && !object$control$classProbs) {
-      stop("classProbs = FALSE. Re-fit with classProbs = TRUE in trainControl.", call. = FALSE)
-    }
-  }
-
-  # Return
-  model_type
-}
-
 #' @title S3 definition for concatenating train objects
 #'
 #' @description take N objects of class train and concatenate into an object of class caretList for future ensembling
@@ -365,9 +326,9 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
     is.data.frame(object$pred)
   )
   keep_cols <- c("pred", "obs", "rowIndex")
-  type <- object$modelType
+  is_class <- isClassifier(object)
   predobs <- data.table::data.table(object$pred)
-  if (type == "Classification") {
+  if (is_class) {
     show_class <- levels(object)[show_class_id]
     data.table::set(predobs, j = "pred", value = predobs[[show_class]])
     data.table::set(predobs, j = "obs", value = as.integer(predobs[["obs"]] == show_class))
@@ -379,4 +340,55 @@ extractPredObsResid <- function(object, show_class_id = 2L) {
   data.table::set(predobs, j = "resid", value = r)
   data.table::setorderv(predobs, "rowIndex")
   predobs
+}
+
+
+#' @title Is Classifier
+#' @description Check if a model is a classifier.
+#' @param model A train object from the caret package.
+#' @return A logical indicating whether the model is a classifier.
+#' @keywords internal
+isClassifier <- function(model) {
+  stopifnot(methods::is(model, "train") || methods::is(model, "caretStack"))
+  if (methods::is(model, "train")) {
+    out <- model$modelType == "Classification"
+  } else {
+    out <- model$ens_model$modelType == "Classification"
+  }
+  out
+}
+
+#' @title Validate a model type
+#' @description Validate the model type from a \code{\link[caret]{train}} object.
+#' For classification, validates that the model can predict probabilities, and,
+#'  if stacked predictions are requested, that classProbs = TRUE.
+#' @param object a \code{\link[caret]{train}} object
+#' @param validate_for_stacking a logical indicating whether to validate the object for stacked predictions
+#' @return a logical. TRUE if classifier, otherwise FALSE.
+#' @keywords internal
+isClassifierAndValidate <- function(object, validate_for_stacking = TRUE) {
+  stopifnot(methods::is(object, "train"))
+
+  is_class <- isClassifier(object)
+
+  # Validate for predictions
+  if (is_class && !is.function(object$modelInfo$prob)) {
+    stop("No probability function found. Re-fit with a method that supports prob.", call. = FALSE)
+  }
+  # Validate for stacked predictions
+  if (validate_for_stacking) {
+    err <- "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions."
+    if (is.null(object$control$savePredictions)) {
+      stop(err, call. = FALSE)
+    }
+    if (!object$control$savePredictions %in% c("all", "final", TRUE)) {
+      stop(err, call. = FALSE)
+    }
+    if (is_class && !object$control$classProbs) {
+      stop("classProbs = FALSE. Re-fit with classProbs = TRUE in trainControl.", call. = FALSE)
+    }
+  }
+
+  # Return
+  is_class
 }
