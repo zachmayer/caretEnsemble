@@ -19,12 +19,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config:
+        config:  # https://github.com/r-hub/rversions
+
+          # macOS / Widnows on latest
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
+  
+          # Ubuntu on latest, devel, release, oldrel as well as version in DESCRIPTION
+          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,  r: 'release'}  # rversions::r_release()
+          - {os: ubuntu-latest,  r: 'oldrel-1'}  # rversions::r_oldrel()
+          - {os: ubuntu-latest,  r: 'oldrel-2'}
+          - {os: ubuntu-latest,  r: 'oldrel-3'}
+          - {os: ubuntu-latest,  r: 'oldrel-4'}
+          - {os: ubuntu-latest,  r: '3.6.0'}  # rversions::r_versions()
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
