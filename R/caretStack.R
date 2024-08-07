@@ -100,7 +100,6 @@ caretStack <- function(
 #' @param newdata a new dataframe to make predictions on
 #' @param se logical, should prediction errors be produced? Default is false.
 #' @param level tolerance/confidence level
-#' @param return_weights a logical indicating whether prediction weights for each model
 #' should be returned
 #' @param excluded_class_id Which class to exclude from predictions. Note that if the caretStack
 #' was trained with an excluded_class_id, that class is ALWAYS excluded from the predictions from the
@@ -136,7 +135,6 @@ predict.caretStack <- function(
     newdata = NULL,
     se = FALSE,
     level = 0.95,
-    return_weights = FALSE,
     excluded_class_id = 0L,
     return_class_only = FALSE,
     verbose = FALSE,
@@ -161,7 +159,7 @@ predict.caretStack <- function(
   }
 
   # Calculate variable importance if needed
-  if (se || return_weights) {
+  if (se) {
     imp <- caret::varImp(object, newdata = newdata, normalize = TRUE)
   }
 
@@ -219,11 +217,6 @@ predict.caretStack <- function(
     out <- factor(class_levels[class_id], class_levels)
   } else {
     out <- meta_preds
-  }
-
-  # Add weights to output if needed
-  if (return_weights) {
-    attr(out, "weights") <- imp
   }
 
   # Return
@@ -465,6 +458,7 @@ plot.caretStack <- function(x, metric = NULL, ...) {
 #' )
 #' autoplot(ens)
 #' }
+# https://github.com/thomasp85/patchwork/issues/226 — why we need importFrom patchwork plot_layout
 autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(methods::is(object, "caretStack"))
   ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)

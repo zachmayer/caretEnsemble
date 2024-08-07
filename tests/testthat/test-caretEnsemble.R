@@ -42,7 +42,6 @@ testthat::test_that("We can ensemble regression models", {
 
   testthat::expect_true(all(pred.reg == pred.reg2$pred))
 
-  testthat::expect_error(predict(ens.reg, return_weights = "BOGUS"), "Error in se || return_weights")
 
   testthat::expect_s3_class(pred.reg, "data.table")
   testthat::expect_identical(nrow(pred.reg), 150L)
@@ -51,26 +50,6 @@ testthat::test_that("We can ensemble regression models", {
   pred.class <- predict(ens.class, newdata = X.class)
   testthat::expect_s3_class(pred.class, "data.table")
   testthat::expect_identical(nrow(pred.class), 150L)
-
-  # Check different cases
-  p1 <- predict(ens.reg, newdata = X.class, return_weights = TRUE, se = FALSE)
-  testthat::expect_is(unlist(attr(p1, which = "weights")), "numeric")
-  testthat::expect_s3_class(p1, "data.table")
-
-  p2 <- predict(ens.reg, newdata = X.class, return_weights = TRUE, se = TRUE)
-  testthat::expect_is(unlist(attr(p2, which = "weights")), "numeric")
-  testthat::expect_s3_class(p2, "data.table")
-  testthat::expect_identical(ncol(p2), 3L)
-  testthat::expect_named(p2, c("pred", "lwr", "upr"))
-
-  p3 <- predict(ens.reg, newdata = X.class, return_weights = FALSE, se = FALSE)
-  testthat::expect_s3_class(p3, "data.table")
-  testthat::expect_equivalent(p1, p3)
-  testthat::expect_false(identical(p1, p3))
-
-  testthat::expect_equivalent(p2$pred, p1$pred)
-  testthat::expect_equivalent(p2$pred, p3$pred)
-  testthat::expect_null(attr(p3, which = "weights"))
 })
 
 #############################################################################
