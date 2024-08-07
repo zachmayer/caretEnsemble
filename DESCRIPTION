@@ -15,7 +15,7 @@ Description: Functions for creating ensembles of caret models: caretList()
     non-linear combinations of these models, using a caret::train() model as a
     meta-model.
 Depends:
-    R (>= 3.2.0)
+    R (>= 4.1.0)
 Suggests:
     MASS,
     caTools,
