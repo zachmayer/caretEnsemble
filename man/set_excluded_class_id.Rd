@@ -4,12 +4,12 @@
 \alias{set_excluded_class_id}
 \title{Set excluded class id}
 \usage{
-set_excluded_class_id(object, model_type)
+set_excluded_class_id(object, is_class)
 }
 \arguments{
 \item{object}{a caretStack object}
 
-\item{model_type}{the model type as a character vector with length 1}
+\item{is_class}{the model type as a logical vector with length 1}
 }
 \description{
 Set the excluded class id for a caretStack object

@@ -25,3 +25,4 @@ This is a prediction wrapper for \code{\link[caret]{train}} with several feature
 - Optionally drops one predicted class for classification models.
 - Always returns a \code{\link[data.table]{data.table}}
 }
+\keyword{internal}

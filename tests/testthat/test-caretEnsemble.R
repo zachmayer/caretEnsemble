@@ -245,7 +245,7 @@ testthat::test_that("Ensembles fails if predictions are not saved", {
   models_bad <- models.reg[[1L]]
   models_bad$pred <- NULL
   testthat::expect_error(
-    extractPredObsResid(models_bad),
+    stackedTrainResiduals(models_bad),
     "No predictions saved during training. Please set savePredictions = 'final' in trainControl"
   )
 })

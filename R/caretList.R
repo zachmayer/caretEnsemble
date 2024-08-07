@@ -74,10 +74,7 @@ caretList <- function(
   if (is.null(metric)) {
     metric <- "RMSE"
     if (is_class) {
-      metric <- "Accuracy"
-      if (is_binary) {
-        metric <- "ROC"
-      }
+      metric <- if (is_binary) "ROC" else "Accuracy"
     }
   }
 
@@ -93,6 +90,10 @@ caretList <- function(
       returnData = FALSE
     )
   }
+
+  # ALWAYS save class probs
+  trControl[["classProbs"]] <- is_class
+  trControl["savePredictions"] <- "final"
 
   # Capture global arguments for train as a list
   # Squish trControl back onto the global arguments list

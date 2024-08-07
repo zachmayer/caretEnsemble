@@ -25,22 +25,6 @@ mae <- function(a, b) {
   mean(abs(a - b))
 }
 
-#' @title Is Classifier
-#' @description Check if a model is a classifier.
-#' @param model A train object from the caret package.
-#' @return A logical indicating whether the model is a classifier.
-#' @keywords internal
-isClassifier <- function(model) {
-  stopifnot(methods::is(model, "train") || methods::is(model, "caretStack"))
-  if (methods::is(model, "train")) {
-    out <- model$modelType == "Classification"
-  } else {
-    out <- model$ens_model$modelType == "Classification"
-  }
-  out
-}
-
-
 #' @title Shuffled MAE
 #' @description Compute the mean absolute error of a model's predictions when a variable is shuffled.
 #' @param original_data A data.table of the original data.

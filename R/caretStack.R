@@ -143,11 +143,10 @@ predict.caretStack <- function(
   check_caretStack(object)
 
   # Extract model types
-  model_type <- object$ens_model$modelType
-  is_class <- model_type == "Classification"
+  is_class <- isClassifier(object)
 
   # If the excluded class wasn't set at train time, set it
-  object <- set_excluded_class_id(object, model_type)
+  object <- set_excluded_class_id(object, is_class)
 
   # Check return_class_only
   if (return_class_only) {
@@ -224,10 +223,10 @@ check_caretStack <- function(object) {
 #' @description Set the excluded class id for a caretStack object
 #'
 #' @param object a caretStack object
-#' @param model_type the model type as a character vector with length 1
+#' @param is_class the model type as a logical vector with length 1
 #' @keywords internal
-set_excluded_class_id <- function(object, model_type) {
-  if (model_type == "Classification" && is.null(object[["excluded_class_id"]])) {
+set_excluded_class_id <- function(object, is_class) {
+  if (is_class && is.null(object[["excluded_class_id"]])) {
     object[["excluded_class_id"]] <- 1L
     warning("No excluded_class_id set. Setting to 1L.", call. = FALSE)
   }
@@ -412,6 +411,34 @@ plot.caretStack <- function(x, metric = NULL, ...) {
   plt
 }
 
+#' @title Extracted stacked residuals for the autoplot
+#' @description This function extracts the predictions, observeds, and residuals from a \code{train} object.
+#' It uses the object's stacked predictions from cross-validation.
+#' @param object a \code{train} object
+#' @param show_class_id For classification only: which class level to use for residuals
+#' @return a data.table::data.table with predictions, observeds, and residuals
+#' @keywords internal
+stackedTrainResiduals <- function(object, show_class_id = 2L) {
+  stopifnot(methods::is(object, "train"))
+  is_class <- isClassifier(object)
+  predobs <- extractBestPreds(object)
+  rowIndex <- predobs[["rowIndex"]]
+  pred <- predobs[["pred"]]
+  obs <- predobs[["obs"]]
+  if (is_class) {
+    show_class <- levels(object)[show_class_id]
+    pred <- predobs[[show_class]]
+    obs <- as.integer(obs == show_class)
+  }
+  predobs <- data.table::data.table(
+    rowIndex = rowIndex,
+    pred = pred,
+    obs = obs,
+    resid = obs - pred
+  )
+  predobs
+}
+
 #' @title Convenience function for more in-depth diagnostic plots of caretStack objects
 #' @description This function provides a more robust series of diagnostic plots
 #' for a caretEnsemble object.
@@ -445,7 +472,7 @@ plot.caretStack <- function(x, metric = NULL, ...) {
 # https://github.com/thomasp85/patchwork/issues/226 — why we need importFrom patchwork plot_layout
 autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(methods::is(object, "caretStack"))
-  ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
+  ensemble_data <- stackedTrainResiduals(object$ens_model, show_class_id = show_class_id)
 
   # Performance metrics by model
   g1 <- plot(object) + ggplot2::labs(title = "Metric and SD For Component Models")
@@ -470,7 +497,7 @@ autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
     ggplot2::theme_bw()
 
   # Disagreement in sub-model residuals
-  sub_model_data <- lapply(object$models, extractPredObsResid, show_class_id = show_class_id)
+  sub_model_data <- lapply(object$models, stackedTrainResiduals, show_class_id = show_class_id)
   for (model_name in names(sub_model_data)) {
     data.table::set(sub_model_data[[model_name]], j = "model", value = model_name)
   }

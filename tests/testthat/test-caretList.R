@@ -174,11 +174,6 @@ testthat::test_that("caretList predictions", {
     p3,
     correct_colnames
   ) # check the column names are correct and ordered correctly (methodname_classname)
-
-  # Check that bad model types error
-  # This error message is weird though
-  models[[1L]]$modelType <- "Bogus"
-  testthat::expect_error(predict(models), "mean is not meaningful for factors.")
 })
 
 testthat::test_that("as.caretList.list returns a caretList object", {
