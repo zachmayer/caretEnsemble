@@ -411,6 +411,34 @@ plot.caretStack <- function(x, metric = NULL, ...) {
   plt
 }
 
+#' @title Extracted stacked residuals for the autoplot
+#' @description This function extracts the predictions, observeds, and residuals from a \code{train} object.
+#' It uses the object's stacked predictions from cross-validation.
+#' @param object a \code{train} object
+#' @param show_class_id For classification only: which class level to use for residuals
+#' @return a data.table::data.table with predictions, observeds, and residuals
+#' @keywords internal
+stackedTrainResiduals <- function(object, show_class_id = 2L) {
+  stopifnot(methods::is(object, "train"))
+  is_class <- isClassifier(object)
+  predobs <- extractBestPreds(object)
+  rowIndex <- predobs[["rowIndex"]]
+  pred <- predobs[["pred"]]
+  obs <- predobs[["obs"]]
+  if (is_class) {
+    show_class <- levels(object)[show_class_id]
+    pred <- predobs[[show_class]]
+    obs <- as.integer(obs == show_class)
+  }
+  predobs <- data.table::data.table(
+    rowIndex = rowIndex,
+    pred = pred,
+    obs = obs,
+    resid = obs - pred
+  )
+  predobs
+}
+
 #' @title Convenience function for more in-depth diagnostic plots of caretStack objects
 #' @description This function provides a more robust series of diagnostic plots
 #' for a caretEnsemble object.
@@ -444,7 +472,7 @@ plot.caretStack <- function(x, metric = NULL, ...) {
 # https://github.com/thomasp85/patchwork/issues/226 — why we need importFrom patchwork plot_layout
 autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(methods::is(object, "caretStack"))
-  ensemble_data <- extractPredObsResid(object$ens_model, show_class_id = show_class_id)
+  ensemble_data <- stackedTrainResiduals(object$ens_model, show_class_id = show_class_id)
 
   # Performance metrics by model
   g1 <- plot(object) + ggplot2::labs(title = "Metric and SD For Component Models")
@@ -469,7 +497,7 @@ autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
     ggplot2::theme_bw()
 
   # Disagreement in sub-model residuals
-  sub_model_data <- lapply(object$models, extractPredObsResid, show_class_id = show_class_id)
+  sub_model_data <- lapply(object$models, stackedTrainResiduals, show_class_id = show_class_id)
   for (model_name in names(sub_model_data)) {
     data.table::set(sub_model_data[[model_name]], j = "model", value = model_name)
   }

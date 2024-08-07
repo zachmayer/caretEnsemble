@@ -9,6 +9,7 @@
 #' @param excluded_class_id an integer indicating the class to exclude. If 0L, no class is excluded
 #' @param ... additional arguments to pass to \code{\link[caret]{predict.train}}, if newdata is not NULL
 #' @return a data.table
+#' @keywords internal
 caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
   stopifnot(methods::is(object, "train"))
 
@@ -17,30 +18,9 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
 
   # If newdata is NULL, return the stacked predictions
   if (is.null(newdata)) {
-    # Extract the best tune
-    a <- data.table::data.table(object$bestTune, key = names(object$bestTune))
-
-    # Extract the best predictions
-    b <- data.table::data.table(object$pred, key = names(object$bestTune))
-
-    # Subset pred data to the best tune only
-    pred <- b[a, ]
-
-    # Keep only the predictions
-    keep_cols <- "pred"
-    if (is_class) {
-      keep_cols <- levels(object)
-    }
-    pred <- pred[, c("rowIndex", keep_cols), drop = FALSE, with = FALSE]
-
-    # If we have multiple resamples per row
-    # e.g. for repeated CV, we need to average the predictions
-    data.table::setkeyv(pred, "rowIndex")
-    pred <- pred[, lapply(.SD, mean), by = "rowIndex"]
-    data.table::setorderv(pred, "rowIndex")
-
-    # Remove the rowIndex
-    data.table::set(pred, j = "rowIndex", value = NULL)
+    pred <- extractBestPreds(object)
+    keep_cols <- if (is_class) levels(object) else "pred"
+    pred <- pred[, keep_cols, with = FALSE]
 
     # Otherwise, predict on newdata
   } else {
@@ -110,9 +90,9 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
     model <- do.call(caret::train, model_args)
   }
 
-  # Use data.table for stacked predictions
+  # Only save stacked predictions for the best model
   if ("pred" %in% names(model)) {
-    model[["pred"]] <- data.table::data.table(model[["pred"]])
+    model[["pred"]] <- extractBestPreds(model)
   }
 
   if (trim) {
@@ -141,6 +121,55 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
 
   # Return
   model
+}
+
+#' @title Aggregate mean or first
+#' @description For numeric data take the mean.  For character data take the first value.
+#' @param x a train object
+#' @return a data.table::data.table with predictions
+#' @keywords internal
+aggregate_mean_or_first <- function(x) {
+  if (is.numeric(x)) {
+    mean(x)
+  } else {
+    x[1L]
+  }
+}
+
+#' @title Extract the best predictions from a train object
+#' @description Extract the best predictions from a train object.
+#' @param x a train object
+#' @return a data.table::data.table with predictions
+#' @keywords internal
+extractBestPreds <- function(x) {
+  stopifnot(methods::is(x, "train"))
+  if (is.null(x$pred)) {
+    stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
+  }
+  stopifnot(methods::is(x$pred, "data.frame"))
+
+  # Extract the best tune
+  keys <- names(x$bestTune)
+  best_tune <- data.table::data.table(x$bestTune, key = keys)
+
+  # Extract the best predictions
+  pred <- data.table::data.table(x$pred, key = keys)
+
+  # Subset pred data to the best tune only
+  # Drop rows for other tunes
+  pred <- pred[best_tune, ]
+
+  # If we have multiple resamples per row
+  # e.g. for repeated CV, we need to average the predictions
+  keys <- "rowIndex"
+  data.table::setkeyv(pred, keys)
+  pred <- pred[, lapply(.SD, aggregate_mean_or_first), by = keys]
+
+  # Order results consistently
+  data.table::setorderv(pred, keys)
+
+  # Return
+  pred
 }
 
 #' @title Validate the excluded class
@@ -269,8 +298,8 @@ extractMetric <- function(x, ...) {
 #' @param ... ignored
 #' If NULL, uses the metric that was used to train the model.
 #' @return A numeric representing the metric desired metric.
-#' @export
 #' @method extractMetric train
+#' @export
 extractMetric.train <- function(x, metric = NULL, ...) {
   if (is.null(metric) || !metric %in% names(x$results)) {
     metric <- x$metric
@@ -301,6 +330,7 @@ extractMetric.train <- function(x, metric = NULL, ...) {
 #' used instead.
 #' @param x a single caret train object
 #' @return Name associated with model
+#' @keywords internal
 extractModelName <- function(x) {
   if (is.list(x$method)) {
     checkCustomModel(x$method)$method
@@ -310,38 +340,6 @@ extractModelName <- function(x) {
     x$method
   }
 }
-
-#' @title Extract the best predictions and observations from a train object
-#' @description This function extracts the best predictions and observations from a train object
-#' and then calculates residuals. It only uses one class for classification models, by default class 2.
-#' @param object a \code{train} object
-#' @param show_class_id For classification only: which class level to use for residuals
-#' @return a data.table::data.table with predictions, observeds, and residuals
-extractPredObsResid <- function(object, show_class_id = 2L) {
-  if (is.null(object$pred)) {
-    stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
-  }
-  stopifnot(
-    methods::is(object, "train"),
-    is.data.frame(object$pred)
-  )
-  keep_cols <- c("pred", "obs", "rowIndex")
-  is_class <- isClassifier(object)
-  predobs <- data.table::data.table(object$pred)
-  if (is_class) {
-    show_class <- levels(object)[show_class_id]
-    data.table::set(predobs, j = "pred", value = predobs[[show_class]])
-    data.table::set(predobs, j = "obs", value = as.integer(predobs[["obs"]] == show_class))
-  }
-  predobs <- predobs[, keep_cols, with = FALSE]
-  data.table::setkeyv(predobs, "rowIndex")
-  predobs <- predobs[, lapply(.SD, mean), by = "rowIndex"]
-  r <- predobs[["obs"]] - predobs[["pred"]]
-  data.table::set(predobs, j = "resid", value = r)
-  data.table::setorderv(predobs, "rowIndex")
-  predobs
-}
-
 
 #' @title Is Classifier
 #' @description Check if a model is a classifier.
