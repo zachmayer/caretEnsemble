@@ -21,14 +21,14 @@ testthat::test_that("No predictions generates an error", {
   models_multi <- caretList(
     iris[, 1L:2L], iris[, 5L],
     tuneLength = 1L, verbose = FALSE,
-    methodList = c("glmnet", "gbm")
+    methodList = c("rf", "gbm")
   )
   testthat::expect_is(vapply(models_multi, extractModelType, character(1L)), "character")
 
   models <- caretList(
     iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
     tuneLength = 1L, verbose = FALSE,
-    methodList = c("glmnet", "gbm")
+    methodList = c("rf", "gbm")
   )
   new_model <- caret::train(
     iris[, 1L:2L], factor(ifelse(iris[, 5L] == "setosa", "Yes", "No")),
@@ -54,14 +54,14 @@ testthat::test_that("We can make the stacked predictions matrix", {
   out <- predict(models.reg)
   testthat::expect_s3_class(out, "data.table")
   testthat::expect_identical(dim(out), c(150L, 4L))
-  testthat::expect_named(out, names(models.reg))
+  testthat::expect_named(out, c("rf", "glm", "rpart", "treebag"))
 })
 
 testthat::test_that("We can predict", {
   out <- predict(models.reg, newdata = X.reg)
   testthat::expect_is(out, "data.table")
   testthat::expect_identical(dim(out), c(150L, 4L))
-  testthat::expect_named(out, names(models.reg))
+  testthat::expect_named(out, c("rf", "glm", "rpart", "treebag"))
 })
 
 ########################################################################
@@ -78,13 +78,13 @@ testthat::test_that("We can predict", {
   out <- predict(models.class, newdata = X.class, excluded_class_id = 0L)
   testthat::expect_is(out, "data.table")
   testthat::expect_identical(dim(out), c(150L, 4L * 2L))
-  model_names <- c("rf", "glm")
+  model_names <- c("rf", "glm", "rpart", "treebag")
   class_names <- c("No", "Yes")
   combinations <- expand.grid(class_names, model_names)
   testthat::expect_named(out, paste(combinations$Var2, combinations$Var1, sep = "_"))
   out2 <- predict(models.reg, newdata = X.reg)
   testthat::expect_identical(dim(out2), c(150L, 4L))
-  testthat::expect_named(out2, model_names)
+  testthat::expect_named(out2, c("rf", "glm", "rpart", "treebag"))
 })
 
 testthat::test_that("predict results same regardless of verbose option", {
@@ -355,8 +355,8 @@ testthat::test_that("Stacked predictions works if the row indexes differ", {
 })
 
 testthat::test_that("extractModelName extracts model names correctly", {
-  testthat::expect_identical(extractModelName(models.class[[1L]]), "rf") # Prebuilt test fixture
-  testthat::expect_identical(extractModelName(models.reg[[1L]]), "rf") # Prebuilt test fixture
+  testthat::expect_identical(extractModelName(models.class[[1L]]), "rf")
+  testthat::expect_identical(extractModelName(models.reg[[1L]]), "rf")
 
   # Test custom model
   custom_model <- models.class[[1L]]

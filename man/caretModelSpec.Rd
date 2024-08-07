@@ -4,7 +4,7 @@
 \alias{caretModelSpec}
 \title{Generate a specification for fitting a caret model}
 \usage{
-caretModelSpec(method = "rpart", ...)
+caretModelSpec(method = "rf", ...)
 }
 \arguments{
 \item{method}{the modeling method to pass to caret::train}
@@ -19,5 +19,5 @@ A caret model specification consists of 2 parts: a model (as a string) and
 the arguments to the train call for fitting that model
 }
 \examples{
-caretModelSpec("rpart", tuneLength = 5, preProcess = "ica")
+caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
 }

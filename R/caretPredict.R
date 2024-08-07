@@ -250,19 +250,19 @@ extractModelType <- function(object, validate_for_stacking = TRUE) {
 #' @export
 #' @examples
 #' \dontrun{
-#' tree <- train(Class ~ .,
+#' rpartTrain <- train(Class ~ .,
 #'   data = Sonar,
 #'   trControl = ctrl1,
 #'   method = "rpart"
 #' )
 #'
-#' lin <- train(Class ~ .,
+#' rfTrain <- train(Class ~ .,
 #'   data = Sonar,
 #'   trControl = ctrl1,
-#'   method = "glm"
+#'   method = "rf"
 #' )
 #'
-#' bigList <- c(tree, lin)
+#' bigList <- c(model_list1, model_list2)
 #' }
 #'
 c.train <- function(...) {

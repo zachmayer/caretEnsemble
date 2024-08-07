@@ -171,8 +171,8 @@ testthat::test_that("Ensembles using custom models work correctly", {
   set.seed(1234L)
 
   # Create custom caret models with a properly assigned method attribute
-  custom.glm <- getModelInfo("glmnet", regex = FALSE)[[1L]]
-  custom.glm$method <- "custom.glm"
+  custom.rf <- getModelInfo("rf", regex = FALSE)[[1L]]
+  custom.rf$method <- "custom.rf"
 
   custom.rpart <- getModelInfo("rpart", regex = FALSE)[[1L]]
   custom.rpart$method <- "custom.rpart"
@@ -182,7 +182,7 @@ testthat::test_that("Ensembles using custom models work correctly", {
   # Add a named custom model, to contrast the above
   # Add a non-custom model
   tune.list <- list(
-    caretModelSpec(method = custom.glm, tuneLength = 1L),
+    caretModelSpec(method = custom.rf, tuneLength = 1L),
     myrpart = caretModelSpec(method = custom.rpart, tuneLength = 1L),
     treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
   )
@@ -201,7 +201,7 @@ testthat::test_that("Ensembles using custom models work correctly", {
   testthat::expect_is(cs, "caretEnsemble")
 
   # Validate names assigned to ensembled models
-  testthat::expect_named(cs$models, c("custom.glm", "myrpart", "treebag"))
+  testthat::expect_named(cs$models, c("custom.rf", "myrpart", "treebag"))
 
   # Validate ensemble predictions
   pred_stacked <- predict(cs) # stacked predictions
@@ -234,7 +234,8 @@ testthat::test_that("Ensembles using custom models work correctly", {
   # Verify that not specifying a method attribute for custom models causes an error
   #  Add a custom caret model WITHOUT a properly assigned method attribute
   tune.list <- list(
-    caretModelSpec(method = getModelInfo("glm", regex = FALSE)[[1L]], tuneLength = 1L)
+    caretModelSpec(method = getModelInfo("rf", regex = FALSE)[[1L]], tuneLength = 1L),
+    treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
   )
   msg <- "Custom models must be defined with a \"method\" attribute"
   testthat::expect_error(caretList(X.class, Y.class, tuneList = tune.list, trControl = train.control), regexp = msg)

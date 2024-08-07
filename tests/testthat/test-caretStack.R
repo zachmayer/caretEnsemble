@@ -134,7 +134,7 @@ testthat::test_that("predict.caretStack works correctly if the multiclass exclud
   model_list <- caretList(
     Species ~ .,
     data = iris,
-    methodList = "rpart"
+    methodList = c("rpart", "rf")
   )
 
   # Make sure predictions still work if the exlcuded level is too high
@@ -157,7 +157,7 @@ testthat::test_that("caretStack handles different stacking algorithms", {
     model_list <- x[[1L]]
     test_data <- x[[2L]]
 
-    stack_methods <- c("glm", "gbm", "glmnet")
+    stack_methods <- c("glm", "rf", "gbm", "glmnet")
 
     for (method in stack_methods) {
       if (method == "gbm") {

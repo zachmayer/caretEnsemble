@@ -29,8 +29,8 @@ model_list1 <- caretList(Class ~ .,
 model_list2 <- caretList(Class ~ .,
   data = Sonar,
   tuneList = list(
-    glm = caretModelSpec(method = "glm"),
-    rpart = caretModelSpec(method = "rpart")
+    glm = caretModelSpec(method = "rpart"),
+    rpart = caretModelSpec(method = "rf")
   )
 )
 
