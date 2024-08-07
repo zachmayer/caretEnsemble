@@ -1,5 +1,6 @@
 # huge HTML file messes up git stats lol
 coverage-report.html
+cobertura.xml
 
 # weirdness from covr::package_coverage
 lib/
