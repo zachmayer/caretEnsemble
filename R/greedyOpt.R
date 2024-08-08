@@ -72,12 +72,13 @@ print.greedyMSE <- function(x, ...) {
 #' @return A numeric matrix of predictions.
 #' @export
 predict.greedyMSE <- function(object, newdata, ...) {
+  newdata <- if (is.matrix(newdata)) newdata else as.matrix(newdata)
   stopifnot(
-    is.matrix(newdata),
     is.numeric(newdata),
     is.finite(newdata),
     ncol(newdata) == nrow(object$model_weights)
   )
+  
   out <- newdata %*% object$model_weights
   if (ncol(out) > 1L) {
     out <- out / rowSums(out)
@@ -131,7 +132,6 @@ greedyMSE_caret <- list(
     model
   },
   predict = function(modelFit, newdata, submodels = NULL) {
-    if (!is.matrix(newdata)) newdata <- as.matrix(newdata)
 
     pred <- predict(modelFit, newdata)
 
@@ -143,7 +143,6 @@ greedyMSE_caret <- list(
     pred
   },
   prob = function(modelFit, newdata, submodels = NULL) {
-    if (!is.matrix(newdata)) newdata <- as.matrix(newdata)
 
     pred <- predict(modelFit, newdata)
 
