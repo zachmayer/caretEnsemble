@@ -105,7 +105,6 @@ permutationImportance <- function(
     is.numeric(preds_orig),
     is.finite(preds_orig)
   )
-
   # Error of shuffled variables
   mae_vars <- shuffled_mae(model, newdata, preds_orig, pred_type, shuffle_idx)
 
