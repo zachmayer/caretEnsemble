@@ -152,13 +152,6 @@ testthat::test_that("greedyMSE can be used for classification ensembling with GL
   ensemble_X <- cbind(glm_pred, rpart_pred, rf_pred, greedy_pred)
   ensemble_model <- greedyMSE(ensemble_X, matrix(Y_binary, ncol = 1L))
 
-  # Calculate AUC for each model
-  calc_auc <- function(pred, actual) {
-    pred_obj <- ROCR::prediction(pred, actual)
-    perf_obj <- ROCR::performance(pred_obj, "auc")
-    as.numeric(perf_obj@y.values[[1L]])
-  }
-
   # Check if ensemble performs better than the best individual model
   individual_rmse <- c(
     sqrt(mean((Y_binary - glm_pred)^2L)),

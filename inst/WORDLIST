@@ -27,6 +27,7 @@ ggplot
 ggplot2
 github
 glm
+greedyMSE
 importances
 kable
 knitr

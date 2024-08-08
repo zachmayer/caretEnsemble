@@ -1,6 +1,6 @@
 #' @title Greedy optimization for MSE
 #' @description Greedy optimization for minimizing the mean squared error.
-#' Works for classificaton and regression.
+#' Works for classification and regression.
 #' @param X A numeric matrix of features.
 #' @param Y A numeric matrix of target values.
 #' @param max_iter An integer scalar of the maximum number of iterations.
