@@ -84,3 +84,83 @@ predict.greedyMSE <- function(object, newdata, ...) {
   }
   out
 }
+
+#' @title caret interface for greedyMSE
+#' @description caret interface for greedyMSE.
+#' @export
+greedyMSE_caret <- list(
+  label = "Greedy Mean Squared Error Optimizer",
+  library = NULL,
+  loop = NULL,
+  type = c("Regression", "Classification"),
+  parameters = data.frame(
+    parameter = "max_iter",
+    class = "integer",
+    label = "Max Iterations"
+  ),
+  grid = function(x, y, len = 1L, search = "grid") {
+    data.frame(max_iter = seq(50, 500, len = len))
+  },
+  fit = function(x, y, wts, param, lev, last, classProbs, ...) {
+
+    is_class <- is.factor(y)
+    lev <- levels(y)
+
+    # X to matrix
+    if (!is.matrix(x)) x <- as.matrix(x)
+
+    # y to matrix
+    if (is_class) {
+      y_matrix <- matrix(
+        0.0,
+        nrow = length(y),
+        ncol = length(lev),
+        dimnames = list(NULL, lev)
+      )
+      for (i in seq_along(lev)) {
+        y_matrix[, i] <- as.integer(y == lev[i])
+      }
+      colnames(y_matrix) <- lev
+    } else {
+      y_matrix <- matrix(y, ncol = 1L)
+    }
+
+    # Fit model
+    model <- greedyMSE(X = x, Y = y_matrix, max_iter = param$max_iter)
+
+    model
+  },
+  predict = function(modelFit, newdata, submodels = NULL) {
+    if (!is.matrix(newdata)) newdata <- as.matrix(newdata)
+
+    pred <- predict(modelFit, newdata)
+
+    if (modelFit$problemType == "Classification") {
+      pred <- modelFit$obsLevels[apply(pred, 1, which.max)]
+      pred <- factor(pred, levels = modelFit$obsLevels)
+    }
+
+    pred
+  },
+  prob = function(modelFit, newdata, submodels = NULL) {
+    if (!is.matrix(newdata)) newdata <- as.matrix(newdata)
+
+    pred <- predict(modelFit, newdata)
+
+    colnames(pred) <- modelFit$obsLevels
+
+    pred
+  },
+  varImp = function(object, ...) {
+    importance <- rowSums(abs(object$model_weights))
+    importance <- importance / sum(importance)
+    out <- data.frame(Overall = importance)
+    rownames(out) <- row.names(object$model_weights)
+    out
+  },
+  predictors = function(x, ...) {
+    rownames(object$model_weights)
+  },
+  tags = c("Greedy Optimizer", "Mean Squared Error", "Interpretable"),
+  sort = function(x) x[order(x$max_iter), ]
+)
