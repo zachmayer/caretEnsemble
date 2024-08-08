@@ -15,8 +15,8 @@ caretList(
 )
 }
 \arguments{
-\item{...}{arguments to pass to \code{\link[caret]{train}}.  Don't use the formula interface, its slower
-and buggier compared to the X, y interface.  Use a \code{\link[data.table]{data.table}} for X.
+\item{...}{arguments to pass to \code{\link[caret]{train}}. Don't use the formula interface, its slower
+and buggier compared to the X, y interface. Use a \code{\link[data.table]{data.table}} for X.
 Particularly if you have a large dataset and/or many models, using a data.table will
 avoid unnecessary copies of your data and can save a lot of time and RAM.
 These arguments will determine which train method gets dispatched.}
@@ -46,22 +46,12 @@ Build a list of train objects suitable for ensembling using the \code{\link{care
 function.
 }
 \examples{
-\dontrun{
-myControl <- trainControl(method = "cv", number = 5)
 caretList(
   Sepal.Length ~ Sepal.Width,
   head(iris, 50),
   methodList = c("glm", "lm"),
-  trControl = myControl
-)
-caretList(
-  Sepal.Length ~ Sepal.Width,
-  head(iris, 50),
-  methodList = c("lm"),
   tuneList = list(
     nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1)
-  ),
-  trControl = myControl
+  )
 )
-}
 }

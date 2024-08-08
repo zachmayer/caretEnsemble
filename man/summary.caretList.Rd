@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{a caretList object}
 
-\item{metric}{The metric to show.  If NULL will use the metric used to train each model}
+\item{metric}{The metric to show. If NULL will use the metric used to train each model}
 
 \item{...}{passed to extractMetric}
 }

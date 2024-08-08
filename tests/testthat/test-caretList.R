@@ -82,7 +82,7 @@ testthat::test_that("caretList errors for bad models", {
     testthat::expect_warning(
       testthat::expect_error(
         caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad),
-        regexp = "Stopping" # Stop training on the first error.  This is the mssage straight from train.
+        regexp = "Stopping" # Stop training on the first error. This is the mssage straight from train.
       ),
       regexp = "model fit failed for Fold1"
     ),
@@ -562,13 +562,6 @@ testthat::test_that("methodCheck stops for invalid method type", {
     methodCheck(list("invalid_method")),
     "The following models are not valid caret models: invalid_method"
   )
-})
-
-testthat::test_that("is.caretList correctly identifies caretList objects", {
-  mylist <- list()
-  testthat::expect_false(is.caretList(mylist))
-  class(mylist) <- "caretList"
-  testthat::expect_true(is.caretList(mylist))
 })
 
 testthat::test_that("as.caretList stops for null object", {

@@ -120,13 +120,6 @@ testthat::test_that("Test na.action pass through", {
   testthat::expect_false(nrow(pred.reg) != nrow(X_reg_na))
 })
 
-testthat::test_that("is.caretStack correctly identifies caretStack objects", {
-  mylist <- list()
-  testthat::expect_false(is.caretStack(mylist))
-  class(mylist) <- "caretStack"
-  testthat::expect_true(is.caretStack(mylist))
-})
-
 testthat::test_that("predict.caretStack works correctly if the multiclass excluded level is too high", {
   data(iris)
 

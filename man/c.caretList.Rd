@@ -17,24 +17,20 @@ take N objects of class caretList and concatenate them into a larger object of
 class caretList for future ensembling
 }
 \examples{
-\dontrun{
-model_list1 <- caretList(Class ~ .,
-  data = Sonar,
+data(iris)
+model_list1 <- caretList(Sepal.Width ~ .,
+  data = iris,
   tuneList = list(
-    glm = caretModelSpec(method = "glm", family = "binomial"),
-    rpart = caretModelSpec(method = "rpart")
+    lm = caretModelSpec(method = "lm")
   )
 )
 
-model_list2 <- caretList(Class ~ .,
-  data = Sonar,
+model_list2 <- caretList(Sepal.Width ~ .,
+  data = iris, tuneLength = 1L,
   tuneList = list(
-    glm = caretModelSpec(method = "rpart"),
-    rpart = caretModelSpec(method = "rf")
+    rf = caretModelSpec(method = "rf")
   )
 )
 
 bigList <- c(model_list1, model_list2)
-}
-
 }

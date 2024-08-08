@@ -124,7 +124,7 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
 }
 
 #' @title Aggregate mean or first
-#' @description For numeric data take the mean.  For character data take the first value.
+#' @description For numeric data take the mean. For character data take the first value.
 #' @param x a train object
 #' @return a data.table::data.table with predictions
 #' @keywords internal
@@ -239,22 +239,19 @@ dropExcludedClass <- function(x, all_classes, excluded_class_id) {
 #' @return a \code{\link{caretList}} object
 #' @export
 #' @examples
-#' \dontrun{
-#' rpartTrain <- train(Class ~ .,
-#'   data = Sonar,
-#'   trControl = ctrl1,
-#'   method = "rpart"
+#' data(iris)
+#' model_lm <- caret::train(Sepal.Length ~ .,
+#'   data = iris,
+#'   method = "lm"
 #' )
 #'
-#' rfTrain <- train(Class ~ .,
-#'   data = Sonar,
-#'   trControl = ctrl1,
-#'   method = "rf"
+#' model_rf <- caret::train(Sepal.Length ~ .,
+#'   data = iris,
+#'   method = "rf",
+#'   tuneLength = 1L
 #' )
 #'
-#' bigList <- c(model_list1, model_list2)
-#' }
-#'
+#' model_list <- c(model_lm, model_rf)
 c.train <- function(...) {
   new_model_list <- unlist(lapply(list(...), function(x) {
     if (inherits(x, "caretList")) {

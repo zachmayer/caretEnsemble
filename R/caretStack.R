@@ -28,22 +28,19 @@
 #'   \url{https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf}
 #' @export
 #' @examples
-#' \dontrun{
 #' models <- caretList(
 #'   x = iris[1:50, 1:2],
 #'   y = iris[1:50, 3],
-#'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
 #' caretStack(models, method = "glm")
-#' }
 caretStack <- function(
     all.models,
     new_X = NULL,
     new_y = NULL,
     excluded_class_id = 1L,
     ...) {
-  if (!is.caretList(all.models)) {
+  if (!methods::is(all.models, "caretList")) {
     warning("Attempting to coerce all.models to a caretList.", call. = FALSE)
     all.models <- as.caretList(all.models)
   }
@@ -120,16 +117,13 @@ caretStack <- function(
 #' model predictions are transformed before being passed to the stacking model.
 #' @method predict caretStack
 #' @examples
-#' \dontrun{
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
-#'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
 #' meta_model <- caretStack(models, method = "lm")
 #' RMSE(predict(meta_model, iris[101:150, 1:2]), iris[101:150, 3])
-#' }
 predict.caretStack <- function(
     object,
     newdata = NULL,
@@ -194,7 +188,6 @@ predict.caretStack <- function(
     )
   } else if (return_class_only) {
     # Map to class levels
-    # TODO: HANDLE ORDINAL and TESTS FOR THIS
     class_id <- apply(meta_preds, 1L, which.max)
     class_levels <- levels(object$ens_model)
     out <- factor(class_levels[class_id], class_levels)
@@ -253,30 +246,19 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
   out
 }
 
-#' @title Check if an object is a caretStack object
-#' @param object an R object
-#' @description Check if an object is a caretStack object
-#' @export
-is.caretStack <- function(object) {
-  methods::is(object, "caretStack")
-}
-
 #' @title Print a caretStack object
 #' @description This is a function to print a caretStack.
 #' @param x An object of class caretStack
 #' @param ... ignored
 #' @export
 #' @examples
-#' \dontrun{
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
-#'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
 #' meta_model <- caretStack(models, method = "lm")
 #' print(meta_model)
-#' }
 print.caretStack <- function(x, ...) {
   cat("The following models were ensembled:", toString(names(x$models)), " \n")
   print(x$ens_model)
@@ -288,16 +270,13 @@ print.caretStack <- function(x, ...) {
 #' @param ... ignored
 #' @export
 #' @examples
-#' \dontrun{
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
-#'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
 #' meta_model <- caretStack(models, method = "lm")
 #' summary(meta_model)
-#' }
 summary.caretStack <- function(object, ...) {
   metric <- object$ens_model$metric
   out <- list(
@@ -349,17 +328,14 @@ varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
 #' @importFrom lattice dotplot
 #' @export
 #' @examples
-#' \dontrun{
 #' set.seed(42)
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
-#'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method = "lm", trControl = trainControl(method = "cv"))
-#' dotplot.caretStack(meta_model)
-#' }
+#' meta_model <- caretStack(models, method = "lm")
+#' lattice::dotplot(meta_model)
 dotplot.caretStack <- function(x, ...) {
   resamps <- caret::resamples(x$models)
   lattice::dotplot(resamps, ...)
@@ -388,7 +364,7 @@ extractMetric.caretStack <- function(x, ...) {
 #' @title Plot a caretStack object
 #' @description This function plots the performance of each model in a caretList object.
 #' @param x a caretStack object
-#' @param metric which metric to plot.  If NULL, will use the default metric used to train the model.
+#' @param metric which metric to plot. If NULL, will use the default metric used to train the model.
 #' @param ... ignored
 #' @return a ggplot2 object
 #' @method plot caretStack
@@ -452,13 +428,14 @@ stackedTrainResiduals <- function(object, show_class_id = 2L) {
 #' Middle left is a bar graph of the weights of the component models. Middle
 #' right is the disagreement in the residuals of the component models (unweighted)
 #' across the fitted values. Bottom left and bottom right are the plots of the
-#' residuals against two random or user specified variables.
+#' residuals against two random or user specified variables. Note that the ensemble
+#' must have been trained with savePredictions = "final", which is required to
+#' get residuals from the stack for the plot.
 #' @importFrom ggplot2 autoplot
 #' @importFrom patchwork plot_layout
 #' @method autoplot caretStack
 #' @export
 #' @examples
-#' \dontrun{
 #' set.seed(42)
 #' data(models.reg)
 #' ens <- caretStack(
@@ -468,7 +445,6 @@ stackedTrainResiduals <- function(object, show_class_id = 2L) {
 #'   )
 #' )
 #' autoplot(ens)
-#' }
 # https://github.com/thomasp85/patchwork/issues/226 — why we need importFrom patchwork plot_layout
 autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(methods::is(object, "caretStack"))

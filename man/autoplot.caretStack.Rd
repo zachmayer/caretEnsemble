@@ -22,14 +22,15 @@ is the residuals from the ensembled model plotted against fitted values.
 Middle left is a bar graph of the weights of the component models. Middle
 right is the disagreement in the residuals of the component models (unweighted)
 across the fitted values. Bottom left and bottom right are the plots of the
-residuals against two random or user specified variables.
+residuals against two random or user specified variables. Note that the ensemble
+must have been trained with savePredictions = "final", which is required to
+get residuals from the stack for the plot.
 }
 \description{
 This function provides a more robust series of diagnostic plots
 for a caretEnsemble object.
 }
 \examples{
-\dontrun{
 set.seed(42)
 data(models.reg)
 ens <- caretStack(
@@ -39,5 +40,4 @@ ens <- caretStack(
   )
 )
 autoplot(ens)
-}
 }

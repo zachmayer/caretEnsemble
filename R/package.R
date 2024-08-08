@@ -12,48 +12,42 @@
 #' @name models.class
 #' @description Data for the caretEnsemble package
 #' @docType data
-#' @rdname data
 #' @author Zachary Deane-Mayer \email{zach.mayer@@gmail.com}
-#' @keywords data
+#' @keywords data internal
 NULL
 
 #' @title caretList of regression models
 #' @name models.reg
 #' @docType data
-#' @rdname data
 #' @author Zachary Deane-Mayer \email{zach.mayer@@gmail.com}
-#' @keywords data
+#' @keywords data internal
 NULL
 
 #' @title data for classification
 #' @name X.class
 #' @docType data
-#' @rdname data
 #' @author Zachary Deane-Mayer \email{zach.mayer@@gmail.com}
-#' @keywords data
+#' @keywords data internal
 NULL
 
 #' @title data for classification
 #' @name Y.class
 #' @docType data
-#' @rdname data
-#' @keywords data
+#' @keywords data internal
 NULL
 
 #' @title data for classification
 #' @name X.reg
 #' @docType data
-#' @rdname data
 #' @author Zachary Deane-Mayer \email{zach.mayer@@gmail.com}
-#' @keywords data
+#' @keywords data internal
 NULL
 
 #' @title data for regression
 #' @name Y.reg
 #' @docType data
-#' @rdname data
 #' @author Zachary Deane-Mayer \email{zach.mayer@@gmail.com}
-#' @keywords data
+#' @keywords data internal
 NULL
 
 # Hack to make data.table functions work with devtools::load_all

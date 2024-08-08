@@ -3,8 +3,8 @@
 #' Build a list of train objects suitable for ensembling using the \code{\link{caretStack}}
 #' function.
 #'
-#' @param ... arguments to pass to \code{\link[caret]{train}}.  Don't use the formula interface, its slower
-#' and buggier compared to the X, y interface.  Use a \code{\link[data.table]{data.table}} for X.
+#' @param ... arguments to pass to \code{\link[caret]{train}}. Don't use the formula interface, its slower
+#' and buggier compared to the X, y interface. Use a \code{\link[data.table]{data.table}} for X.
 #' Particularly if you have a large dataset and/or many models, using a data.table will
 #' avoid unnecessary copies of your data and can save a lot of time and RAM.
 #' These arguments will determine which train method gets dispatched.
@@ -22,24 +22,14 @@
 #' it is dropped from the list.
 #' @export
 #' @examples
-#' \dontrun{
-#' myControl <- trainControl(method = "cv", number = 5)
 #' caretList(
 #'   Sepal.Length ~ Sepal.Width,
 #'   head(iris, 50),
 #'   methodList = c("glm", "lm"),
-#'   trControl = myControl
-#' )
-#' caretList(
-#'   Sepal.Length ~ Sepal.Width,
-#'   head(iris, 50),
-#'   methodList = c("lm"),
 #'   tuneList = list(
 #'     nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1)
-#'   ),
-#'   trControl = myControl
+#'   )
 #' )
-#' }
 caretList <- function(
     ...,
     trControl = NULL,
@@ -127,7 +117,7 @@ caretList <- function(
 #' @method predict caretList
 #' @export
 predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...) {
-  stopifnot(is.caretList(object))
+  stopifnot(methods::is(object, "caretList"))
 
   # Decided whether to be verbose or quiet
   apply_fun <- lapply
@@ -152,8 +142,10 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   # E.g. you could mix classification and regression models
   # caretPredict will aggregate multiple predictions for the same row (e.g. repeated CV)
   # caretPredict will make sure the rows are sorted by the original row order
+  # If you want to ensemble models that were trained on different rows of data, use
+  # newdata to predict on a common dataset so they can be ensembles.
   pred_rows <- vapply(preds, nrow, integer(1L))
-  stopifnot(pred_rows == pred_rows[1L]) # TODO: informative error message
+  stopifnot(pred_rows == pred_rows[1L])
 
   # Name the predictions
   for (i in seq_along(preds)) {
@@ -187,14 +179,6 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
 
   # Return
   preds
-}
-
-#' @title Check if an object is a caretList object
-#' @description Check if an object is a caretList object
-#' @param object an R object
-#' @export
-is.caretList <- function(object) {
-  methods::is(object, "caretList")
 }
 
 #' @title Convert object to caretList object
@@ -260,26 +244,22 @@ as.caretList.list <- function(object) {
 #' @return a \code{\link{caretList}} object
 #' @export
 #' @examples
-#' \dontrun{
-#' model_list1 <- caretList(Class ~ .,
-#'   data = Sonar,
+#' data(iris)
+#' model_list1 <- caretList(Sepal.Width ~ .,
+#'   data = iris,
 #'   tuneList = list(
-#'     glm = caretModelSpec(method = "glm", family = "binomial"),
-#'     rpart = caretModelSpec(method = "rpart")
+#'     lm = caretModelSpec(method = "lm")
 #'   )
 #' )
 #'
-#' model_list2 <- caretList(Class ~ .,
-#'   data = Sonar,
+#' model_list2 <- caretList(Sepal.Width ~ .,
+#'   data = iris, tuneLength = 1L,
 #'   tuneList = list(
-#'     glm = caretModelSpec(method = "rpart"),
-#'     rpart = caretModelSpec(method = "rf")
+#'     rf = caretModelSpec(method = "rf")
 #'   )
 #' )
 #'
 #' bigList <- c(model_list1, model_list2)
-#' }
-#'
 c.caretList <- function(...) {
   new_model_list <- unlist(lapply(list(...), function(x) {
     if (inherits(x, "caretList")) {
@@ -418,6 +398,7 @@ methodCheck <- function(x) {
 #' @description This function extracts the y variable from a set of arguments headed to a caret::train model.
 #' Since there are 2 methods to call caret::train, this function also has 2 methods.
 #' @param ... a set of arguments, as in the caret::train function
+#' @keywords internal
 extractCaretTarget <- function(...) {
   UseMethod("extractCaretTarget")
 }
@@ -428,6 +409,7 @@ extractCaretTarget <- function(...) {
 #' or other type (e.g. sparse matrix). See Details below.
 #' @param y a numeric or factor vector containing the outcome for each sample.
 #' @param ... ignored
+#' @keywords internal
 extractCaretTarget.default <- function(x, y, ...) {
   y
 }
@@ -437,6 +419,8 @@ extractCaretTarget.default <- function(x, y, ...) {
 #' @param form A formula of the form y ~ x1 + x2 + ...
 #' @param data Data frame from which variables specified in formula are preferentially to be taken.
 #' @param ... ignored
+#' @method extractCaretTarget formula
+#' @keywords internal
 extractCaretTarget.formula <- function(form, data, ...) {
   y <- stats::model.response(stats::model.frame(form, data))
   names(y) <- NULL
@@ -448,8 +432,8 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #' @param x a caretList object
 #' @param ... passed to extractMetric.train
 #' @return A data.table with metrics from each model.
-#' @export
 #' @method extractMetric caretList
+#' @export
 extractMetric.caretList <- function(x, ...) {
   metrics <- lapply(x, extractMetric.train, ...)
   metrics <- data.table::rbindlist(metrics, use.names = TRUE, fill = TRUE)
@@ -485,7 +469,7 @@ plot.caretList <- function(x, metric = NULL, ...) {
 #' @title Summarize a caretList
 #' @description This function summarizes the performance of each model in a caretList object.
 #' @param object a caretList object
-#' @param metric The metric to show.  If NULL will use the metric used to train each model
+#' @param metric The metric to show. If NULL will use the metric used to train each model
 #' @param ... passed to extractMetric
 #' @return A data.table with metrics from each model.
 #' @method summary caretList
