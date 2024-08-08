@@ -1,11 +1,28 @@
 # Makefile for R project
 
-.PHONY: all install-deps install document update-test-fixtures test coverage-test coverage check fix-style lint spell build-vignettes release clean build
+.PHONY: help
+help:
+	@echo "Available targets:"
+	@echo "  all                 - Run clean, fix-style, document, install, build-vignettes, lint, spell, test, check, coverage"
+	@echo "  install-deps        - Install dependencies"
+	@echo "  install             - Install the whole package"
+	@echo "  document            - Generate documentation"
+	@echo "  update-test-fixtures - Update test fixtures"
+	@echo "  test                - Run unit tests"
+	@echo "  coverage            - Generate coverage reports"
+	@echo "  check               - Run R CMD check as CRAN"
+	@echo "  fix-style           - Auto style the code"
+	@echo "  lint                - Check the code for lint"
+	@echo "  spell               - Check spelling"
+	@echo "  build               - Build the package"
+	@echo "  build-vignettes     - Build vignettes"
+	@echo "  release             - Release to CRAN"
+	@echo "  clean               - Clean up generated files"
 
-# Default target
+.PHONY: all
 all: clean fix-style document install build-vignettes lint spell test check coverage
 
-# Install dependencies
+.PHONY: install-deps
 install-deps:
 	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
 	Rscript -e "devtools::install_deps()"
@@ -13,25 +30,23 @@ install-deps:
 	Rscript -e "devtools::update_packages()"
 	Rscript -e "devtools::install_github('r-lib/lintr')"
 
-# Install the whole package
+.PHONY: install
 install: install-deps
 	Rscript -e "devtools::install()"
 
-# Generate documentation
+.PHONY: document
 document:
 	Rscript -e "devtools::document()"
 
-# Update test fixtures
+.PHONY: update-test-fixtures
 update-test-fixtures:
 	Rscript inst/data-raw/build_test_data.R
 
-# Run unit tests
+.PHONY: test
 test:
 	Rscript -e "Sys.setenv(NOT_CRAN='true'); devtools::test(stop_on_failure=TRUE, stop_on_warning=TRUE)"
 	rm -f caretEnsemble_test_plots.png
 
-# Run test coverage
-# Dunno why package_coverage makes the dir 'lib/'
 coverage.rds: $(wildcard R/*.R) $(wildcard tests/testthat/*.R)
 	Rscript -e "\
 		Sys.setenv(NOT_CRAN = 'true'); \
@@ -40,21 +55,19 @@ coverage.rds: $(wildcard R/*.R) $(wildcard tests/testthat/*.R)
 	"
 	rm -rf lib/
 
-# xml coverage report in cobertura format for app.codecov.io/gh/zachmayer/caretEnsemble
 cobertura.xml: coverage.rds
 	Rscript -e "\
 		cov = readRDS('coverage.rds'); \
 		covr::to_cobertura(cov, filename='cobertura.xml'); \
 	"
 
-# html coverage report for local viewing
 coverage-report.html: coverage.rds
 	Rscript -e "\
 		cov = readRDS('coverage.rds'); \
 		covr::report(cov, file='coverage-report.html', browse=interactive()); \
 	"
 
-# Test that coverage is 100%
+.PHONY: coverage-test
 coverage-test: coverage.rds
 	Rscript -e "\
 		cov = readRDS('coverage.rds'); \
@@ -62,23 +75,24 @@ coverage-test: coverage.rds
 		testthat::expect_gte(cov_num, 100.0); \
 	"
 
+.PHONY: coverage
 coverage: cobertura.xml coverage-report.html coverage-test
 
-# Run R CMD check as CRAN
+.PHONY: check
 check: document
 	Rscript -e "devtools::check(cran = FALSE, remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
 	Rscript -e "devtools::check(cran = TRUE , remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
 
-# Auto style the code
+.PHONY: fix-style
 fix-style:
 	Rscript -e "styler::style_pkg()"
 	Rscript -e "styler::style_dir('inst/')"
 
-# Check the code for lint
+.PHONY: lint
 lint:
 	Rscript -e "Sys.setenv(LINTR_ERROR_ON_LINT='true'); devtools::load_all(); lintr::lint_package(cache = FALSE)"
 
-# Check spelling
+.PHONY: spell
 spell:
 	Rscript -e " \
 		results = spelling::spell_check_package(); \
@@ -89,18 +103,19 @@ spell:
 		}; \
 	"
 
+.PHONY: build
 build:
 	Rscript -e "devtools::build()"
 
-# Build vignettes
+.PHONY: build-vignettes
 build-vignettes:
 	Rscript -e "devtools::build_vignettes()"
 
-# Release to CRAN
+.PHONY: release
 release:
 	Rscript -e "devtools::release()"
-	
-# Clean up generated files
+
+.PHONY: clean
 clean:
 	rm -rf *.Rcheck
 	rm -f *.tar.gz
