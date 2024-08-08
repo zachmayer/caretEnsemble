@@ -261,3 +261,43 @@ testthat::test_that("greedyMSE handles highly correlated predictors", {
 
   testthat::expect_lt(rmse_model, rmse_mean)
 })
+
+testthat::test_that("greedyMSE works with caret::train for regression", {
+  set.seed(42L)
+  n <- 1000L
+  X1 <- stats::rnorm(n)
+  X2 <- 0.5 * X1 + sqrt(1L - 0.5^2L) * stats::rnorm(n)
+  Y <- 0.9 * X1 + 0.9 * X2 + 0.1 * stats::rnorm(n)
+  Y <- (Y - mean(Y)) / stats::sd(Y) # Standardize Y
+
+  # Split data
+  train_indices <- sample.int(n, 0.7 * n)
+  X_train <- cbind(X1, X2)[train_indices, ]
+  X_test <- cbind(X1, X2)[-train_indices, ]
+  Y_train <- Y[train_indices]
+  Y_test <- Y[-train_indices]
+
+  # Train model
+  model <- caret::train(
+    X_train,
+    Y_train,
+    tuneLength = 1L,
+    method = greedyMSE_caret(),
+    trControl = caret::trainControl(method = "cv", number = 5L)
+  )
+
+  # Make predictions
+  predictions <- predict(model, newdata = X_test)
+
+  # Compute RMSE
+  rmse_model <- sqrt(mean((predictions - Y_test)^2L))
+  rmse_mean <- sqrt(mean((mean(Y_train) - Y_test)^2L))
+
+  # Check model performance
+  testthat::expect_lt(rmse_model, rmse_mean)
+
+  # Check variable importance
+  w <- model$finalModel$model_weights
+  expect_equal(sum(w), 1.0, tol = 1.0e-6)
+  expect_equal(w[1L], w[2L], tol = 0.2)
+})

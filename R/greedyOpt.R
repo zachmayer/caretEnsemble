@@ -169,7 +169,7 @@ greedyMSE_caret <- function() {
       stringsAsFactors = FALSE
     ),
     grid = function(x, y, len = 1L, search = "grid") {
-      data.frame(max_iter = seq(100L, 250L, len = len))
+      data.frame(max_iter = as.integer(floor(seq.int(100L, 250L, length.out = len))))
     },
     fit = function(x, y, wts, param, lev, last, classProbs, ...) {
       greedyMSE(X = x, Y = y, max_iter = param$max_iter)
