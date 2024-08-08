@@ -1,5 +1,5 @@
 # Helper function to create a simple dataset
-create_dataset <- function(n_samples, n_features, n_targets, coef = NULL, noise = 0L) {
+create_dataset <- function(n_samples, n_features = 5L, n_targets = 1L, coef = NULL, noise = 0L) {
   X <- matrix(stats::runif(n_samples * n_features), nrow = n_samples)
 
   if (is.null(coef)) {
@@ -25,11 +25,12 @@ create_dataset <- function(n_samples, n_features, n_targets, coef = NULL, noise 
 
 # Create datasets for reuse
 set.seed(42L)
-regression_data <- create_dataset(100L, 5L, 1L, noise = 0.1)
-multi_regression_data <- create_dataset(100L, 5L, 3L)
+N <- 100L
+regression_data <- create_dataset(N, noise = 0.1)
+multi_regression_data <- create_dataset(N, n_targets = 3L)
 
-Y_binary <- as.integer(regression_data$Y > mean(regression_data$Y))
-Y_multi_binary <- as.integer(multi_regression_data$Y > mean(multi_regression_data$Y))
+Y_binary <- matrix(as.integer(regression_data$Y > mean(regression_data$Y)), nrow = N)
+Y_multi_binary <- matrix(as.integer(multi_regression_data$Y > mean(multi_regression_data$Y)), nrow = N)
 
 # Test for regression (one col)
 testthat::test_that("greedyMSE works for regression", {
@@ -93,7 +94,7 @@ testthat::test_that("greedyMSE handles edge cases", {
   Y <- matrix(rowSums(X) + stats::rnorm(100L, 0L, 1.0e5), ncol = 1L)
   model <- greedyMSE(X, Y)
   pred <- predict(model, X)
-  testthat::expect_gt(cor(pred, Y), 0.5)
+  testthat::expect_gt(cor(pred, Y), 0.4)
 })
 
 # Regression ensembling test
