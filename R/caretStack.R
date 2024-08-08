@@ -194,7 +194,6 @@ predict.caretStack <- function(
     )
   } else if (return_class_only) {
     # Map to class levels
-    # TODO: HANDLE ORDINAL and TESTS FOR THIS
     class_id <- apply(meta_preds, 1L, which.max)
     class_levels <- levels(object$ens_model)
     out <- factor(class_levels[class_id], class_levels)

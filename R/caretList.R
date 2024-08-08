@@ -152,8 +152,10 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   # E.g. you could mix classification and regression models
   # caretPredict will aggregate multiple predictions for the same row (e.g. repeated CV)
   # caretPredict will make sure the rows are sorted by the original row order
+  # If you want to ensemble models that were trained on different rows of data, use
+  # newdata to predict on a common dataset so they can be ensembles.
   pred_rows <- vapply(preds, nrow, integer(1L))
-  stopifnot(pred_rows == pred_rows[1L]) # TODO: informative error message
+  stopifnot(pred_rows == pred_rows[1L])
 
   # Name the predictions
   for (i in seq_along(preds)) {
