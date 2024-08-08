@@ -1,26 +1,15 @@
-#' @title Check binary classification
-#' @description Check that the problem is a binary classification problem
-#'
-#' @param list_of_models a list of caret models to check
-#' @keywords internal
-check_binary_classification <- function(list_of_models) {
-  if (is.list(list_of_models) && length(list_of_models) > 1L) {
-    lapply(list_of_models, function(x) {
-      # avoid regression models
-      if (methods::is(x, "train") && !is.null(x$pred$obs) && is.factor(x$pred$obs) && nlevels(x$pred$obs) > 2L) {
-        stop("caretEnsemble only supports binary classification problems", call. = FALSE)
-      }
-    })
-  }
-  invisible(NULL)
-}
-
 #' @title Combine several predictive models via weights
 #'
-#' @description Find a good linear combination of several classification or regression models,
-#' using linear regression.
+#' @description Find a greedy, positive only linear combination of several \code{\link[caret]{train}} objects
 #'
-#' @details Every model in the "library" must be a separate \code{train} object. For
+#' @details greedyMSE works well when you want an ensemble that will never be worse than any
+#' single model in the dataset. In the worst case scenario, it will select the single
+#' best model, if none of them can be ensembled to improve the overall score. It will
+#' also never assign any model a negative coefficient, which can help avoid
+#' unintuitive cases at prediction time (e.g. if the correlations between
+#' predictors breaks down on new data, negative coefficients can lead to bad results).
+#'
+#' @note Every model in the "library" must be a separate \code{train} object. For
 #' example, if you wish to combine a random forests with several different
 #' values of mtry, you must build a model for each value of mtry. If you
 #' use several values of mtry in one train model, (e.g. tuneGrid =
@@ -29,14 +18,13 @@ check_binary_classification <- function(list_of_models) {
 #' RMSE is used to ensemble regression models, and AUC is used to ensemble
 #' Classification models. This function does not currently support multi-class
 #' problems
-#' @note Currently when missing values are present in the training data, weights
-#' are calculated using only observations which are complete across all models
-#' in the library.The optimizer ignores missing values and calculates the weights with the
-#' observations and predictions available for each model separately. If each of the
-#' models has a different pattern of missingness in the predictors, then the resulting
-#' ensemble weights may be biased and the function issues a message.
 #' @param all.models an object of class caretList
-#' @param ... additional arguments to pass to the optimization function
+#' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
+#' By default no classes are excluded, as the greedy optimizer requires all classes because it cannot
+#' use negative coefficients.
+#' @param tuneLength The size of the grid to search for tuning the model. Defaults to 1, as
+#' the only parameter to optimize is the number of iterations, and the default of 100 works well.
+#' @param ... additional arguments to pass caret::train
 #' @return a \code{\link{caretEnsemble}} object
 #' @export
 #' @examples
@@ -46,9 +34,18 @@ check_binary_classification <- function(list_of_models) {
 #' ens <- caretEnsemble(models)
 #' summary(ens)
 #' }
-caretEnsemble <- function(all.models, ...) {
-  check_binary_classification(all.models)
-  out <- caretStack(all.models, method = "glm", ...)
+caretEnsemble <- function(
+    all.models,
+    excluded_class_id = 0L,
+    tuneLength = 1L,
+    ...) {
+  out <- caretStack(
+    all.models,
+    excluded_class_id = excluded_class_id,
+    tuneLength = tuneLength,
+    method = greedyMSE_caret(),
+    ...
+  )
   class(out) <- c("caretEnsemble", "caretStack")
   out
 }

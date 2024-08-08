@@ -154,22 +154,6 @@ testthat::test_that("We can make a confusion matrix", {
   testthat::expect_gt(cm$overall["Accuracy"], 0.9)
 })
 
-testthat::test_that("Multiclass is not supported for caretEnsemble", {
-  data(iris)
-  data(models.class)
-  data(models.reg)
-  model_list <- caretList(
-    x = iris[, -5L],
-    y = iris[, 5L],
-    methodList = c("glmnet", "rpart"),
-    tuneList = list(
-      nnet = caretModelSpec(method = "nnet", trace = FALSE)
-    )
-  )
-
-  testthat::expect_error(caretEnsemble(model_list), "caretEnsemble only supports binary classification problems")
-})
-
 testthat::test_that("caretList and caretStack handle imbalanced multiclass data", {
   set.seed(123L)
   n <- 1000L

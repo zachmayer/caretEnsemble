@@ -6,23 +6,37 @@
 \alias{caretEnsemble-package}
 \title{Combine several predictive models via weights}
 \usage{
-caretEnsemble(all.models, ...)
+caretEnsemble(all.models, excluded_class_id = 0L, tuneLength = 1L, ...)
 }
 \arguments{
 \item{all.models}{an object of class caretList}
 
-\item{...}{additional arguments to pass to the optimization function}
+\item{excluded_class_id}{The integer level to exclude from binary classification or multiclass problems.
+By default no classes are excluded, as the greedy optimizer requires all classes because it cannot
+use negative coefficients.}
+
+\item{tuneLength}{The size of the grid to search for tuning the model. Defaults to 1, as
+the only parameter to optimize is the number of iterations, and the default of 100 works well.}
+
+\item{...}{additional arguments to pass caret::train}
 }
 \value{
 a \code{\link{caretEnsemble}} object
 }
 \description{
-Find a good linear combination of several classification or regression models,
-using linear regression.
+Find a greedy, positive only linear combination of several \code{\link[caret]{train}} objects
 
 Functions for creating ensembles of caret models: caretList and caretStack
 }
 \details{
+greedyMSE works well when you want an ensemble that will never be worse than any
+single model in the dataset. In the worst case scenario, it will select the single
+best model, if none of them can be ensembled to improve the overall score. It will
+also never assign any model a negative coefficient, which can help avoid
+unintuitive cases at prediction time (e.g. if the correlations between
+predictors breaks down on new data, negative coefficients can lead to bad results).
+}
+\note{
 Every model in the "library" must be a separate \code{train} object. For
 example, if you wish to combine a random forests with several different
 values of mtry, you must build a model for each value of mtry. If you
@@ -32,14 +46,6 @@ before we get a chance to include it in the ensemble. By default,
 RMSE is used to ensemble regression models, and AUC is used to ensemble
 Classification models. This function does not currently support multi-class
 problems
-}
-\note{
-Currently when missing values are present in the training data, weights
-are calculated using only observations which are complete across all models
-in the library.The optimizer ignores missing values and calculates the weights with the
-observations and predictions available for each model separately. If each of the
-models has a different pattern of missingness in the predictors, then the resulting
-ensemble weights may be biased and the function issues a message.
 }
 \examples{
 \dontrun{

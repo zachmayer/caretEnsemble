@@ -90,10 +90,14 @@ testthat::test_that("We can ensemble models of different predictors", {
   testthat::expect_s3_class(pred.nest, "data.table")
   testthat::expect_identical(nrow(pred.nest), 150L)
 
+  # Ensemble errors on NAs
   X_reg_new <- X.reg
   X_reg_new[2L, 3L] <- NA
-  X_reg_new[25L, 3L] <- NA
-  p_with_nas <- predict(ensNest, newdata = X_reg_new)
+  expect_error(
+    predict(ensNest, newdata = X_reg_new),
+    "is.finite(newdata) are not all TRUE",
+    fixed = TRUE
+  )
 })
 
 testthat::context("Does ensemble prediction work with new data")
@@ -130,12 +134,13 @@ testthat::test_that("caretEnsemble works for classification models", {
     models.class,
     trControl = caret::trainControl(
       method = "cv",
-      number = 2L,
+      number = 10L,
       savePredictions = "final",
       classProbs = TRUE
     )
   )
   testthat::expect_s3_class(ens.class, "caretEnsemble")
+  ens.class$ens_model$finalModel
 
   # Predictions
   pred_stacked <- predict(ens.class) # stacked predictions
@@ -158,11 +163,11 @@ testthat::test_that("caretEnsemble works for classification models", {
   testthat::expect_identical(ncol(pred_one), 2L)
 
   # stacked predcitons should be similar to in sample predictions
-  testthat::expect_equal(pred_stacked, pred_in_sample, tol = 0.2)
+  testthat::expect_equal(pred_stacked, pred_in_sample, tol = 0.1)
 
   # One row predictions
-  testthat::expect_equivalent(pred_one$Yes, 0.03833661, tol = 0.05)
-  testthat::expect_equivalent(pred_one$No, 0.9616634, tol = 0.05)
+  testthat::expect_equivalent(pred_one$Yes, 0.02, tol = 0.05)
+  testthat::expect_equivalent(pred_one$No, 0.98, tol = 0.05)
 })
 
 testthat::context("Do ensembles of custom models work?")

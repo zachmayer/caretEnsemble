@@ -54,6 +54,7 @@ trainControl
 travis
 tuneGrid
 tuneList
+unintuitive
 varImp
 vecstack
 yhat

@@ -214,8 +214,8 @@ testthat::test_that("predict works with data.frame input", {
   newdata_df <- as.data.frame(regression_data$X)
   pred <- predict(model, newdata_df)
 
-  testthat::expect_is(pred, "matrix")
-  testthat::expect_identical(nrow(pred), nrow(newdata_df))
+  testthat::expect_is(pred, "numeric")
+  testthat::expect_length(pred, nrow(newdata_df))
 })
 
 # Test predict with label return for classification
