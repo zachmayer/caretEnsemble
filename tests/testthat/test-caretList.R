@@ -82,7 +82,7 @@ testthat::test_that("caretList errors for bad models", {
     testthat::expect_warning(
       testthat::expect_error(
         caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad),
-        regexp = "Stopping" # Stop training on the first error.  This is the mssage straight from train.
+        regexp = "Stopping" # Stop training on the first error. This is the mssage straight from train.
       ),
       regexp = "model fit failed for Fold1"
     ),

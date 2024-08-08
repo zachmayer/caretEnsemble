@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{a caretStack object}
 
-\item{metric}{which metric to plot.  If NULL, will use the default metric used to train the model.}
+\item{metric}{which metric to plot. If NULL, will use the default metric used to train the model.}
 
 \item{...}{ignored}
 }

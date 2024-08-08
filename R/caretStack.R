@@ -387,7 +387,7 @@ extractMetric.caretStack <- function(x, ...) {
 #' @title Plot a caretStack object
 #' @description This function plots the performance of each model in a caretList object.
 #' @param x a caretStack object
-#' @param metric which metric to plot.  If NULL, will use the default metric used to train the model.
+#' @param metric which metric to plot. If NULL, will use the default metric used to train the model.
 #' @param ... ignored
 #' @return a ggplot2 object
 #' @method plot caretStack

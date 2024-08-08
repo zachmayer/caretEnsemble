@@ -13,6 +13,6 @@ aggregate_mean_or_first(x)
 a data.table::data.table with predictions
 }
 \description{
-For numeric data take the mean.  For character data take the first value.
+For numeric data take the mean. For character data take the first value.
 }
 \keyword{internal}

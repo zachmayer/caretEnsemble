@@ -124,7 +124,7 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
 }
 
 #' @title Aggregate mean or first
-#' @description For numeric data take the mean.  For character data take the first value.
+#' @description For numeric data take the mean. For character data take the first value.
 #' @param x a train object
 #' @return a data.table::data.table with predictions
 #' @keywords internal

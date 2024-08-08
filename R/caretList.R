@@ -3,8 +3,8 @@
 #' Build a list of train objects suitable for ensembling using the \code{\link{caretStack}}
 #' function.
 #'
-#' @param ... arguments to pass to \code{\link[caret]{train}}.  Don't use the formula interface, its slower
-#' and buggier compared to the X, y interface.  Use a \code{\link[data.table]{data.table}} for X.
+#' @param ... arguments to pass to \code{\link[caret]{train}}. Don't use the formula interface, its slower
+#' and buggier compared to the X, y interface. Use a \code{\link[data.table]{data.table}} for X.
 #' Particularly if you have a large dataset and/or many models, using a data.table will
 #' avoid unnecessary copies of your data and can save a lot of time and RAM.
 #' These arguments will determine which train method gets dispatched.
@@ -487,7 +487,7 @@ plot.caretList <- function(x, metric = NULL, ...) {
 #' @title Summarize a caretList
 #' @description This function summarizes the performance of each model in a caretList object.
 #' @param object a caretList object
-#' @param metric The metric to show.  If NULL will use the metric used to train each model
+#' @param metric The metric to show. If NULL will use the metric used to train each model
 #' @param ... passed to extractMetric
 #' @return A data.table with metrics from each model.
 #' @method summary caretList
