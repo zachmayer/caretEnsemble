@@ -1,39 +1,50 @@
-greedyMSE <- function(X, Y, levels = NULL, max_iter = 100L) {
+#' @title Greedy optimization for MSE
+#' @description Greedy optimization for minimizing the mean squared error.
+#' Works for classificaton and regression.
+#' @param X A numeric matrix of features.
+#' @param Y A numeric matrix of target values.
+#' @param max_iter An integer scalar of the maximum number of iterations.
+#' @return A list with components:
+#' \item{model_weights}{A numeric matrix of model_weights.}
+#' \item{RMSE}{A numeric scalar of the root mean squared error.}
+#' \item{max_iter}{An integer scalar of the maximum number of iterations.}
+#' @export
+greedyMSE <- function(X, Y, max_iter = 100L) {
   stopifnot(
     is.matrix(X), is.matrix(Y),
     is.numeric(X), is.numeric(Y),
-    all(is.finite(X)), all(is.finite(Y)),
+    is.finite(X), is.finite(Y),
     nrow(X) == nrow(Y), ncol(X) >= 1L, ncol(Y) >= 1L,
     is.integer(max_iter), max_iter > 0L
   )
 
-  weights <- matrix(0, nrow = ncol(X), ncol = ncol(Y))
-  weights_update <- diag(ncol(X))
+  model_weights <- matrix(0L, nrow = ncol(X), ncol = ncol(Y))
+  model_update <- diag(ncol(X))
 
-  for (iter in 1L:max_iter) {
-    for (y_col in 1L:ncol(Y)) {
+  for (iter in seq_len(max_iter)) {
+    for (y_col in seq_len(ncol(Y))) {
       target <- Y[, y_col]
-      w <- weights[, y_col]
+      w <- model_weights[, y_col]
 
       # Calculate MSE for incrementing each weight
-      w_new <- w + weights_update
+      w_new <- w + model_update
       w_new <- w_new / colSums(w_new)
       predictions <- X %*% w_new
       MSE <- colMeans((predictions - target)^2.0)
 
       # Update the best weight
       best_id <- which.min(MSE)
-      weights[best_id, y_col] <- weights[best_id, y_col] + 1L
+      model_weights[best_id, y_col] <- model_weights[best_id, y_col] + 1L
     }
   }
 
   # Output
-  weights <- weights / colSums(weights)
-  rownames(weights) <- colnames(X)
-  colnames(weights) <- colnames(Y)
-  RMSE <- sqrt(mean((X %*% weights - Y)^2.0))
+  model_weights <- model_weights / colSums(model_weights)
+  rownames(model_weights) <- colnames(X)
+  colnames(model_weights) <- colnames(Y)
+  RMSE <- sqrt(mean((X %*% model_weights - Y)^2.0))
   out <- list(
-    weights = weights,
+    model_weights = model_weights,
     RMSE = RMSE,
     max_iter = max_iter
   )
@@ -41,36 +52,35 @@ greedyMSE <- function(X, Y, levels = NULL, max_iter = 100L) {
   out
 }
 
+#' @title Print method for greedyMSE
+#' @description Print method for greedyMSE objects.
+#' @param x A greedyMSE object.
+#' @param ... Additional arguments. Ignored.
+#' @export
 print.greedyMSE <- function(x, ...) {
   cat("Greedy MSE\n")
   cat("RMSE: ", x$RMSE, "\n")
-  cat("Weights:\n")
-  print(x$weights)
+  cat("model_weights:\n")
+  print(x$model_weights)
 }
 
+#' @title Predict method for greedyMSE
+#' @description Predict method for greedyMSE objects.
+#' @param object A greedyMSE object.
+#' @param newdata A numeric matrix of new data.
+#' @param ... Additional arguments. Ignored.
+#' @return A numeric matrix of predictions.
+#' @export
 predict.greedyMSE <- function(object, newdata, ...) {
   stopifnot(
     is.matrix(newdata),
     is.numeric(newdata),
-    all(is.finite(newdata)),
-    ncol(newdata) == nrow(object$weights)
+    is.finite(newdata),
+    ncol(newdata) == nrow(object$model_weights)
   )
-  out <- newdata %*% object$weights
+  out <- newdata %*% object$model_weights
   if (ncol(out) > 1L) {
     out <- out / rowSums(out)
   }
   out
 }
-
-set.seed(42)
-X <- matrix(runif(200), nrow = 100)
-Y <- X %*% c(6, 4) / 10
-
-X <- cbind(X, 1 - X)
-colnames(X) <- c("yes1", "yes2", "no1", "no2")
-Y <- cbind(Y, 1 - Y)
-colnames(Y) <- paste0("Y", 1:ncol(Y))
-
-model <- greedyMSE(X, Y)
-print(model)
-predict(model, X)
