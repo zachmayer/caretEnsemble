@@ -60,7 +60,7 @@ greedyMSE <- function(X, Y, max_iter = 100L) {
 print.greedyMSE <- function(x, ...) {
   cat("Greedy MSE\n")
   cat("RMSE: ", x$RMSE, "\n")
-  cat("model_weights:\n")
+  cat("Weights:\n")
   print(x$model_weights)
 }
 

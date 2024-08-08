@@ -38,6 +38,10 @@ testthat::test_that("greedyMSE works for regression", {
   testthat::expect_lt(model$RMSE, stats::sd(regression_data$Y)) # Model should be better than baseline
   # High correlation with true values
   testthat::expect_gt(stats::cor(predict(model, regression_data$X), regression_data$Y), 0.8)
+
+  testthat::expect_output(print(model), "Greedy MSE")
+  testthat::expect_output(print(model), "RMSE")
+  testthat::expect_output(print(model), "Weights")
 })
 
 # Test for binary classification (one col)
@@ -46,6 +50,10 @@ testthat::test_that("greedyMSE works for binary classification", {
   predictions <- predict(model, regression_data$X)
   accuracy <- mean((predictions > 0.5) == Y_binary)
   testthat::expect_gt(accuracy, 0.7) # Accuracy should be better than random guessing
+
+  testthat::expect_output(print(model), "Greedy MSE")
+  testthat::expect_output(print(model), "RMSE")
+  testthat::expect_output(print(model), "Weights")
 })
 
 # Test for multiple regression (many cols)
