@@ -29,7 +29,7 @@
 #' @export
 #' @examples
 #' set.seed(42)
-#' models <- caretList(iris[1:50, 1:2], iris[1:50, 3], methodList = c("glm", "lm"))
+#' models <- caretList(iris[1:50, 1:2], iris[1:50, 3], methodList = c("rpart", "rf"))
 #' ens <- caretEnsemble(models)
 #' summary(ens)
 caretEnsemble <- function(

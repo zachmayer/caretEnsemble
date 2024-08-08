@@ -239,20 +239,19 @@ dropExcludedClass <- function(x, all_classes, excluded_class_id) {
 #' @return a \code{\link{caretList}} object
 #' @export
 #' @examples
-#' rpartTrain <- train(Class ~ .,
-#'   data = Sonar,
-#'   trControl = ctrl1,
-#'   method = "rpart"
+#' data(iris)
+#' model_lm <- caret::train(Sepal.Length ~ .,
+#'   data = iris,
+#'   method = "lm"
 #' )
 #'
-#' rfTrain <- train(Class ~ .,
-#'   data = Sonar,
-#'   trControl = ctrl1,
-#'   method = "rf"
+#' model_rf <- caret::train(Sepal.Length ~ .,
+#'   data = iris,
+#'   method = "rf",
+#'   tuneLength = 1L
 #' )
 #'
-#' bigList <- c(model_list1, model_list2)
-#'
+#' model_list <- c(model_lm, model_rf)
 c.train <- function(...) {
   new_model_list <- unlist(lapply(list(...), function(x) {
     if (inherits(x, "caretList")) {

@@ -43,7 +43,6 @@ inference time for transfer learning.
 models <- caretList(
   x = iris[1:50, 1:2],
   y = iris[1:50, 3],
-  trControl = trainControl(method = "cv"),
   methodList = c("rpart", "glm")
 )
 caretStack(models, method = "glm")

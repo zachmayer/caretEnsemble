@@ -22,21 +22,13 @@
 #' it is dropped from the list.
 #' @export
 #' @examples
-#' myControl <- trainControl(method = "cv", number = 5)
 #' caretList(
 #'   Sepal.Length ~ Sepal.Width,
 #'   head(iris, 50),
 #'   methodList = c("glm", "lm"),
-#'   trControl = myControl
-#' )
-#' caretList(
-#'   Sepal.Length ~ Sepal.Width,
-#'   head(iris, 50),
-#'   methodList = c("lm"),
 #'   tuneList = list(
 #'     nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1)
-#'   ),
-#'   trControl = myControl
+#'   )
 #' )
 caretList <- function(
     ...,
@@ -252,24 +244,22 @@ as.caretList.list <- function(object) {
 #' @return a \code{\link{caretList}} object
 #' @export
 #' @examples
-#' model_list1 <- caretList(Class ~ .,
-#'   data = Sonar,
+#' data(iris)
+#' model_list1 <- caretList(Sepal.Width ~ .,
+#'   data = iris,
 #'   tuneList = list(
-#'     glm = caretModelSpec(method = "glm", family = "binomial"),
-#'     rpart = caretModelSpec(method = "rpart")
+#'     lm = caretModelSpec(method = "lm")
 #'   )
 #' )
 #'
-#' model_list2 <- caretList(Class ~ .,
-#'   data = Sonar,
+#' model_list2 <- caretList(Sepal.Width ~ .,
+#'   data = iris, tuneLength = 1L,
 #'   tuneList = list(
-#'     glm = caretModelSpec(method = "rpart"),
-#'     rpart = caretModelSpec(method = "rf")
+#'     rf = caretModelSpec(method = "rf")
 #'   )
 #' )
 #'
 #' bigList <- c(model_list1, model_list2)
-#'
 c.caretList <- function(...) {
   new_model_list <- unlist(lapply(list(...), function(x) {
     if (inherits(x, "caretList")) {

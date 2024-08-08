@@ -58,7 +58,6 @@ model predictions are transformed before being passed to the stacking model.
 models <- caretList(
   x = iris[1:100, 1:2],
   y = iris[1:100, 3],
-  trControl = trainControl(method = "cv"),
   methodList = c("rpart", "glm")
 )
 meta_model <- caretStack(models, method = "lm")

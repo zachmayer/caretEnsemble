@@ -31,7 +31,6 @@
 #' models <- caretList(
 #'   x = iris[1:50, 1:2],
 #'   y = iris[1:50, 3],
-#'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
 #' caretStack(models, method = "glm")
@@ -121,7 +120,6 @@ caretStack <- function(
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
-#'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
 #' meta_model <- caretStack(models, method = "lm")
@@ -257,7 +255,6 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
-#'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
 #' meta_model <- caretStack(models, method = "lm")
@@ -276,7 +273,6 @@ print.caretStack <- function(x, ...) {
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
-#'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
 #' meta_model <- caretStack(models, method = "lm")
@@ -336,11 +332,10 @@ varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
-#'   trControl = trainControl(method = "cv"),
 #'   methodList = c("rpart", "glm")
 #' )
-#' meta_model <- caretStack(models, method = "lm", trControl = trainControl(method = "cv"))
-#' dotplot.caretStack(meta_model)
+#' meta_model <- caretStack(models, method = "lm")
+#' lattice::dotplot(meta_model)
 dotplot.caretStack <- function(x, ...) {
   resamps <- caret::resamples(x$models)
   lattice::dotplot(resamps, ...)
@@ -433,7 +428,9 @@ stackedTrainResiduals <- function(object, show_class_id = 2L) {
 #' Middle left is a bar graph of the weights of the component models. Middle
 #' right is the disagreement in the residuals of the component models (unweighted)
 #' across the fitted values. Bottom left and bottom right are the plots of the
-#' residuals against two random or user specified variables.
+#' residuals against two random or user specified variables. Note that the ensemble
+#' must have been trained with savePredictions = "final", which is required to
+#' get residuals from the stack for the plot.
 #' @importFrom ggplot2 autoplot
 #' @importFrom patchwork plot_layout
 #' @method autoplot caretStack
