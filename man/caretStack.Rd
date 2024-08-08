@@ -40,7 +40,6 @@ a common set of rows during training (for stacking) or a common set of columns a
 inference time for transfer learning.
 }
 \examples{
-\dontrun{
 models <- caretList(
   x = iris[1:50, 1:2],
   y = iris[1:50, 3],
@@ -48,7 +47,6 @@ models <- caretList(
   methodList = c("rpart", "glm")
 )
 caretStack(models, method = "glm")
-}
 }
 \references{
 Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).

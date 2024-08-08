@@ -28,7 +28,6 @@
 #'   \url{https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf}
 #' @export
 #' @examples
-#' \dontrun{
 #' models <- caretList(
 #'   x = iris[1:50, 1:2],
 #'   y = iris[1:50, 3],
@@ -36,7 +35,6 @@
 #'   methodList = c("rpart", "glm")
 #' )
 #' caretStack(models, method = "glm")
-#' }
 caretStack <- function(
     all.models,
     new_X = NULL,
@@ -120,7 +118,6 @@ caretStack <- function(
 #' model predictions are transformed before being passed to the stacking model.
 #' @method predict caretStack
 #' @examples
-#' \dontrun{
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -129,7 +126,6 @@ caretStack <- function(
 #' )
 #' meta_model <- caretStack(models, method = "lm")
 #' RMSE(predict(meta_model, iris[101:150, 1:2]), iris[101:150, 3])
-#' }
 predict.caretStack <- function(
     object,
     newdata = NULL,
@@ -258,7 +254,6 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' @param ... ignored
 #' @export
 #' @examples
-#' \dontrun{
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -267,7 +262,6 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' )
 #' meta_model <- caretStack(models, method = "lm")
 #' print(meta_model)
-#' }
 print.caretStack <- function(x, ...) {
   cat("The following models were ensembled:", toString(names(x$models)), " \n")
   print(x$ens_model)
@@ -279,7 +273,6 @@ print.caretStack <- function(x, ...) {
 #' @param ... ignored
 #' @export
 #' @examples
-#' \dontrun{
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
 #'   y = iris[1:100, 3],
@@ -288,7 +281,6 @@ print.caretStack <- function(x, ...) {
 #' )
 #' meta_model <- caretStack(models, method = "lm")
 #' summary(meta_model)
-#' }
 summary.caretStack <- function(object, ...) {
   metric <- object$ens_model$metric
   out <- list(
@@ -340,7 +332,6 @@ varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
 #' @importFrom lattice dotplot
 #' @export
 #' @examples
-#' \dontrun{
 #' set.seed(42)
 #' models <- caretList(
 #'   x = iris[1:100, 1:2],
@@ -350,7 +341,6 @@ varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
 #' )
 #' meta_model <- caretStack(models, method = "lm", trControl = trainControl(method = "cv"))
 #' dotplot.caretStack(meta_model)
-#' }
 dotplot.caretStack <- function(x, ...) {
   resamps <- caret::resamples(x$models)
   lattice::dotplot(resamps, ...)
@@ -449,7 +439,6 @@ stackedTrainResiduals <- function(object, show_class_id = 2L) {
 #' @method autoplot caretStack
 #' @export
 #' @examples
-#' \dontrun{
 #' set.seed(42)
 #' data(models.reg)
 #' ens <- caretStack(
@@ -459,7 +448,6 @@ stackedTrainResiduals <- function(object, show_class_id = 2L) {
 #'   )
 #' )
 #' autoplot(ens)
-#' }
 # https://github.com/thomasp85/patchwork/issues/226 — why we need importFrom patchwork plot_layout
 autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(methods::is(object, "caretStack"))

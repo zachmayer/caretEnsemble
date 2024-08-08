@@ -29,7 +29,6 @@ This function provides a more robust series of diagnostic plots
 for a caretEnsemble object.
 }
 \examples{
-\dontrun{
 set.seed(42)
 data(models.reg)
 ens <- caretStack(
@@ -39,5 +38,4 @@ ens <- caretStack(
   )
 )
 autoplot(ens)
-}
 }

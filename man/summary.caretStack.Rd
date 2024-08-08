@@ -15,7 +15,6 @@
 This is a function to summarize a caretStack.
 }
 \examples{
-\dontrun{
 models <- caretList(
   x = iris[1:100, 1:2],
   y = iris[1:100, 3],
@@ -24,5 +23,4 @@ models <- caretList(
 )
 meta_model <- caretStack(models, method = "lm")
 summary(meta_model)
-}
 }

@@ -55,7 +55,6 @@ caret model. This is not available for all cases such as where the library
 model predictions are transformed before being passed to the stacking model.
 }
 \examples{
-\dontrun{
 models <- caretList(
   x = iris[1:100, 1:2],
   y = iris[1:100, 3],
@@ -64,5 +63,4 @@ models <- caretList(
 )
 meta_model <- caretStack(models, method = "lm")
 RMSE(predict(meta_model, iris[101:150, 1:2]), iris[101:150, 3])
-}
 }

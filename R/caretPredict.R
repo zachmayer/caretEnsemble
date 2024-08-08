@@ -239,7 +239,6 @@ dropExcludedClass <- function(x, all_classes, excluded_class_id) {
 #' @return a \code{\link{caretList}} object
 #' @export
 #' @examples
-#' \dontrun{
 #' rpartTrain <- train(Class ~ .,
 #'   data = Sonar,
 #'   trControl = ctrl1,
@@ -253,7 +252,6 @@ dropExcludedClass <- function(x, all_classes, excluded_class_id) {
 #' )
 #'
 #' bigList <- c(model_list1, model_list2)
-#' }
 #'
 c.train <- function(...) {
   new_model_list <- unlist(lapply(list(...), function(x) {

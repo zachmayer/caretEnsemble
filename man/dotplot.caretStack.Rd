@@ -17,7 +17,6 @@ caret package on all the models in the ensemble, excluding the final ensemble mo
 this function only works if the ensembling model has the same number of resamples as the component models.
 }
 \examples{
-\dontrun{
 set.seed(42)
 models <- caretList(
   x = iris[1:100, 1:2],
@@ -27,5 +26,4 @@ models <- caretList(
 )
 meta_model <- caretStack(models, method = "lm", trControl = trainControl(method = "cv"))
 dotplot.caretStack(meta_model)
-}
 }

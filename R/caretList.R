@@ -22,7 +22,6 @@
 #' it is dropped from the list.
 #' @export
 #' @examples
-#' \dontrun{
 #' myControl <- trainControl(method = "cv", number = 5)
 #' caretList(
 #'   Sepal.Length ~ Sepal.Width,
@@ -39,7 +38,6 @@
 #'   ),
 #'   trControl = myControl
 #' )
-#' }
 caretList <- function(
     ...,
     trControl = NULL,
@@ -254,7 +252,6 @@ as.caretList.list <- function(object) {
 #' @return a \code{\link{caretList}} object
 #' @export
 #' @examples
-#' \dontrun{
 #' model_list1 <- caretList(Class ~ .,
 #'   data = Sonar,
 #'   tuneList = list(
@@ -272,7 +269,6 @@ as.caretList.list <- function(object) {
 #' )
 #'
 #' bigList <- c(model_list1, model_list2)
-#' }
 #'
 c.caretList <- function(...) {
   new_model_list <- unlist(lapply(list(...), function(x) {

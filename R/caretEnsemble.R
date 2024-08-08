@@ -28,12 +28,10 @@
 #' @return a \code{\link{caretEnsemble}} object
 #' @export
 #' @examples
-#' \dontrun{
 #' set.seed(42)
 #' models <- caretList(iris[1:50, 1:2], iris[1:50, 3], methodList = c("glm", "lm"))
 #' ens <- caretEnsemble(models)
 #' summary(ens)
-#' }
 caretEnsemble <- function(
     all.models,
     excluded_class_id = 0L,

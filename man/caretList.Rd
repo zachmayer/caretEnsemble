@@ -46,7 +46,6 @@ Build a list of train objects suitable for ensembling using the \code{\link{care
 function.
 }
 \examples{
-\dontrun{
 myControl <- trainControl(method = "cv", number = 5)
 caretList(
   Sepal.Length ~ Sepal.Width,
@@ -63,5 +62,4 @@ caretList(
   ),
   trControl = myControl
 )
-}
 }

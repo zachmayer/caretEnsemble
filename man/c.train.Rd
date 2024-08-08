@@ -16,7 +16,6 @@ a \code{\link{caretList}} object
 take N objects of class train and concatenate into an object of class caretList for future ensembling
 }
 \examples{
-\dontrun{
 rpartTrain <- train(Class ~ .,
   data = Sonar,
   trControl = ctrl1,
@@ -30,6 +29,5 @@ rfTrain <- train(Class ~ .,
 )
 
 bigList <- c(model_list1, model_list2)
-}
 
 }
