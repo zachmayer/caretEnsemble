@@ -10,20 +10,47 @@
 #' \item{max_iter}{An integer scalar of the maximum number of iterations.}
 #' @export
 greedyMSE <- function(X, Y, max_iter = 100L) {
+  # X to matrix
+  X <- if (is.matrix(X)) X else as.matrix(X)
+
+  # Y to matrix
+  if (is.matrix(Y)) {
+    y_matrix <- Y
+  } else if (is.factor(Y)) {
+    lev <- levels(Y)
+    y_matrix <- matrix(
+      0.0,
+      nrow = length(Y),
+      ncol = length(lev),
+      dimnames = list(NULL, lev)
+    )
+    for (i in seq_along(lev)) {
+      y_matrix[, i] <- as.integer(Y == lev[i])
+    }
+    colnames(y_matrix) <- lev
+  } else {
+    y_matrix <- matrix(Y, ncol = 1L)
+  }
+
+  # Checks
   stopifnot(
-    is.matrix(X), is.matrix(Y),
-    is.numeric(X), is.numeric(Y),
-    is.finite(X), is.finite(Y),
-    nrow(X) == nrow(Y), ncol(X) >= 1L, ncol(Y) >= 1L,
+    is.matrix(X), is.matrix(y_matrix),
+    is.numeric(X), is.numeric(y_matrix),
+    is.finite(X), is.finite(y_matrix),
+    nrow(X) == nrow(y_matrix),
+    ncol(X) >= 1L, ncol(y_matrix) >= 1L,
     is.integer(max_iter), max_iter > 0L
   )
 
-  model_weights <- matrix(0L, nrow = ncol(X), ncol = ncol(Y))
+  # Initialize empty weights and the potential weight updates
+  # The diag matrix basically proposes updating each weight by 1L
+  n_targets <- ncol(y_matrix)
+  model_weights <- matrix(0L, nrow = ncol(X), ncol = n_targets)
   model_update <- diag(ncol(X))
 
   for (iter in seq_len(max_iter)) {
-    for (y_col in seq_len(ncol(Y))) {
-      target <- Y[, y_col]
+    for (y_col in seq_len(n_targets)) {
+      target <- y_matrix[, y_col]
       w <- model_weights[, y_col]
 
       # Calculate MSE for incrementing each weight
@@ -41,8 +68,8 @@ greedyMSE <- function(X, Y, max_iter = 100L) {
   # Output
   model_weights <- model_weights / colSums(model_weights)
   rownames(model_weights) <- colnames(X)
-  colnames(model_weights) <- colnames(Y)
-  RMSE <- sqrt(mean((X %*% model_weights - Y)^2.0))
+  colnames(model_weights) <- colnames(y_matrix)
+  RMSE <- sqrt(mean((X %*% model_weights - y_matrix)^2.0))
   out <- list(
     model_weights = model_weights,
     RMSE = RMSE,
@@ -56,6 +83,7 @@ greedyMSE <- function(X, Y, max_iter = 100L) {
 #' @description Print method for greedyMSE objects.
 #' @param x A greedyMSE object.
 #' @param ... Additional arguments. Ignored.
+#' @method print greedyMSE
 #' @export
 print.greedyMSE <- function(x, ...) {
   cat("Greedy MSE\n")
@@ -64,102 +92,101 @@ print.greedyMSE <- function(x, ...) {
   print(x$model_weights)
 }
 
+#' @title variample importance for a greedyMSE model
+#' @description Variable importance for a greedyMSE model.
+#' @param x A greedyMSE object.
+#' @param ... Additional arguments. Ignored.
+#' @importFrom caret varImp
+#' @method varImp greedyMSE
+#' @export
+varImp.greedyMSE <- function(x, ...) {
+  importance <- rowSums(abs(x$model_weights))
+  importance <- importance / sum(importance)
+  out <- data.frame(Overall = importance)
+  rownames(out) <- row.names(x$model_weights)
+  out
+}
+
 #' @title Predict method for greedyMSE
 #' @description Predict method for greedyMSE objects.
 #' @param object A greedyMSE object.
 #' @param newdata A numeric matrix of new data.
+#' @param return_labels A logical scalar of whether to return labels.
 #' @param ... Additional arguments. Ignored.
 #' @return A numeric matrix of predictions.
 #' @export
-predict.greedyMSE <- function(object, newdata, ...) {
+predict.greedyMSE <- function(object, newdata, return_labels = FALSE, ...) {
   newdata <- if (is.matrix(newdata)) newdata else as.matrix(newdata)
   stopifnot(
     is.numeric(newdata),
     is.finite(newdata),
     ncol(newdata) == nrow(object$model_weights)
   )
-  
-  out <- newdata %*% object$model_weights
-  if (ncol(out) > 1L) {
-    out <- out / rowSums(out)
+
+  pred <- newdata %*% object$model_weights
+  if (ncol(pred) > 1L) {
+    pred <- pred / rowSums(pred)
   }
-  out
+
+  if (return_labels) {
+    stopifnot(ncol(pred) > 1L)
+    lev <- colnames(object$model_weights)
+    pred <- lev[apply(pred, 1L, which.max)]
+    pred <- factor(pred, levels = lev)
+  }
+
+  pred
 }
 
 #' @title caret interface for greedyMSE
-#' @description caret interface for greedyMSE.
+#' @description caret interface for greedyMSE.  greedyMSE works
+#' well when you want an ensemble that will never be worse than any single predictor
+#' in the in dataset.  It does not use an intercept and it does not allow for
+#' negative coefficients.  This makes it highly contrained and in general
+#' does not work well on standard classification and regression problems.
+#' However, it does work well in the case of (bulllet list please):
+#' \item{-}{The predictors are highly correlated with each other}
+#' \item{-}{The predictors are highly correlated with the model}
+#' \item{-}{You expect or want positive only coefficients}
+#' In the worse case, this method will select one input and use that,
+#' but in many other cases it will return a positive, weighted average
+#' of the inputs.  Since it never uses negative weigths, you never get
+#' into a scenario where one model is weighted negative and on new data
+#' you get were predictions becuase a correlation changed.
+#' Since this model will always be a positive weighted average of the inputs,
+#' it will rarely do worse than the individual models on new data.
 #' @export
-greedyMSE_caret <- list(
-  label = "Greedy Mean Squared Error Optimizer",
-  library = NULL,
-  loop = NULL,
-  type = c("Regression", "Classification"),
-  parameters = data.frame(
-    parameter = "max_iter",
-    class = "integer",
-    label = "Max Iterations"
-  ),
-  grid = function(x, y, len = 1L, search = "grid") {
-    data.frame(max_iter = seq(50, 500, len = len))
-  },
-  fit = function(x, y, wts, param, lev, last, classProbs, ...) {
-
-    is_class <- is.factor(y)
-    lev <- levels(y)
-
-    # X to matrix
-    if (!is.matrix(x)) x <- as.matrix(x)
-
-    # y to matrix
-    if (is_class) {
-      y_matrix <- matrix(
-        0.0,
-        nrow = length(y),
-        ncol = length(lev),
-        dimnames = list(NULL, lev)
-      )
-      for (i in seq_along(lev)) {
-        y_matrix[, i] <- as.integer(y == lev[i])
-      }
-      colnames(y_matrix) <- lev
-    } else {
-      y_matrix <- matrix(y, ncol = 1L)
-    }
-
-    # Fit model
-    model <- greedyMSE(X = x, Y = y_matrix, max_iter = param$max_iter)
-
-    model
-  },
-  predict = function(modelFit, newdata, submodels = NULL) {
-
-    pred <- predict(modelFit, newdata)
-
-    if (modelFit$problemType == "Classification") {
-      pred <- modelFit$obsLevels[apply(pred, 1, which.max)]
-      pred <- factor(pred, levels = modelFit$obsLevels)
-    }
-
-    pred
-  },
-  prob = function(modelFit, newdata, submodels = NULL) {
-
-    pred <- predict(modelFit, newdata)
-
-    colnames(pred) <- modelFit$obsLevels
-
-    pred
-  },
-  varImp = function(object, ...) {
-    importance <- rowSums(abs(object$model_weights))
-    importance <- importance / sum(importance)
-    out <- data.frame(Overall = importance)
-    rownames(out) <- row.names(object$model_weights)
-    out
-  },
-  predictors = function(x, ...) {
-    rownames(object$model_weights)
-  },
-  tags = c("Greedy Optimizer", "Mean Squared Error", "Interpretable"),
-  sort = function(x) x[order(x$max_iter), ]
-)
+greedyMSE_caret <- function() {
+  list(
+    label = "Greedy Mean Squared Error Optimizer",
+    library = NULL,
+    loop = NULL,
+    type = c("Regression", "Classification"),
+    parameters = data.frame(
+      parameter = "max_iter",
+      class = "integer",
+      label = "Max Iterations",
+      stringsAsFactors = FALSE
+    ),
+    grid = function(x, y, len = 1L, search = "grid") {
+      data.frame(max_iter = seq(100L, 250L, len = len))
+    },
+    fit = function(x, y, wts, param, lev, last, classProbs, ...) {
+      greedyMSE(X = x, Y = y, max_iter = param$max_iter)
+    },
+    predict = function(modelFit, newdata, submodels = NULL) {
+      predict(modelFit, newdata, return_labels = modelFit$problemType == "Classification")
+    },
+    prob = function(modelFit, newdata, submodels = NULL) {
+      predict(modelFit, newdata, return_labels = FALSE)
+    },
+    varImp = function(object, ...) {
+      caret::varImp(object)
+    },
+    predictors = function(x, ...) {
+      rownames(x$model_weights)
+    },
+    tags = c("Greedy Optimizer", "Mean Squared Error", "Interpretable"),
+    sort = function(x) x[order(x$max_iter), ]
+  )
+}

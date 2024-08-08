@@ -1,6 +1,7 @@
 # Helper function to create a simple dataset
 create_dataset <- function(n_samples, n_features = 5L, n_targets = 1L, coef = NULL, noise = 0L) {
   X <- matrix(stats::runif(n_samples * n_features), nrow = n_samples)
+  colnames(X) <- paste0("Feature", seq_len(n_features))
 
   if (is.null(coef)) {
     coef <- matrix(stats::runif(n_features * n_targets), nrow = n_features)
@@ -12,6 +13,7 @@ create_dataset <- function(n_samples, n_features = 5L, n_targets = 1L, coef = NU
   coef <- apply(coef, 2L, function(col) col / sum(abs(col)))
 
   Y <- X %*% coef + matrix(stats::rnorm(n_samples * n_targets, 0.0, noise), nrow = n_samples)
+  colnames(Y) <- letters[seq_len(ncol(Y))]
 
   if (n_targets > 1L) {
     # Ensure all values are positive
@@ -31,6 +33,7 @@ multi_regression_data <- create_dataset(N, n_targets = 3L)
 
 Y_binary <- matrix(as.integer(regression_data$Y > mean(regression_data$Y)), nrow = N)
 Y_multi_binary <- matrix(as.integer(multi_regression_data$Y > mean(multi_regression_data$Y)), nrow = N)
+colnames(Y_multi_binary) <- letters[seq_len(ncol(Y_multi_binary))]
 
 # Test for regression (one col)
 testthat::test_that("greedyMSE works for regression", {
@@ -168,4 +171,93 @@ testthat::test_that("greedyMSE can be used for classification ensembling with GL
     greedy_model$RMSE
   )
   testthat::expect_lte(ensemble_model$RMSE, min(individual_rmse))
+})
+
+# Test fitting and predicting with factor response (2 levels)
+testthat::test_that("greedyMSE works with 2-level factor response", {
+  lev <- c("Low", "High")
+  y_factor <- cut(regression_data$Y, breaks = 2L, labels = lev)
+  model <- greedyMSE(regression_data$X, y_factor)
+  pred <- predict(model, regression_data$X, return_labels = TRUE)
+
+  testthat::expect_is(pred, "factor")
+  testthat::expect_identical(levels(pred), levels(y_factor))
+  testthat::expect_gt(mean(pred == y_factor), 0.60) # 0.50 is random guessing
+})
+
+# Test fitting and predicting with factor response (3 levels)
+testthat::test_that("greedyMSE works with 3-level factor response", {
+  lev <- c("Low", "Medium", "High")
+  y_factor <- cut(regression_data$Y, breaks = 3L, labels = lev)
+  model <- greedyMSE(regression_data$X, y_factor)
+  pred <- predict(model, regression_data$X, return_labels = TRUE)
+
+  testthat::expect_is(pred, "factor")
+  testthat::expect_identical(levels(pred), levels(y_factor))
+  testthat::expect_gt(mean(pred == y_factor), 0.4) # 0.33 is random guessing
+})
+
+# Test varImp functionality
+testthat::test_that("varImp works for greedyMSE", {
+  model <- greedyMSE(regression_data$X, regression_data$Y)
+  importance <- caret::varImp(model)
+
+  testthat::expect_is(importance, "data.frame")
+  testthat::expect_identical(nrow(importance), ncol(regression_data$X))
+  testthat::expect_true(all(importance$Overall >= 0.0 & importance$Overall <= 1.0))
+  testthat::expect_equal(sum(importance$Overall), 1.0, tolerance = 1e-6)
+})
+
+# Test predict with data.frame input
+testthat::test_that("predict works with data.frame input", {
+  model <- greedyMSE(regression_data$X, regression_data$Y)
+  newdata_df <- as.data.frame(regression_data$X)
+  pred <- predict(model, newdata_df)
+
+  testthat::expect_is(pred, "matrix")
+  testthat::expect_identical(nrow(pred), nrow(newdata_df))
+})
+
+# Test predict with label return for classification
+testthat::test_that("predict returns labels for classification", {
+  y_factor <- factor(ifelse(regression_data$Y > median(regression_data$Y), "High", "Low"))
+  model <- greedyMSE(regression_data$X, y_factor)
+  pred_prob <- predict(model, regression_data$X, return_labels = FALSE)
+  pred_label <- predict(model, regression_data$X, return_labels = TRUE)
+
+  testthat::expect_is(pred_prob, "matrix")
+  testthat::expect_is(pred_label, "factor")
+  testthat::expect_identical(levels(pred_label), levels(y_factor))
+})
+
+# More realistic test
+testthat::test_that("greedyMSE handles highly correlated predictors", {
+  set.seed(123L)
+  n <- 1000L
+  base <- rnorm(n)
+  X <- matrix(
+    cbind(
+      base + rnorm(n, 0.0, 0.01),
+      base + rnorm(n, 0.0, 0.01),
+      base + rnorm(n, 0.0, 0.01),
+      base + rnorm(n, 0.0, 0.01),
+      base + rnorm(n, 0.0, 0.01),
+      rnorm(n)
+    ),
+    ncol = 6L
+  )
+  colnames(X) <- c("x1", "x2", "x3", "x4", "x5", "x6")
+  coef <- c(10.0, 10.0, 5.0, 5.0, 0.0, 0.0)
+  coef <- coef / sum(coef)
+  Y <- X %*% coef + rnorm(n, 0.0, 0.1)
+  Y <- Y - mean(Y)
+  Y <- Y / sd(Y)
+
+  model <- greedyMSE(X, Y)
+  pred <- predict(model, X)
+
+  rmse_model <- sqrt(mean((pred - Y)^2L))
+  rmse_mean <- sqrt(mean((mean(Y) - Y)^2L))
+
+  testthat::expect_lt(rmse_model, rmse_mean)
 })
