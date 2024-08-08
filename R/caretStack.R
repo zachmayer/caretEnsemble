@@ -488,8 +488,9 @@ autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
     ggplot2::theme_bw()
 
   # Model Weights
-  wghtFrame <- data.table::as.data.table(stats::coef(object[["ens_model"]][["finalModel"]]))
-  data.table::set(wghtFrame, j = "method", value = row.names(wghtFrame))
+  imp <- caret::varImp(object[["ens_model"]][["finalModel"]])
+  wghtFrame <- data.table::as.data.table(imp)
+  data.table::set(wghtFrame, j = "method", value = row.names(imp))
   names(wghtFrame) <- c("weights", "method")
   g3 <- ggplot2::ggplot(wghtFrame, ggplot2::aes(.data[["method"]], .data[["weights"]])) +
     ggplot2::geom_bar(stat = "identity", fill = I("gray50"), color = I("black")) +
@@ -550,6 +551,6 @@ autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
     ggplot2::scale_y_continuous("Residuals") +
     ggplot2::labs(title = paste0("Residuals Against ", xvars[2L])) +
     ggplot2::theme_bw()
-  out <- g1 + g2 / (g3 + g4) / (g5 + g6)
+  out <- (g1 + g2) / (g3 + g4) / (g5 + g6)
   out
 }

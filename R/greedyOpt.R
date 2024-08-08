@@ -125,14 +125,15 @@ predict.greedyMSE <- function(object, newdata, return_labels = FALSE, ...) {
 
   pred <- newdata %*% object$model_weights
   if (ncol(pred) > 1L) {
-    pred <- pred / rowSums(pred)
-  }
-
-  if (return_labels) {
-    stopifnot(ncol(pred) > 1L)
-    lev <- colnames(object$model_weights)
-    pred <- lev[apply(pred, 1L, which.max)]
-    pred <- factor(pred, levels = lev)
+    if (return_labels) {
+      lev <- colnames(object$model_weights)
+      pred <- lev[apply(pred, 1L, which.max)]
+      pred <- factor(pred, levels = lev)
+    } else {
+      pred <- pred / rowSums(pred)
+    }
+  } else {
+    pred <- pred[, 1L]
   }
 
   pred
@@ -141,7 +142,7 @@ predict.greedyMSE <- function(object, newdata, return_labels = FALSE, ...) {
 #' @title caret interface for greedyMSE
 #' @description caret interface for greedyMSE. greedyMSE works
 #' well when you want an ensemble that will never be worse than any single predictor
-#' in the in dataset. It does not use an intercept and it does not allow for
+#' in the dataset. It does not use an intercept and it does not allow for
 #' negative coefficients. This makes it highly constrained and in general
 #' does not work well on standard classification and regression problems.
 #' However, it does work well in the case of:

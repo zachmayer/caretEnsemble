@@ -31,8 +31,17 @@ testthat::test_that("caret::varImp.caretEnsemble", {
     for (s in c(TRUE, FALSE)) {
       i <- caret::varImp(m, normalize = s)
       testthat::expect_is(i, "numeric")
-      testthat::expect_length(i, length(m$models))
-      testthat::expect_named(i, names(m$models))
+      if (isClassifier(m)) {
+        len <- length(m$models) * 2L
+        n <- c(outer(c("rf", "glm", "rpart", "treebag"), c("No", "Yes"), paste, sep = "_"))
+        n <- matrix(n, ncol = 2L)
+        n <- c(t(n))
+      } else {
+        len <- length(m$models)
+        n <- names(m$models)
+      }
+      testthat::expect_length(i, len)
+      testthat::expect_named(i, n)
       if (s) {
         testthat::expect_true(all(i >= 0.0))
         testthat::expect_true(all(i <= 1.0))

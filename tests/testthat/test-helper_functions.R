@@ -188,26 +188,6 @@ testthat::test_that("isClassifierAndValidate stops when a classification model d
   testthat::expect_error(lapply(model_list, isClassifierAndValidate, validate_for_stacking = TRUE), err)
   testthat::context("Test helper functions for multiclass classification")
 
-  testthat::test_that("Check errors in caretEnsemble for multiclass classification work", {
-    data(iris)
-    model_list <- caretList(
-      x = iris[, -5L],
-      y = iris[, 5L],
-      methodList = c("rpart", "glmnet")
-    )
-
-    err <- "caretEnsemble only supports binary classification problems"
-    testthat::expect_error(check_binary_classification(model_list), err)
-    testthat::expect_null(check_binary_classification(models.class))
-    testthat::expect_null(check_binary_classification(models.reg))
-
-    # Do not produce errors when another object is passed
-    testthat::expect_null(check_binary_classification(NULL))
-    testthat::expect_null(check_binary_classification(2L))
-    testthat::expect_null(check_binary_classification(list("string")))
-    testthat::expect_null(check_binary_classification(iris))
-  })
-
   testthat::test_that("Configuration function for excluded level work", {
     # Integers work
     testthat::expect_identical(validateExcludedClass(0L), 0L)
