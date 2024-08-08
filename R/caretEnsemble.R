@@ -20,7 +20,7 @@
 #' problems
 #' @param all.models an object of class caretList
 #' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
-#' by default no classes are excluded, as the greedy optimizer requires all classes because it cannot
+#' By default no classes are excluded, as the greedy optimizer requires all classes because it cannot
 #' use negative coefficients.
 #' @param tuneLength The size of the grid to search for tuning the model. Defaults to 1, as
 #' the only parameter to optimize is the number of iterations, and the default of 100 works well.

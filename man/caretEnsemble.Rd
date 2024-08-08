@@ -12,7 +12,7 @@ caretEnsemble(all.models, excluded_class_id = 0L, tuneLength = 1L, ...)
 \item{all.models}{an object of class caretList}
 
 \item{excluded_class_id}{The integer level to exclude from binary classification or multiclass problems.
-by default no classes are excluded, as the greedy optimizer requires all classes because it cannot
+By default no classes are excluded, as the greedy optimizer requires all classes because it cannot
 use negative coefficients.}
 
 \item{tuneLength}{The size of the grid to search for tuning the model. Defaults to 1, as
