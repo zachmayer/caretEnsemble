@@ -13,3 +13,4 @@ extractCaretTarget(...)
 This function extracts the y variable from a set of arguments headed to a caret::train model.
 Since there are 2 methods to call caret::train, this function also has 2 methods.
 }
+\keyword{internal}

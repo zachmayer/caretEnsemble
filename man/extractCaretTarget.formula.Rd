@@ -16,3 +16,4 @@
 \description{
 This function extracts the y variable from a set of arguments headed to a caret::train.formula model.
 }
+\keyword{internal}

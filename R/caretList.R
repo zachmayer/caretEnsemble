@@ -420,6 +420,7 @@ methodCheck <- function(x) {
 #' @description This function extracts the y variable from a set of arguments headed to a caret::train model.
 #' Since there are 2 methods to call caret::train, this function also has 2 methods.
 #' @param ... a set of arguments, as in the caret::train function
+#' @keywords internal
 extractCaretTarget <- function(...) {
   UseMethod("extractCaretTarget")
 }
@@ -430,6 +431,7 @@ extractCaretTarget <- function(...) {
 #' or other type (e.g. sparse matrix). See Details below.
 #' @param y a numeric or factor vector containing the outcome for each sample.
 #' @param ... ignored
+#' @keywords internal
 extractCaretTarget.default <- function(x, y, ...) {
   y
 }
@@ -439,6 +441,8 @@ extractCaretTarget.default <- function(x, y, ...) {
 #' @param form A formula of the form y ~ x1 + x2 + ...
 #' @param data Data frame from which variables specified in formula are preferentially to be taken.
 #' @param ... ignored
+#' @method extractCaretTarget formula
+#' @keywords internal
 extractCaretTarget.formula <- function(form, data, ...) {
   y <- stats::model.response(stats::model.frame(form, data))
   names(y) <- NULL
@@ -450,8 +454,8 @@ extractCaretTarget.formula <- function(form, data, ...) {
 #' @param x a caretList object
 #' @param ... passed to extractMetric.train
 #' @return A data.table with metrics from each model.
-#' @export
 #' @method extractMetric caretList
+#' @export
 extractMetric.caretList <- function(x, ...) {
   metrics <- lapply(x, extractMetric.train, ...)
   metrics <- data.table::rbindlist(metrics, use.names = TRUE, fill = TRUE)

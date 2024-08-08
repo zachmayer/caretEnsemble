@@ -17,3 +17,4 @@ or other type (e.g. sparse matrix). See Details below.}
 \description{
 This function extracts the y variable from a set of arguments headed to a caret::train.default model.
 }
+\keyword{internal}
