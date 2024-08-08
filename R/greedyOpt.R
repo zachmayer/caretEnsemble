@@ -94,16 +94,16 @@ print.greedyMSE <- function(x, ...) {
 
 #' @title variable importance for a greedyMSE model
 #' @description Variable importance for a greedyMSE model.
-#' @param x A greedyMSE object.
+#' @param object A greedyMSE object.
 #' @param ... Additional arguments. Ignored.
 #' @importFrom caret varImp
 #' @method varImp greedyMSE
 #' @export
-varImp.greedyMSE <- function(x, ...) {
-  importance <- rowSums(abs(x$model_weights))
+varImp.greedyMSE <- function(object, ...) {
+  importance <- rowSums(abs(object$model_weights))
   importance <- importance / sum(importance)
   out <- data.frame(Overall = importance)
-  rownames(out) <- row.names(x$model_weights)
+  rownames(out) <- row.names(object$model_weights)
   out
 }
 
@@ -175,16 +175,10 @@ greedyMSE_caret <- function() {
       greedyMSE(X = x, Y = y, max_iter = param$max_iter)
     },
     predict = function(modelFit, newdata, submodels = NULL) {
-      predict(modelFit, newdata, return_labels = modelFit$problemType == "Classification")
+      stats::predict(modelFit, newdata, return_labels = modelFit$problemType == "Classification")
     },
     prob = function(modelFit, newdata, submodels = NULL) {
-      predict(modelFit, newdata, return_labels = FALSE)
-    },
-    varImp = function(object, ...) {
-      caret::varImp(object)
-    },
-    predictors = function(x, ...) {
-      rownames(x$model_weights)
+      stats::predict(modelFit, newdata, return_labels = FALSE)
     },
     tags = c("Greedy Optimizer", "Mean Squared Error", "Interpretable"),
     sort = function(x) x[order(x$max_iter), ]
