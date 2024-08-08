@@ -43,7 +43,7 @@ caretStack <- function(
     new_y = NULL,
     excluded_class_id = 1L,
     ...) {
-  if (!is.caretList(all.models)) {
+  if (!methods::is(all.models, "caretList")) {
     warning("Attempting to coerce all.models to a caretList.", call. = FALSE)
     all.models <- as.caretList(all.models)
   }
@@ -250,14 +250,6 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
   out <- sqrt(variance)
 
   out
-}
-
-#' @title Check if an object is a caretStack object
-#' @param object an R object
-#' @description Check if an object is a caretStack object
-#' @export
-is.caretStack <- function(object) {
-  methods::is(object, "caretStack")
 }
 
 #' @title Print a caretStack object

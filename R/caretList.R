@@ -127,7 +127,7 @@ caretList <- function(
 #' @method predict caretList
 #' @export
 predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...) {
-  stopifnot(is.caretList(object))
+  stopifnot(methods::is(object, "caretList"))
 
   # Decided whether to be verbose or quiet
   apply_fun <- lapply
@@ -189,14 +189,6 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
 
   # Return
   preds
-}
-
-#' @title Check if an object is a caretList object
-#' @description Check if an object is a caretList object
-#' @param object an R object
-#' @export
-is.caretList <- function(object) {
-  methods::is(object, "caretList")
 }
 
 #' @title Convert object to caretList object

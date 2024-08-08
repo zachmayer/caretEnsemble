@@ -564,13 +564,6 @@ testthat::test_that("methodCheck stops for invalid method type", {
   )
 })
 
-testthat::test_that("is.caretList correctly identifies caretList objects", {
-  mylist <- list()
-  testthat::expect_false(is.caretList(mylist))
-  class(mylist) <- "caretList"
-  testthat::expect_true(is.caretList(mylist))
-})
-
 testthat::test_that("as.caretList stops for null object", {
   testthat::expect_error(as.caretList(NULL), "object is null")
 })
