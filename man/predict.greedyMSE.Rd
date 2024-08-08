@@ -4,12 +4,14 @@
 \alias{predict.greedyMSE}
 \title{Predict method for greedyMSE}
 \usage{
-\method{predict}{greedyMSE}(object, newdata, ...)
+\method{predict}{greedyMSE}(object, newdata, return_labels = FALSE, ...)
 }
 \arguments{
 \item{object}{A greedyMSE object.}
 
 \item{newdata}{A numeric matrix of new data.}
+
+\item{return_labels}{A logical scalar of whether to return labels.}
 
 \item{...}{Additional arguments. Ignored.}
 }

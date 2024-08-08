@@ -301,3 +301,110 @@ testthat::test_that("greedyMSE works with caret::train for regression", {
   expect_equal(sum(w), 1.0, tol = 1.0e-6)
   expect_equal(w[1L], w[2L], tol = 0.2)
 })
+
+testthat::test_that("greedyMSE works with caret::train for binary classification", {
+  set.seed(42L)
+
+  # Make Y
+  n <- 1000L
+  X1_pos <- stats::runif(n)
+  X2_pos <- 0.5 * X1_pos + sqrt(1L - 0.5^2L) * stats::runif(n)
+  Y <- 0.9 * X1_pos + 0.9 * X2_pos + 0.05 * stats::rnorm(n)
+  Y <- cut(Y, breaks = 2L, labels = c("Low", "High"))
+
+  # Add negative classes
+  # THIS IS IMPORTANT!
+  # We need probabilities from ALL classes for ALL the input models
+  X1_neg <- 1.0 - X1_pos
+  X2_neg <- 1.0 - X2_pos
+
+  X <- cbind(X1_pos, X2_pos, X1_neg, X2_neg)
+
+  # Split data
+  train_indices <- sample.int(n, 0.7 * n)
+  X_train <- X[train_indices, ]
+  X_test <- X[-train_indices, ]
+  Y_train <- Y[train_indices]
+  Y_test <- Y[-train_indices]
+
+  # Train model
+  model <- caret::train(
+    X_train,
+    Y_train,
+    tuneLength = 1L,
+    method = greedyMSE_caret(),
+    trControl = caret::trainControl(
+      method = "cv",
+      number = 5L
+    )
+  )
+
+  # Make predictions
+  predictions <- predict(model, newdata = X_test, type = "prob")
+
+  # Compute AUC
+  auc <- mean(caTools::colAUC(predictions, Y_test))
+  benchmark_auc <- max(caTools::colAUC(X_test, Y_test))
+
+  # Check model performance
+  testthat::expect_gt(auc, benchmark_auc)
+})
+
+testthat::test_that("greedyMSE works with caret::train for multiclass classification", {
+  set.seed(42L)
+  n <- 1000L
+
+  # Generate base correlated variables
+  Z1 <- stats::rnorm(n)
+  Z2 <- 0.5 * Z1 + sqrt(2L - 0.5^2L) * stats::rnorm(n)
+
+  # Generate Y with high correlation to Z1 and Z2
+  Y_numeric <- 0.9 * Z1 + 0.9 * Z2 + stats::rnorm(n)
+
+  # Convert Y to categorical
+  Y <- cut(Y_numeric, breaks = 3L, labels = c("Low", "Medium", "High"))
+
+  # Create probability matrices for X1 and X2
+  create_prob_matrix <- function(z) {
+    probs <- stats::pnorm(z, mean = mean(z), sd = sd(z))
+    raw_matrix <- matrix(c(1L - probs, probs - 0.5, 0.5 * probs), ncol = 3L)
+    exp_matrix <- exp(raw_matrix)
+    exp_matrix / rowSums(exp_matrix)
+  }
+
+  X1 <- create_prob_matrix(Z1)
+  X2 <- create_prob_matrix(Z2)
+
+  # Combine X1 and X2
+  X <- cbind(X1, X2)
+  colnames(X) <- c("X1_Low", "X1_Medium", "X1_High", "X2_Low", "X2_Medium", "X2_High")
+
+  # Split data
+  train_indices <- sample.int(n, 0.7 * n)
+  X_train <- X[train_indices, ]
+  X_test <- X[-train_indices, ]
+  Y_train <- Y[train_indices]
+  Y_test <- Y[-train_indices]
+
+  # Train model
+  model <- caret::train(
+    X_train,
+    Y_train,
+    tuneLength = 1L,
+    method = greedyMSE_caret(),
+    trControl = caret::trainControl(
+      method = "cv",
+      number = 5L
+    )
+  )
+
+  # Make predictions
+  predictions <- predict(model, newdata = X_test, type = "prob")
+
+  # Compute AUC
+  auc <- rowMeans(caTools::colAUC(predictions, Y_test))
+  benchmark_auc <- rowMeans(caTools::colAUC(X_test, Y_test))
+
+  # Check model performance
+  testthat::expect_true(all(auc > benchmark_auc))
+})

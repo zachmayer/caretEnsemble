@@ -92,7 +92,7 @@ print.greedyMSE <- function(x, ...) {
   print(x$model_weights)
 }
 
-#' @title variample importance for a greedyMSE model
+#' @title variable importance for a greedyMSE model
 #' @description Variable importance for a greedyMSE model.
 #' @param x A greedyMSE object.
 #' @param ... Additional arguments. Ignored.
@@ -139,20 +139,20 @@ predict.greedyMSE <- function(object, newdata, return_labels = FALSE, ...) {
 }
 
 #' @title caret interface for greedyMSE
-#' @description caret interface for greedyMSE.  greedyMSE works
+#' @description caret interface for greedyMSE. greedyMSE works
 #' well when you want an ensemble that will never be worse than any single predictor
-#' in the in dataset.  It does not use an intercept and it does not allow for
-#' negative coefficients.  This makes it highly contrained and in general
+#' in the in dataset. It does not use an intercept and it does not allow for
+#' negative coefficients. This makes it highly constrained and in general
 #' does not work well on standard classification and regression problems.
-#' However, it does work well in the case of (bulllet list please):
-#' \item{-}{The predictors are highly correlated with each other}
-#' \item{-}{The predictors are highly correlated with the model}
-#' \item{-}{You expect or want positive only coefficients}
+#' However, it does work well in the case of:
+#' * The predictors are highly correlated with each other
+#' * The predictors are highly correlated with the model
+#' * You expect or want positive only coefficients
 #' In the worse case, this method will select one input and use that,
 #' but in many other cases it will return a positive, weighted average
-#' of the inputs.  Since it never uses negative weigths, you never get
+#' of the inputs. Since it never uses negative weights, you never get
 #' into a scenario where one model is weighted negative and on new data
-#' you get were predictions becuase a correlation changed.
+#' you get were predictions because a correlation changed.
 #' Since this model will always be a positive weighted average of the inputs,
 #' it will rarely do worse than the individual models on new data.
 #' @export
