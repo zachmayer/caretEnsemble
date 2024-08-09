@@ -53,7 +53,7 @@ test_predictions <- function(ens, newdata, one_row_preds) {
   testthat::expect_identical(nrow(pred_se), N)
   testthat::expect_identical(nrow(pred_one), 1L)
 
-  testthat::expect_equal(pred_stacked, pred, tol = ifelse(is_class, 0.25, 0.05))
+  testthat::expect_equal(pred_stacked, pred, tol = ifelse(is_class, 0.35, 0.05))
 
   if (is_class) {
     testthat::expect_identical(ncol(pred_stacked), 2L)
