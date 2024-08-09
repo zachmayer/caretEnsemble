@@ -368,7 +368,6 @@ testthat::test_that("caretStack multiclass", {
   p <- predict(stack, iris[, -5L])
   testthat::expect_s3_class(p, "data.table")
   testthat::expect_identical(nrow(p), 150L)
-
 })
 
 #############################################################################

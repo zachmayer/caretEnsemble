@@ -48,7 +48,7 @@ testthat::test_that("caretModelSpec and checking functions work as expected", {
   )
 
   testthat::expect_error(
-    methodCheck(list(invalid_method = 42)),
+    methodCheck(list(invalid_method = 42L)),
     "Method \"42\" is invalid"
   )
 })
@@ -66,7 +66,7 @@ testthat::test_that("c.caretList", {
   testthat::expect_s3_class(combined_models, "caretList")
   testthat::expect_length(combined_models, length(models.class) * 2L)
 
-  combined_models <- c(models.class, models.class[[1]])
+  combined_models <- c(models.class, models.class[[1L]])
   testthat::expect_s3_class(combined_models, "caretList")
   testthat::expect_length(combined_models, length(models.class) + 1L)
 
@@ -122,7 +122,7 @@ testthat::test_that("predict.caretList works for classification and regression",
   # Test verbose option
   p <- predict(models, newdata = test_data, verbose = TRUE)
   testthat::expect_s3_class(p, "data.table")
-  testthat::expect_identical(nrow(p), nrow(test_data)) 
+  testthat::expect_identical(nrow(p), nrow(test_data))
 })
 
 # Test caretList
