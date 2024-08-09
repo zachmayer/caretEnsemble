@@ -1,8 +1,10 @@
+  utils::data(iris)
+  utils::data(Boston, package = "MASS")
+
 #############################################################################
 testthat::context("caretList and caretStack work for multiclass problems")
 #############################################################################
 testthat::test_that("We can predict with caretList and caretStack multiclass problems", {
-  data(iris)
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
@@ -25,7 +27,6 @@ testthat::test_that("We can predict with caretList and caretStack multiclass pro
 })
 
 testthat::test_that("Columns for caretList predictions are correct and ordered", {
-  data(iris)
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
@@ -55,7 +56,6 @@ testthat::test_that("Columns for caretList predictions are correct and ordered",
 })
 
 testthat::test_that("Columns for caretStack are correct", {
-  data(iris)
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
@@ -82,7 +82,6 @@ testthat::test_that("Columns for caretStack are correct", {
 })
 
 testthat::test_that("Periods are supported in method and class names in caretList and caretStack", {
-  data(iris)
   # Rename values and levels to have underscores
   levels(iris[, 5L]) <- c("setosa_1", "versicolor_2", "virginica_3")
   iris[, 5L] <- factor(iris[, 5L])
@@ -123,7 +122,6 @@ testthat::test_that("Periods are supported in method and class names in caretLis
 })
 
 testthat::test_that("We can make a confusion matrix", {
-  data(iris)
 
   set.seed(42L)
   n <- nrow(iris)
@@ -198,7 +196,6 @@ testthat::test_that("caretList and caretStack handle a large number of classes",
 })
 
 testthat::test_that("caretList and caretStack handle ordinal multiclass data", {
-  data(Boston, package = "MASS")
   Boston$chas <- as.factor(Boston$chas)
   Boston$rad <- factor(paste0("rad_", Boston$rad), ordered = TRUE)
 
@@ -220,7 +217,6 @@ testthat::test_that("caretList and caretStack handle ordinal multiclass data", {
 })
 
 testthat::test_that("caretList and caretStack produce consistent probability predictions", {
-  data(iris)
 
   model_list <- caretList(
     x = iris[, -5L],
@@ -238,7 +234,6 @@ testthat::test_that("caretList and caretStack produce consistent probability pre
 })
 
 testthat::test_that("caretList and caretStack handle new levels in prediction data", {
-  data(iris)
   idx <- seq_len(nrow(iris))
   idx_train <- sample(idx, 120L)
   idx_test <- setdiff(idx, idx_train)
@@ -260,7 +255,6 @@ testthat::test_that("caretList and caretStack handle new levels in prediction da
 })
 
 testthat::test_that("caretList and caretStack produce consistent probability predictions", {
-  data(iris)
 
   model_list <- caretList(
     x = iris[, -5L],

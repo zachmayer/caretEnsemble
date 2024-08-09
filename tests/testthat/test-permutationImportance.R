@@ -1,6 +1,6 @@
-data(models.class)
-data(models.reg)
-data(iris)
+utils::data(models.class)
+utils::data(models.reg)
+utils::data(iris)
 
 # Helper function to create a simple dataset
 create_dataset <- function(n = 200L, p = 5L, classification = TRUE) {

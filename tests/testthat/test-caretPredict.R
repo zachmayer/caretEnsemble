@@ -1,10 +1,10 @@
 # Setup
-data(models.reg)
-data(X.reg)
-data(Y.reg)
-data(models.class)
-data(X.class)
-data(Y.class)
+utils::data(models.reg)
+utils::data(X.reg)
+utils::data(Y.reg)
+utils::data(models.class)
+utils::data(X.class)
+utils::data(Y.class)
 
 set.seed(1234L)
 

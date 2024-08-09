@@ -3,9 +3,9 @@ testthat::context("Does binary class selection work?")
 # Load and prepare data for subsequent tests
 seed <- 2239L
 set.seed(seed)
-data(models.class)
-data(X.class)
-data(Y.class)
+utils::data(models.class)
+utils::data(X.class)
+utils::data(Y.class)
 
 # Create 80/20 train/test split
 index <- caret::createDataPartition(Y.class, p = 0.8)[[1L]]

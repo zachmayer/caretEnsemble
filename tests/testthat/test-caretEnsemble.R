@@ -2,15 +2,15 @@
 # UPDATE THE FIXTURES!
 # make update-test-fixtures
 
-data(models.reg)
-data(X.reg)
-data(Y.reg)
+utils::data(models.reg)
+utils::data(X.reg)
+utils::data(Y.reg)
 
-data(models.class)
-data(X.class)
-data(Y.class)
+utils::data(models.class)
+utils::data(X.class)
+utils::data(Y.class)
 
-data(Sonar, package = "mlbench")
+utils::data(Sonar, package = "mlbench")
 
 set.seed(1234L)
 ens.reg <- caretEnsemble(
@@ -33,7 +33,6 @@ testthat::context("Test metric and residual extraction")
 #############################################################################
 
 testthat::test_that("We can extract resdiuals from train regression objects", {
-  data(iris)
   mod <- caret::train(
     iris[, 1L:2L], iris[, 3L],
     method = "lm"
@@ -69,7 +68,6 @@ testthat::context("Does ensembling work with models with differing predictors")
 #############################################################################
 
 testthat::test_that("We can ensemble models of different predictors", {
-  data(iris)
   Y.reg <- iris[, 1L]
   X.reg <- model.matrix(~., iris[, -1L])
   mseeds <- vector(mode = "list", length = 12L)

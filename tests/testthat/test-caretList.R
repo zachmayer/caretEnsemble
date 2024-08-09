@@ -1,13 +1,13 @@
 # Setup
 set.seed(442L)
 
-data(models.reg)
-data(X.reg)
-data(Y.reg)
+utils::data(models.reg)
+utils::data(X.reg)
+utils::data(Y.reg)
 
-data(models.class)
-data(X.class)
-data(Y.class)
+utils::data(models.class)
+utils::data(X.class)
+utils::data(Y.class)
 
 train <- caret::twoClassSim(
   n = 1000L, intercept = -8L, linearVars = 3L,
