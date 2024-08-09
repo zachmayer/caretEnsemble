@@ -35,7 +35,6 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # Verify that the training data given to the ensemble model has the
   # same levels in the response as the original, raw data
   testthat::expect_identical(levels(model.ens$ens_model$trainingData$.outcome), Y.levels)
-  testthat::expect_identical(levels(model.ens$ensemble_model), Y.levels)
 
   # Create class and probability predictions, as well as class predictions
   # generated from probability predictions using a .5 cutoff

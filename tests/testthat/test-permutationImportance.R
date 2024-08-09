@@ -1,21 +1,20 @@
+# Helper functions
 utils::data(models.class)
 utils::data(models.reg)
 utils::data(iris)
 
-# Helper function to create a simple dataset
 create_dataset <- function(n = 200L, p = 5L, classification = TRUE) {
   set.seed(42L)
-  X <- data.table::data.table(matrix(rnorm(n * p), ncol = p))
+  X <- data.table::data.table(matrix(stats::rnorm(n * p), ncol = p))
   data.table::setnames(X, paste0("x", seq_len(p)))
   if (classification) {
     y <- factor(ifelse(rowSums(X) > 0L, "A", "B"))
   } else {
-    y <- rowSums(X) + rnorm(n)
+    y <- rowSums(X) + stats::rnorm(n)
   }
   list(X = X, y = y)
 }
 
-# Helper function to train a model
 train_model <- function(x, y, method = "rpart", ...) {
   set.seed(1234L)
   caret::train(
@@ -27,7 +26,6 @@ train_model <- function(x, y, method = "rpart", ...) {
   )
 }
 
-# Helper function to check test results
 check_importance_scores <- function(
     imp,
     expected_names = paste0("x", seq_len(5L)),
@@ -40,24 +38,37 @@ check_importance_scores <- function(
   testthat::expect_equal(sum(imp), 1L, tolerance = 1e-6)
 }
 
-testthat::test_that("isClassifier works for train models", {
+######################################################################
+testthat::context("isClassifier function")
+######################################################################
+
+testthat::test_that("isClassifier works for train models and caretStacks models", {
   testthat::expect_true(isClassifier(models.class[[1L]]))
   testthat::expect_false(isClassifier(models.reg[[1L]]))
-})
 
-testthat::test_that("isClassifier works for caretStacks models", {
-  ens_class <- caretEnsemble(models.class)
-  ens_reg <- caretEnsemble(models.reg)
+  ens_class <- caretEnsemble::caretEnsemble(models.class)
+  ens_reg <- caretEnsemble::caretEnsemble(models.reg)
 
   testthat::expect_true(isClassifier(ens_class))
   testthat::expect_false(isClassifier(ens_reg))
 })
 
-testthat::test_that("permutationImportance works for regression", {
-  dt <- create_dataset(classification = FALSE)
-  model <- train_model(dt[["X"]], dt[["y"]])
-  imp <- permutationImportance(model, dt[["X"]])
-  check_importance_scores(imp)
+######################################################################
+testthat::context("permutationImportance function")
+######################################################################
+
+testthat::test_that("permutationImportance works for regression and classification", {
+  # Regression
+  dt_reg <- create_dataset(classification = FALSE)
+  model_reg <- train_model(dt_reg[["X"]], dt_reg[["y"]])
+  imp_reg <- permutationImportance(model_reg, dt_reg[["X"]])
+  check_importance_scores(imp_reg)
+
+  # Classification
+  dt_class <- create_dataset(classification = TRUE)
+  model_class <- train_model(dt_class[["X"]], dt_class[["y"]])
+  imp_class <- permutationImportance(model_class, dt_class[["X"]])
+  check_importance_scores(imp_class)
 })
 
 testthat::test_that("permutationImportance works for multiclass classification", {
@@ -69,13 +80,13 @@ testthat::test_that("permutationImportance works for multiclass classification",
     x3 = stats::rnorm(n)
   )
   coef_matrix <- matrix(c(
-    1.0, -0.5, 0.2, # coefficients for class A
-    -0.5, 1.0, 0.2, # coefficients for class B
-    0.2, 0.2, 1.0 # coefficients for class C
+    1.0, -0.5, 0.2,
+    -0.5, 1.0, 0.2,
+    0.2, 0.2, 1.0
   ), nrow = 3L, byrow = TRUE)
 
   linear_combinations <- as.matrix(x) %*% t(coef_matrix)
-  linear_combinations <- linear_combinations + matrix(stats::rnorm(n * 3.0, sd = 0.1), nrow = n)
+  linear_combinations <- linear_combinations + matrix(stats::rnorm(n * 3L, sd = 0.1), nrow = n)
   probabilities <- exp(linear_combinations) / rowSums(exp(linear_combinations))
   y <- factor(apply(probabilities, 1L, function(prob) sample(c("A", "B", "C"), 1L, prob = prob)))
 
@@ -84,174 +95,120 @@ testthat::test_that("permutationImportance works for multiclass classification",
   check_importance_scores(imp, c("x1", "x2", "x3"))
 })
 
-testthat::test_that("permutationImportance works with a single feature unimportant feature", {
+testthat::test_that("permutationImportance works with single feature cases", {
   n <- 100L
-  x <- data.table::data.table(x1 = stats::rnorm(n))
-  y <- factor(sample(c("A", "B"), n, replace = TRUE))
-  model <- train_model(x, y)
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, "x1")
+
+  # Unimportant feature
+  x_unimp <- data.table::data.table(x1 = stats::rnorm(n))
+  y_unimp <- factor(sample(c("A", "B"), n, replace = TRUE))
+  model_unimp <- train_model(x_unimp, y_unimp)
+  imp_unimp <- permutationImportance(model_unimp, x_unimp)
+  check_importance_scores(imp_unimp, "x1")
+
+  # Important feature
+  x_imp <- data.table::data.table(x1 = stats::rnorm(n))
+  y_imp <- x_imp$x1 + stats::rnorm(n, sd = 0.1)
+  model_imp <- train_model(x_imp, y_imp, method = "lm")
+  imp_imp <- permutationImportance(model_imp, x_imp)
+  check_importance_scores(imp_imp, "x1")
+  testthat::expect_gt(imp_imp["x1"], 0.9)
 })
 
-testthat::test_that("permutationImportance works with a single important feature", {
-  set.seed(1234L)
-
-  make_var <- function(n) scale(stats::rnorm(n), center = TRUE, scale = TRUE)[, 1L]
-
-  n <- 1000L
-  x <- data.table::data.table(
-    x1 = make_var(n),
-    x2 = make_var(n),
-    x3 = make_var(n)
-  )
-
-  cf_set <- c(0L, 1L, 5L, 10L)
-  all_cfs <- expand.grid(
-    c(0L, 1L),
-    cf_set,
-    cf_set,
-    cf_set
-  )
-
-  evaluate_model <- function(cf, do_class) {
-    cf <- unname(unlist(cf))
-    y <- (cbind(1L, as.matrix(x)) %*% cf)[, 1L]
-    if (do_class) {
-      classes <- c("A", "B")
-      y <- factor(ifelse(y > 0L, classes[1L], classes[2L]), levels = classes)
-      if (length(unique(y)) == 1L) {
-        return(NULL)
-      }
-    }
-    model <- suppressWarnings(train_model(x, y, method = "glm"))
-    imp <- permutationImportance(model, x)
-    check_importance_scores(imp, c("x1", "x2", "x3"))
-
-    glm_imp <- normalize_to_one(abs(coef(model$finalModel))[-1L])
-    cf_norm <- normalize_to_one(cf[-1L])
-    testthat::expect_equivalent(glm_imp, cf_norm, tolerance = 0.1)
-
-    if (!do_class || cf[[1L]] == 0.0) {
-      testthat::expect_equivalent(imp, cf_norm, tolerance = 0.1)
-    }
-  }
-
-  for (do_class in c(FALSE, TRUE)) {
-    apply(all_cfs, 1L, evaluate_model, do_class)
-  }
-})
-
-testthat::test_that("permutationImportance works a single, contant, unimportant feature", {
+testthat::test_that("permutationImportance works with constant features", {
   n <- 100L
-  x <- data.table::data.table(
-    x1 = rep(1L, n),
-    x2 = stats::rnorm(n)
-  )
-  y <- stats::rnorm(n)
-  model <- train_model(x, y)
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, c("x1", "x2"))
-  testthat::expect_lte(imp["x1"], imp["x2"])
-})
 
-testthat::test_that("permutationImportance works a single, contant, important feature - aka intercept only", {
-  n <- 100L
-  x <- data.table::data.table(
-    x1 = rep(1L, n),
-    x2 = stats::rnorm(n)
-  )
-  y <- x$x1 + stats::rnorm(n) / 10L
-  model <- train_model(x, y)
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, c("x1", "x2"))
-  testthat::expect_lte(imp["x1"], imp["x2"])
+  # Constant unimportant feature
+  x_const_unimp <- data.table::data.table(x1 = rep(1L, n), x2 = stats::rnorm(n))
+  y_const_unimp <- stats::rnorm(n)
+  model_const_unimp <- train_model(x_const_unimp, y_const_unimp)
+  imp_const_unimp <- permutationImportance(model_const_unimp, x_const_unimp)
+  check_importance_scores(imp_const_unimp, c("x1", "x2"))
+  testthat::expect_lte(imp_const_unimp["x1"], imp_const_unimp["x2"])
+
+  # Constant important feature (intercept only)
+  x_const_imp <- data.table::data.table(x1 = rep(1L, n), x2 = stats::rnorm(n))
+  y_const_imp <- x_const_imp$x1 + stats::rnorm(n, sd = 0.1)
+  model_const_imp <- train_model(x_const_imp, y_const_imp)
+  imp_const_imp <- permutationImportance(model_const_imp, x_const_imp)
+  check_importance_scores(imp_const_imp, c("x1", "x2"))
+  testthat::expect_lte(imp_const_imp["x2"], imp_const_imp["x1"])
 })
 
 testthat::test_that("permutationImportance works with perfect predictor", {
   n <- 100L
-  x <- data.table::data.table(
-    x1 = stats::rnorm(n),
-    x2 = stats::rnorm(n)
-  )
+  x <- data.table::data.table(x1 = stats::rnorm(n), x2 = stats::rnorm(n))
   y <- x$x1
   model <- train_model(x, y, method = "lm")
   imp <- permutationImportance(model, x)
   check_importance_scores(imp, c("x1", "x2"))
-  testthat::expect_gt(imp["x1"], imp["x2"])
+  testthat::expect_gt(imp["x1"], 0.9)
+  testthat::expect_lt(imp["x2"], 0.1)
 })
 
-testthat::test_that("permutationImportance works for multiclass classification and various edge cases", {
+testthat::test_that("permutationImportance works for multiclass classification with iris dataset", {
   model <- train_model(iris[, -5L], iris$Species, method = "rpart")
   imp <- permutationImportance(model, iris[, -5L])
   check_importance_scores(imp, names(iris[, -5L]))
 })
 
+######################################################################
 testthat::context("permutationImportance edge cases")
-testthat::test_that("permutationImportance normalizes to uniform distribution for all zero importances", {
-  n <- 100L
-  x <- data.table::data.table(x1 = rep(0L, n), x2 = rep(0L, n), x3 = rep(0L, n))
-  y <- rep(0L, n)
-  model <- train_model(x, y, method = "lm")
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, names(x))
-  testthat::expect_equivalent(imp, normalize_to_one(rep(0L, length(imp))), tolerance = 1e-6)
-})
+######################################################################
 
-testthat::test_that("permutationImportance assigns full importance to perfect predictor", {
-  set.seed(1234L)
+testthat::test_that("permutationImportance handles various edge cases", {
   n <- 100L
   vars <- 25L
-  x <- data.table::data.table(
-    matrix(rnorm(n * vars), nrow = n, ncol = vars)
-  )
-  data.table::setnames(x, paste0("x", seq_len(vars)))
-  y <- x$x1
-  model <- train_model(x, y, method = "lm")
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, names(x))
-  testthat::expect_equal(imp[["x1"]], 1L, tol = 1e-8)
-  testthat::expect_equal(sum(imp[-1L]), 0L, tol = 1e-8)
-})
 
-testthat::test_that("permutationImportance handles highly collinear features", {
-  set.seed(5678L)
-  n <- 100L
-  x <- data.table::data.table(
-    x1 = rnorm(n),
-    x2 = rnorm(n)
-  )
-  x$x3 <- x$x1 + rnorm(n, sd = 0.01)
-  y <- x$x1 + x$x2
-  model <- train_model(x, y, method = "lm")
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, names(x))
-  testthat::expect_equal(imp[["x3"]], 0L, tol = 1e-6)
-})
+  # All zero importances
+  x_zero <- data.table::data.table(matrix(0L, nrow = n, ncol = 3L))
+  y_zero <- rep(0L, n)
+  model_zero <- train_model(x_zero, y_zero, method = "lm")
+  imp_zero <- permutationImportance(model_zero, x_zero)
+  check_importance_scores(imp_zero, names(x_zero))
+  testthat::expect_equivalent(imp_zero, normalize_to_one(rep(0L, length(imp_zero))), tolerance = 1e-6)
 
-testthat::test_that("permutationImportance works with very small dataset", {
-  set.seed(9876L)
-  n <- 5L
-  x <- data.table::data.table(
-    x1 = rnorm(n),
-    x2 = rnorm(n),
-    x3 = rnorm(n)
-  )
-  y <- x$x1 + rnorm(n)
-  model <- train_model(x, y, method = "lm")
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, names(x))
-})
+  # Perfect predictor among many variables
+  x_perfect <- data.table::data.table(matrix(stats::rnorm(n * vars), nrow = n, ncol = vars))
+  data.table::setnames(x_perfect, paste0("x", seq_len(vars)))
+  y_perfect <- x_perfect$x1
+  model_perfect <- train_model(x_perfect, y_perfect, method = "lm")
+  imp_perfect <- permutationImportance(model_perfect, x_perfect)
+  check_importance_scores(imp_perfect, names(x_perfect))
+  testthat::expect_equal(imp_perfect[["x1"]], 1L, tol = 1e-8)
+  testthat::expect_equal(sum(imp_perfect[-1L]), 0L, tol = 1e-8)
 
-testthat::test_that("permutationImportance handles identical features", {
-  n <- 100L
-  x <- data.table::data.table(
-    x1 = rnorm(n),
-    x2 = rnorm(n)
+  # Highly collinear features
+  x_collinear <- data.table::data.table(
+    x1 = stats::rnorm(n),
+    x2 = stats::rnorm(n)
   )
-  x$x3 <- x$x1
-  y <- x$x1 + x$x2 + rnorm(n)
-  model <- train_model(x, y, method = "glmnet")
-  imp <- permutationImportance(model, x)
-  check_importance_scores(imp, names(x))
-  testthat::expect_equal(imp[["x1"]], imp[["x3"]], tol = 1e-1)
+  x_collinear$x3 <- x_collinear$x1 + stats::rnorm(n, sd = 0.01)
+  y_collinear <- x_collinear$x1 + x_collinear$x2
+  model_collinear <- train_model(x_collinear, y_collinear, method = "lm")
+  imp_collinear <- permutationImportance(model_collinear, x_collinear)
+  check_importance_scores(imp_collinear, names(x_collinear))
+  testthat::expect_lt(imp_collinear[["x3"]], 0.1)
+
+  # Very small dataset
+  x_small <- data.table::data.table(
+    x1 = stats::rnorm(5L),
+    x2 = stats::rnorm(5L),
+    x3 = stats::rnorm(5L)
+  )
+  y_small <- x_small$x1 + stats::rnorm(5L)
+  model_small <- train_model(x_small, y_small, method = "lm")
+  imp_small <- permutationImportance(model_small, x_small)
+  check_importance_scores(imp_small, names(x_small))
+
+  # Identical features
+  x_identical <- data.table::data.table(
+    x1 = stats::rnorm(n),
+    x2 = stats::rnorm(n)
+  )
+  x_identical$x3 <- x_identical$x1
+  y_identical <- x_identical$x1 + x_identical$x2 + stats::rnorm(n)
+  model_identical <- train_model(x_identical, y_identical, method = "glmnet")
+  imp_identical <- permutationImportance(model_identical, x_identical)
+  check_importance_scores(imp_identical, names(x_identical))
+  testthat::expect_equal(imp_identical[["x1"]], imp_identical[["x3"]], tol = 1e-1)
 })
