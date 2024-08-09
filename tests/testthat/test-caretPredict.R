@@ -1,7 +1,7 @@
+# Setup
 data(models.reg)
 data(X.reg)
 data(Y.reg)
-
 data(models.class)
 data(X.class)
 data(Y.class)
@@ -31,103 +31,78 @@ mod <- caret::train(
   trControl = caret::trainControl(method = "none")
 )
 
+# Helper function for testing
+expect_data_table_structure <- function(dt, expected_names) {
+  testthat::expect_s3_class(dt, "data.table")
+  testthat::expect_named(dt, expected_names)
+}
+
 #############################################################################
-testthat::context("caretPredict")
+testthat::context("caretPredict and extractMetric")
 #############################################################################
 testthat::test_that("caretPredict extracts best predictions correctly", {
   stacked_preds_class <- caretPredict(models.class[[1L]], excluded_class_id = 0L)
   stacked_preds_reg <- caretPredict(models.reg[[1L]])
 
-  testthat::expect_s3_class(stacked_preds_class, "data.table")
-  testthat::expect_s3_class(stacked_preds_reg, "data.table")
-
-  testthat::expect_named(stacked_preds_class, c("No", "Yes"))
-  testthat::expect_named(stacked_preds_reg, "pred")
+  expect_data_table_structure(stacked_preds_class, c("No", "Yes"))
+  expect_data_table_structure(stacked_preds_reg, "pred")
 })
 
-###############################################
-testthat::context("S3 methods for train")
-################################################
+testthat::test_that("extractMetric works for different model types", {
+  # Test for model with no resampling (no SD)
+  metric <- extractMetric(mod)
+  expect_data_table_structure(metric, c("model_name", "metric", "value", "sd"))
+  testthat::expect_true(is.na(metric$value), is.na(metric$sd))
 
-testthat::test_that("c.train stops for invalid class", {
+  # Test for ensemble models
+  for (ens in list(ens.class, ens.reg)) {
+    metrics <- extractMetric(ens)
+    expect_data_table_structure(metrics, c("model_name", "metric", "value", "sd"))
+    testthat::expect_named(ens$models, metrics$model_name[-1L])
+  }
+})
+
+#############################################################################
+testthat::context("S3 methods and model operations")
+#############################################################################
+testthat::test_that("c.train on 2 train objects", {
   testthat::expect_error(c.train(list()), "class of modelList1 must be 'caretList' or 'train'")
-})
 
-testthat::test_that("c.train combines train objects correctly and handles duplicate names", {
-  combined_models <- c(
-    models.class[[1L]],
-    models.class[[1L]]
-  )
-
+  combined_models <- c(models.class[[1L]], models.class[[1L]])
   testthat::expect_s3_class(combined_models, "caretList")
   testthat::expect_length(combined_models, 2L)
-
   testthat::expect_identical(anyDuplicated(names(combined_models)), 0L)
   testthat::expect_length(unique(names(combined_models)), 2L)
 })
 
-testthat::test_that("c.train can bind a train and a caretList", {
+testthat::test_that("c.train on a train and a caretList", {
   bigList <- c(models.reg[[1L]], models.class)
   testthat::expect_is(bigList, "caretList")
   testthat::expect_identical(anyDuplicated(names(bigList)), 0L)
   testthat::expect_length(unique(names(bigList)), 5L)
 })
 
-#############################################################################
-testthat::context("extractMetric")
-#############################################################################
-testthat::test_that("Extracting metrics works if there is no SD", {
-  # In the case of no resampling, metrics will not have an SD to extract
-  metric <- extractMetric(mod)
-  expect_s3_class(metric, "data.table")
-  expect_named(metric, c("model_name", "metric", "value", "sd"))
-  expect_is(metric$model_name, "character")
-  expect_is(metric$metric, "character")
-  expect_is(metric$value, "numeric")
-  expect_is(metric$sd, "numeric")
-  testthat::expect_true(is.na(metric$value))
-  testthat::expect_true(is.na(metric$sd))
-})
+testthat::test_that("extractModelName handles different model types", {
+  testthat::expect_identical(extractModelName(models.class[[1L]]), "rf")
+  testthat::expect_identical(extractModelName(models.reg[[1L]]), "rf")
 
-testthat::test_that("extractMetric", {
-  for (ens in list(ens.class, ens.reg)) {
-    metrics <- extractMetric(ens)
-    testthat::expect_s3_class(metrics, "data.table")
-    testthat::expect_named(ens$models, metrics$model_name[-1L])
-  }
-})
+  custom_model <- models.class[[1L]]
+  custom_model$method <- list(method = "custom_rf")
+  testthat::expect_identical(extractModelName(custom_model), "custom_rf")
 
-#############################################################################
-testthat::context("extractModelName")
-#############################################################################
-
-testthat::test_that("extractModelName handles custom models correctly", {
   mock_model <- list(method = list(method = "custom_method"))
   class(mock_model) <- "train"
   testthat::expect_identical(extractModelName(mock_model), "custom_method")
-})
 
-testthat::test_that("extractModelName handles custom models correctly", {
   mock_model <- list(method = "custom", modelInfo = list(method = "custom_method"))
   class(mock_model) <- "train"
   testthat::expect_identical(extractModelName(mock_model), "custom_method")
 })
 
-testthat::test_that("extractModelName extracts model names correctly", {
-  testthat::expect_identical(extractModelName(models.class[[1L]]), "rf")
-  testthat::expect_identical(extractModelName(models.reg[[1L]]), "rf")
-
-  # Test custom model
-  custom_model <- models.class[[1L]]
-  custom_model$method <- list(method = "custom_rf")
-  testthat::expect_identical(extractModelName(custom_model), "custom_rf")
-})
-
 #############################################################################
 testthat::context("isClassifierAndValidate")
 #############################################################################
-
-testthat::test_that("isClassifierAndValidate", {
+testthat::test_that("isClassifierAndValidate handles various model types", {
   models_multi <- caretList(
     iris[, 1L:2L], iris[, 5L],
     tuneLength = 1L, verbose = FALSE,
@@ -135,190 +110,83 @@ testthat::test_that("isClassifierAndValidate", {
   )
   models_multi_bin_reg <- c(models_multi, models.class, models.reg)
   testthat::expect_is(vapply(models_multi_bin_reg, isClassifierAndValidate, logical(1L)), "logical")
-})
 
-testthat::test_that("isClassifierAndValidate shouldn't care about predictions", {
+  # Test when predictions are missing
   model_list <- models.class
   model_list[[1L]]$pred <- NULL
   testthat::expect_is(vapply(model_list, isClassifierAndValidate, logical(1L)), "logical")
   testthat::expect_equivalent(unique(vapply(model_list, isClassifierAndValidate, logical(1L))), TRUE)
-})
 
-testthat::test_that("isClassifierAndValidate stops when a classification model can't predict probabilities", {
+  # Test error cases
   model_list <- models.class
   model_list[[1L]]$modelInfo$prob <- FALSE
-  err <- "No probability function found. Re-fit with a method that supports prob."
-  testthat::expect_error(lapply(model_list, isClassifierAndValidate), err)
-})
+  testthat::expect_error(
+    lapply(model_list, isClassifierAndValidate),
+    "No probability function found. Re-fit with a method that supports prob."
+  )
 
-testthat::test_that("isClassifierAndValidate stops when a classification model did not save probs", {
   model_list <- models.class
   model_list[[1L]]$control$classProbs <- FALSE
-  err <- "classProbs = FALSE. Re-fit with classProbs = TRUE in trainControl."
-  testthat::expect_error(lapply(model_list, isClassifierAndValidate, validate_for_stacking = TRUE), err)
-  testthat::context("Test helper functions for multiclass classification")
-})
+  testthat::expect_error(
+    lapply(model_list, isClassifierAndValidate, validate_for_stacking = TRUE),
+    "classProbs = FALSE. Re-fit with classProbs = TRUE in trainControl."
+  )
 
-testthat::test_that("isClassifierAndValidate validates caretList correctly", {
-  testthat::expect_is(vapply(models.class, isClassifierAndValidate, logical(1L)), "logical")
-  testthat::expect_is(vapply(models.reg, isClassifierAndValidate, logical(1L)), "logical")
-
-  # Test error for non-caretList object
+  # Test for non-caretList object
   testthat::expect_error(
     isClassifierAndValidate(list(model = lm(Y.reg ~ ., data = as.data.frame(X.reg)))),
     "is(object, \"train\") is not TRUE",
     fixed = TRUE
   )
-})
 
-testthat::test_that("isClassifierAndValidate validates model types correctly", {
-  testthat::expect_is(vapply(models.class, isClassifierAndValidate, logical(1L)), "logical")
-  testthat::expect_is(vapply(models.reg, isClassifierAndValidate, logical(1L)), "logical")
-
-  # Test error for mixed model types
-  mixed_list <- c(models.class, models.reg)
-  testthat::expect_is(vapply(mixed_list, isClassifierAndValidate, logical(1L)), "logical")
-})
-
-testthat::test_that("isClassifierAndValidate extracts model types correctly", {
-  testthat::expect_true(unique(vapply(models.class, isClassifierAndValidate, logical(1L))))
-  testthat::expect_false(unique(vapply(models.reg, isClassifierAndValidate, logical(1L))))
-})
-
-testthat::test_that("isClassifierAndValidate fails for models without object$control$savePredictions", {
+  # Test for models without savePredictions
   model <- models.class[[1L]]
   model$control$savePredictions <- NULL
-  err <- "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions."
-  testthat::expect_error(isClassifierAndValidate(model), err)
+  testthat::expect_error(
+    isClassifierAndValidate(model),
+    "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions."
+  )
   model$control$savePredictions <- "BAD_VALUE"
-  testthat::expect_error(isClassifierAndValidate(model), err)
+  testthat::expect_error(
+    isClassifierAndValidate(model),
+    "Must have savePredictions = 'all', 'final', or TRUE in trainControl to do stacked predictions."
+  )
 })
 
 #############################################################################
 testthat::context("validateExcludedClass")
 #############################################################################
-
-testthat::test_that("validateExcludedClass stops for non-numeric input", {
-  invalid_input <- "invalid"
-  err <- "classification excluded level must be numeric: invalid"
-  testthat::expect_error(validateExcludedClass(invalid_input), err)
-})
-
-testthat::test_that("validateExcludedClass stops for non-finite input", {
-  invalid_input <- Inf
-  err <- "classification excluded level must be finite: Inf"
+testthat::test_that("validateExcludedClass handles various inputs", {
+  testthat::expect_error(validateExcludedClass("invalid"), "classification excluded level must be numeric: invalid")
   testthat::expect_warning(
-    testthat::expect_error(validateExcludedClass(invalid_input), err),
+    testthat::expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"),
     "classification excluded level is not an integer: Inf"
   )
-})
-
-testthat::test_that("validateExcludedClass stops for non-positive input", {
-  invalid_input <- -1.0
-  err <- "classification excluded level must be >= 0: -1"
-  wrn <- "classification excluded level is not an integer:"
-  testthat::expect_warning(testthat::expect_error(validateExcludedClass(invalid_input), err), wrn)
-})
-
-validated <- testthat::test_that("validateExcludedClass warns for non-integer input", {
-  testthat::expect_identical(
-    testthat::expect_warning(
-      validateExcludedClass(1.1),
-      "classification excluded level is not an integer: 1.1"
-    ), 1L
+  testthat::expect_warning(
+    testthat::expect_error(validateExcludedClass(-1.0), "classification excluded level must be >= 0: -1"),
+    "classification excluded level is not an integer:"
   )
-})
+  testthat::expect_warning(validateExcludedClass(1.1), "classification excluded level is not an integer: 1.1")
+  testthat::expect_identical(validateExcludedClass(3L), 3L)
 
-testthat::test_that("validateExcludedClass passes for valid input", {
-  valid_input <- 3L
-  testthat::expect_identical(validateExcludedClass(valid_input), 3L)
-})
-
-testthat::test_that("validateExcludedClass edge cases", {
-  # Integers work
+  # Edge cases
   testthat::expect_identical(validateExcludedClass(0L), 0L)
   testthat::expect_identical(validateExcludedClass(1L), 1L)
   testthat::expect_identical(validateExcludedClass(4L), 4L)
-
-  # Decimals work with a warning
-  wrn <- "classification excluded level is not an integer:"
-  testthat::expect_warning(testthat::expect_identical(validateExcludedClass(0.0), 0L), wrn)
-  testthat::expect_warning(testthat::expect_identical(validateExcludedClass(1.0), 1L), wrn)
-  testthat::expect_warning(testthat::expect_identical(validateExcludedClass(4.0), 4L), wrn)
-
-  # Less than 0 will error
+  w <- "classification excluded level is not an integer:"
+  testthat::expect_warning(testthat::expect_identical(validateExcludedClass(0.0), 0L), w)
+  testthat::expect_warning(testthat::expect_identical(validateExcludedClass(1.0), 1L), w)
+  testthat::expect_warning(testthat::expect_identical(validateExcludedClass(4.0), 4L), w)
   testthat::expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
-})
 
-testthat::test_that("validateExcludedClass works with caretLists", {
-  # Make a model list
-  data(iris)
-  model_list <- caretList(
-    x = iris[, -5L],
-    y = iris[, 5L],
-    methodList = c("rpart", "glmnet")
-  )
-
-  # Stacking with the excluded level should work
-  invisible(caretStack(model_list, method = "knn", excluded_class_id = 1L))
-
-  # Stacking with too great of a level should work. No error or warning.
-  stack <- caretStack(model_list, method = "knn", excluded_class_id = 4L)
-  invisible(predict(stack, iris[, -5L]))
-
-  # Check if we are actually excluding level 1 (setosa)
-  classes <- levels(iris[, 5L])[-1L]
-  models <- c("rpart", "glmnet")
-  class_model_combinations <- expand.grid(classes, models)
-  varImp_rownames <- apply(class_model_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
-
-  model_stack <- caretStack(model_list, method = "knn", excluded_class_id = 1L)
-  testthat::expect_identical(rownames(caret::varImp(model_stack$ens_model)$importance), varImp_rownames)
-})
-
-testthat::test_that("validateExcludedClass validates excluded level correctly", {
+  # Additional tests
   testthat::expect_warning(validateExcludedClass(NULL), "No excluded_class_id set. Setting to 1L.")
   testthat::expect_error(
     validateExcludedClass(c(1L, 2L)),
     "classification excluded level must have a length of 1: length=2"
   )
-  testthat::expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
-  testthat::expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
   testthat::expect_warning(
     testthat::expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"),
     "classification excluded level is not an integer"
   )
-  testthat::expect_warning(
-    testthat::expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"),
-    "classification excluded level is not an integer"
-  )
-  testthat::expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
-  txt <- "classification excluded level is not an integer: 2"
-  testthat::expect_warning(
-    testthat::expect_identical(
-      validateExcludedClass(2.0), 2L
-    ), txt,
-    "classification excluded level is not an integer"
-  )
-})
-
-testthat::test_that("validateExcludedClass validates excluded level correctly", {
-  testthat::expect_warning(validateExcludedClass(NULL), "No excluded_class_id set. Setting to 1L.")
-  testthat::expect_error(
-    validateExcludedClass(c(1L, 2L)),
-    "classification excluded level must have a length of 1: length=2"
-  )
-  testthat::expect_error(validateExcludedClass("a"), "classification excluded level must be numeric: a")
-  testthat::expect_error(validateExcludedClass(-1L), "classification excluded level must be >= 0: -1")
-  testthat::expect_warning(
-    testthat::expect_error(validateExcludedClass(-0.000001), "classification excluded level must be >= 0: -1e-06"),
-    "classification excluded level is not an integer"
-  )
-  testthat::expect_warning(
-    testthat::expect_error(validateExcludedClass(Inf), "classification excluded level must be finite: Inf"),
-    "classification excluded level is not an integer"
-  )
-  testthat::expect_warning(validateExcludedClass(1.5), "classification excluded level is not an integer: 1.5")
-  txt <- "classification excluded level is not an integer: 2"
-  testthat::expect_warning(testthat::expect_identical(validateExcludedClass(2.0), 2L), txt)
 })

@@ -1,9 +1,18 @@
 data(models.reg)
 data(X.reg)
 data(Y.reg)
+
 data(models.class)
 data(X.class)
 data(Y.class)
+
+data(iris)
+
+models_multiclass <- caretList(
+  x = iris[, -5L],
+  y = iris[, 5L],
+  methodList = c("rpart", "glmnet")
+)
 
 ens.class <- caretStack(
   models.class,
@@ -123,18 +132,10 @@ testthat::test_that("Test na.action pass through", {
 })
 
 testthat::test_that("predict.caretStack works correctly if the multiclass excluded level is too high", {
-  data(iris)
-
-  # Create a caretList
-  model_list <- caretList(
-    Species ~ .,
-    data = iris,
-    methodList = c("rpart", "rf")
-  )
 
   # Make sure predictions still work if the exlcuded level is too high
   meta_model <- caretStack(
-    model_list,
+    models_multiclass,
     method = "rpart",
     excluded_class_id = 4L
   )
@@ -210,7 +211,6 @@ testthat::test_that("caretStack handles different metrics", {
 })
 
 testthat::test_that("caretStack handles upsampling data", {
-  data(iris)
   train_data <- iris
 
   imbalanced_data <- rbind(
@@ -351,6 +351,22 @@ testthat::test_that("caretStack works if both new_X and new_Y are supplied", {
 
   testthat::expect_identical(ncol(pred_class), 2L)
   testthat::expect_identical(ncol(pred_reg), 1L)
+})
+
+testthat::test_that("caretStack multiclass", {
+  # Stacking with the excluded level should work
+  model_stack <- caretStack(models_multiclass, method = "knn", excluded_class_id = 1L)
+
+  # Check if we are actually excluding level 1 (setosa)
+  classes <- levels(iris[, 5L])[-1L]
+  models <- c("rpart", "glmnet")
+  class_model_combinations <- expand.grid(classes, models)
+  varImp_rownames <- apply(class_model_combinations, 1L, function(x) paste(x[2L], x[1L], sep = "_"))
+  testthat::expect_identical(rownames(caret::varImp(model_stack$ens_model)$importance), varImp_rownames)
+
+  # Stacking with too great of a level should work too. No error or warning.
+  stack <- caretStack(models_multiclass, method = "knn", excluded_class_id = 4L)
+  invisible(predict(stack, iris[, -5L]))
 })
 
 #############################################################################
