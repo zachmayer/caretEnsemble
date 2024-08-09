@@ -19,7 +19,7 @@ test <- caret::twoClassSim(
 )
 
 ###############################################
-testthat::context("caretModelSpec")
+testthat::context("caretModelSpec, tuneCheck, methodCheck")
 ###############################################
 testthat::test_that("caretModelSpec returns valid specs", {
   tuneList <- list(
@@ -58,6 +58,14 @@ testthat::test_that("caretModelSpec and checking functions work as expected", {
   testthat::expect_error(methodCheck(c(all_models, "THIS_IS_NOT_A_REAL_MODEL", "GBM")))
 })
 
+testthat::test_that("methodCheck stops for invalid method type", {
+  testthat::expect_error(methodCheck(list(123L)), "Method \"123\" is invalid.")
+  testthat::expect_error(
+    methodCheck(list("invalid_method")),
+    "The following models are not valid caret models: invalid_method"
+  )
+})
+
 ###############################################
 testthat::context("extractCaretTarget")
 ###############################################
@@ -68,6 +76,194 @@ testthat::test_that("Target extraction functions work", {
   testthat::expect_identical(extractCaretTarget(iris[, 2L:5L], iris[, 1L]), iris[, 1L])
   testthat::expect_identical(extractCaretTarget(Species ~ ., iris), iris[, "Species"])
   testthat::expect_identical(extractCaretTarget(Sepal.Width ~ ., iris), iris[, "Sepal.Width"])
+})
+
+###############################################
+testthat::context("S3 methods for caretList")
+################################################
+
+testthat::test_that("[.caretList subsets caretList objects correctly", {
+  subset_models <- models.class[1L:2L]
+
+  testthat::expect_s3_class(subset_models, "caretList")
+  testthat::expect_length(subset_models, 2L)
+  testthat::expect_true(all(names(subset_models) %in% names(models.class)[1L:2L]))
+})
+
+testthat::test_that("c.caretList combines caretList objects correctly", {
+  models_class1 <- models.class[1L:2L]
+  models_class2 <- models.class[3L:4L]
+  class(models_class1) <- class(models_class2) <- "caretList"
+
+  combined_models <- c(models_class1, models_class2)
+
+  testthat::expect_s3_class(combined_models, "caretList")
+  testthat::expect_length(combined_models, length(models.class))
+  testthat::expect_true(all(names(combined_models) %in% names(models.class)))
+})
+
+testthat::test_that("c.caretList combines caretList and train objects correctly", {
+  models_class1 <- models.class[1L:2L]
+  class(models_class1) <- "caretList"
+  single_model <- models.class[[3L]]
+
+  combined_models <- c(models_class1, single_model)
+
+  testthat::expect_s3_class(combined_models, "caretList")
+  testthat::expect_length(combined_models, 3L)
+  testthat::expect_true(all(names(combined_models) %in% names(models.class)))
+})
+
+testthat::test_that("c.caretList handles duplicate names", {
+  models_class1 <- models.class[1L:2L]
+  class(models_class1) <- "caretList"
+
+  combined_models <- c(models_class1, models_class1)
+
+  testthat::expect_s3_class(combined_models, "caretList")
+  testthat::expect_length(combined_models, 4L)
+  testthat::expect_true(all(make.names(rep(names(models_class1), 2L), unique = TRUE) %in% names(combined_models)))
+})
+
+testthat::test_that("c.caretList and c.train fail for invalid inputs", {
+  testthat::expect_error(c.caretList(list(a = 1L, b = 2L)), "class of modelList1 must be 'caretList' or 'train'")
+  testthat::expect_error(c.train(list(a = 1L, b = 2L)), "class of modelList1 must be 'caretList' or 'train'")
+})
+
+testthat::test_that("c can bind two caretList objects", {
+  bigList <- c(models.class, models.reg)
+  testthat::expect_is(bigList, "caretList")
+  testthat::expect_identical(anyDuplicated(names(bigList)), 0L)
+  testthat::expect_length(unique(names(bigList)), 8L)
+})
+
+testthat::test_that("c can bind a caretList and train object", {
+  bigList <- c(models.class, models.reg[[1L]])
+  testthat::expect_is(bigList, "caretList")
+  testthat::expect_identical(anyDuplicated(names(bigList)), 0L)
+  testthat::expect_length(unique(names(bigList)), 5L)
+})
+
+testthat::test_that("as.caretList.list converts list to caretList", {
+  model_list <- list(model1 = models.class[[1L]], model2 = models.class[[2L]])
+  caretlist_object <- as.caretList(model_list)
+
+  testthat::expect_s3_class(caretlist_object, "caretList")
+  testthat::expect_length(caretlist_object, 2L)
+  testthat::expect_true(all(names(caretlist_object) %in% names(model_list)))
+})
+
+testthat::test_that("as.caretList.list fails for invalid inputs", {
+  testthat::expect_error(as.caretList(list(a = 1L, b = 2L)), "object requires all elements of list to be caret models")
+})
+
+testthat::test_that("as.caretList.list names lists without names", {
+  models.no.name <- models.class
+  names(models.no.name) <- NULL
+  class(models.no.name) <- "list"
+  testthat::expect_null(names(models.no.name))
+  cl <- as.caretList(models.no.name)
+  testthat::expect_named(cl, unname(vapply(models.class, "[[", character(1L), "method")))
+})
+
+testthat::test_that("as.caretList fails on non-list", {
+  testthat::expect_error(as.caretList(1L), "object must be a list")
+})
+
+testthat::test_that("c.caretList stops for invalid class", {
+  testthat::expect_error(c.caretList(list()), "class of modelList1 must be 'caretList' or 'train'")
+})
+
+testthat::test_that("as.caretList stops for null object", {
+  testthat::expect_error(as.caretList(NULL), "object is null")
+})
+
+testthat::test_that("as.caretList.list stops for non-list object", {
+  testthat::expect_error(as.caretList.list(1L), "object must be a list of caret models")
+})
+
+testthat::test_that("as.caretList.list fails on NULL object", {
+  err <- "object requires all elements of list to be caret models"
+  testthat::expect_error(as.caretList(list(NULL)), err)
+})
+
+###############################################
+testthat::context("predict.caretList")
+###############################################
+testthat::test_that("predict.caretList works for classification and regression", {
+  class_preds <- predict(models.class, newdata = X.class, excluded_class_id = 0L)
+  reg_preds <- predict(models.reg, newdata = X.reg)
+
+  testthat::expect_is(class_preds, "data.table")
+  testthat::expect_is(reg_preds, "data.table")
+  testthat::expect_identical(nrow(class_preds), nrow(X.class))
+  testthat::expect_identical(nrow(reg_preds), nrow(X.reg))
+  testthat::expect_identical(ncol(class_preds), length(models.class) * 2L)
+  testthat::expect_identical(ncol(reg_preds), length(models.reg))
+})
+
+testthat::test_that("predict.caretList handles type='prob' for classification", {
+  class_probs <- predict(models.class, newdata = X.class, excluded_class_id = 0L)
+  testthat::expect_is(class_probs, "data.table")
+  testthat::expect_identical(nrow(class_probs), nrow(X.class))
+  testthat::expect_identical(ncol(class_probs), length(models.class) * nlevels(Y.class))
+})
+
+testthat::test_that("Stacked predictions for caret lists works", {
+  best_preds_class <- predict(models.class)
+  best_preds_reg <- predict(models.reg)
+
+  testthat::expect_is(best_preds_class, "data.table")
+  testthat::expect_is(best_preds_reg, "data.table")
+
+  testthat::expect_named(best_preds_class, names(models.class))
+  testthat::expect_named(best_preds_reg, names(models.reg))
+})
+
+testthat::test_that("Stacked predictions works with different resampling strategies", {
+  models.class.inconsistent <- models.class
+  models.class.inconsistent[[1L]]$pred$Resample <- "WEIRD_SAMPLING"
+  testthat::expect_is(predict(models.class.inconsistent), "data.table")
+})
+
+testthat::test_that("Stacked predictions works if the row indexes differ", {
+  models.class.inconsistent <- models.class
+  models.class.inconsistent[[1L]]$pred$rowIndex <- rev(models.class.inconsistent[[1L]]$pred$rowIndex)
+  big_preds <- rbind(models.class.inconsistent[[2L]]$pred, models.class.inconsistent[[2L]]$pred)
+  models.class.inconsistent[[2L]]$pred <- big_preds
+  testthat::expect_is(predict(models.class.inconsistent), "data.table")
+})
+
+testthat::test_that("predict.caretList works when the progress bar is turned off", {
+  set.seed(42L)
+  N <- 100L
+  noise_level <- 1L / 10L
+  X <- data.table::data.table(
+    a = runif(N),
+    b = runif(N)
+  )
+  y <- 7.5 - 10.0 * X$a + 5.0 * X$b + noise_level * rnorm(N)
+  models <- caretList(
+    X, y,
+    tuneLength = 1L,
+    methodList = "lm"
+  )
+  pred <- predict(models, X, verbose = FALSE)[["lm"]]
+  rmse <- sqrt(mean((y - pred)^2L))
+  testthat::expect_lt(rmse, noise_level)
+})
+
+
+testthat::test_that("predict.caretList doesn't care about missing training data", {
+  new_model_list <- lapply(models.class, function(x) {
+    x$trainingData <- NULL
+    x
+  })
+  new_model_list <- as.caretList(new_model_list)
+  pred <- predict.caretList(new_model_list)
+  testthat::expect_is(pred, "data.table")
+  testthat::expect_identical(nrow(pred), 150L)
+  testthat::expect_named(pred, names(new_model_list))
 })
 
 ###############################################
@@ -443,7 +639,6 @@ testthat::test_that("Test that caretList preserves user specified error function
   testthat::expect_is(myEns1, "caretEnsemble")
 })
 
-testthat::context("Formula interface for caretList works")
 testthat::test_that("User tuneTest parameters are respected and model is ensembled", {
   tuneTest <- list(
     rpart = list(method = "rpart", tuneLength = 2L),
@@ -477,7 +672,6 @@ testthat::test_that("User tuneTest parameters are respected and model is ensembl
   testthat::expect_equal(ens_default$weights, ens_flma$weights, tol = 0.000001)
 })
 
-
 testthat::test_that("Regression Models", {
   test1 <- caretList(
     x = train[, c(-23L, -1L)],
@@ -498,83 +692,6 @@ testthat::test_that("Regression Models", {
 
   testthat::expect_is(ens1, "caretEnsemble")
   testthat::expect_is(ens2, "caretEnsemble")
-})
-
-testthat::test_that("methodCheck stops for invalid method type", {
-  testthat::expect_error(methodCheck(list(123L)), "Method \"123\" is invalid.")
-  testthat::expect_error(
-    methodCheck(list("invalid_method")),
-    "The following models are not valid caret models: invalid_method"
-  )
-})
-
-testthat::test_that("as.caretList stops for null object", {
-  testthat::expect_error(as.caretList(NULL), "object is null")
-})
-
-testthat::test_that("as.caretList.list stops for non-list object", {
-  testthat::expect_error(as.caretList.list(1L), "object must be a list of caret models")
-})
-
-testthat::test_that("predict.caretList doesn't care about missing training data", {
-  new_model_list <- lapply(models.class, function(x) {
-    x$trainingData <- NULL
-    x
-  })
-  new_model_list <- as.caretList(new_model_list)
-  pred <- predict.caretList(new_model_list)
-  testthat::expect_is(pred, "data.table")
-  testthat::expect_identical(nrow(pred), 150L)
-  testthat::expect_named(pred, names(new_model_list))
-})
-
-testthat::test_that("as.caretList.list fails on NULL object", {
-  err <- "object requires all elements of list to be caret models"
-  testthat::expect_error(as.caretList(list(NULL)), err)
-})
-
-testthat::test_that("Stacked predictions for caret lists works", {
-  best_preds_class <- predict(models.class)
-  best_preds_reg <- predict(models.reg)
-
-  testthat::expect_is(best_preds_class, "data.table")
-  testthat::expect_is(best_preds_reg, "data.table")
-
-  testthat::expect_named(best_preds_class, names(models.class))
-  testthat::expect_named(best_preds_reg, names(models.reg))
-})
-
-testthat::test_that("Stacked predictions works with different resampling strategies", {
-  models.class.inconsistent <- models.class
-  models.class.inconsistent[[1L]]$pred$Resample <- "WEIRD_SAMPLING"
-  testthat::expect_is(predict(models.class.inconsistent), "data.table")
-})
-
-testthat::test_that("Stacked predictions works if the row indexes differ", {
-  models.class.inconsistent <- models.class
-  models.class.inconsistent[[1L]]$pred$rowIndex <- rev(models.class.inconsistent[[1L]]$pred$rowIndex)
-  big_preds <- rbind(models.class.inconsistent[[2L]]$pred, models.class.inconsistent[[2L]]$pred)
-  models.class.inconsistent[[2L]]$pred <- big_preds
-  testthat::expect_is(predict(models.class.inconsistent), "data.table")
-})
-
-testthat::test_that("predict.caretList works when the progress bar is turned off", {
-  set.seed(42L)
-  N <- 100L
-  noise_level <- 1L / 10L
-  X <- data.table::data.table(
-    a = runif(N),
-    b = runif(N)
-  )
-  y <- 7.5 - 10.0 * X$a + 5.0 * X$b + noise_level * rnorm(N)
-  models <- caretList(
-    X, y,
-    tuneLength = 1L,
-    methodList = "lm"
-  )
-  pred <- predict(models, X, verbose = FALSE)[["lm"]]
-  rmse <- sqrt(mean((y - pred)^2L))
-  testthat::expect_lt(rmse, noise_level)
 })
 
 testthat::test_that("caretList handles missing data correctly", {

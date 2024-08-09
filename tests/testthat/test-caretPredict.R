@@ -45,6 +45,27 @@ testthat::test_that("caretPredict extracts best predictions correctly", {
   testthat::expect_named(stacked_preds_reg, "pred")
 })
 
+###############################################
+testthat::context("S3 methods for train")
+################################################
+
+testthat::test_that("c.train stops for invalid class", {
+  testthat::expect_error(c.train(list()), "class of modelList1 must be 'caretList' or 'train'")
+})
+
+testthat::test_that("c.train combines train objects correctly and handles duplicate names", {
+  combined_models <- c(
+    models.class[[1L]],
+    models.class[[1L]]
+  )
+
+  testthat::expect_s3_class(combined_models, "caretList")
+  testthat::expect_length(combined_models, 2L)
+
+  testthat::expect_identical(anyDuplicated(names(combined_models)), 0L)
+  testthat::expect_length(unique(names(combined_models)), 2L)
+})
+
 #############################################################################
 testthat::context("extractMetric")
 #############################################################################
