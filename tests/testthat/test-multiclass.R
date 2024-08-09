@@ -1,5 +1,5 @@
-  utils::data(iris)
-  utils::data(Boston, package = "MASS")
+utils::data(iris)
+utils::data(Boston, package = "MASS")
 
 #############################################################################
 testthat::context("caretList and caretStack work for multiclass problems")
@@ -122,7 +122,6 @@ testthat::test_that("Periods are supported in method and class names in caretLis
 })
 
 testthat::test_that("We can make a confusion matrix", {
-
   set.seed(42L)
   n <- nrow(iris)
   train_indices <- sample.int(n, n * 0.8)
@@ -217,7 +216,6 @@ testthat::test_that("caretList and caretStack handle ordinal multiclass data", {
 })
 
 testthat::test_that("caretList and caretStack produce consistent probability predictions", {
-
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
@@ -255,7 +253,6 @@ testthat::test_that("caretList and caretStack handle new levels in prediction da
 })
 
 testthat::test_that("caretList and caretStack produce consistent probability predictions", {
-
   model_list <- caretList(
     x = iris[, -5L],
     y = iris[, 5L],
