@@ -25,7 +25,9 @@ large_data <- list(
   y = factor(sample(c("A", "B"), n, replace = TRUE))
 )
 
-# Test caretModelSpec, tuneCheck, methodCheck
+################################################################
+testthat::context("caretModelSpec, tuneCheck, methodCheck")
+################################################################
 testthat::test_that("caretModelSpec and checking functions work as expected", {
   all_models <- sort(unique(caret::modelLookup()$model))
 
@@ -53,14 +55,22 @@ testthat::test_that("caretModelSpec and checking functions work as expected", {
   )
 })
 
-# Test extractCaretTarget
+################################################################
+testthat::context("S3 methods for caretlist")
+################################################################
+
 testthat::test_that("Target extraction functions work", {
   data(iris)
   testthat::expect_identical(extractCaretTarget(iris[, 1L:4L], iris[, 5L]), iris[, 5L])
   testthat::expect_identical(extractCaretTarget(Species ~ ., iris), iris[, "Species"])
 })
 
-# Test S3 methods for caretList
+testthat::test_that("[.caretList", {
+  subset_models <- models.class[1L:2L]
+  testthat::expect_s3_class(subset_models, "caretList")
+  testthat::expect_length(subset_models, 2L)
+})
+
 testthat::test_that("c.caretList", {
   combined_models <- c(models.class, models.class)
   testthat::expect_s3_class(combined_models, "caretList")
@@ -74,15 +84,19 @@ testthat::test_that("c.caretList", {
 })
 
 testthat::test_that("as.caretList", {
-  subset_models <- models.class[1L:2L]
-  testthat::expect_s3_class(subset_models, "caretList")
-  testthat::expect_length(subset_models, 2L)
-
+  # Named
   model_list <- list(model1 = models.class[[1L]], model2 = models.class[[2L]])
   caretlist_object <- as.caretList(model_list)
   testthat::expect_s3_class(caretlist_object, "caretList")
   testthat::expect_length(caretlist_object, 2L)
 
+  # Unnamed
+  model_list <- list(models.class[[1L]], models.class[[2L]])
+  caretlist_object <- as.caretList(model_list)
+  testthat::expect_s3_class(caretlist_object, "caretList")
+  testthat::expect_length(caretlist_object, 2L)
+
+  # Error cases
   testthat::expect_error(as.caretList(NULL), "object is null")
   testthat::expect_error(as.caretList(1L), "object must be a list")
   testthat::expect_error(as.caretList(list(1L)), "object requires all elements of list to be caret models")
@@ -90,7 +104,10 @@ testthat::test_that("as.caretList", {
   testthat::expect_error(as.caretList.list(1L), "object must be a list of caret models")
 })
 
-# Test predict.caretList
+################################################################
+testthat::context("predict.caretlist")
+################################################################
+
 testthat::test_that("predict.caretList works for classification and regression", {
   class_preds <- predict(models.class, newdata = X.class, excluded_class_id = 0L)
   reg_preds <- predict(models.reg, newdata = X.reg)
@@ -125,7 +142,10 @@ testthat::test_that("predict.caretList works for classification and regression",
   testthat::expect_identical(nrow(p), nrow(test_data))
 })
 
-# Test caretList
+################################################################
+testthat::context("caretList")
+################################################################
+
 testthat::test_that("caretList works for various scenarios", {
   # Basic classification
   test1 <- caretList(
