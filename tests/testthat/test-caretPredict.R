@@ -66,6 +66,13 @@ testthat::test_that("c.train combines train objects correctly and handles duplic
   testthat::expect_length(unique(names(combined_models)), 2L)
 })
 
+testthat::test_that("c.train can bind a train and a caretList", {
+  bigList <- c(models.reg[[1L]], models.class)
+  testthat::expect_is(bigList, "caretList")
+  testthat::expect_identical(anyDuplicated(names(bigList)), 0L)
+  testthat::expect_length(unique(names(bigList)), 5L)
+})
+
 #############################################################################
 testthat::context("extractMetric")
 #############################################################################

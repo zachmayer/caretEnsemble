@@ -137,11 +137,15 @@ testthat::test_that("c can bind two caretList objects", {
   testthat::expect_length(unique(names(bigList)), 8L)
 })
 
-testthat::test_that("c can bind a caretList and train object", {
+testthat::test_that("c.caretList can bind a caretList and train object", {
   bigList <- c(models.class, models.reg[[1L]])
   testthat::expect_is(bigList, "caretList")
   testthat::expect_identical(anyDuplicated(names(bigList)), 0L)
   testthat::expect_length(unique(names(bigList)), 5L)
+})
+
+testthat::test_that("c.caretList stops for invalid class", {
+  testthat::expect_error(c.caretList(list()), "class of modelList1 must be 'caretList' or 'train'")
 })
 
 testthat::test_that("as.caretList.list converts list to caretList", {
@@ -168,10 +172,6 @@ testthat::test_that("as.caretList.list names lists without names", {
 
 testthat::test_that("as.caretList fails on non-list", {
   testthat::expect_error(as.caretList(1L), "object must be a list")
-})
-
-testthat::test_that("c.caretList stops for invalid class", {
-  testthat::expect_error(c.caretList(list()), "class of modelList1 must be 'caretList' or 'train'")
 })
 
 testthat::test_that("as.caretList stops for null object", {
