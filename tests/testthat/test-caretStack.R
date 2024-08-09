@@ -132,7 +132,6 @@ testthat::test_that("Test na.action pass through", {
 })
 
 testthat::test_that("predict.caretStack works correctly if the multiclass excluded level is too high", {
-
   # Make sure predictions still work if the exlcuded level is too high
   meta_model <- caretStack(
     models_multiclass,
