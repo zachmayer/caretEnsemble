@@ -1,28 +1,21 @@
-testthat::context("Does binary class selection work?")
-
 # Load and prepare data for subsequent tests
 seed <- 2239L
 set.seed(seed)
-utils::data(models.class)
-utils::data(X.class)
-utils::data(Y.class)
+utils::data(iris)
 
 # Create 80/20 train/test split
-index <- caret::createDataPartition(Y.class, p = 0.8)[[1L]]
-X.train <- X.class[index, ]
-X.test <- X.class[-index, ]
-Y.train <- Y.class[index]
-Y.test <- Y.class[-index]
-
-#############################################################################
-testthat::context("Do classifier predictions use the correct target classes?")
-#############################################################################
+target_col <- which(names(iris) == "Species")
+index <- caret::createDataPartition(iris[, target_col], p = 0.8)[[1L]]
+X.train <- iris[index, -target_col]
+X.test <- iris[-index, -target_col]
+Y.train <- iris[index, target_col]
+Y.test <- iris[-index, target_col]
 
 runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # Extract levels of response input data
   Y.levels <- levels(Y.train)
   testthat::expect_identical(Y.levels, levels(Y.test))
-  testthat::expect_length(Y.levels, 2L)
+  testthat::expect_length(Y.levels, 3L)
 
   # Train a caret ensemble
   model.list <- caretList(
@@ -42,6 +35,7 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # Verify that the training data given to the ensemble model has the
   # same levels in the response as the original, raw data
   testthat::expect_identical(levels(model.ens$ens_model$trainingData$.outcome), Y.levels)
+  testthat::expect_identical(levels(model.ens$ensemble_model), Y.levels)
 
   # Create class and probability predictions, as well as class predictions
   # generated from probability predictions using a .5 cutoff
@@ -73,50 +67,31 @@ runBinaryLevelValidation <- function(Y.train, Y.test, pos.level = 1L) {
   # check exists to avoid previous errors where classifer ensemble predictions were
   # being made using the incorrect level of the response, causing the opposite
   # class labels to be predicted with new data.
-  testthat::expect_gt(cmat.pred$overall["Accuracy"], 0.79)
+  testthat::expect_gt(cmat.pred$overall["Accuracy"], 0.60)
 
   # Similar to the above, ensure that probability predictions are working correctly
   # by checking to see that accuracy is also high for class predictions created
   # from probabilities
-  testthat::expect_gt(cmat.cutoff$overall["Accuracy"], 0.79)
+  testthat::expect_gt(cmat.cutoff$overall["Accuracy"], 0.60)
 }
 
-testthat::test_that("Ensembled classifiers do not rearrange outcome factor levels", {
-  # First run the level selection test using the default levels
-  # of the response (i.e. c('No', 'Yes'))
-  set.seed(seed)
-  runBinaryLevelValidation(Y.train, Y.test, pos.level = 1L)
+#############################################################################
+testthat::context("Do classifier predictions use the correct target classes?")
+#############################################################################
 
-  # Now reverse the assigment of the response labels as well as
-  # the levels of the response factor. Reversing the assignment
-  # is necessary to make sure the expected accuracy numbers are
-  # the same (i.e. Making a "No" into a "Yes" in the response means
-  # predictions of the first class will still be as accurate).
-  # Reversing the level order then ensures that the outcome is not
-  # releveled at some point by caretEnsemble.
-  Y.levels <- levels(Y.train)
-  refactor <- function(d) {
-    factor(
-      ifelse(d == Y.levels[1L], Y.levels[2L], Y.levels[1L]),
-      levels = rev(Y.levels)
-    )
+testthat::test_that("validateExcludedClass for multiclass", {
+  for (excluded_class in c(1L, 2L, 3L)) {
+    testthat::expect_silent(validateExcludedClass(excluded_class))
   }
-
-  set.seed(seed)
-  runBinaryLevelValidation(refactor(Y.train), refactor(Y.test))
+  testthat::expect_error(validateExcludedClass("x"), "classification excluded level must be numeric")
 })
 
 testthat::test_that("Target class selection configuration works", {
-  # No error
-  excluded_class <- validateExcludedClass(1L)
-  excluded_class <- validateExcludedClass(2L)
-
-  # Should error
-  testthat::expect_error(validateExcludedClass("x"), "classification excluded level must be numeric")
-
-  # Check that we can exclude the first class
   Y.levels <- levels(Y.train)
   refactor <- function(d) factor(as.character(d), levels = rev(Y.levels))
   set.seed(seed)
-  runBinaryLevelValidation(refactor(Y.train), refactor(Y.test), pos.level = 1L)
+  for (pos in c(1L, 2L, 3L)) {
+    runBinaryLevelValidation(Y.train, Y.test, pos.level = pos)
+    runBinaryLevelValidation(refactor(Y.train), refactor(Y.test), pos.level = pos)
+  }
 })
