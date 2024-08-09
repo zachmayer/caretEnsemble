@@ -19,7 +19,9 @@ ens.reg <- caretStack(
   trControl = caret::trainControl(method = "cv", number = 2L, savePredictions = "final", classProbs = FALSE)
 )
 
-testthat::context("Does stacking and prediction work?")
+#############################################################################
+testthat::context("caretStack")
+#############################################################################
 
 testthat::test_that("We can make predictions from stacks, including cases where the stacked model has preprocessing", {
   ens_list <- list(class = ens.class, reg = ens.reg)
@@ -142,8 +144,6 @@ testthat::test_that("predict.caretStack works correctly if the multiclass exclud
   all_finite <- function(x) all(is.finite(x))
   testthat::expect_true(all(vapply(pred, all_finite, logical(1L))))
 })
-
-testthat::context("caretStack edge cases")
 
 testthat::test_that("caretStack handles different stacking algorithms", {
   for (x in list(list(models.reg, X.reg), list(models.class, X.class))) {
@@ -285,8 +285,6 @@ testthat::test_that("predict.caretStack works if excluded_class_id is not set", 
   testthat::expect_named(pred, c("No", "Yes"))
 })
 
-testthat::context("Edge cases")
-
 testthat::test_that("caretStack coerces lists to caretLists", {
   model_list <- models.reg
   class(model_list) <- "list"
@@ -355,6 +353,10 @@ testthat::test_that("caretStack works if both new_X and new_Y are supplied", {
   testthat::expect_identical(ncol(pred_reg), 1L)
 })
 
+#############################################################################
+testthat::context("varImp")
+#############################################################################
+
 testthat::test_that("varImp works in for class and reg in sample", {
   for (ens in list(ens.class, ens.reg)) {
     imp <- varImp(ens)
@@ -376,4 +378,48 @@ testthat::test_that("varImp works in for reg on new data", {
   expect_is(imp, "numeric")
   expect_named(imp, names(ens.reg$models))
   expect_equal(sum(imp), 1.0, tolerance = 1e-6)
+})
+
+#############################################################################
+testthat::context("wtd.sd")
+#############################################################################
+
+testthat::test_that("wtd.sd applies weights correctly", {
+  x1 <- c(3L, 5L, 9L, 3L, 4L, 6L, 4L)
+  x2 <- c(10L, 10L, 20L, 14L, 2L, 2L, 40L)
+  x3 <- c(10L, 10L, 10L, 20L)
+  w1 <- c(0.1, 0.1, 0.1, 0.7)
+  testthat::expect_error(caretEnsemble::wtd.sd(x1), 'argument "w" is missing, with no default')
+  testthat::expect_false(sd(x1) == caretEnsemble::wtd.sd(x1, w = x2))
+  testthat::expect_false(sd(x1) == caretEnsemble::wtd.sd(x1, w = x2))
+  testthat::expect_equal(caretEnsemble::wtd.sd(x3, w = w1), 5.291503, tolerance = 0.001)
+  testthat::expect_equal(caretEnsemble::wtd.sd(x3, w = w1 * 100L), caretEnsemble::wtd.sd(x3, w = w1), tolerance = 0.001)
+})
+
+testthat::test_that("wtd.sd handles NA values correctly", {
+  x1 <- c(10L, 10L, 10L, 20L, NA, NA)
+  w1 <- c(0.1, 0.1, 0.1, 0.7, NA, NA)
+  testthat::expect_true(is.na(caretEnsemble::wtd.sd(x1, w = w1)))
+  testthat::expect_true(is.na(sd(x1)))
+  testthat::expect_false(is.na(caretEnsemble::wtd.sd(x1, w = w1, na.rm = TRUE)))
+  testthat::expect_false(is.na(sd(x1, na.rm = TRUE)))
+  testthat::expect_true(is.na(caretEnsemble::wtd.sd(x1, w = w1)))
+  testthat::expect_false(is.na(caretEnsemble::wtd.sd(x1, w = w1, na.rm = TRUE)))
+})
+
+testthat::test_that("wtd.sd calculates weighted standard deviation correctly", {
+  x <- c(1L, 2L, 3L, 4L, 5L)
+  w <- c(1L, 1L, 1L, 1L, 1L)
+  testthat::expect_equal(wtd.sd(x, w), sd(x), tol = 0.001)
+
+  w <- c(2L, 1L, 1L, 1L, 1L)
+  testthat::expect_true(wtd.sd(x, w) != sd(x))
+
+  # Test with NA values
+  x_na <- c(1L, 2L, NA, 4L, 5L)
+  testthat::expect_true(is.na(wtd.sd(x_na, w)))
+  testthat::expect_false(is.na(wtd.sd(x_na, w, na.rm = TRUE)))
+
+  # Test error for mismatched lengths
+  testthat::expect_error(wtd.sd(x, w[-1L]), "'x' and 'w' must have the same length")
 })

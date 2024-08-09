@@ -10,12 +10,24 @@ data(models.class)
 data(X.class)
 data(Y.class)
 
+data(Sonar, package = "mlbench")
+
 set.seed(1234L)
 ens.reg <- caretEnsemble(
   models.reg,
-  trControl = caret::`trainControl`(method = "cv", number = 2L, savePredictions = "final")
+  trControl = caret::trainControl(method = "cv", number = 2L, savePredictions = "final")
 )
 
+ens.class <- caretEnsemble(
+  models.class,
+  metric = "ROC",
+  trControl = caret::trainControl(
+    number = 2L,
+    summaryFunction = caret::twoClassSummary,
+    classProbs = TRUE,
+    savePredictions = TRUE
+  )
+)
 #############################################################################
 testthat::context("Test metric and residual extraction")
 #############################################################################
@@ -253,4 +265,125 @@ testthat::test_that("Ensembles fails if predictions are not saved", {
     stackedTrainResiduals(models_bad),
     "No predictions saved during training. Please set savePredictions = 'final' in trainControl"
   )
+})
+
+testthat::test_that("caret::varImp.caretEnsemble", {
+  set.seed(2239L)
+
+  for (m in list(ens.class, ens.reg)) {
+    for (s in c(TRUE, FALSE)) {
+      i <- caret::varImp(m, normalize = s)
+      testthat::expect_is(i, "numeric")
+      if (isClassifier(m)) {
+        len <- length(m$models) * 2L
+        n <- c(outer(c("rf", "glm", "rpart", "treebag"), c("No", "Yes"), paste, sep = "_"))
+        n <- matrix(n, ncol = 2L)
+        n <- c(t(n))
+      } else {
+        len <- length(m$models)
+        n <- names(m$models)
+      }
+      testthat::expect_length(i, len)
+      testthat::expect_named(i, n)
+      if (s) {
+        testthat::expect_true(all(i >= 0.0))
+        testthat::expect_true(all(i <= 1.0))
+        testthat::expect_equal(sum(i), 1.0, tolerance = 1e-6)
+      }
+    }
+  }
+})
+
+testthat::test_that("plot.caretEnsemble", {
+  for (ens in list(ens.class, ens.reg)) {
+    plt <- plot(ens)
+    testthat::expect_is(plt, "ggplot")
+    testthat::expect_identical(nrow(plt$data), 5L) # 4 models, one ensemble
+    testthat::expect_named(ens$models, plt$data$model_name[-1L]) # First is ensemble
+  }
+})
+
+testthat::test_that("ggplot2::autoplot.caretEnsemble", {
+  for (ens in list(ens.class, ens.reg)) {
+    plt1 <- ggplot2::autoplot(ens)
+    plt2 <- ggplot2::autoplot(ens, xvars = c("Petal.Length", "Petal.Width"))
+
+    testthat::expect_is(plt1, "ggplot")
+    testthat::expect_is(plt2, "ggplot")
+
+    testthat::expect_is(plt1, "patchwork")
+    testthat::expect_is(plt2, "patchwork")
+
+    train_model <- ens.reg$models[[1L]]
+    testthat::expect_error(ggplot2::autoplot(train_model), "Objects of class (.*?) are not supported by autoplot")
+  }
+})
+
+testthat::test_that("summary.caretEnsemble", {
+  for (ens in list(ens.class, ens.reg)) {
+    smry <- testthat::expect_silent(summary(ens.class))
+    testthat::expect_output(print(smry), ens.class$ens_model$metric)
+    for (name in names(ens.class$models)) {
+      testthat::expect_output(print(smry), name)
+    }
+  }
+})
+
+testthat::test_that("precict.caretEnsemble with and without se and weights", {
+  for (ens in list(ens.class, ens.reg)) {
+    is_class <- isClassifier(ens)
+    for (se in c(FALSE, TRUE)) {
+      p <- predict(
+        ens,
+        newdata = X.reg,
+        se = se,
+        excluded_class_id = 1L
+      )
+      expect_s3_class(p, "data.table")
+      if (se) {
+        testthat::expect_named(p, c("pred", "lwr", "upr"))
+      } else {
+        testthat::expect_named(p, ifelse(is_class, "Yes", "pred"))
+      }
+    }
+  }
+})
+
+testthat::test_that("We can train and ensemble models with custom tuning lists", {
+  target <- "Class"
+
+  custom_list <- caretList(
+    x = Sonar[, setdiff(names(Sonar), target)],
+    y = Sonar[, target],
+    tuneList = list(
+      rpart = caretModelSpec(
+        method = "rpart",
+        tuneGrid = data.table::data.table(.cp = c(0.01, 0.001, 0.1, 1.0)) # 4L parameters
+      ),
+      knn = caretModelSpec(
+        method = "knn",
+        tuneLength = 9L # 9L parameters
+      ),
+      lda = caretModelSpec(
+        method = "lda2",
+        tuneLength = 1L # 1L parameters
+      ),
+      nnet = caretModelSpec(
+        method = "nnet",
+        tuneLength = 2L, # 2 paramters.  2 values each.   2^2 = 4
+        trace = FALSE,
+        softmax = FALSE
+      )
+    )
+  )
+  testthat::expect_is(custom_list, "caretList")
+  testthat::expect_identical(nrow(custom_list[["rpart"]]$results), 4L)
+  testthat::expect_identical(nrow(custom_list[["knn"]]$results), 9L)
+  testthat::expect_identical(nrow(custom_list[["lda"]]$results), 1L)
+  testthat::expect_identical(nrow(custom_list[["nnet"]]$results), 4L)
+  testthat::expect_false(custom_list[["nnet"]]$finalModel$softmax)
+
+  # Ensemble them
+  custom_ensemble <- caretEnsemble(custom_list)
+  testthat::expect_is(custom_ensemble, "caretEnsemble")
 })
