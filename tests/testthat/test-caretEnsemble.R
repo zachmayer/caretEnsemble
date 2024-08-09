@@ -66,7 +66,9 @@ test_predictions <- function(ens, newdata, one_row_preds) {
   }
 }
 
+######################################################################
 testthat::context("Metric and residual extraction")
+######################################################################
 
 testthat::test_that("We can extract residuals from train regression objects", {
   data(iris)
@@ -76,7 +78,9 @@ testthat::test_that("We can extract residuals from train regression objects", {
   testthat::expect_length(r, 150L)
 })
 
+######################################################################
 testthat::context("Ensembling and prediction")
+######################################################################
 
 testthat::test_that("We can ensemble regression models", {
   testthat::expect_s3_class(ens.reg, "caretEnsemble")
@@ -88,7 +92,9 @@ testthat::test_that("We can ensemble classification models", {
   test_predictions(ens.class, X.class, c(0.02, 0.98))
 })
 
+######################################################################
 testthat::context("Ensembling with models of differing predictors")
+######################################################################
 
 testthat::test_that("We can ensemble models of different predictors", {
   data(iris)
@@ -130,7 +136,9 @@ testthat::test_that("We can ensemble models of different predictors", {
   )
 })
 
+######################################################################
 testthat::context("Ensembles with custom models")
+######################################################################
 
 testthat::test_that("Ensembles using custom models work correctly", {
   set.seed(1234L)
@@ -181,7 +189,9 @@ testthat::test_that("Ensembles fails if predictions are not saved", {
   )
 })
 
+######################################################################
 testthat::context("Variable importance and plotting")
+######################################################################
 
 testthat::test_that("caret::varImp.caretEnsemble works", {
   set.seed(2239L)
