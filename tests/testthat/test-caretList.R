@@ -25,7 +25,6 @@ large_data <- list(
   y = factor(sample(c("A", "B"), n, replace = TRUE))
 )
 
-
 # Test caretModelSpec, tuneCheck, methodCheck
 testthat::test_that("caretModelSpec and checking functions work as expected", {
   all_models <- sort(unique(caret::modelLookup()$model))
@@ -42,6 +41,16 @@ testthat::test_that("caretModelSpec and checking functions work as expected", {
     methodCheck(c(all_models, "THIS_IS_NOT_A_REAL_MODEL")),
     "The following models are not valid caret models: THIS_IS_NOT_A_REAL_MODEL"
   )
+
+  testthat::expect_error(
+    methodCheck("InvalidMethod"),
+    "The following models are not valid caret models: InvalidMethod"
+  )
+
+  testthat::expect_error(
+    methodCheck(list(invalid_method = 42)),
+    "Method \"42\" is invalid"
+  )
 })
 
 # Test extractCaretTarget
@@ -52,22 +61,33 @@ testthat::test_that("Target extraction functions work", {
 })
 
 # Test S3 methods for caretList
-testthat::test_that("S3 methods for caretList work correctly", {
+testthat::test_that("c.caretList", {
+  combined_models <- c(models.class, models.class)
+  testthat::expect_s3_class(combined_models, "caretList")
+  testthat::expect_length(combined_models, length(models.class) * 2L)
+
+  combined_models <- c(models.class, models.class[[1]])
+  testthat::expect_s3_class(combined_models, "caretList")
+  testthat::expect_length(combined_models, length(models.class) + 1L)
+
+  testthat::expect_error(c.caretList(list(a = 1L, b = 2L)), "class of modelList1 must be 'caretList' or 'train'")
+})
+
+testthat::test_that("as.caretList", {
   subset_models <- models.class[1L:2L]
   testthat::expect_s3_class(subset_models, "caretList")
   testthat::expect_length(subset_models, 2L)
-
-  models_class1 <- models.class[1L:2L]
-  models_class2 <- models.class[3L:4L]
-  class(models_class1) <- class(models_class2) <- "caretList"
-  combined_models <- c(models_class1, models_class2)
-  testthat::expect_s3_class(combined_models, "caretList")
-  testthat::expect_length(combined_models, length(models.class))
 
   model_list <- list(model1 = models.class[[1L]], model2 = models.class[[2L]])
   caretlist_object <- as.caretList(model_list)
   testthat::expect_s3_class(caretlist_object, "caretList")
   testthat::expect_length(caretlist_object, 2L)
+
+  testthat::expect_error(as.caretList(NULL), "object is null")
+  testthat::expect_error(as.caretList(1L), "object must be a list")
+  testthat::expect_error(as.caretList(list(1L)), "object requires all elements of list to be caret models")
+  testthat::expect_error(as.caretList(list(NULL)), "object requires all elements of list to be caret models")
+  testthat::expect_error(as.caretList.list(1L), "object must be a list of caret models")
 })
 
 # Test predict.caretList
@@ -98,6 +118,11 @@ testthat::test_that("predict.caretList works for classification and regression",
   pred <- predict(models, newdata = test_data)
   testthat::expect_is(pred, "data.table")
   testthat::expect_identical(nrow(pred), nrow(test_data))
+
+  # Test verbose option
+  p <- predict(models, newdata = test_data, verbose = TRUE)
+  testthat::expect_s3_class(p, "data.table")
+  testthat::expect_identical(nrow(p), nrow(test_data)) 
 })
 
 # Test caretList
@@ -150,6 +175,28 @@ testthat::test_that("caretList works for various scenarios", {
   )
   testthat::expect_s3_class(models_imbalanced, "caretList")
   testthat::expect_length(models_imbalanced, 1L)
+
+  # Test error cases
+  testthat::expect_error(caretList(Sepal.Width ~ ., iris), "Please either define a methodList or tuneList")
+  testthat::expect_warning(
+    caretList(Sepal.Width ~ ., iris, methodList = c("lm", "lm")),
+    "Duplicate entries in methodList. Using unique methodList values."
+  )
+
+  # Test continue_on_fail
+  bad <- list(
+    bad = caretModelSpec(method = "glm", tuneLength = 1L)
+  )
+  testthat::expect_output(
+    testthat::expect_warning(
+      testthat::expect_error(
+        caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad, continue_on_fail = TRUE),
+        regexp = "caret:train failed for all models. Please inspect your data."
+      ),
+      regexp = "model fit failed for Fold1"
+    ),
+    regexp = "Something is wrong; all the Accuracy metric values are missing:"
+  )
 })
 
 # Test plot and summary methods

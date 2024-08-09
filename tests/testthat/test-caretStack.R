@@ -42,7 +42,7 @@ testthat::test_that("We can make predictions from stacks, including cases where 
     testthat::expect_s3_class(ens, "caretStack")
     testthat::expect_s3_class(summary(ens), "summary.caretStack")
     testthat::expect_s3_class(plot(ens), "ggplot")
-    invisible(capture.output(print(ens)))
+    testthat::expect_output(print(ens), "The following models were ensembled: rf, glm, rpart, treebag")
 
     # Predictions
     param_grid <- expand.grid(
@@ -365,7 +365,10 @@ testthat::test_that("caretStack multiclass", {
 
   # Stacking with too great of a level should work too. No error or warning.
   stack <- caretStack(models_multiclass, method = "knn", excluded_class_id = 4L)
-  invisible(predict(stack, iris[, -5L]))
+  p <- predict(stack, iris[, -5L])
+  testthat::expect_s3_class(p, "data.table")
+  testthat::expect_identical(nrow(p), 150L)
+
 })
 
 #############################################################################
