@@ -160,6 +160,7 @@ predict.greedyMSE <- function(object, newdata, return_labels = FALSE, ...) {
 greedyMSE_caret <- function() {
   list(
     label = "Greedy Mean Squared Error Optimizer",
+    method = "greedyMSE",
     library = NULL,
     loop = NULL,
     type = c("Regression", "Classification"),
