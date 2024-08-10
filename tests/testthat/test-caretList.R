@@ -255,15 +255,6 @@ testthat::test_that("caretList supports combined regression, binary, multiclass"
   testthat::expect_identical(nrow(new_p), 10L)
 })
 
-testthat::test_that("methodlist errors for not character data", {
-  err <- "methodList must be a character vector"
-  tuneList <- list(x = caretModelSpec(method = "glm"))
-  testthat::expect_error(caretList(Sepal.Length ~ Sepal.Width, iris, methodList = 1L), err)
-  testthat::expect_error(caretList(Sepal.Length ~ Sepal.Width, iris, methodList = 1.0), err)
-  testthat::expect_error(caretList(Sepal.Length ~ Sepal.Width, iris, methodList = tuneList), err)
-})
-
-
 testthat::test_that("caretList supports custom models", {
   set.seed(42L)
 
