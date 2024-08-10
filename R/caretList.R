@@ -49,6 +49,10 @@ caretList <- function(
 
   # Make methodList into a tuneList and add onto tuneList
   if (!is.null(methodList)) {
+    # Raise an error if its not a character vector
+    if (!is.character(methodList)) {
+      stop("methodList must be a character vector", call. = FALSE)
+    }
     tuneList <- c(tuneList, lapply(methodList, caretModelSpec))
   }
 
