@@ -302,7 +302,7 @@ c.caretList <- function(...) {
 #' @examples
 #' caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
 caretModelSpec <- function(method = "rf", ...) {
-  out <- c(list(method = method), list(...))
+  out <- list(method = method, ...)
   out
 }
 
