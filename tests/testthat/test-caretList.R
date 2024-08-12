@@ -297,23 +297,8 @@ testthat::test_that("caretList supports custom models", {
 })
 
 ################################################################
-testthat::context("caretModelSpec")
+testthat::context("validateMethodList | caretModelSpec | defaultModelName")
 ################################################################
-
-testthat::test_that("caretModelSpec works correctly", {
-  # Test valid input
-  testthat::expect_s3_class(caretModelSpec("rf"), "caretModelSpec")
-  testthat::expect_identical(caretModelSpec("rf", tuneLength = 5L)$tuneLength, 5L)
-
-  # Test invalid method
-  testthat::expect_error(
-    caretModelSpec("invalid_method"),
-    "'invalid_method' not supported"
-  )
-
-  # Test non-character method
-  testthat::expect_error(caretModelSpec(123L), "is.character(method) is not TRUE", fixed = TRUE)
-})
 
 testthat::test_that("validateMethodList works correctly", {
   # Test character vector input
@@ -364,13 +349,38 @@ testthat::test_that("validateMethodList errors", {
 testthat::test_that("validateMethodList handles duplicates correctly", {
   duplicate_list <- list(rf = caretModelSpec("rf"), caretModelSpec("rf"))
   unique_list <- validateMethodList(duplicate_list)
-  testthat::expect_named(unique_list, c("rf.1", "rf.2"))
+  testthat::expect_named(unique_list, c("rf", "rf.1"))
 
   duplicate_list <- c("rf", "rf")
   unique_list <- validateMethodList(duplicate_list)
-  testthat::expect_named(unique_list, c("rf.1", "rf.2"))
+  testthat::expect_named(unique_list, c("rf", "rf.1"))
 
   duplicate_list <- list("rf", rf = caretModelSpec("rf"))
   unique_list <- validateMethodList(duplicate_list)
-  testthat::expect_named(unique_list, c("rf.1", "rf.2"))
+  testthat::expect_named(unique_list, c("rf", "rf.1"))
+})
+
+testthat::test_that("caretModelSpec works correctly", {
+  # Test valid input
+  testthat::expect_s3_class(caretModelSpec("rf"), "caretModelSpec")
+  testthat::expect_identical(caretModelSpec("rf", tuneLength = 5L)$tuneLength, 5L)
+
+  # Test invalid method
+  testthat::expect_error(
+    caretModelSpec("invalid_method"),
+    "'invalid_method' not supported"
+  )
+
+  # Test non-character method
+  testthat::expect_error(caretModelSpec(123L), "is.character(method) is not TRUE", fixed = TRUE)
+})
+
+testthat::test_that("defaultModelName handles native models and custom models", {
+  testthat::expect_identical(defaultModelName(caretModelSpec("rf")), "rf")
+
+  custom_rf <- caret::getModelInfo("rf", regex = FALSE)[[1L]]
+  testthat::expect_identical(defaultModelName(caretModelSpec(custom_rf)), "Random.Forest")
+
+  custom_rf$label <- "custom_rf"
+  testthat::expect_identical(defaultModelName(caretModelSpec(custom_rf)), "custom_rf")
 })

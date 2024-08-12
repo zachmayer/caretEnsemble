@@ -82,23 +82,6 @@ testthat::test_that("c.train on a train and a caretList", {
   testthat::expect_length(unique(names(bigList)), 5L)
 })
 
-testthat::test_that("extractModelName handles different model types", {
-  testthat::expect_identical(extractModelName(models.class[[1L]]), "rf")
-  testthat::expect_identical(extractModelName(models.reg[[1L]]), "rf")
-
-  custom_model <- models.class[[1L]]
-  custom_model$method <- list(method = "custom_rf")
-  testthat::expect_identical(extractModelName(custom_model), "custom_rf")
-
-  mock_model <- list(method = list(method = "custom_method"))
-  class(mock_model) <- "train"
-  testthat::expect_identical(extractModelName(mock_model), "custom_method")
-
-  mock_model <- list(method = "custom", modelInfo = list(method = "custom_method"))
-  class(mock_model) <- "train"
-  testthat::expect_identical(extractModelName(mock_model), "custom_method")
-})
-
 #############################################################################
 testthat::context("isClassifierAndValidate")
 #############################################################################

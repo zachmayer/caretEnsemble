@@ -210,7 +210,7 @@ as.caretList.list <- function(object) {
   if (is.null(names(object))) {
     # If the model list used for predictions is not currently named,
     # then exctract the model names from each model individually.
-    names(object) <- vapply(object, extractModelName, character(1L))
+    names(object) <- vapply(object, defaultModelName, character(1L))
   }
 
   # Make sure the names are valid
@@ -290,7 +290,8 @@ c.caretList <- function(...) {
 #' @examples
 #' caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
 caretModelSpec <- function(method = "rf", ...) {
-  if (is.character(method)) {
+  if (!is.list(method)) {
+    stopifnot(is.character(method))
     all_models <- unique(caret::modelLookup()$model)
     if (!method %in% all_models) {
       stop(
@@ -340,7 +341,7 @@ validateMethodList <- function(methodList) {
   )
 
   # If the list is not named, name it
-  default_model_names <- vapply(methodList, extractModelName, character(1L))
+  default_model_names <- vapply(methodList, defaultModelName, character(1L))
   if (is.null(names(methodList))) {
     names(methodList) <- default_model_names
   }
@@ -366,7 +367,7 @@ validateMethodList <- function(methodList) {
 #' @param x a single caret train object
 #' @return Name associated with model
 #' @keywords internal
-extractModelName <- function(x) {
+defaultModelName <- function(x) {
   if (is.character(x$method) && (x$method != "custom")[[1L]]) {
     x$method
   } else {

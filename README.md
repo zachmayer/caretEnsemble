@@ -28,11 +28,11 @@ install.packages('caretEnsemble')
 devtools::install_github('zachmayer/caretEnsemble')
 ```
 
-There are also tagged versions of caretEnsemble on github you can install via devtools. For example, to install the [previous release of caretEnsemble](https://github.com/zachmayer/caretEnsemble/releases/tag/2.0.3) use:
+There are also tagged versions of caretEnsemble on github you can install via devtools. For example, to install the [previous release of caretEnsemble](https://github.com/zachmayer/caretEnsemble/releases/tag/) use:
 ```{R}
 devtools::install_github('zachmayer/caretEnsemble@2.0.3')
 ```
-This is useful if the latest release breaks some aspect of your workflow.  caretEnsemble is pure R with no compilation, so this command will work in a variety of environments.
+This is useful if the latest release breaks some aspect of your workflow. caretEnsemble is pure R with no compilation, so this command will work in a variety of environments.
 
 # Code of Conduct:
 Please note that this project is released with a [Contributor Code of Conduct](https://github.com/zachmayer/caretEnsemble/blob/master/.github/CONTRIBUTING.md). By participating in this project you agree to abide by its terms.
