@@ -161,7 +161,7 @@ greedyMSE_caret <- function() {
   list(
     label = "Greedy Mean Squared Error Optimizer",
     method = "greedyMSE",
-    library = NULL,
+    library = "caretEnsemble",
     loop = NULL,
     type = c("Regression", "Classification"),
     parameters = data.frame(

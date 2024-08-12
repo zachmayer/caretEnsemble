@@ -143,11 +143,11 @@ testthat::context("Ensembles with custom models")
 testthat::test_that("Ensembles using custom models work correctly", {
   set.seed(1234L)
 
-  custom.rf <- getModelInfo("rf", regex = FALSE)[[1L]]
-  custom.rf$method <- "custom.rf"
+  custom.rf <- caret::getModelInfo("rf", regex = FALSE)[[1L]]
+  custom.rf$label <- "custom.rf"
 
-  custom.rpart <- getModelInfo("rpart", regex = FALSE)[[1L]]
-  custom.rpart$method <- "custom.rpart"
+  custom.rpart <- caret::getModelInfo("rpart", regex = FALSE)[[1L]]
+  custom.rpart$label <- "custom.rpart"
 
   tune.list <- list(
     caretModelSpec(method = custom.rf, tuneLength = 1L),
@@ -169,15 +169,6 @@ testthat::test_that("Ensembles using custom models work correctly", {
   testthat::expect_named(cs$models, c("custom.rf", "myrpart", "treebag"))
 
   test_predictions(cs, X.class, c(0.0198, 0.9802))
-
-  tune.list_bad <- list(
-    caretModelSpec(method = getModelInfo("rf", regex = FALSE)[[1L]], tuneLength = 1L),
-    treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
-  )
-  testthat::expect_error(
-    caretList(X.class, Y.class, methodList = tune.list_bad, trControl = train.control),
-    "Custom models must be defined with a \"method\" attribute"
-  )
 })
 
 testthat::test_that("Ensembles fails if predictions are not saved", {

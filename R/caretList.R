@@ -8,10 +8,9 @@
 #' Particularly if you have a large dataset and/or many models, using a data.table will
 #' avoid unnecessary copies of your data and can save a lot of time and RAM.
 #' These arguments will determine which train method gets dispatched.
+#' @param methodList A character vector of registered caret models or a list of caretModelSpecs defining
+#' a model method as well as additional parameters to pass to caret::train.
 #' @param trControl a \code{\link[caret]{trainControl}} object. If null, we will construct a good one.
-#' @param methodList optional, either a character vector of registered caret models, or a named list
-#' of caretModelSpec objects. caretModelSpec allows specification of model-specific parameters
-#' (e.g. passing trace=FALSE to nnet)
 #' @param metric a string, the metric to optimize for. If NULL, we will choose a good one.
 #' @param continue_on_fail logical, should a valid caretList be returned that
 #' excludes models that fail, default is FALSE
@@ -30,8 +29,8 @@
 #' )
 caretList <- function(
     ...,
-    trControl = NULL,
     methodList = NULL,
+    trControl = NULL,
     metric = NULL,
     continue_on_fail = FALSE,
     trim = TRUE) {
@@ -206,11 +205,9 @@ as.caretList.list <- function(object) {
     stop("object requires all elements of list to be caret models", call. = FALSE)
   }
 
-  # Make sure the class is named
+  # If the whole list is unnamed, used the model's methods to name it
   if (is.null(names(object))) {
-    # If the model list used for predictions is not currently named,
-    # then exctract the model names from each model individually.
-    names(object) <- vapply(object, defaultModelName, character(1L))
+    names(object) <- vapply(object, "[[", character(1L), "method")
   }
 
   # Make sure the names are valid
@@ -281,19 +278,19 @@ c.caretList <- function(...) {
 }
 
 #' @title Generate a specification for fitting a caret model
-#' @description A caret model specification consists of 2 parts: a model (as a string) and
-#' the arguments to the train call for fitting that model
-#' @param method the modeling method to pass to caret::train
-#' @param all_models a character vector representing the allowed models.
-#' By default uses all_models = unique(caret::modelLookup()$model)
+#' @description A caretModelSpec is a named list of arguments to be passed to caret::train.
+#' This constructor also does some validation. Nothing is modified.
+#' @param method the modeling method to pass to caret::train. A character vector for
+#' built in models or a list for a custom model.  Will be passed to caret::train(method=x).
 #' @param ... Other arguments that will eventually be passed to caret::train
+#' @param all_models a character vector representing the allowed built-in models.
+#' By default uses all_models = unique(caret::modelLookup()$model)
 #' @export
 #' @return a list of lists
 #' @examples
 #' caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
-caretModelSpec <- function(method = "rf", allowed_models = unique(caret::modelLookup()$model), ...) {
-  if (!is.list(method)) {
-    stopifnot(is.character(method))
+caretModelSpec <- function(method = "rf", ..., allowed_models = unique(caret::modelLookup()$model)) {
+  if (is.character(method)) {
     if (!method %in% allowed_models) {
       stop(
         "'", method, "' not supported. ",
@@ -301,6 +298,8 @@ caretModelSpec <- function(method = "rf", allowed_models = unique(caret::modelLo
         call. = FALSE
       )
     }
+  } else {
+    stopifnot(is.list(method))
   }
   out <- c(list(method = method), list(...))
   class(out) <- "caretModelSpec"
@@ -320,19 +319,16 @@ validateMethodList <- function(methodList) {
 
   # If its a character vector, assume they are names of native models
   if (is.character(methodList)) {
+    names(methodList) <- methodList
     methodList <- as.list(methodList)
   }
-  stopifnot(is.list(methodList))
 
-  # Now we should have a list of caretModel specs or model names
-  # Turn character vectors into caretModelSpec objects
-  methodList <- lapply(methodList, function(x) {
-    if (is.character(x)) {
-      caretModelSpec(x)
-    } else {
-      x
-    }
-  })
+  # Make sure all the methods in the list are valid caretModelSpecs
+  # This will coerce list entries that are single character vectors
+  # to caretModelSpec(method=x), since methods is the first argument
+  # to caretModelSpec. This allows the use of simple method lists
+  # for built-in models, like methodList = c('glm', 'rpart')
+  methodList <- lapply(methodList, caretModelSpec)
 
   # Now we should have a list of caretModelSpec objects
   stopifnot(
@@ -340,16 +336,9 @@ validateMethodList <- function(methodList) {
     vapply(methodList, methods::is, logical(1L), "caretModelSpec")
   )
 
-  # If the list is not named, name it
-  default_model_names <- vapply(methodList, defaultModelName, character(1L))
+  # Make sure names are present
   if (is.null(names(methodList))) {
-    names(methodList) <- default_model_names
-  }
-
-  # If any list entries are not named, name them
-  i <- !nzchar(names(methodList))
-  if (any(i)) {
-    names(methodList)[i] <- default_model_names[i]
+    names(methodList) <- paste0("model_", seq_along(methodList))
   }
 
   # Make sure names are unique
@@ -357,22 +346,6 @@ validateMethodList <- function(methodList) {
 
   # Return
   methodList
-}
-
-#' @title Extract the method name associated with a single train object
-#' @description Extracts the method name associated with a single train object. Note
-#' that for standard models (i.e. those already prespecified by caret), the
-#' "method" attribute on the train object is used directly. For custom models,
-#' we use make.names on the modelInfo$method attribute.
-#' @param x a single caret train object
-#' @return Name associated with model
-#' @keywords internal
-defaultModelName <- function(x) {
-  if (is.character(x$method) && (x$method != "custom")[[1L]]) {
-    x$method
-  } else {
-    make.names(x$method$label)
-  }
 }
 
 #' @title Extracts the target variable from a set of arguments headed to the caret::train function.
