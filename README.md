@@ -10,7 +10,7 @@
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](https://badges.mit-license.org)
 [![Discord](https://img.shields.io/discord/1255535052578619524)](https://discord.gg/zgPeSm8a3u)
 
-# caretEnsemble: [(Read the vignette!)](https://htmlpreview.github.io/?https://github.com/zachmayer/caretEnsemble/blob/master/doc/caretEnsemble-intro.html)
+# caretEnsemble:
 
 Framework for fitting multiple [caret models](https://github.com/topepo/caret) using the same re-sampling strategy as well as creating ensembles of such models. Use `caretList` to fit multiple models, and then use `caretStack` to stack them using a caret model.
 

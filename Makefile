@@ -4,6 +4,7 @@
 help:
 	@echo "Available targets:"
 	@echo "  all                    Run clean, fix-style, document, install, build-vignettes, lint, spell, test, check, coverage"
+	@echo "  dev                    Run clean, fix-style, document, lint, spell, test"
 	@echo "  install-deps           Install dependencies"
 	@echo "  install                Install the whole package, including dependencies"
 	@echo "  document               Generate documentation"
@@ -17,14 +18,19 @@ help:
 	@echo "  build                  Build the package"
 	@echo "  build-vignettes        Build vignettes"
 	@echo "  release                Release to CRAN"
+	@echo "  preview-site           Preview pkgdown site"
 	@echo "  clean                  Clean up generated files"
 
 .PHONY: all
 all: clean fix-style document install build-vignettes lint spell test check coverage
 
+.PHONY: dev
+all: clean fix-style document lint spell test
+
 .PHONY: install-deps
 install-deps:
 	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
+	Rscript -e "if (!requireNamespace('pkgdown', quietly = TRUE)) install.packages('pkgdown')"
 	Rscript -e "devtools::install_deps()"
 	Rscript -e "devtools::install_dev_deps()"
 	Rscript -e "devtools::update_packages()"
@@ -110,6 +116,10 @@ build:
 .PHONY: build-vignettes
 build-vignettes:
 	Rscript -e "devtools::build_vignettes()"
+
+.PHONY: preview-site
+preview-site:
+	Rscript -e "pkgdown::build_site()"
 
 .PHONY: release
 release:
