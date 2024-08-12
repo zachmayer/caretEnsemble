@@ -10,28 +10,9 @@ utils::data(Sonar, package = "mlbench")
 # Set up test environment
 set.seed(1234L)
 k <- 2L
-ens.reg <- caretEnsemble(
-  models.reg,
-  trControl = caret::trainControl(
-    method = "cv",
-    number = k,
-    index = caret::createFolds(Y.reg, k = k),
-    savePredictions = "final"
-  )
-)
 
-ens.class <- caretEnsemble(
-  models.class,
-  metric = "ROC",
-  trControl = caret::trainControl(
-    method = "cv",
-    number = k,
-    index = caret::createFolds(Y.class, k = k),
-    summaryFunction = caret::twoClassSummary,
-    classProbs = TRUE,
-    savePredictions = TRUE
-  )
-)
+ens.reg <- caretEnsemble(models.reg)
+ens.class <- caretEnsemble(models.class)
 
 # Helper function for prediction tests
 test_predictions <- function(ens, newdata, one_row_preds) {
@@ -100,14 +81,9 @@ testthat::test_that("We can ensemble models of different predictors", {
   data(iris)
   Y.reg <- iris[, 1L]
   X.reg <- model.matrix(~., iris[, -1L])
-  my_control <- caret::trainControl(
-    method = "cv", number = 2L,
-    p = 0.75,
-    savePrediction = TRUE,
-    returnResamp = "final"
-  )
 
   set.seed(482L)
+  my_control <- defaultControl(target = Y.reg)
   nestedList <- list(
     glm1 = caret::train(x = X.reg[, c(-1L, -2L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
     glm2 = caret::train(x = X.reg[, c(-1L, -3L, -6L)], y = Y.reg, method = "glm", trControl = my_control),
@@ -156,15 +132,7 @@ testthat::test_that("Ensembles using custom models work correctly", {
   )
 
   cl <- caretList(X.class, Y.class, tuneList = tune.list)
-  cs <- caretEnsemble(
-    cl,
-    trControl = caret::trainControl(
-      method = "cv",
-      number = 2L,
-      savePredictions = "final",
-      classProbs = TRUE
-    )
-  )
+  cs <- caretEnsemble(cl)
   testthat::expect_is(cs, "caretEnsemble")
   testthat::expect_named(cs$models, c("custom.rf", "myrpart", "treebag"))
 

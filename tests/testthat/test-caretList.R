@@ -185,12 +185,9 @@ testthat::test_that("caretList works for various scenarios", {
     x = large_data$X,
     y = imbalanced_y,
     methodList = "rpart",
-    trControl = caret::trainControl(
-      method = "cv",
-      classProbs = TRUE,
-      summaryFunction = twoClassSummary,
-      sampling = "up",
-      index = caret::createFolds(imbalanced_y, k = 5L, returnTrain = TRUE)
+    trControl = defaultControl(
+      imbalanced_y,
+      sampling = "up"
     )
   )
   testthat::expect_s3_class(models_imbalanced, "caretList")
@@ -285,8 +282,7 @@ testthat::test_that("caretList supports custom models", {
   # is what caretEnsemble does under the hood
   ens <- caretStack(
     all_models,
-    method = greedyMSE_caret(),
-    trControl = trainControl(method = "cv", number = 2L, savePredictions = "final")
+    method = greedyMSE_caret()
   )
   stacked_p <- predict(ens)
   new_p <- predict(ens, newdata = iris[1L:10L, ])

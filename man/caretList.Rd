@@ -21,7 +21,7 @@ Particularly if you have a large dataset and/or many models, using a data.table 
 avoid unnecessary copies of your data and can save a lot of time and RAM.
 These arguments will determine which train method gets dispatched.}
 
-\item{trControl}{a \code{\link[caret]{trainControl}} object. If null, we will construct a good one.}
+\item{trControl}{a \code{\link[caret]{trainControl}} object. If NULL, will use defaultControl.}
 
 \item{methodList}{optional, a character vector of caret models to ensemble.
 One of methodList or tuneList must be specified.}

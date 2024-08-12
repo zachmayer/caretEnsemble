@@ -4,7 +4,15 @@
 \alias{caretStack}
 \title{Combine several predictive models via stacking}
 \usage{
-caretStack(all.models, new_X = NULL, new_y = NULL, excluded_class_id = 1L, ...)
+caretStack(
+  all.models,
+  new_X = NULL,
+  new_y = NULL,
+  metric = NULL,
+  trControl = NULL,
+  excluded_class_id = 1L,
+  ...
+)
 }
 \arguments{
 \item{all.models}{a caretList, or an object coercible to a caretList (such as a list of train objects)}
@@ -16,6 +24,10 @@ if NULL, the stacked predictions will be extracted from the caretList models.}
 (for transfer learning).
 If NULL, will use the observed levels from the first model in the caret stack
 If 0, will include all levels.}
+
+\item{metric}{the metric to use for grid search on the stacking model.}
+
+\item{trControl}{a trainControl object to use for training the ensemble model. If NULL, will use defaultControl.}
 
 \item{excluded_class_id}{The integer level to exclude from binary classification or multiclass problems.}
 

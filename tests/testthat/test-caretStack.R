@@ -13,24 +13,9 @@ models_multiclass <- caretList(
   methodList = c("rpart", "glmnet")
 )
 
-control_class <- caret::trainControl(
-  method = "cv",
-  number = 2L,
-  savePredictions = "final",
-  classProbs = TRUE,
-  summaryFunction = twoClassSummary,
-  index = caret::createFolds(Y.class, 2L)
-)
-ens.class <- caretStack(models.class, preProcess = "pca", method = "glm", metric = "ROC", trControl = control_class)
+ens.class <- caretStack(models.class, preProcess = "pca", method = "glm", metric = "ROC")
 
-control_reg <- caret::trainControl(
-  method = "cv",
-  number = 2L,
-  savePredictions = "final",
-  classProbs = FALSE,
-  index = caret::createFolds(Y.reg, 2L)
-)
-ens.reg <- caretStack(models.reg, preProcess = "pca", method = "lm", trControl = control_reg)
+ens.reg <- caretStack(models.reg, preProcess = "pca", method = "lm")
 
 # Helper functions
 expect_all_finite <- function(x) {
@@ -186,16 +171,14 @@ testthat::test_that("caretStack handles new data correctly", {
     metric = "ROC",
     method = "rpart",
     new_X = X.class[idx, ],
-    new_y = Y.class[idx],
-    trControl = control_class
+    new_y = Y.class[idx]
   )
 
   stack_reg <- caretStack(
     models.reg,
     method = "glm",
     new_X = X.reg[idx, ],
-    new_y = Y.reg[idx],
-    trControl = control_reg
+    new_y = Y.reg[idx]
   )
 
   testthat::expect_s3_class(stack_class, "caretStack")
@@ -246,8 +229,8 @@ testthat::context("S3 methods for caretStack")
 testthat::test_that("print", {
   for (ens in list(ens.class, ens.reg)) {
     testthat::expect_output(print(ens), "The following models were ensembled: rf, glm, rpart, treebag")
-    testthat::expect_output(print(ens), "150 samples")
-    testthat::expect_output(print(ens), "4 predictor")
+    testthat::expect_output(print(ens), "Linear")
+    testthat::expect_output(print(ens), "Resampling: Cross-Validated (5 fold)", fixed = TRUE)
   }
 })
 

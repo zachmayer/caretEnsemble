@@ -20,6 +20,8 @@
 #' (for transfer learning).
 #' If NULL, will use the observed levels from the first model in the caret stack
 #' If 0, will include all levels.
+#' @param metric the metric to use for grid search on the stacking model.
+#' @param trControl a trainControl object to use for training the ensemble model. If NULL, will use defaultControl.
 #' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
 #' @param ... additional arguments to pass to the stacking model
 #' @return S3 caretStack object
@@ -38,8 +40,11 @@ caretStack <- function(
     all.models,
     new_X = NULL,
     new_y = NULL,
+    metric = NULL,
+    trControl = NULL,
     excluded_class_id = 1L,
     ...) {
+  # Check all.models
   if (!methods::is(all.models, "caretList")) {
     warning("Attempting to coerce all.models to a caretList.", call. = FALSE)
     all.models <- as.caretList(all.models)
@@ -67,7 +72,7 @@ caretStack <- function(
     stopifnot(nrow(preds) == nrow(new_X))
   }
 
-  # Build a caret model
+  # Choose the target
   obs <- new_y
   if (is.null(obs)) {
     obs <- data.table::data.table(all.models[[1L]]$pred)
@@ -76,7 +81,19 @@ caretStack <- function(
     obs <- obs[["obs"]]
   }
   stopifnot(nrow(preds) == length(obs))
-  model <- caret::train(preds, obs, ...)
+
+  # Make a trainControl
+  is_class <- is.factor(obs) || is.character(obs)
+  is_binary <- length(unique(obs)) == 2L
+  if (is.null(metric)) {
+    metric <- defaultMetric(is_class = is_class, is_binary = is_binary)
+  }
+  if (is.null(trControl)) {
+    trControl <- defaultControl(obs, is_class = is_class, is_binary = is_binary)
+  }
+
+  # Train the model
+  model <- caret::train(preds, obs, metric = metric, trControl = trControl, ...)
 
   # Return final model
   out <- list(
@@ -438,12 +455,7 @@ stackedTrainResiduals <- function(object, show_class_id = 2L) {
 #' @examples
 #' set.seed(42)
 #' data(models.reg)
-#' ens <- caretStack(
-#'   models.reg,
-#'   trControl = caret::trainControl(
-#'     method = "cv", savePredictions = "final"
-#'   )
-#' )
+#' ens <- caretStack(models.reg)
 #' autoplot(ens)
 # https://github.com/thomasp85/patchwork/issues/226 — why we need importFrom patchwork plot_layout
 autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {

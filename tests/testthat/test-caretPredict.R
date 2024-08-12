@@ -8,21 +8,8 @@ utils::data(Y.class)
 
 set.seed(1234L)
 
-ens.reg <- caretEnsemble(
-  models.reg,
-  trControl = caret::trainControl(method = "cv", number = 2L, savePredictions = "final")
-)
-
-ens.class <- caretEnsemble(
-  models.class,
-  metric = "ROC",
-  trControl = caret::trainControl(
-    number = 2L,
-    summaryFunction = caret::twoClassSummary,
-    classProbs = TRUE,
-    savePredictions = TRUE
-  )
-)
+ens.reg <- caretEnsemble(models.reg)
+ens.class <- caretEnsemble(models.class)
 
 mod <- caret::train(
   X.reg,

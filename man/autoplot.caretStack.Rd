@@ -33,11 +33,6 @@ for a caretEnsemble object.
 \examples{
 set.seed(42)
 data(models.reg)
-ens <- caretStack(
-  models.reg,
-  trControl = caret::trainControl(
-    method = "cv", savePredictions = "final"
-  )
-)
+ens <- caretStack(models.reg)
 autoplot(ens)
 }

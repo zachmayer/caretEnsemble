@@ -75,15 +75,7 @@ caret::modelCor(caret::resamples(model_list))
 
 These 2 models make a good candidate for an ensemble: their predictions are fairly uncorrelated, but their overall accuracy is similar. We do a simple, linear greedy optimization on AUC using caretEnsemble:
 ```{r, echo=TRUE}
-greedy_ensemble <- caretEnsemble::caretEnsemble(
-  model_list,
-  metric = "ROC",
-  trControl = caret::trainControl(
-    method = "cv",
-    summaryFunction = caret::twoClassSummary,
-    classProbs = TRUE
-  )
-)
+greedy_ensemble <- caretEnsemble::caretEnsemble(model_list)
 summary(greedy_ensemble)
 ```
 
@@ -113,16 +105,7 @@ round(caret::varImp(greedy_ensemble), 4L)
 
 ## caretStack
 ```{r, echo=TRUE}
-glm_ensemble <- caretEnsemble::caretStack(
-  model_list,
-  method = "glm",
-  metric = "ROC",
-  trControl = caret::trainControl(
-    method = "cv",
-    classProbs = TRUE,
-    summaryFunction = caret::twoClassSummary
-  )
-)
+glm_ensemble <- caretEnsemble::caretStack(model_list, method = "glm")
 model_preds2 <- model_preds
 model_preds2$ensemble <- predict(glm_ensemble, newdata = testing, excluded_class_id = 2L)
 print(caTools::colAUC(model_preds2, testing$Class))
@@ -138,13 +121,7 @@ gbm_ensemble <- caretEnsemble::caretStack(
   model_list,
   method = "gbm",
   verbose = FALSE,
-  tuneLength = 5L,
-  metric = "ROC",
-  trControl = caret::trainControl(
-    method = "cv",
-    classProbs = TRUE,
-    summaryFunction = caret::twoClassSummary
-  )
+  tuneLength = 5L
 )
 model_preds3 <- model_preds
 model_preds3$ensemble <- predict(gbm_ensemble, newdata = testing, excluded_class_id = 2L)
