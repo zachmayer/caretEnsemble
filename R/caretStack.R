@@ -458,7 +458,7 @@ stackedTrainResiduals <- function(object, show_class_id = 2L) {
 #' ens <- caretStack(models.reg)
 #' autoplot(ens)
 # https://github.com/thomasp85/patchwork/issues/226 — why we need importFrom patchwork plot_layout
-autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
+autoplot.caretStack <- function(object, training_data = NULL, xvars = NULL, show_class_id = 2L, ...) {
   stopifnot(methods::is(object, "caretStack"))
   ensemble_data <- stackedTrainResiduals(object$ens_model, show_class_id = show_class_id)
 
@@ -517,28 +517,29 @@ autoplot.caretStack <- function(object, xvars = NULL, show_class_id = 2L, ...) {
     )
 
   # Residuals vs X variables
-  x_data <- data.table::data.table(object$models[[1L]]$trainingData)
-  if (is.null(xvars)) {
-    xvars <- names(x_data)
-    xvars <- setdiff(xvars, c(".outcome", ".weights", "(Intercept)"))
-    xvars <- sample(xvars, 2L)
+  out <- (g1 + g2) / (g3 + g4)
+  if(!is.null(training_data)){
+    x_data <- data.table::data.table(training_data)
+    if (is.null(xvars)) {
+      xvars <- sample(object$models[[1L]]$coefnames, 2L)
+    }
+    data.table::set(x_data, j = "rowIndex", value = seq_len(nrow(x_data)))
+    plotdf <- merge(ensemble_data, x_data, by = "rowIndex")
+    g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1L]]], .data[["resid"]])) +
+      ggplot2::geom_point() +
+      ggplot2::geom_smooth(se = FALSE) +
+      ggplot2::scale_x_continuous(xvars[1L]) +
+      ggplot2::scale_y_continuous("Residuals") +
+      ggplot2::labs(title = paste0("Residuals Against ", xvars[1L])) +
+      ggplot2::theme_bw()
+    g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[2L]]], .data[["resid"]])) +
+      ggplot2::geom_point() +
+      ggplot2::geom_smooth(se = FALSE) +
+      ggplot2::scale_x_continuous(xvars[2L]) +
+      ggplot2::scale_y_continuous("Residuals") +
+      ggplot2::labs(title = paste0("Residuals Against ", xvars[2L])) +
+      ggplot2::theme_bw()
+  out <- out / (g5 + g6)
   }
-  data.table::set(x_data, j = "rowIndex", value = seq_len(nrow(x_data)))
-  plotdf <- merge(ensemble_data, x_data, by = "rowIndex")
-  g5 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[1L]]], .data[["resid"]])) +
-    ggplot2::geom_point() +
-    ggplot2::geom_smooth(se = FALSE) +
-    ggplot2::scale_x_continuous(xvars[1L]) +
-    ggplot2::scale_y_continuous("Residuals") +
-    ggplot2::labs(title = paste0("Residuals Against ", xvars[1L])) +
-    ggplot2::theme_bw()
-  g6 <- ggplot2::ggplot(plotdf, ggplot2::aes(.data[[xvars[2L]]], .data[["resid"]])) +
-    ggplot2::geom_point() +
-    ggplot2::geom_smooth(se = FALSE) +
-    ggplot2::scale_x_continuous(xvars[2L]) +
-    ggplot2::scale_y_continuous("Residuals") +
-    ggplot2::labs(title = paste0("Residuals Against ", xvars[2L])) +
-    ggplot2::theme_bw()
-  out <- (g1 + g2) / (g3 + g4) / (g5 + g6)
   out
 }

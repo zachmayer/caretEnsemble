@@ -14,28 +14,41 @@
 
 Framework for fitting multiple [caret models](https://github.com/topepo/caret) using the same re-sampling strategy as well as creating ensembles of such models. Use `caretList` to fit multiple models, and then use `caretStack` to stack them using a caret model.
 
-caretEnsemble was inspired by [medley](https://github.com/mewo2/medley), which in turn was inspired by Caruana et. al.'s (2004) paper [Ensemble Selection from Libraries of Models.](http://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
+```r
+library(caretEnsemble)
+data(diamonds, package='ggplot2')
+dat <- data.table::data.table(diamonds)
+dat <- dat[sample.int(nrow(diamonds), 250L),]
+models <- caretList(price ~ ., data=dat, methodList = c('rf', 'glmnet'))
+greedy_stack <- caretEnsemble(models)
+ggplot2::autoplot(greedy_stack, training_data = dat, xvars =  c('carat', 'table'))
+```
 
-If you want to do something similar in python, check out [vecstack](https://github.com/vecxoz/vecstack)
-
-# Install the stable version from [CRAN](https://CRAN.R-project.org/package=caretEnsemble/):
-```{R}
+# Installation
+###  Install the stable version from [CRAN](https://CRAN.R-project.org/package=caretEnsemble/):
+```r
 install.packages('caretEnsemble')
 ```
 
-# Install the dev version from github:
-```{R}
+### Install the dev version from github:
+```r
 devtools::install_github('zachmayer/caretEnsemble')
 ```
 
 There are also tagged versions of caretEnsemble on github you can install via devtools. For example, to install the original draft of the API:
-```{R}
+```r
 devtools::install_github('zachmayer/caretEnsemble@0.0')
 ```
 caretEnsemble has changed a bit over the years, so the tags let you use older versions of the package (e.g. if you want to use greedy ensembling).
 
+# Package development
+This packages uses a Makefile. Run `make all` to run linting, spell checking, tests, test coverage, and R CMD CHECK. This is helpful for locally debugging PR failures.
+
+Run `make dev` for a quicker local develipment loop that just runs linting, spelling, and unit tests.
+
+# Inspiration and similar packages:
+caretEnsemble was inspired by [medley](https://github.com/mewo2/medley), which in turn was inspired by Caruana et. al.'s (2004) paper [Ensemble Selection from Libraries of Models.](http://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
+
+If you want to do something similar in python, check out [vecstack](https://github.com/vecxoz/vecstack)
 # Code of Conduct:
 Please note that this project is released with a [Contributor Code of Conduct](https://github.com/zachmayer/caretEnsemble/blob/master/.github/CONTRIBUTING.md). By participating in this project you agree to abide by its terms.
-
-# Package development
-This packages uses a Makefile. Run `make all` to run linting, tests, test coverage, and R CMD CHECK. This is helpful for locally debugging PR failures.
