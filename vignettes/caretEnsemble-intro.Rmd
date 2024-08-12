@@ -17,7 +17,7 @@ vignette: >
 
 `caretList` is a flexible function for fitting many different caret models, with the same resampling parameters, to the same dataset. It returns a convenient `list` of caret objects which can later be passed to `caretEnsemble` and `caretStack`. `caretList` has almost exactly the same arguments as `train` (from the caret package), with the exception that the `trControl` argument comes last. It can handle both the formula interface and the explicit `x`, `y` interface to train. As in caret, the formula interface introduces some overhead and the `x`, `y` interface is preferred.
 
-Use the `methodList` argument to specify which models to fit: either a character vector specifying the model name or a  `caretModelSpec` can be used to customize the call to each component model and will be discussed in more detail later. First, lets build an example dataset (adapted from the caret vignette):
+Use the `methodList` argument to specify which models to fit: either a character vector specifying the model name or a `caretModelSpec` which can be used to customize the call to each component model and will be discussed in more detail later. First, lets build an example dataset (adapted from the caret vignette):
 ```{r, echo=TRUE, results="hide"}
 # Adapted from the caret vignette
 data(Sonar, package = "mlbench")
@@ -49,8 +49,8 @@ If you desire more control over the model fit, use the `caretModelSpec` to const
 model_list_big <- caretEnsemble::caretList(
   Class ~ .,
   data = training,
-  methodList = c("glmnet", "rpart"),
   methodList = list(
+    "glmnet", "rpart",
     rf1 = caretEnsemble::caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 2L)),
     rf2 = caretEnsemble::caretModelSpec(method = "rf", tuneGrid = data.frame(.mtry = 10L), preProcess = "pca"),
     nn = caretEnsemble::caretModelSpec(method = "nnet", tuneLength = 2L, trace = FALSE)

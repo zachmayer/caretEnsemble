@@ -28,14 +28,21 @@ install.packages('caretEnsemble')
 devtools::install_github('zachmayer/caretEnsemble')
 ```
 
-There are also tagged versions of caretEnsemble on github you can install via devtools. For example, to install the original draft of the API:
+There are also tagged versions of caretEnsemble on github you can install via devtools. For example, to install the [previous release of caretEnsemble](https://github.com/zachmayer/caretEnsemble/releases/tag/2.0.3) use:
 ```{R}
-devtools::install_github('zachmayer/caretEnsemble@0.0')
+devtools::install_github('zachmayer/caretEnsemble@2.0.3')
 ```
-caretEnsemble has changed a bit over the years, so the tags let you use older versions of the package (e.g. if you want to use greedy ensembling).
+This is useful if the latest release breaks some aspect of your workflow.  caretEnsemble is pure R with no compilation, so this command will work in a variety of environments.
 
 # Code of Conduct:
 Please note that this project is released with a [Contributor Code of Conduct](https://github.com/zachmayer/caretEnsemble/blob/master/.github/CONTRIBUTING.md). By participating in this project you agree to abide by its terms.
 
 # Package development
-This packages uses a Makefile. Run `make all` to run linting, tests, test coverage, and R CMD CHECK. This is helpful for locally debugging PR failures.
+This packages uses a Makefile. Use `make help` to see the supported options.
+
+Use `make fix-style` to fix simple linting error. For iterating while writing code, run something like `make clean fix-style document lint spell test`, to re-document the code, lint and spellcheck it, then run unit tests.
+
+use `make all` before making a pull request, which will also run R CMD CHECK and a code coverage check.
+
+## First time dev setup:
+run `make install` from the git repository to install the dev version of caretEnsemble, along with the necessary dependencies.

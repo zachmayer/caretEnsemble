@@ -303,56 +303,74 @@ testthat::context("caretModelSpec")
 testthat::test_that("caretModelSpec works correctly", {
   # Test valid input
   testthat::expect_s3_class(caretModelSpec("rf"), "caretModelSpec")
-  testthat::expect_equal(caretModelSpec("rf", tuneLength = 5L)$tuneLength, 5L)
-  
+  testthat::expect_identical(caretModelSpec("rf", tuneLength = 5L)$tuneLength, 5L)
+
   # Test invalid method
   testthat::expect_error(
     caretModelSpec("invalid_method"),
     "'invalid_method' not supported"
   )
-  
+
   # Test non-character method
-  testthat::expect_error(caretModelSpec(123L), "is.character(method) is not TRUE", fixed=TRUE)
+  testthat::expect_error(caretModelSpec(123L), "is.character(method) is not TRUE", fixed = TRUE)
 })
 
-testthat::test_that("checkMethodList works correctly", {
-  
+testthat::test_that("validateMethodList works correctly", {
   # Test character vector input
   char_vector <- c("rf", "glm")
-  model_list <- checkMethodList(char_vector)
+  model_list <- validateMethodList(char_vector)
   testthat::expect_type(model_list, "list")
   testthat::expect_length(model_list, 2L)
   testthat::expect_true(all(unlist(lapply(model_list, inherits, "caretModelSpec"))))
   testthat::expect_named(model_list, char_vector)
 
   # List input
-  model_list <- checkMethodList(list("rf"= caretModelSpec("rf"), glm = caretModelSpec("glm")))
-  testthat::expect_equal(valid_list, valid_list)
+  model_list <- validateMethodList(list(rf = caretModelSpec("rf"), glm = caretModelSpec("glm")))
   testthat::expect_type(model_list, "list")
   testthat::expect_length(model_list, 2L)
   testthat::expect_true(all(unlist(lapply(model_list, inherits, "caretModelSpec"))))
   testthat::expect_named(model_list, c("rf", "glm"))
 
   # Mixed input
-  model_list <- checkMethodList(list("rf", glm = caretModelSpec("glm")))
-  testthat::expect_equal(valid_list, valid_list)
+  model_list <- validateMethodList(list("rf", glm = caretModelSpec("glm")))
   testthat::expect_type(model_list, "list")
   testthat::expect_length(model_list, 2L)
   testthat::expect_true(all(unlist(lapply(model_list, inherits, "caretModelSpec"))))
   testthat::expect_named(model_list, c("rf", "glm"))
 
-  # Test duplicate entries
-  duplicate_list <- list(rf = caretModelSpec("rf"), rf = caretModelSpec("rf"))
-  unique_list <- testthat::expect_warning(checkMethodList(duplicate_list), "Duplicate entries in methodList")
-  testthat::expect_named(unique_list, "rf")
+  # No names input
+  model_list <- validateMethodList(list("rf", caretModelSpec("glm")))
+  testthat::expect_type(model_list, "list")
+  testthat::expect_length(model_list, 2L)
+  testthat::expect_true(all(unlist(lapply(model_list, inherits, "caretModelSpec"))))
+  testthat::expect_named(model_list, c("rf", "glm"))
+
+  # Custom models
+  custom_model_specs <- lapply(caret::getModelInfo("^glm$|^rf$"), function(x) caretModelSpec(method = x))
+  model_list <- validateMethodList(custom_model_specs)
+  testthat::expect_type(model_list, "list")
+  testthat::expect_length(model_list, 2L)
+  testthat::expect_true(all(unlist(lapply(model_list, inherits, "caretModelSpec"))))
+  testthat::expect_named(model_list, c("glm", "rf"))
+})
+
+testthat::test_that("validateMethodList errors", {
+  testthat::expect_error(validateMethodList(NULL), "Please define a methodList")
+  testthat::expect_error(validateMethodList(123L), "is.list(methodList) is not TRUE", fixed = TRUE)
+  testthat::expect_error(validateMethodList(list("invalid_model")), "'invalid_model' not supported. ", fixed = TRUE)
+  testthat::expect_error(validateMethodList(list(rf = "invalid_model")), "'invalid_model' not supported. ")
+})
+
+testthat::test_that("validateMethodList handles duplicates correctly", {
+  duplicate_list <- list(rf = caretModelSpec("rf"), caretModelSpec("rf"))
+  unique_list <- validateMethodList(duplicate_list)
+  testthat::expect_named(unique_list, c("rf.1", "rf.2"))
 
   duplicate_list <- c("rf", "rf")
-  unique_list <- testthat::expect_warning(checkMethodList(duplicate_list), "Duplicate entries in methodList")
-  testthat::expect_named(unique_list, "rf")
+  unique_list <- validateMethodList(duplicate_list)
+  testthat::expect_named(unique_list, c("rf.1", "rf.2"))
 
-  # Test null input
-  testthat::expect_error(checkMethodList(NULL), "Please define a methodList")
-  
-  # Test invalid input type
-  testthat::expect_error(checkMethodList(123L), "is.list(methodList) is not TRUE", fixed=TRUE)
+  duplicate_list <- list("rf", rf = caretModelSpec("rf"))
+  unique_list <- validateMethodList(duplicate_list)
+  testthat::expect_named(unique_list, c("rf.1", "rf.2"))
 })
