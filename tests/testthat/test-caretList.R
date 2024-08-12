@@ -33,8 +33,8 @@ testthat::test_that("caretModelSpec and checking functions work as expected", {
 
   testthat::expect_identical(caretModelSpec("rf", tuneLength = 5L, preProcess = "knnImpute")$method, "rf")
 
-  tuneList <- lapply(all_models, function(x) list(method = x, preProcess = "pca"))
-  all_models_check <- tuneCheck(tuneList)
+  methodList <- lapply(all_models, function(x) list(method = x, preProcess = "pca"))
+  all_models_check <- tuneCheck(methodList)
   testthat::expect_is(all_models_check, "list")
   testthat::expect_length(all_models, length(all_models_check))
 
@@ -197,7 +197,7 @@ testthat::test_that("caretList works for various scenarios", {
   testthat::expect_length(models_imbalanced, 1L)
 
   # Test error cases
-  testthat::expect_error(caretList(Sepal.Width ~ ., iris), "Please either define a methodList or tuneList")
+  testthat::expect_error(caretList(Sepal.Width ~ ., iris), "Please either define a methodList or methodList")
   testthat::expect_warning(
     caretList(Sepal.Width ~ ., iris, methodList = c("lm", "lm")),
     "Duplicate entries in methodList. Using unique methodList values."
@@ -210,7 +210,7 @@ testthat::test_that("caretList works for various scenarios", {
   testthat::expect_output(
     testthat::expect_warning(
       testthat::expect_error(
-        caretList(iris[, 1L:4L], iris[, 5L], tuneList = bad, continue_on_fail = TRUE),
+        caretList(iris[, 1L:4L], iris[, 5L], methodList = bad, continue_on_fail = TRUE),
         regexp = "caret:train failed for all models. Please inspect your data."
       ),
       regexp = "model fit failed for Fold1"
@@ -264,9 +264,9 @@ testthat::test_that("caretList supports custom models", {
   )
 
   # Fit it reg/bin/multi (it supports all 3!)
-  reg_models <- caretList(Sepal.Length ~ Sepal.Width, iris, tuneList = custom_list)
-  bin_models <- caretList(factor(ifelse(Species == "setosa", "Y", "N")) ~ Sepal.Width, iris, tuneList = custom_list)
-  multi_models <- caretList(Species ~ Sepal.Width, iris, tuneList = custom_list)
+  reg_models <- caretList(Sepal.Length ~ Sepal.Width, iris, methodList = custom_list)
+  bin_models <- caretList(factor(ifelse(Species == "setosa", "Y", "N")) ~ Sepal.Width, iris, methodList = custom_list)
+  multi_models <- caretList(Species ~ Sepal.Width, iris, methodList = custom_list)
 
   # Check the fit
   all_models <- c(reg_models, bin_models, multi_models)
@@ -294,4 +294,65 @@ testthat::test_that("caretList supports custom models", {
   testthat::expect_is(new_p, "data.table")
   testthat::expect_identical(nrow(stacked_p), nrow(iris))
   testthat::expect_identical(nrow(new_p), 10L)
+})
+
+################################################################
+testthat::context("caretModelSpec")
+################################################################
+
+testthat::test_that("caretModelSpec works correctly", {
+  # Test valid input
+  testthat::expect_s3_class(caretModelSpec("rf"), "caretModelSpec")
+  testthat::expect_equal(caretModelSpec("rf", tuneLength = 5L)$tuneLength, 5L)
+  
+  # Test invalid method
+  testthat::expect_error(
+    caretModelSpec("invalid_method"),
+    "'invalid_method' not supported"
+  )
+  
+  # Test non-character method
+  testthat::expect_error(caretModelSpec(123L), "is.character(method) is not TRUE", fixed=TRUE)
+})
+
+testthat::test_that("checkMethodList works correctly", {
+  
+  # Test character vector input
+  char_vector <- c("rf", "glm")
+  model_list <- checkMethodList(char_vector)
+  testthat::expect_type(model_list, "list")
+  testthat::expect_length(model_list, 2L)
+  testthat::expect_true(all(unlist(lapply(model_list, inherits, "caretModelSpec"))))
+  testthat::expect_named(model_list, char_vector)
+
+  # List input
+  model_list <- checkMethodList(list("rf"= caretModelSpec("rf"), glm = caretModelSpec("glm")))
+  testthat::expect_equal(valid_list, valid_list)
+  testthat::expect_type(model_list, "list")
+  testthat::expect_length(model_list, 2L)
+  testthat::expect_true(all(unlist(lapply(model_list, inherits, "caretModelSpec"))))
+  testthat::expect_named(model_list, c("rf", "glm"))
+
+  # Mixed input
+  model_list <- checkMethodList(list("rf", glm = caretModelSpec("glm")))
+  testthat::expect_equal(valid_list, valid_list)
+  testthat::expect_type(model_list, "list")
+  testthat::expect_length(model_list, 2L)
+  testthat::expect_true(all(unlist(lapply(model_list, inherits, "caretModelSpec"))))
+  testthat::expect_named(model_list, c("rf", "glm"))
+
+  # Test duplicate entries
+  duplicate_list <- list(rf = caretModelSpec("rf"), rf = caretModelSpec("rf"))
+  unique_list <- testthat::expect_warning(checkMethodList(duplicate_list), "Duplicate entries in methodList")
+  testthat::expect_named(unique_list, "rf")
+
+  duplicate_list <- c("rf", "rf")
+  unique_list <- testthat::expect_warning(checkMethodList(duplicate_list), "Duplicate entries in methodList")
+  testthat::expect_named(unique_list, "rf")
+
+  # Test null input
+  testthat::expect_error(checkMethodList(NULL), "Please define a methodList")
+  
+  # Test invalid input type
+  testthat::expect_error(checkMethodList(123L), "is.list(methodList) is not TRUE", fixed=TRUE)
 })

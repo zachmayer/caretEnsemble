@@ -155,7 +155,7 @@ testthat::test_that("Ensembles using custom models work correctly", {
     treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
   )
 
-  cl <- caretList(X.class, Y.class, tuneList = tune.list)
+  cl <- caretList(X.class, Y.class, methodList = tune.list)
   cs <- caretEnsemble(
     cl,
     trControl = caret::trainControl(
@@ -175,7 +175,7 @@ testthat::test_that("Ensembles using custom models work correctly", {
     treebag = caretModelSpec(method = "treebag", tuneLength = 1L)
   )
   testthat::expect_error(
-    caretList(X.class, Y.class, tuneList = tune.list_bad, trControl = train.control),
+    caretList(X.class, Y.class, methodList = tune.list_bad, trControl = train.control),
     "Custom models must be defined with a \"method\" attribute"
   )
 })
@@ -280,7 +280,7 @@ testthat::test_that("We can train and ensemble models with custom tuning lists",
   custom_list <- caretList(
     x = Sonar[, setdiff(names(Sonar), target)],
     y = Sonar[, target],
-    tuneList = list(
+    methodList = list(
       rpart = caretModelSpec(
         method = "rpart",
         tuneGrid = data.table::data.table(.cp = c(0.01, 0.001, 0.1, 1.0))

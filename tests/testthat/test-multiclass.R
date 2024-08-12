@@ -6,7 +6,7 @@ model_list <- caretList(
   iris[, 5L],
   tuneLength = 1L,
   methodList = c("glmnet", "rpart"),
-  tuneList = list(
+  methodList = list(
     nnet = caretModelSpec(method = "nnet", trace = FALSE)
   )
 )
@@ -70,7 +70,7 @@ testthat::test_that("Periods are supported in method and class names in caretLis
     x = iris_mod[, -5L],
     y = iris_mod[, 5L],
     methodList = c("glmnet", "rpart"),
-    tuneList = list(
+    methodList = list(
       nnet_1 = caretModelSpec(
         method = "nnet",
         tuneGrid = expand.grid(.size = c(1L, 3L, 5L), .decay = 0.3),

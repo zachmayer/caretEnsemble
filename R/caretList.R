@@ -9,11 +9,9 @@
 #' avoid unnecessary copies of your data and can save a lot of time and RAM.
 #' These arguments will determine which train method gets dispatched.
 #' @param trControl a \code{\link[caret]{trainControl}} object. If null, we will construct a good one.
-#' @param methodList optional, a character vector of caret models to ensemble.
-#' One of methodList or tuneList must be specified.
-#' @param tuneList optional, a NAMED list of caretModelSpec objects.
-#' This much more flexible than methodList and allows the
-#' specification of model-specific parameters (e.g. passing trace=FALSE to nnet)
+#' @param methodList optional, either a character vector of registered caret models, or a named list 
+#' of caretModelSpec objects. caretModelSpec allows specification of model-specific parameters 
+#' (e.g. passing trace=FALSE to nnet)
 #' @param metric a string, the metric to optimize for. If NULL, we will choose a good one.
 #' @param continue_on_fail logical, should a valid caretList be returned that
 #' excludes models that fail, default is FALSE
@@ -25,8 +23,9 @@
 #' caretList(
 #'   Sepal.Length ~ Sepal.Width,
 #'   head(iris, 50),
-#'   methodList = c("glm", "lm"),
-#'   tuneList = list(
+#'   methodList = 
+#'   methodList = list(
+#'     "glm", "lm",
 #'     nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1)
 #'   )
 #' )
@@ -34,26 +33,13 @@ caretList <- function(
     ...,
     trControl = NULL,
     methodList = NULL,
-    tuneList = NULL,
     metric = NULL,
     continue_on_fail = FALSE,
     trim = TRUE) {
-  # Checks
-  if (is.null(tuneList) && is.null(methodList)) {
-    stop("Please either define a methodList or tuneList", call. = FALSE)
-  }
-  if (!is.null(methodList) && anyDuplicated(methodList) > 0L) {
-    warning("Duplicate entries in methodList. Using unique methodList values.", call. = FALSE)
-    methodList <- unique(methodList)
-  }
 
-  # Make methodList into a tuneList and add onto tuneList
-  if (!is.null(methodList)) {
-    tuneList <- c(tuneList, lapply(methodList, caretModelSpec))
-  }
 
-  # Make sure tuneList is valid
-  tuneList <- tuneCheck(tuneList)
+  # Make sure methodList is valid
+  methodList <- validateMethodList(methodList)
 
   # Determine class vs reg
   target <- extractCaretTarget(...)
@@ -91,9 +77,9 @@ caretList <- function(
   global_args[["trControl"]] <- trControl
   global_args[["metric"]] <- metric
 
-  # Loop through the tuneLists and fit caret models with those specs
-  modelList <- lapply(tuneList, caretTrain, global_args = global_args, continue_on_fail = continue_on_fail, trim = trim)
-  names(modelList) <- names(tuneList)
+  # Loop through the methodList and fit caret models with those specs
+  modelList <- lapply(methodList, caretTrain, global_args = global_args, continue_on_fail = continue_on_fail, trim = trim)
+  names(modelList) <- names(methodList)
   nulls <- vapply(modelList, is.null, logical(1L))
   modelList <- modelList[!nulls]
 
@@ -247,14 +233,14 @@ as.caretList.list <- function(object) {
 #' data(iris)
 #' model_list1 <- caretList(Sepal.Width ~ .,
 #'   data = iris,
-#'   tuneList = list(
+#'   methodList = list(
 #'     lm = caretModelSpec(method = "lm")
 #'   )
 #' )
 #'
 #' model_list2 <- caretList(Sepal.Width ~ .,
 #'   data = iris, tuneLength = 1L,
-#'   tuneList = list(
+#'   methodList = list(
 #'     rf = caretModelSpec(method = "rf")
 #'   )
 #' )
@@ -302,7 +288,18 @@ c.caretList <- function(...) {
 #' @examples
 #' caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
 caretModelSpec <- function(method = "rf", ...) {
+  stopifnot(is.character(method))
+  all_models <- unique(caret::modelLookup()$model)
+  if(!method %in% all_models) {
+    stop(
+      "'", method, "' not supported. ",
+      "caretModelSpec only supports native caret models. ",
+      "Use unique(caret::modelLookup()$model) to see supported models.", 
+      call. = FALSE
+    )
+  }
   out <- c(list(method = method), list(...))
+  class(out) <- "caretModelSpec"
   out
 }
 
@@ -310,88 +307,71 @@ caretModelSpec <- function(method = "rf", ...) {
 #' @description This function makes sure the tuning parameters passed by the user
 #' are valid and have the proper naming, etc.
 #' @param x a list of user-supplied tuning parameters and methods
-#' @return NULL
-#' @export
-tuneCheck <- function(x) {
-  # Check model methods
-  stopifnot(is.list(x))
-
-  model_methods <- lapply(x, function(m) m$method)
-  methodCheck(model_methods)
-  method_names <- vapply(x, extractModelName, character(1L))
-
-  # Name models
-  if (is.null(names(x))) {
-    names(x) <- method_names
-  }
-  i <- !nzchar(names(x))
-  if (any(i)) {
-    names(x)[i] <- method_names[i]
-  }
-  names(x) <- make.names(names(x), unique = TRUE)
-
-  # Check params
-  stopifnot(vapply(x, is.list, logical(1L)))
-  x
-}
-
-#' @title Validate a custom caret model info list
-#' @description Currently, this only ensures that all model info lists
-#' were also assigned a "method" attribute for consistency with usage
-#' of non-custom models
-#' @param x a model info list (e.g. \code{getModelInfo("rf", regex=F)\[[1]]})
-#' @return validated model info list (i.e. x)
+#' @return a named list of caretModelSpec objects
 #' @keywords internal
-checkCustomModel <- function(x) {
-  if (is.null(x$method)) {
-    stop(
-      "Custom models must be defined with a \"method\" attribute containing the name",
-      "by which that model should be referenced. Example: my.glm.model$method <- \"custom_glm\"",
-      call. = FALSE
-    )
+validateMethodList <- function(methodList) {
+
+  if (is.null(methodList)) {
+    stop("Please define a methodList.", call. = FALSE)
   }
-  x
-}
+  if (anyDuplicated(methodList) > 0L) {
+    warning("Duplicate entries in methodList. Using unique methodList values.", call. = FALSE)
+    methodList <- unique(methodList)
+  }
 
-#' @title Check that the methods supplied by the user are valid caret methods
-#' @description This function uses modelLookup from caret to ensure the list of
-#' methods supplied by the user are all models caret can fit.
-#' @param x a list of user-supplied tuning parameters and methods
-#' @return NULL
-#' @keywords internal
-methodCheck <- function(x) {
-  # Fetch list of existing caret models
-  supported_models <- unique(caret::modelLookup()$model)
+  # If its a character vector, assume they are names of native models
+  if (is.character(methodList)) {
+    methodList <- as.list(methodList)
+  }
 
-  # Split given model methods based on whether or not they
-  # are specified as strings or model info lists (ie custom models)
-  models <- lapply(x, function(m) {
-    if (is.list(m)) {
-      checkCustomModel(m)
-      data.table::data.table(type = "custom", model = m$method, stringsAsFactors = FALSE)
-    } else if (is.character(m)) {
-      data.table::data.table(type = "native", model = m, stringsAsFactors = FALSE)
-    } else {
-      stop(
-        "Method \"", m, "\" is invalid. Methods must either be character names ",
-        "supported by caret (e.g. \"gbm\") or modelInfo lists ",
-        "(e.g. getModelInfo(\"gbm\", regex=F))",
-        call. = FALSE
-      )
+  # Now we should have a list of caretModel specs or model names
+
+  # Turn character vectors into caretModelSpec objects
+  methodList <- lapply(methodList, function(x) {
+    if (is.character(x)) {
+      x <- caretModelSpec(x)
     }
+    x
   })
-  models <- data.table::rbindlist(models, use.names = TRUE, fill = TRUE)
 
-  # Ensure that all non-custom models are valid
-  native_models <- subset(models, get("type") == "native")$model
-  bad_models <- setdiff(native_models, supported_models)
+  # Now we should have a list of caretModelSpec objects
+  stopifnot(all(vapply(methodList, function(x) methods::is(x, "caretModelSpec"), logical(1L))))
 
-  if (length(bad_models) > 0L) {
-    msg <- toString(bad_models)
-    stop("The following models are not valid caret models: ", msg, call. = FALSE)
+  # If the list is not named, name it
+  default_model_names <- vapply(methodList, extractModelName, character(1L))
+  if (is.null(names(methodList))) {
+    names(methodList) <- default_model_names
   }
 
-  invisible(NULL)
+  # If any list entries are not named, name them
+  i <- !nzchar(names(methodList))
+  if (any(i)) {
+    names(methodList)[i] <- default_model_names[i]
+  }
+
+  # Make sure we have a list of caretModelSpec objects
+  stopifnot(is.list(methodList))  # List
+  stopifnot(vapply(methodList, is.list, logical(1L)))  # List of lists
+  stopifnot(all(vapply(methodList, function(x) methods::is(x, "caretModelSpec"), logical(1L))))
+
+  # Return
+  methodList
+}
+
+#' @title Extract the method name associated with a single train object
+#' @description Extracts the method name associated with a single train object. Note
+#' that for standard models (i.e. those already prespecified by caret), the
+#' "method" attribute on the train object is used directly. For custom models,
+#' we use make.names on the modelInfo$method attribute.
+#' @param x a single caret train object
+#' @return Name associated with model
+#' @keywords internal
+extractModelName <- function(x) {
+  if(is.character(x$method) && x$method[[1]] != "custom") {
+    x$method
+  } else{
+    make.names(x$modelInfo$method)
+  }
 }
 
 #' @title Extracts the target variable from a set of arguments headed to the caret::train function.
