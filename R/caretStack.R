@@ -526,7 +526,7 @@ autoplot.caretStack <- function(object, training_data = NULL, xvars = NULL, show
   if (!is.null(training_data)) {
     x_data <- data.table::data.table(training_data)
     if (is.null(xvars)) {
-      xvars <- sample(object$models[[1L]]$coefnames, 2L)
+      xvars <- sample(names(x_data), 2L)
     }
     data.table::set(x_data, j = "rowIndex", value = seq_len(nrow(x_data)))
     plotdf <- merge(ensemble_data, x_data, by = "rowIndex")

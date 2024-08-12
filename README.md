@@ -51,21 +51,21 @@ print(greedy_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 400, 400, 400 
+#> Summary of sample sizes: 400, 400, 400, 401, 399 
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   1065.887  0.9284382  592.5321
+#>   946.5929  0.9468516  506.8786
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  1076.431 
+#> RMSE:  963.298 
 #> Weights:
 #>        [,1]
-#> rf     0.57
-#> glmnet 0.43
+#> rf      0.7
+#> glmnet  0.3
 ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
@@ -84,11 +84,11 @@ print(rf_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 400, 400, 400 
+#> Summary of sample sizes: 400, 401, 400, 400, 399 
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   1043.646  0.9306849  507.4756
+#>   968.4043  0.9467661  499.4089
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -100,8 +100,8 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 1130686
-#>                     % Var explained: 92.85
+#>           Mean of squared residuals: 881047.1
+#>                     % Var explained: 94.87
 ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 

@@ -29,7 +29,9 @@ knitr::opts_chunk$set(
 [![Discord](https://img.shields.io/discord/1255535052578619524)](https://discord.gg/zgPeSm8a3u)
 <!-- badges: end -->
 
-caretEnsemble is a framework for fitting multiple [caret models](https://github.com/topepo/caret) using the same re-sampling strategy as well as creating ensembles of such models. Use `caretList` to fit multiple models, and then use `caretStack` to stack them using a caret model.
+caretEnsemble is a framework for [stacking](https://en.wikipedia.org/wiki/Ensemble_learning#Stacking) models fit with the [caret](https://topepo.github.io/caret/) package.
+
+Use `caretList` to fit multiple models, and then use `caretStack` to stack them with another caret model.
 
 
 First, use caretList to fit many models to the same data:

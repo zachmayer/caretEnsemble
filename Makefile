@@ -22,6 +22,7 @@ help:
 	@echo "  readme                 Build readme"
 	@echo "  release                Release to CRAN"
 	@echo "  preview-site           Preview pkgdown site"
+	@echo "  dev-guide              Open the R package development guide"
 	@echo "  clean                  Clean up generated files"
 
 .PHONY: all
@@ -84,12 +85,12 @@ coverage-test: coverage.rds
 		testthat::expect_gte(cov_num, 100.0); \
 	"
 
-.PHONY: coverage
-coverage: cobertura.xml coverage-report.html coverage-test
-
 .PHONY: view-coverage
 view-coverage: coverage-report.html 
 	open coverage-report.html  
+
+.PHONY: coverage
+coverage: cobertura.xml coverage-report.html coverage-test view-coverage
 
 .PHONY: check
 check:
@@ -135,10 +136,15 @@ readme:
 .PHONY: preview-site
 preview-site:
 	Rscript -e "pkgdown::build_site()"
+	open docs/index.html
 
 .PHONY: release
 release:
 	Rscript -e "devtools::release()"
+
+.PHONY: dev-guide
+dev-guide:
+	open https://r-pkgs.org/whole-game.html
 
 .PHONY: clean
 clean:
