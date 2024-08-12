@@ -1,4 +1,5 @@
 # huge XML/HTML file messes up git stats lol
+coverage.rds
 coverage-report.html
 cobertura.xml
 
