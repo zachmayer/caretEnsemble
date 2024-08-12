@@ -1,4 +1,4 @@
-#' Create a list of several train models from the caret package
+table#' Create a list of several train models from the caret package
 #'
 #' Build a list of train objects suitable for ensembling using the \code{\link{caretStack}}
 #' function.
@@ -70,15 +70,7 @@ caretList <- function(
 
   # Make a trainControl if it is missing
   if (is.null(trControl)) {
-    trControl <- caret::trainControl(
-      method = "cv",
-      number = 5L,
-      index = caret::createFolds(target, k = 5L, list = TRUE, returnTrain = TRUE),
-      savePredictions = "final",
-      classProbs = is_class,
-      summaryFunction = ifelse(is_class && is_binary, caret::twoClassSummary, caret::defaultSummary),
-      returnData = FALSE
-    )
+    trControl <- defaultControl(target, is_class = is_class, is_binary = is_binary)
   }
 
   # ALWAYS save class probs
@@ -179,6 +171,34 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
 
   # Return
   preds
+}
+
+#' @title Construct a default train control for use with caretList
+#' @description Unlike caret::trainControl, this function defaults to 5 fold CV.
+#' CV is good for stacking, as every observation is in the test set exactly once.
+#' We use 5 instead of 10 to save compute time, as caretList is for fitting many
+#' models. We also consturct explicit fold indexes and return the stacked predictions,
+#' which are needed for stacking. For classification models we return class probabilities.
+#' @param target the target variable.
+#' @param number the number of folds to use.
+#' @param is_class logical, is this a classification or regression problem.
+#' @param is_binary logical, is this binary classification.
+#' @export
+defaultControl <- function(
+  target, 
+  number=5L,
+  is_class = is.factor(target) || is.character(target),
+  is_binary = length(unique(target)) == 2L
+  ){
+  caret::trainControl(
+      method = "cv",
+      number = number,
+      index = caret::createFolds(target, k = number, list = TRUE, returnTrain = TRUE),
+      savePredictions = "final",
+      classProbs = is_class,
+      summaryFunction = ifelse(is_class && is_binary, caret::twoClassSummary, caret::defaultSummary),
+      returnData = FALSE
+    )
 }
 
 #' @title Convert object to caretList object

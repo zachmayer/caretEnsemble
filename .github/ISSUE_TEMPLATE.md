@@ -28,12 +28,7 @@ If your data frame has a factor with many levels, the `dput` output can be unwie
 ```{R}
 models <- caretEnsemble::caretList(
   X, y, 
-  methodList=c('glm', 'rpart'),
-  trControl=caret::trainControl(
-    method="cv", 
-    number=5,
-    classProbs=TRUE, 
-    savePredictions="final")
+  methodList=c('glm', 'rpart')
 )
 ens <- caretEnsemble::caretStack(models)
 print(ens)
