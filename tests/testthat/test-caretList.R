@@ -26,36 +26,6 @@ large_data <- list(
 )
 
 ################################################################
-testthat::context("caretModelSpec, tuneCheck, methodCheck")
-################################################################
-testthat::test_that("caretModelSpec and checking functions work as expected", {
-  all_models <- sort(unique(caret::modelLookup()$model))
-
-  testthat::expect_identical(caretModelSpec("rf", tuneLength = 5L, preProcess = "knnImpute")$method, "rf")
-
-  methodList <- lapply(all_models, function(x) list(method = x, preProcess = "pca"))
-  all_models_check <- tuneCheck(methodList)
-  testthat::expect_is(all_models_check, "list")
-  testthat::expect_length(all_models, length(all_models_check))
-
-  methodCheck(all_models)
-  testthat::expect_error(
-    methodCheck(c(all_models, "THIS_IS_NOT_A_REAL_MODEL")),
-    "The following models are not valid caret models: THIS_IS_NOT_A_REAL_MODEL"
-  )
-
-  testthat::expect_error(
-    methodCheck("InvalidMethod"),
-    "The following models are not valid caret models: InvalidMethod"
-  )
-
-  testthat::expect_error(
-    methodCheck(list(invalid_method = 42L)),
-    "Method \"42\" is invalid"
-  )
-})
-
-################################################################
 testthat::context("S3 methods for caretlist")
 ################################################################
 
@@ -196,12 +166,13 @@ testthat::test_that("caretList works for various scenarios", {
   testthat::expect_s3_class(models_imbalanced, "caretList")
   testthat::expect_length(models_imbalanced, 1L)
 
+  # We allow duplicates
+  model_list <- caretList(Sepal.Width ~ ., iris, methodList = c("lm", "lm"))
+  testthat::expect_s3_class(model_list, "caretList")
+  testthat::expect_named(model_list, c("lm", "lm.1")) # Duplicates are renamed
+
   # Test error cases
-  testthat::expect_error(caretList(Sepal.Width ~ ., iris), "Please either define a methodList or methodList")
-  testthat::expect_warning(
-    caretList(Sepal.Width ~ ., iris, methodList = c("lm", "lm")),
-    "Duplicate entries in methodList. Using unique methodList values."
-  )
+  testthat::expect_error(caretList(Sepal.Width ~ ., iris), "Please either define a methodList.")
 
   # Test continue_on_fail
   bad <- list(
@@ -339,6 +310,14 @@ testthat::test_that("validateMethodList works correctly", {
   testthat::expect_named(model_list, c("glm", "rf"))
 })
 
+testthat::test_that("validateMethodList works with all possible built-in models", {
+  all_models <- sort(unique(caret::modelLookup()$model))
+  methodList <- lapply(all_models, caretModelSpec, allowed_models = all_models, preProcess = "pca")
+  methodList <- validateMethodList(methodList)
+  testthat::expect_is(methodList, "list")
+  testthat::expect_length(methodList, length(all_models))
+})
+
 testthat::test_that("validateMethodList errors", {
   testthat::expect_error(validateMethodList(NULL), "Please define a methodList")
   testthat::expect_error(validateMethodList(123L), "is.list(methodList) is not TRUE", fixed = TRUE)
@@ -360,6 +339,33 @@ testthat::test_that("validateMethodList handles duplicates correctly", {
   testthat::expect_named(unique_list, c("rf", "rf.1"))
 })
 
+testthat::test_that("caretModelSpec and checking functions work as expected", {
+
+
+  testthat::expect_identical(caretModelSpec("rf", tuneLength = 5L, preProcess = "knnImpute")$method, "rf")
+
+
+
+
+  methodCheck(all_models)
+  testthat::expect_error(
+    methodCheck(c(all_models, "THIS_IS_NOT_A_REAL_MODEL")),
+    "The following models are not valid caret models: THIS_IS_NOT_A_REAL_MODEL"
+  )
+
+  testthat::expect_error(
+    methodCheck("InvalidMethod"),
+    "The following models are not valid caret models: InvalidMethod"
+  )
+
+  testthat::expect_error(
+    methodCheck(list(invalid_method = 42L)),
+    "Method \"42\" is invalid"
+  )
+})
+
+
+
 testthat::test_that("caretModelSpec works correctly", {
   # Test valid input
   testthat::expect_s3_class(caretModelSpec("rf"), "caretModelSpec")
@@ -370,6 +376,7 @@ testthat::test_that("caretModelSpec works correctly", {
     caretModelSpec("invalid_method"),
     "'invalid_method' not supported"
   )
+
 
   # Test non-character method
   testthat::expect_error(caretModelSpec(123L), "is.character(method) is not TRUE", fixed = TRUE)

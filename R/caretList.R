@@ -284,19 +284,19 @@ c.caretList <- function(...) {
 #' @description A caret model specification consists of 2 parts: a model (as a string) and
 #' the arguments to the train call for fitting that model
 #' @param method the modeling method to pass to caret::train
+#' @param all_models a character vector representing the allowed models.
+#' By default uses all_models = unique(caret::modelLookup()$model)
 #' @param ... Other arguments that will eventually be passed to caret::train
 #' @export
 #' @return a list of lists
 #' @examples
 #' caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
-caretModelSpec <- function(method = "rf", ...) {
+caretModelSpec <- function(method = "rf", allowed_models = unique(caret::modelLookup()$model), ...) {
   if (!is.list(method)) {
     stopifnot(is.character(method))
-    all_models <- unique(caret::modelLookup()$model)
-    if (!method %in% all_models) {
+    if (!method %in% allowed_models) {
       stop(
         "'", method, "' not supported. ",
-        "caretModelSpec only supports native caret models. ",
         "Use unique(caret::modelLookup()$model) to see supported models.",
         call. = FALSE
       )
