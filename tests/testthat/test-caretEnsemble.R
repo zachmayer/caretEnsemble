@@ -156,15 +156,7 @@ testthat::test_that("Ensembles using custom models work correctly", {
   )
 
   cl <- caretList(X.class, Y.class, tuneList = tune.list)
-  cs <- caretEnsemble(
-    cl,
-    trControl = caret::trainControl(
-      method = "cv",
-      number = 2L,
-      savePredictions = "final",
-      classProbs = TRUE
-    )
-  )
+  cs <- caretEnsemble(cl)
   testthat::expect_is(cs, "caretEnsemble")
   testthat::expect_named(cs$models, c("custom.rf", "myrpart", "treebag"))
 

@@ -20,6 +20,7 @@
 #' (for transfer learning).
 #' If NULL, will use the observed levels from the first model in the caret stack
 #' If 0, will include all levels.
+#' @param metric the metric to use for grid search on the stacking model.
 #' @param trControl a trainControl object to use for training the ensemble model. If NULL, will use defaultControl.
 #' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
 #' @param ... additional arguments to pass to the stacking model
@@ -39,10 +40,10 @@ caretStack <- function(
     all.models,
     new_X = NULL,
     new_y = NULL,
-    trControl=NULL,
+    metric = NULL,
+    trControl = NULL,
     excluded_class_id = 1L,
     ...) {
-
   # Check all.models
   if (!methods::is(all.models, "caretList")) {
     warning("Attempting to coerce all.models to a caretList.", call. = FALSE)
@@ -82,12 +83,17 @@ caretStack <- function(
   stopifnot(nrow(preds) == length(obs))
 
   # Make a trainControl
-  if(is.null(trControl)) {
-    trControl <- defaultControl(obs)
+  is_class <- is.factor(obs) || is.character(obs)
+  is_binary <- length(unique(obs)) == 2L
+  if (is.null(metric)) {
+    metric <- defaultMetric(is_class = is_class, is_binary = is_binary)
+  }
+  if (is.null(trControl)) {
+    trControl <- defaultControl(obs, is_class = is_class, is_binary = is_binary)
   }
 
   # Train the model
-  model <- caret::train(preds, obs, trControl=trControl, ...)
+  model <- caret::train(preds, obs, metric = metric, trControl = trControl, ...)
 
   # Return final model
   out <- list(
