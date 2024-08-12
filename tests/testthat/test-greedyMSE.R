@@ -282,8 +282,7 @@ testthat::test_that("greedyMSE works with caret::train for regression", {
     X_train,
     Y_train,
     tuneLength = 1L,
-    method = greedyMSE_caret(),
-    trControl = caret::trainControl(method = "cv", number = 5L)
+    method = greedyMSE_caret()
   )
 
   # Make predictions
@@ -332,11 +331,7 @@ testthat::test_that("greedyMSE works with caret::train for binary classification
     X_train,
     Y_train,
     tuneLength = 1L,
-    method = greedyMSE_caret(),
-    trControl = caret::trainControl(
-      method = "cv",
-      number = 5L
-    )
+    method = greedyMSE_caret()
   )
 
   # Make predictions
@@ -391,11 +386,7 @@ testthat::test_that("greedyMSE works with caret::train for multiclass classifica
     X_train,
     Y_train,
     tuneLength = 1L,
-    method = greedyMSE_caret(),
-    trControl = caret::trainControl(
-      method = "cv",
-      number = 5L
-    )
+    method = greedyMSE_caret()
   )
 
   # Make predictions

@@ -178,12 +178,14 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
 #' @param number the number of folds to use.
 #' @param is_class logical, is this a classification or regression problem.
 #' @param is_binary logical, is this binary classification.
+#' @param ... other arguments to pass to \code{\link[caret]{trainControl}}
 #' @export
 defaultControl <- function(
     target,
     number = 5L,
     is_class = is.factor(target) || is.character(target),
-    is_binary = length(unique(target)) == 2L) {
+    is_binary = length(unique(target)) == 2L,
+    ...) {
   caret::trainControl(
     method = "cv",
     number = number,
@@ -191,7 +193,8 @@ defaultControl <- function(
     savePredictions = "final",
     classProbs = is_class,
     summaryFunction = ifelse(is_class && is_binary, caret::twoClassSummary, caret::defaultSummary),
-    returnData = FALSE
+    returnData = FALSE,
+    ...
   )
 }
 

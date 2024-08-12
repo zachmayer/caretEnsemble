@@ -8,7 +8,8 @@ defaultControl(
   target,
   number = 5L,
   is_class = is.factor(target) || is.character(target),
-  is_binary = length(unique(target)) == 2L
+  is_binary = length(unique(target)) == 2L,
+  ...
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ defaultControl(
 \item{is_class}{logical, is this a classification or regression problem.}
 
 \item{is_binary}{logical, is this binary classification.}
+
+\item{...}{other arguments to pass to \code{\link[caret]{trainControl}}}
 }
 \description{
 Unlike caret::trainControl, this function defaults to 5 fold CV.
