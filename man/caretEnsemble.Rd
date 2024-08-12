@@ -57,6 +57,7 @@ summary(ens)
 Useful links:
 \itemize{
   \item \url{https://github.com/zachmayer/caretEnsemble}
+  \item \url{http://zachmayer.github.io/caretEnsemble/}
   \item Report bugs at \url{https://github.com/zachmayer/caretEnsemble/issues}
 }
 

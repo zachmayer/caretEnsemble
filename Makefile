@@ -3,7 +3,7 @@
 .PHONY: help
 help:
 	@echo "Available targets:"
-	@echo "  all                    Run clean, fix-style, document, install, build-vignettes, lint, spell, test, check, coverage"
+	@echo "  all                    Run clean, fix-style, document, install, readme, vignettes, lint, spell, test, check, coverage, preview-site"
 	@echo "  dev                    Run clean, fix-style, document, lint, spell, test"
 	@echo "  install-deps           Install dependencies"
 	@echo "  install                Install the whole package, including dependencies"
@@ -11,19 +11,21 @@ help:
 	@echo "  update-test-fixtures   Update test fixtures"
 	@echo "  test                   Run unit tests"
 	@echo "  coverage               Generate coverage reports"
+	@echo "  view-coverage          View coverage report"
 	@echo "  check                  Run R CMD check locally"
 	@echo "  check                  Run R CMD on the winbuilder service from CRAN"
 	@echo "  fix-style              Auto style the code"
 	@echo "  lint                   Check the code for lint"
 	@echo "  spell                  Check spelling"
 	@echo "  build                  Build the package"
-	@echo "  build-vignettes        Build vignettes"
+	@echo "  vignettes              Build vignettes"
+	@echo "  readme                 Build readme"
 	@echo "  release                Release to CRAN"
 	@echo "  preview-site           Preview pkgdown site"
 	@echo "  clean                  Clean up generated files"
 
 .PHONY: all
-all: clean fix-style document install build-vignettes lint spell test check coverage
+all: clean fix-style document install readme vignettes lint spell test check coverage preview-site
 
 .PHONY: dev
 all: clean fix-style document lint spell test
@@ -85,6 +87,10 @@ coverage-test: coverage.rds
 .PHONY: coverage
 coverage: cobertura.xml coverage-report.html coverage-test
 
+.PHONY: view-coverage
+view-coverage: coverage-report.html 
+	open coverage-report.html  
+
 .PHONY: check
 check:
 	Rscript -e "devtools::check(cran = FALSE, remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
@@ -118,9 +124,13 @@ spell:
 build:
 	Rscript -e "devtools::build()"
 
-.PHONY: build-vignettes
-build-vignettes:
+.PHONY: vignettes
+vignettes:
 	Rscript -e "devtools::build_vignettes()"
+
+.PHONY: readme
+readme:
+	Rscript -e "devtools::build_readme()"
 
 .PHONY: preview-site
 preview-site:
@@ -135,6 +145,7 @@ clean:
 	rm -rf *.Rcheck
 	rm -f *.tar.gz
 	rm -f man/*.Rd
+	rm -f README.md
 	rm -f coverage.rds
 	rm -f cobertura.xml
 	rm -f coverage-report.html

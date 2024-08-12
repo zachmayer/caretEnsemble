@@ -278,7 +278,10 @@ wtd.sd <- function(x, w, na.rm = FALSE) {
 #' print(meta_model)
 print.caretStack <- function(x, ...) {
   cat("The following models were ensembled:", toString(names(x$models)), " \n")
+  cat("\ncaret::train model:\n")
   print(x$ens_model)
+  cat("\nFinal model:\n")
+  print(x$ens_model$finalModel)
 }
 
 #' @title Summarize a caretStack object
@@ -436,6 +439,8 @@ stackedTrainResiduals <- function(object, show_class_id = 2L) {
 #' @description This function provides a more robust series of diagnostic plots
 #' for a caretEnsemble object.
 #' @param object a \code{caretStack} object
+#' @param training_data The data used to train the ensemble. Required if xvars is not NULL
+#' Must be in the same row order as when the models were trained.
 #' @param xvars a vector of the names of x variables to plot against residuals
 #' @param show_class_id For classification only: which class level to show on the plot
 #' @param ... ignored
@@ -518,7 +523,7 @@ autoplot.caretStack <- function(object, training_data = NULL, xvars = NULL, show
 
   # Residuals vs X variables
   out <- (g1 + g2) / (g3 + g4)
-  if(!is.null(training_data)){
+  if (!is.null(training_data)) {
     x_data <- data.table::data.table(training_data)
     if (is.null(xvars)) {
       xvars <- sample(object$models[[1L]]$coefnames, 2L)
@@ -539,7 +544,7 @@ autoplot.caretStack <- function(object, training_data = NULL, xvars = NULL, show
       ggplot2::scale_y_continuous("Residuals") +
       ggplot2::labs(title = paste0("Residuals Against ", xvars[2L])) +
       ggplot2::theme_bw()
-  out <- out / (g5 + g6)
+    out <- out / (g5 + g6)
   }
   out
 }
