@@ -11,7 +11,8 @@ help:
 	@echo "  update-test-fixtures   Update test fixtures"
 	@echo "  test                   Run unit tests"
 	@echo "  coverage               Generate coverage reports"
-	@echo "  check                  Run R CMD check as CRAN"
+	@echo "  check                  Run R CMD check locally"
+	@echo "  check                  Run R CMD on the winbuilder service from CRAN"
 	@echo "  fix-style              Auto style the code"
 	@echo "  lint                   Check the code for lint"
 	@echo "  spell                  Check spelling"
@@ -85,9 +86,13 @@ coverage-test: coverage.rds
 coverage: cobertura.xml coverage-report.html coverage-test
 
 .PHONY: check
-check: document
+check:
 	Rscript -e "devtools::check(cran = FALSE, remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
 	Rscript -e "devtools::check(cran = TRUE , remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
+
+.PHONY: check-win
+check-win:
+	Rscript -e "devtools:::check_win()"
 
 .PHONY: fix-style
 fix-style:
