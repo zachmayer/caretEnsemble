@@ -8,7 +8,7 @@ table#' Create a list of several train models from the caret package
 #' Particularly if you have a large dataset and/or many models, using a data.table will
 #' avoid unnecessary copies of your data and can save a lot of time and RAM.
 #' These arguments will determine which train method gets dispatched.
-#' @param trControl a \code{\link[caret]{trainControl}} object. If null, we will construct a good one.
+#' @param trControl a \code{\link[caret]{trainControl}} object. If NULL, will use defaultControl.
 #' @param methodList optional, a character vector of caret models to ensemble.
 #' One of methodList or tuneList must be specified.
 #' @param tuneList optional, a NAMED list of caretModelSpec objects.
