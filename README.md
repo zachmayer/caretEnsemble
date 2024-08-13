@@ -173,4 +173,4 @@ If you want to do something similar in python, check out
 
 Please note that this project is released with a [Contributor Code of
 Conduct](https://github.com/zachmayer/caretEnsemble/blob/master/.github/CONTRIBUTING.md).
-By participating in this project you agree to abide by its terms.
+By participating in this project, you agree to abide by its terms.

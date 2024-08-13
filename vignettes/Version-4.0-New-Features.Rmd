@@ -1,8 +1,8 @@
 ---
-title: "Verions-4"
+title: "Version-4.0-New-Features"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Verions-4}
+  %\VignetteIndexEntry{Version-4.0-New-Features}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
