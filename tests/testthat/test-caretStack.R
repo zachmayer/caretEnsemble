@@ -260,7 +260,7 @@ testthat::test_that("dotplot", {
 
 testthat::test_that("autoplot", {
   for (ens in list(ens.class, ens.reg)) {
-    p <- ggplot2::autoplot(ens)
+    p <- ggplot2::autoplot(ens, X.reg)
     testthat::expect_s3_class(p, "ggplot")
   }
 })

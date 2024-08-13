@@ -26,3 +26,8 @@ revdep/*
 ^CRAN-SUBMISSION$
 check_package.R
 ^\.github$
+^LICENSE\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^README\.Rmd$

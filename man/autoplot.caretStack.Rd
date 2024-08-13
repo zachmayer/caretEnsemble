@@ -4,10 +4,13 @@
 \alias{autoplot.caretStack}
 \title{Convenience function for more in-depth diagnostic plots of caretStack objects}
 \usage{
-\method{autoplot}{caretStack}(object, xvars = NULL, show_class_id = 2L, ...)
+\method{autoplot}{caretStack}(object, training_data = NULL, xvars = NULL, show_class_id = 2L, ...)
 }
 \arguments{
 \item{object}{a \code{caretStack} object}
+
+\item{training_data}{The data used to train the ensemble. Required if xvars is not NULL
+Must be in the same row order as when the models were trained.}
 
 \item{xvars}{a vector of the names of x variables to plot against residuals}
 

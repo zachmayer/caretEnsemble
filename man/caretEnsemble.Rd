@@ -62,11 +62,12 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Zachary A. Deane-Mayer \email{zach.mayer@gmail.com}
+\strong{Maintainer}: Zachary A. Deane-Mayer \email{zach.mayer@gmail.com} [copyright holder]
 
-Authors:
+Other contributors:
 \itemize{
-  \item Jared E. Knowles \email{jknowles@gmail.com}
+  \item Jared E. Knowles \email{jknowles@gmail.com} [contributor]
+  \item Antón López \email{zach.mayer+get-correct-email@gmail.com} [contributor]
 }
 
 }

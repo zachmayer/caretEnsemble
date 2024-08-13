@@ -1,5 +1,24 @@
 #NEWS 
 
+## caretEnsemble 4.0.0
+- Multiclass support! caretList, caretStack, and caretEnsemble 
+- The greedy optimizer is back! caretEnsemble now uses a greedy optimizer by default. This optimizer can never be worse than the worst single model. caretStack still support all caret models, including glm.
+- Refactored some internals for scalability (e.g. data.table for predictions, trim some un-needed data by default).
+- Moved all the S3 methods to caretStack, which now supports print, summary, plot, dotplot, and autoplot. caretEnsemble inherits from caretStack, and therefore also supports all of these methods.
+- Allow ensembling of mixed lists of classification and regression models.
+- Allow ensemble of models with different resampling strategies, so long as they were trained on the same data.
+- Allow transfer learning for ensembling models trained on different datasets.
+- Added permutation importance as the default importance method for caretLists and caretStacks.
+- Add a default trainControl constructor to make it easier to build good controls for training caretLists for stacking with caretStack.
+- Expanded test coverage to 100%.
+- Sped up test suite (unit tests now run in 20 seconds).
+- Delinted codebase: now conforms with all available linters save the object name linter.
+- Added a makefile for easier local package development.
+- Fixed badges in the readme.
+- Added a pkgdown site.
+- Switched to github actions (from travis) for CI.
+- Internal refactoring, optimization, and bug fixes.
+
 ## caretEnsemble 2.0.3
 - Fix broken package documentation with new roxygen2
 - Replace deprecated linters with the new versions

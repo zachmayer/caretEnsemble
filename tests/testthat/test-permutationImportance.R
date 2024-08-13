@@ -212,3 +212,18 @@ testthat::test_that("permutationImportance handles various edge cases", {
   check_importance_scores(imp_identical, names(x_identical))
   testthat::expect_equal(imp_identical[["x1"]], imp_identical[["x3"]], tol = 1e-1)
 })
+######################################################################
+testthat::context("NAN predictions from rpart")
+######################################################################
+
+testthat::test_that("permutationImportance handles NAN predictions from rpart", {
+  set.seed(42L)
+  model_list <- caretEnsemble::caretList(
+    x = iris[, 1L:4L],
+    y = iris[, 5L],
+    methodList = "rpart"
+  )
+  ens <- caretEnsemble(model_list)
+  imp <- caret::varImp(ens)
+  testthat::expect_true(all(is.finite(imp)))
+})
