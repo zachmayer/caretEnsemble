@@ -45,7 +45,13 @@ caretStack (and by extension, caretEnsemble) now supports various S3 methods:
 ```{r}
 print(ens)
 print(summary(ens))
+```
+
+```{r, fig.alt="A dot and whisker plot of ROC for glmnet, rpart, and an ensemble. The ensemble has the highest ROC and is slighly better than the glmnet. The rpart model is bad."}
 plot(ens)
+```
+
+```{r, fig.alt="A 4-panel plot for glmnet, rpart, and an ensemble. The ensemble has the highest ROC and is slighly better than the glmnet. The rpart model is bad. The glmnet has the highest weight, and the residuals look biased."}
 ggplot2::autoplot(ens)
 ```
 

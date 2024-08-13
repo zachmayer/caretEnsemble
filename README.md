@@ -46,10 +46,10 @@ print(summary(models))
 #> The following models were ensembled: rf, glmnet  
 #> 
 #> Model accuracy:
-#>    model_name metric    value       sd
-#>        <char> <char>    <num>    <num>
-#> 1:         rf   RMSE 1110.687 156.3977
-#> 2:     glmnet   RMSE 1212.655 144.5434
+#>    model_name metric     value       sd
+#>        <char> <char>     <num>    <num>
+#> 1:         rf   RMSE  984.9967 192.3488
+#> 2:     glmnet   RMSE 1206.0751 217.0510
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
@@ -64,21 +64,21 @@ print(greedy_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 400, 400, 400 
+#> Summary of sample sizes: 401, 400, 400, 400, 399 
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   1054.468  0.9297412  584.7777
+#>   979.0064  0.9342773  506.3942
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  1062.976 
+#> RMSE:  985.9732 
 #> Weights:
 #>        [,1]
-#> rf     0.63
-#> glmnet 0.37
+#> rf     0.81
+#> glmnet 0.19
 ```
 
 You can also use caretStack to make a non-linear ensemble
@@ -94,11 +94,11 @@ print(rf_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 400, 400, 400 
+#> Summary of sample sizes: 400, 400, 399, 400, 401 
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   1052.992  0.9377573  539.9399
+#>   973.1948  0.9402302  500.0689
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -110,23 +110,23 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 1157730
-#>                     % Var explained: 93.12
+#>           Mean of squared residuals: 1127223
+#>                     % Var explained: 92.21
 ```
 
 Use autoplot from ggplot2 to plot ensemble diagnositcs:
 
 ``` r
-ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
-```
-
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
-
-``` r
 ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" alt="6 panel plot of an ensemble of models fit to the diamonds dataset. The RF model is the best and has the highest weight. The residual plots look good. RMSE is about `r round(min(greedy_stack$ens_model$results$RMSE))`." width="100%" />
+
+``` r
+ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" alt="6 panel plot of an ensemble of models fit to the diamonds dataset. The RF model is the best and has the highest weight. The residual plots look good. RMSE is about `r round(min(rf_stack$ens_model$results$RMSE))`." width="100%" />
 
 # Installation
 

@@ -71,7 +71,7 @@ Finally, you should note that `caretList` does not support custom caret models. 
 
 ## caretEnsemble
 `caretList` is the preferred way to construct list of caret models in this package, as it will ensure the resampling indexes are identical across all models. Lets take a closer look at our list of models:
-```{r}
+```{r, fig.alt="X/Y scatter plot of rpart vs glmnet AUCs on the Sonar dataset. The glmnet model is better for 4 out of 5 resamples."}
 lattice::xyplot(caret::resamples(model_list))
 ```
     
