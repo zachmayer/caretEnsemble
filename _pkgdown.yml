@@ -7,4 +7,8 @@ template:
     border-radius: 0.5rem
     btn-border-radius: 0.25rem
     danger: "#A6081A"
-  
+  opengraph:
+    image:
+      src: man/figures/README-greed-stack-6-plot.png
+      alt: "6 panel plot of an ensemble of models fit to the diamonds dataset. The RF model is the best and has the highest weight. The residual plots look good."
+

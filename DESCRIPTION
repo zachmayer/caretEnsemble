@@ -7,7 +7,7 @@ Authors@R: c(person(c("Zachary", "A."), "Deane-Mayer", role = c("aut", "cre", "c
     person(c("Jared", "E.", "Knowles"), role="ctb", email="jknowles@gmail.com"),
     person("Antón", "López", role="ctb", email="anton.gomez.lopez@rai.usc.es")
     )
-URL: https://github.com/zachmayer/caretEnsemble, https://zachmayer.github.io/caretEnsemble/
+URL: http://zachmayer.github.io/caretEnsemble/, https://github.com/zachmayer/caretEnsemble
 BugReports: https://github.com/zachmayer/caretEnsemble/issues
 Description: Functions for creating ensembles of caret models: caretList()
     and caretStack(). caretList() is a convenience function for fitting multiple
