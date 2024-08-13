@@ -140,7 +140,9 @@ knitr::kable(preds, format = "markdown")
 Permutation importance is now the default method for variable importance in caretLists and caretStacks:
 ```{r}
 importance <- caret::varImp(transfer_ens)
-print(importance)
+print(round(importance, 2L))
 ```
+
+Note that the ensemble uses rpart to classify the easy class (setosa) and then uses the rf to distinguish between the 2 more difficult classes.
 
 This completes our demonstration of the key new features in caretEnsemble 4.0. These enhancements provide greater flexibility, improved performance, and easier usage for ensemble modeling in R.
