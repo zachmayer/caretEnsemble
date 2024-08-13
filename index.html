@@ -6,19 +6,21 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Ensembles of Caret Models • caretEnsemble</title>
-<script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script src="lightswitch.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Ensembles of Caret Models">
 <meta name="description" content="Functions for creating ensembles of caret models: caretList() and caretStack(). caretList() is a convenience function for fitting multiple caret::train() models to the same dataset. caretStack() will make linear or non-linear combinations of these models, using a caret::train() model as a meta-model.">
 <meta property="og:description" content="Functions for creating ensembles of caret models: caretList() and caretStack(). caretList() is a convenience function for fitting multiple caret::train() models to the same dataset. caretStack() will make linear or non-linear combinations of these models, using a caret::train() model as a meta-model.">
+<meta property="og:image" content="http://zachmayer.github.io/caretEnsemble/reference/figures/README-greedy-stack-6-plot.png">
+<meta property="og:image:alt" content="6 panel plot of an ensemble of models fit to the diamonds dataset. The RF model is the best and has the highest weight. The residual plots look good.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="index.html">caretEnsemble</a>
 
@@ -36,7 +38,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/caretEnsemble-intro.html">A Brief Introduction to caretEnsemble</a></li>
-    <li><a class="dropdown-item" href="articles/Version-4.0-New-Features.html">Version-4.0-New-Features</a></li>
+    <li><a class="dropdown-item" href="articles/Version-4.0-New-Features.html">Version 4.0 New Features</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -46,6 +48,14 @@
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/zachmayer/caretEnsemble/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
+<li><button class="dropdown-item" data-bs-theme-value="light"><span class="fa fa-sun"></span> Light</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
+  </ul>
+</li>
       </ul>
 </div>
 
@@ -74,10 +84,10 @@
 <span><span class="co">#&gt; The following models were ensembled: rf, glmnet  </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Model accuracy:</span></span>
-<span><span class="co">#&gt;    model_name metric    value        sd</span></span>
-<span><span class="co">#&gt;        &lt;char&gt; &lt;char&gt;    &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:         rf   RMSE 1127.974  83.50596</span></span>
-<span><span class="co">#&gt; 2:     glmnet   RMSE 1138.137 202.80472</span></span></code></pre></div>
+<span><span class="co">#&gt;    model_name metric    value       sd</span></span>
+<span><span class="co">#&gt;        &lt;char&gt; &lt;char&gt;    &lt;num&gt;    &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:         rf   RMSE 1168.108 422.9558</span></span>
+<span><span class="co">#&gt; 2:     glmnet   RMSE 1152.298 138.8310</span></span></code></pre></div>
 <p>Then, use caretEnsemble to make a greedy ensemble of these models</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">greedy_stack</span> <span class="op">&lt;-</span> <span class="fu">caretEnsemble</span><span class="fu">::</span><span class="fu"><a href="reference/caretEnsemble.html">caretEnsemble</a></span><span class="op">(</span><span class="va">models</span><span class="op">)</span></span>
@@ -92,20 +102,18 @@
 <span><span class="co">#&gt; Summary of sample sizes: 400, 400, 400, 400, 400 </span></span>
 <span><span class="co">#&gt; Resampling results:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   RMSE      Rsquared   MAE     </span></span>
-<span><span class="co">#&gt;   1003.391  0.9357974  577.2895</span></span>
+<span><span class="co">#&gt;   RMSE     Rsquared  MAE    </span></span>
+<span><span class="co">#&gt;   1096.53  0.933482  631.215</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Tuning parameter 'max_iter' was held constant at a value of 100</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Final model:</span></span>
 <span><span class="co">#&gt; Greedy MSE</span></span>
-<span><span class="co">#&gt; RMSE:  1010.776 </span></span>
+<span><span class="co">#&gt; RMSE:  1067.635 </span></span>
 <span><span class="co">#&gt; Weights:</span></span>
 <span><span class="co">#&gt;        [,1]</span></span>
-<span><span class="co">#&gt; rf     0.52</span></span>
-<span><span class="co">#&gt; glmnet 0.48</span></span>
-<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">greedy_stack</span>, training_data <span class="op">=</span> <span class="va">dat</span>, xvars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"carat"</span>, <span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-3-1.png" width="100%"></p>
+<span><span class="co">#&gt; rf     0.43</span></span>
+<span><span class="co">#&gt; glmnet 0.57</span></span></code></pre></div>
 <p>You can also use caretStack to make a non-linear ensemble</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rf_stack</span> <span class="op">&lt;-</span> <span class="fu">caretEnsemble</span><span class="fu">::</span><span class="fu"><a href="reference/caretStack.html">caretStack</a></span><span class="op">(</span><span class="va">models</span>, method <span class="op">=</span> <span class="st">"rf"</span><span class="op">)</span></span>
@@ -122,7 +130,7 @@
 <span><span class="co">#&gt; Resampling results:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   RMSE      Rsquared   MAE     </span></span>
-<span><span class="co">#&gt;   894.1208  0.9518165  455.1419</span></span>
+<span><span class="co">#&gt;   1005.629  0.9423501  490.6683</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Tuning parameter 'mtry' was held constant at a value of 2</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -134,10 +142,15 @@
 <span><span class="co">#&gt;                      Number of trees: 500</span></span>
 <span><span class="co">#&gt; No. of variables tried at each split: 2</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;           Mean of squared residuals: 800137.3</span></span>
-<span><span class="co">#&gt;                     % Var explained: 94.96</span></span>
-<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">rf_stack</span>, training_data <span class="op">=</span> <span class="va">dat</span>, xvars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"carat"</span>, <span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-4-1.png" width="100%"></p>
+<span><span class="co">#&gt;           Mean of squared residuals: 1007817</span></span>
+<span><span class="co">#&gt;                     % Var explained: 94.29</span></span></code></pre></div>
+<p>Use autoplot from ggplot2 to plot ensemble diagnostics:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">greedy_stack</span>, training_data <span class="op">=</span> <span class="va">dat</span>, xvars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"carat"</span>, <span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-greedy-stack-6-plot-1.png" alt="6 panel plot of an ensemble of models fit to the diamonds dataset. The RF model is the best and has the highest weight. The residual plots look good. RMSE is about `r round(min(greedy_stack$ens_model$results$RMSE))`." width="100%"></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">rf_stack</span>, training_data <span class="op">=</span> <span class="va">dat</span>, xvars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"carat"</span>, <span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-5-1.png" alt="6 panel plot of an ensemble of models fit to the diamonds dataset. The RF model is the best and has the highest weight. The residual plots look good. RMSE is about `r round(min(rf_stack$ens_model$results$RMSE))`." width="100%"></p>
 </div>
 <div class="section level1">
 <h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -145,16 +158,16 @@
 <div class="section level3">
 <h3 id="install-the-stable-version-from-cran">Install the stable version from <a href="https://CRAN.R-project.org/package=caretEnsemble/" class="external-link">CRAN</a>:<a class="anchor" aria-label="anchor" href="#install-the-stable-version-from-cran"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"caretEnsemble"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="install-the-dev-version-from-github">Install the dev version from github:<a class="anchor" aria-label="anchor" href="#install-the-dev-version-from-github"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"zachmayer/caretEnsemble"</span><span class="op">)</span></span></code></pre></div>
 <p>There are also tagged versions of caretEnsemble on github you can install via devtools. For example, to install the <a href="https://github.com/zachmayer/caretEnsemble/releases/" class="external-link">previous release of caretEnsemble</a> use:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"zachmayer/caretEnsemble@2.0.3"</span><span class="op">)</span></span></code></pre></div>
 <p>This is useful if the latest release breaks some aspect of your workflow. caretEnsemble is pure R with no compilation, so this command will work in a variety of environments.</p>
 </div>
