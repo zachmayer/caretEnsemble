@@ -1,5 +1,5 @@
 ---
-title: "Version-4.0-New-Features"
+title: "Version 4.0 New Features"
 author: "Zach Deane-Mayer"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -127,7 +127,7 @@ print(transfer_ens)
 We can also predict on new data:
 ```{r}
 preds <- predict(transfer_ens, newdata = head(new_data))
-print(preds)
+knitr::kable(preds, format="markdown")
 ```
 
 # Permutation Importance

@@ -54,14 +54,18 @@ Then, use caretEnsemble to make a greedy ensemble of these models
 ```{r}
 greedy_stack <- caretEnsemble::caretEnsemble(models)
 print(greedy_stack)
-ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
 You can also use caretStack to make a non-linear ensemble
 ```{r}
 rf_stack <- caretEnsemble::caretStack(models, method = "rf")
 print(rf_stack)
+```
+
+Use autoplot from ggplot2 to plot ensemble diagnositcs:
+```{r}
 ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
+ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
 # Installation

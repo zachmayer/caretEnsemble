@@ -46,10 +46,10 @@ print(summary(models))
 #> The following models were ensembled: rf, glmnet  
 #> 
 #> Model accuracy:
-#>    model_name metric    value        sd
-#>        <char> <char>    <num>     <num>
-#> 1:         rf   RMSE 1127.974  83.50596
-#> 2:     glmnet   RMSE 1138.137 202.80472
+#>    model_name metric    value       sd
+#>        <char> <char>    <num>    <num>
+#> 1:         rf   RMSE 1110.687 156.3977
+#> 2:     glmnet   RMSE 1212.655 144.5434
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
@@ -68,21 +68,18 @@ print(greedy_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   1003.391  0.9357974  577.2895
+#>   1054.468  0.9297412  584.7777
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  1010.776 
+#> RMSE:  1062.976 
 #> Weights:
 #>        [,1]
-#> rf     0.52
-#> glmnet 0.48
-ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
+#> rf     0.63
+#> glmnet 0.37
 ```
-
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
 You can also use caretStack to make a non-linear ensemble
 
@@ -101,7 +98,7 @@ print(rf_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   894.1208  0.9518165  455.1419
+#>   1052.992  0.9377573  539.9399
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -113,12 +110,23 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 800137.3
-#>                     % Var explained: 94.96
+#>           Mean of squared residuals: 1157730
+#>                     % Var explained: 93.12
+```
+
+Use autoplot from ggplot2 to plot ensemble diagnositcs:
+
+``` r
 ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
+``` r
+ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
+```
+
+<img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" />
 
 # Installation
 

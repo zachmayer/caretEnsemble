@@ -49,7 +49,7 @@ print(summary(model_list))
 We can use the `predict` function to extract predictions from this object for new data:
 ```{r}
 p <- predict(model_list, newdata = head(testing))
-print(p)
+knitr::kable(p, format="markdown")
 ```
 
 If you desire more control over the model fit, use the `caretModelSpec` to construct a list of model specifications for the `tuneList` argument. This argument can be used to fit several different variants of the same model, and can also be used to pass arguments through `train` down to the component functions (e.g. `trace=FALSE` for `nnet`):
@@ -100,7 +100,8 @@ The ensemble has an AUC on the training set resamples of `r round(auc[1, 'ensemb
 
 Note that the levels for the Sonar Data are "M" and "R", where M is level 1 and R is level 2. "M" stands for "metal cylinder" and "R" stands for rock. M is the positive class, so we exclude class 2L from our predictions. You can set excluded_class_id = 0L
 ```{r}
-predict(greedy_ensemble, newdata = head(testing), excluded_class_id = 0L)
+p <- predict(greedy_ensemble, newdata = head(testing), excluded_class_id = 0L)
+knitr::kable(p, format="markdown")
 ```
 
 We can also use varImp to extract the variable importances from each member of the ensemble, as well as the final ensemble model:
