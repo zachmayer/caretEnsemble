@@ -1,5 +1,5 @@
 ---
-title: "Version-4.0-New-Features"
+title: "Version 4.0 New Features"
 author: "Zach Deane-Mayer"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -45,7 +45,13 @@ caretStack (and by extension, caretEnsemble) now supports various S3 methods:
 ```{r}
 print(ens)
 print(summary(ens))
+```
+
+```{r, fig.alt="A dot and whisker plot of ROC for glmnet, rpart, and an ensemble. The ensemble has the highest ROC and is slighly better than the glmnet. The rpart model is bad."}
 plot(ens)
+```
+
+```{r, fig.alt="A 4-panel plot for glmnet, rpart, and an ensemble. The ensemble has the highest ROC and is slighly better than the glmnet. The rpart model is bad. The glmnet has the highest weight, and the residuals look biased."}
 ggplot2::autoplot(ens)
 ```
 
@@ -127,14 +133,16 @@ print(transfer_ens)
 We can also predict on new data:
 ```{r}
 preds <- predict(transfer_ens, newdata = head(new_data))
-print(preds)
+knitr::kable(preds, format = "markdown")
 ```
 
 # Permutation Importance
 Permutation importance is now the default method for variable importance in caretLists and caretStacks:
 ```{r}
 importance <- caret::varImp(transfer_ens)
-print(importance)
+print(round(importance, 2L))
 ```
+
+Note that the ensemble uses rpart to classify the easy class (setosa) and then uses the rf to distinguish between the 2 more difficult classes.
 
 This completes our demonstration of the key new features in caretEnsemble 4.0. These enhancements provide greater flexibility, improved performance, and easier usage for ensemble modeling in R.

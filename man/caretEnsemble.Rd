@@ -56,6 +56,7 @@ summary(ens)
 \seealso{
 Useful links:
 \itemize{
+  \item \url{http://zachmayer.github.io/caretEnsemble/}
   \item \url{https://github.com/zachmayer/caretEnsemble}
   \item Report bugs at \url{https://github.com/zachmayer/caretEnsemble/issues}
 }
@@ -67,7 +68,7 @@ Useful links:
 Other contributors:
 \itemize{
   \item Jared E. Knowles \email{jknowles@gmail.com} [contributor]
-  \item Antón López \email{zach.mayer+get-correct-email@gmail.com} [contributor]
+  \item Antón López \email{anton.gomez.lopez@rai.usc.es} [contributor]
 }
 
 }

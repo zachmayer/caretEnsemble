@@ -99,6 +99,7 @@ check:
 
 .PHONY: check-win
 check-win:
+	rm -rf lib/
 	Rscript -e "devtools:::check_win()"
 
 .PHONY: fix-style
@@ -150,7 +151,7 @@ dev-guide:
 clean:
 	rm -rf *.Rcheck
 	rm -f *.tar.gz
-	rm -f man/*.Rd
+	rm -rf man/
 	rm -f README.md
 	rm -f coverage.rds
 	rm -f cobertura.xml
