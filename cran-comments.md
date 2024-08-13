@@ -3,6 +3,8 @@
 * R CMD CHECK github actions: mac, windows (R-release)
 * R CMD CHECK github actions: linux (R-release, R-devel, R-oldrelease)
 * win-builder (R-release, R-devel, R-oldrelease)
+* rhub (R-release, linux)
+* reverse dependencies via revdepcheck
 
 ## R CMD check results
 There were no ERRORs, WARNINGs, or NOTEs

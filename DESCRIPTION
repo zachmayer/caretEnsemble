@@ -32,7 +32,9 @@ Suggests:
     rpart,
     spelling,
     testthat,
-    usethis
+    usethis,
+    pkgdown,
+    rhub
 Imports:
     caret,
     data.table,

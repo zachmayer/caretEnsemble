@@ -13,13 +13,14 @@ help:
 	@echo "  coverage               Generate coverage reports"
 	@echo "  view-coverage          View coverage report"
 	@echo "  check                  Run R CMD check locally"
-	@echo "  check                  Run R CMD on the winbuilder service from CRAN"
 	@echo "  fix-style              Auto style the code"
 	@echo "  lint                   Check the code for lint"
 	@echo "  spell                  Check spelling"
 	@echo "  build                  Build the package"
 	@echo "  vignettes              Build vignettes"
 	@echo "  readme                 Build readme"
+	@echo "  check-win              Run R CMD on the winbuilder service from CRAN"
+	@echo "  check-rhub             Run R CMD on the rhub service"
 	@echo "  release                Release to CRAN"
 	@echo "  preview-site           Preview pkgdown site"
 	@echo "  dev-guide              Open the R package development guide"
@@ -34,7 +35,6 @@ all: clean fix-style document lint spell test
 .PHONY: install-deps
 install-deps:
 	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
-	Rscript -e "if (!requireNamespace('pkgdown', quietly = TRUE)) install.packages('pkgdown')"
 	Rscript -e "devtools::install_deps()"
 	Rscript -e "devtools::install_dev_deps()"
 	Rscript -e "devtools::update_packages()"
@@ -97,11 +97,6 @@ check:
 	Rscript -e "devtools::check(cran = FALSE, remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
 	Rscript -e "devtools::check(cran = TRUE , remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
 
-.PHONY: check-win
-check-win:
-	rm -rf lib/
-	Rscript -e "devtools:::check_win()"
-
 .PHONY: fix-style
 fix-style:
 	Rscript -e "styler::style_pkg()"
@@ -121,6 +116,7 @@ spell:
 			stop(error); \
 		}; \
 	"
+	Rscript -e "devtools::spell_check()"
 
 .PHONY: build
 build:
@@ -139,9 +135,20 @@ preview-site:
 	Rscript -e "pkgdown::build_site()"
 	open docs/index.html
 
+.PHONY: check-win
+check-win:
+	rm -rf lib/
+	Rscript -e "devtools:::check_win()"
+
+.PHONY: check-rhub
+check-rhub:
+	rm -rf lib/
+	Rscript -e "rhub::rhub_check(platform='linux')"
+
 .PHONY: release
-release:
-	Rscript -e "devtools::release()"
+release: check-rhub check-win
+	R --no-save --quiet --interactive
+	devtools::release()
 
 .PHONY: dev-guide
 dev-guide:
