@@ -42,7 +42,7 @@ model_list <- caretEnsemble::caretList(
   data = training,
   methodList = c("glmnet", "rpart")
 )
-summary(model_list)
+print(summary(model_list))
 ```
 (As with `train`, the formula interface is convenient but introduces move overhead. For large datasets the explicitly passing `x` and `y` is preferred).
 We can use the `predict` function to extract predictions from this object for new data:
@@ -63,7 +63,7 @@ model_list_big <- caretEnsemble::caretList(
     nn = caretEnsemble::caretModelSpec(method = "nnet", tuneLength = 2L, trace = FALSE)
   )
 )
-summary(model_list_big)
+print(summary(model_list_big))
 ```
 
 Finally, you should note that `caretList` does not support custom caret models. Fitting those models are beyond the scope of this vignette, but if you do so, you can manually add them to the model list (e.g. `model_list_big[["my_custom_model"]] <- my_custom_model`). Just be sure to use the same re-sampling indexes in `trControl` as you use in the `caretList` models!
@@ -84,7 +84,7 @@ caret::modelCor(caret::resamples(model_list))
 These 2 models make a good candidate for an ensemble: their predictions are fairly uncorrelated, but their overall accuracy is similar. We do a simple, linear greedy optimization on AUC using caretEnsemble:
 ```{r}
 greedy_ensemble <- caretEnsemble::caretEnsemble(model_list)
-summary(greedy_ensemble)
+print(summary(greedy_ensemble))
 ```
 
 ```{r}

@@ -44,6 +44,7 @@ models <- caretEnsemble::caretList(
   data = dat,
   methodList = c("rf", "glmnet")
 )
+print(summary(models))
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models

@@ -42,6 +42,14 @@ models <- caretEnsemble::caretList(
   data = dat,
   methodList = c("rf", "glmnet")
 )
+print(summary(models))
+#> The following models were ensembled: rf, glmnet  
+#> 
+#> Model accuracy:
+#>    model_name metric    value        sd
+#>        <char> <char>    <num>     <num>
+#> 1:         rf   RMSE 1007.595 192.05082
+#> 2:     glmnet   RMSE 1217.374  69.54145
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
@@ -59,18 +67,18 @@ print(greedy_stack)
 #> Summary of sample sizes: 400, 400, 400, 400, 400 
 #> Resampling results:
 #> 
-#>   RMSE      Rsquared   MAE    
-#>   1034.614  0.9347528  517.897
+#>   RMSE      Rsquared  MAE     
+#>   951.4063  0.947765  545.1398
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  1047.523 
+#> RMSE:  959.2989 
 #> Weights:
 #>        [,1]
-#> rf     0.78
-#> glmnet 0.22
+#> rf     0.68
+#> glmnet 0.32
 ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
@@ -93,7 +101,7 @@ print(rf_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   1107.429  0.9264549  532.1966
+#>   1030.494  0.9376481  541.5582
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -105,8 +113,8 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 1293471
-#>                     % Var explained: 92.1
+#>           Mean of squared residuals: 985743.6
+#>                     % Var explained: 93.99
 ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 

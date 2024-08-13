@@ -30,21 +30,21 @@ model_list <- caretEnsemble::caretList(
   y = iris[, 5L],
   methodList = c("rpart", "rf")
 )
-summary(model_list)
+print(summary(model_list))
 ```
 
 # Greedy Optimizer in caretEnsemble
 The new version uses a greedy optimizer by default, ensuring the ensemble is never worse than the worst single model:
 ```{r}
 ens <- caretEnsemble::caretEnsemble(model_list)
-summary(ens)
+print(summary(ens))
 ```
 
 # Enhanced S3 Methods
 caretStack (and by extension, caretEnsemble) now supports various S3 methods:
 ```{r}
 print(ens)
-summary(ens)
+print(summary(ens))
 plot(ens)
 ggplot2::autoplot(ens)
 ```
