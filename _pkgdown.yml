@@ -2,10 +2,8 @@ url: http://zachmayer.github.io/caretEnsemble/
 template:
   bootstrap: 5
   light-switch: true
-  bootswatch: darkly
   bslib:
-    base_font: {google: "Roboto"}
-    heading_font: {google: "Roboto Slab"}
-    code_font: {google: "JetBrains Mono"}
-  params:
-    mode: dark
+    primary: "#0054AD"
+    border-radius: 0.5rem
+    btn-border-radius: 0.25rem
+    danger: "#A6081A"
