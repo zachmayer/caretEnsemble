@@ -121,6 +121,7 @@ spell:
 			stop(error); \
 		}; \
 	"
+	Rscript -e "devtools::spell_check()"
 
 .PHONY: build
 build:
@@ -141,7 +142,7 @@ preview-site:
 
 .PHONY: release
 release:
-	Rscript -e "devtools::release()"
+	R -e "devtools::release()"
 
 .PHONY: dev-guide
 dev-guide:
