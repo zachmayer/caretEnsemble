@@ -8,6 +8,9 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
@@ -35,7 +38,7 @@ Use `caretList` to fit multiple models, and then use `caretStack` to stack them 
 
 
 First, use caretList to fit many models to the same data:
-```{r, message=FALSE}
+```{r}
 data(diamonds, package = "ggplot2")
 dat <- data.table::data.table(diamonds)
 dat <- dat[sample.int(nrow(diamonds), 500L), ]
@@ -48,14 +51,14 @@ print(summary(models))
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
-```{r, message=FALSE, warning=FALSE}
+```{r}
 greedy_stack <- caretEnsemble::caretEnsemble(models)
 print(greedy_stack)
 ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
 You can also use caretStack to make a non-linear ensemble
-```{r, message=FALSE, warning=FALSE}
+```{r}
 rf_stack <- caretEnsemble::caretStack(models, method = "rf")
 print(rf_stack)
 ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
