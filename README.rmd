@@ -78,7 +78,7 @@ devtools::install_github("zachmayer/caretEnsemble@2.0.3")
 This is useful if the latest release breaks some aspect of your workflow. caretEnsemble is pure R with no compilation, so this command will work in a variety of environments.
 
 # Package development
-This packages uses a Makefile. Use `make help` to see the supported options.
+This package uses a Makefile. Use `make help` to see the supported options.
 
 Use `make fix-style` to fix simple linting errors. 
 
@@ -88,7 +88,6 @@ Use `make all` before making a pull request, which will also run R CMD CHECK and
 
 ## First time dev setup:
 run `make install` from the git repository to install the dev version of caretEnsemble, along with the necessary package dependencies.
-
 # Inspiration and similar packages:
 caretEnsemble was inspired by [medley](https://github.com/mewo2/medley), which in turn was inspired by Caruana et. al.'s (2004) paper [Ensemble Selection from Libraries of Models.](http://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
 
