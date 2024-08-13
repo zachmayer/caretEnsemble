@@ -17,6 +17,12 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
+knitr::opts_chunk$set(render = function(x, options) {
+  if (is.data.frame(x) || is.matrix(x)) {
+    return(knitr::kable(x))
+  }
+  knitr::knit_print(x)
+})
 ```
 
 `caretEnsemble` is a package for making ensembles of caret models. You should already be somewhat familiar with the caret package before trying out `caretEnsemble`.
