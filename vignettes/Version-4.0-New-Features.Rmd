@@ -4,7 +4,7 @@ author: "Zach Deane-Mayer"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Version-4.0-New-Features}
+  %\VignetteIndexEntry{Version 4.0 New Features}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
