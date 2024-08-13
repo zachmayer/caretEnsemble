@@ -9,6 +9,6 @@ template:
     danger: "#A6081A"
   opengraph:
     image:
-      src: man/figures/README-greed-stack-6-plot.png
+      src: man/figures/README-greedy-stack-6-plot.png
       alt: "6 panel plot of an ensemble of models fit to the diamonds dataset. The RF model is the best and has the highest weight. The residual plots look good."
 
