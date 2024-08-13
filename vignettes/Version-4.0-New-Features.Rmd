@@ -17,12 +17,6 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
-knitr::opts_chunk$set(render = function(x, options) {
-  if (is.data.frame(x) || is.matrix(x)) {
-    return(knitr::kable(x))
-  }
-  knitr::knit_print(x)
-})
 set.seed(42L)
 ```
 

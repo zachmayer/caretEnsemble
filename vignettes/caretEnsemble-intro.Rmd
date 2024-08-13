@@ -17,12 +17,6 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
-knitr::opts_chunk$set(render = function(x, options) {
-  if (is.data.frame(x) || is.matrix(x)) {
-    return(knitr::kable(x))
-  }
-  knitr::knit_print(x)
-})
 ```
 
 `caretEnsemble` is a package for making ensembles of caret models. You should already be somewhat familiar with the caret package before trying out `caretEnsemble`.
@@ -34,7 +28,7 @@ knitr::opts_chunk$set(render = function(x, options) {
 `caretList` is a flexible function for fitting many different caret models, with the same resampling parameters, to the same dataset. It returns a convenient `list` of caret objects which can later be passed to `caretEnsemble` and `caretStack`. `caretList` has almost exactly the same arguments as `train` (from the caret package), with the exception that the `trControl` argument comes last. It can handle both the formula interface and the explicit `x`, `y` interface to train. As in caret, the formula interface introduces some overhead and the `x`, `y` interface is preferred.
 
 `caretEnsemble` has 2 arguments that can be used to specify which models to fit: `methodList` and `tuneList`. `methodList` is a simple character vector of methods that will be fit with the default `train` parameters, while `tuneList` can be used to customize the call to each component model and will be discussed in more detail later. First, lets build an example dataset (adapted from the caret vignette):
-```{r, results="hide"}
+```{r}
 data(Sonar, package = "mlbench")
 set.seed(107L)
 inTrain <- caret::createDataPartition(y = Sonar$Class, p = 0.75, list = FALSE)
@@ -42,7 +36,7 @@ training <- Sonar[inTrain, ]
 testing <- Sonar[-inTrain, ]
 ```
 
-```{r, echo=TRUE, results="hide", warning=FALSE}
+```{r}
 model_list <- caretEnsemble::caretList(
   Class ~ .,
   data = training,
@@ -50,6 +44,7 @@ model_list <- caretEnsemble::caretList(
 )
 print(summary(model_list))
 ```
+
 (As with `train`, the formula interface is convenient but introduces move overhead. For large datasets the explicitly passing `x` and `y` is preferred).
 We can use the `predict` function to extract predictions from this object for new data:
 ```{r}
