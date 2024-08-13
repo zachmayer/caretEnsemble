@@ -182,15 +182,19 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
 #' @export
 defaultControl <- function(
     target,
+    method = 'cv',
     number = 5L,
+    savePredictions = "final",
+    index = caret::createFolds(target, k = number, list = TRUE, returnTrain = TRUE),
     is_class = is.factor(target) || is.character(target),
     is_binary = length(unique(target)) == 2L,
     ...) {
+  stopifnot(savePredictions %in% c("final", "all"))
   caret::trainControl(
-    method = "cv",
+    method = method,
     number = number,
-    index = caret::createFolds(target, k = number, list = TRUE, returnTrain = TRUE),
-    savePredictions = "final",
+    index = index,
+    savePredictions = savePredictions,
     classProbs = is_class,
     summaryFunction = ifelse(is_class && is_binary, caret::twoClassSummary, caret::defaultSummary),
     returnData = FALSE,

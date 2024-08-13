@@ -90,7 +90,7 @@ view-coverage: coverage-report.html
 	open coverage-report.html  
 
 .PHONY: coverage
-coverage: cobertura.xml coverage-report.html coverage-test view-coverage
+coverage: cobertura.xml coverage-report.html view-coverage coverage-test
 
 .PHONY: check
 check:

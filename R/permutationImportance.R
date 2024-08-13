@@ -54,6 +54,10 @@ shuffled_mae <- function(model, original_data, target, pred_type, shuffle_idx) {
     new_preds <- as.matrix(stats::predict(model, original_data, type = pred_type))
     data.table::set(original_data, j = var, value = old_var)
 
+    if(anyNA(new_preds)) {  # This shoudn't happen, but it does with rpart.
+      new_preds[is.na(new_preds)] <- 0.0
+    }
+
     mae(new_preds, target)
   }, numeric(1L))
 
@@ -105,6 +109,7 @@ permutationImportance <- function(
     is.numeric(preds_orig),
     is.finite(preds_orig)
   )
+
   # Error of shuffled variables
   mae_vars <- shuffled_mae(model, newdata, preds_orig, pred_type, shuffle_idx)
 

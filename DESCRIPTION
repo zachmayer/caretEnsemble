@@ -4,7 +4,7 @@ Title: Ensembles of Caret Models
 Version: 4.0.0
 Date: 2024-08-12
 Authors@R: c(person(c("Zachary", "A."), "Deane-Mayer", role = c("aut", "cre", "cph"), email = "zach.mayer@gmail.com"),
-    person(c("Jared", "E.", "Knowles", role="ctb", email="jknowles@gmail.com"),
+    person(c("Jared", "E.", "Knowles"), role="ctb", email="jknowles@gmail.com"),
     person("Antón", "López", role="ctb", email="zach.mayer+get-correct-email@gmail.com")
     )
 URL: https://github.com/zachmayer/caretEnsemble
