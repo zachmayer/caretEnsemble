@@ -30,6 +30,7 @@ model_list <- caretEnsemble::caretList(
   y = iris[, 5L],
   methodList = c("rpart", "rf")
 )
+summary(model_list)
 ```
 
 # Greedy Optimizer in caretEnsemble
@@ -47,6 +48,7 @@ summary(ens)
 plot(ens)
 ggplot2::autoplot(ens)
 ```
+
 # Improved Default trainControl
 A new default trainControl constructor makes it easier to build appropriate controls for caretLists. These controls include explicit indexes based on the target, return stacked predictions, and use probability estimates for classification models.
 ```{r}
