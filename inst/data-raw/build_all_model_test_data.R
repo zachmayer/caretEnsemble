@@ -9,7 +9,7 @@ devtools::load_all()
 # Setup data
 #################################################################
 set.seed(42L)
-nrows <- 25L
+nrows <- 10L
 ncols <- 2L
 
 X <- matrix(stats::rnorm(nrows * ncols), ncol = ncols)
@@ -21,10 +21,22 @@ y_bin <- factor(ifelse(y > median(y), "yes", "no"))
 all_models <- data.table::data.table(caret::modelLookup())
 all_models <- unique(all_models[, c("model", "forReg", "probModel")])
 
+# Reg
 reg_models <- sort(unique(all_models[which(forReg), ][["model"]]))
-bin_models <- sort(unique(all_models[which(probModel), ][["model"]]))
+reg_models <- setdiff(reg_models, c(  # Not installed
+  'elm'))
 
+
+# Bin
+bin_models <- sort(unique(all_models[which(probModel), ][["model"]]))
 bin_models <- setdiff(bin_models, "gaussprLinear") # Unbelievably slow.  100 points, 2 columns, 50 hours lol
+
+bin_models <- setdiff(bin_models, c(
+  "bagEarth", "bagEarthGCV", "bagEarthInf", "bagEarthInfGCV",
+  "randomGLM", "bam", "AdaBoost.M1", "AdaBag", 'ada', 'bagFDAGCV', 'treebag',
+  'gamLoess', 'gamSpline', 'vglmCumulative', 'xgbDART', 'vglmAdjCat',
+  'wsrf', 'gamboost', 'glmboost'
+))
 
 #################################################################
 # Class/Reg models
@@ -84,16 +96,30 @@ models_reg <- trim_models(models_reg)
 models_bin <- caretList(X, y_bin, methodList = bin_models, tuneLength = 1L, continue_on_fail = TRUE)
 models_bin <- trim_models(models_bin)
 
+# Check size
+show_size <- function(x){
+  object_size_bytes <- object.size(x)
+  object_size_mb <- as.numeric(object_size_bytes) / (1024^2)
+  cat("The size is:", object_size_mb, "MB\n")
+
+  sizes <- sapply(x, object.size)
+  sizes <- sizes / sum(sizes)
+  sizes <- sort(sizes)
+  sizes
+}
+print(show_size(models_reg))
+print(show_size(models_bin))
+
 #################################################################
 # Save data
 #################################################################
 all_models <- c(models_reg, models_bin)
 
-usethis::use_data(
+save(
   all_models,
-  internal = TRUE,
-  overwrite = TRUE,
+  file = file.path("devdata.rda"),
+  ascii = FALSE,
+  version = 3L,
   compress = "xz",
-  version = 3,
-  ascii = FALSE
+  compression_level = 9
 )

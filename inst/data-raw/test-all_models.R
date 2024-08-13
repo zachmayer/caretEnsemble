@@ -1,13 +1,23 @@
-
 # Load pre-computed test data
 all_models <- NULL
-load(file.path("R", "sysdata.rda"))
+suppressWarnings(suppressMessages({
+  load(file.path("devdata.rda"))
+}))
+
+# Make X matrix
+set.seed(42L)
+nrows <- 25L
+ncols <- 2L
+X <- matrix(stats::rnorm(nrows * ncols), ncol = ncols)
+colnames(X) <- paste0("X", 1L:ncols)
 
 # Load libraries needed
-libs <- lapply(all_models, function(x) {
-  x$modelInfo$library
-})
-libs <- sort(unique(unlist(libs)))
+suppressWarnings(suppressMessages({
+  libs <- lapply(all_models, function(x) {
+    x$modelInfo$library
+  })
+  libs <- sort(unique(unlist(libs)))
+}))
 
 # Check libraries are installed
 testthat::test_that("All libraries are installed", {
@@ -27,7 +37,7 @@ testthat::test_that("Most caret models can predict", {
     require(lib, character.only = TRUE) # nolint undesired_function_linter
   }
   testthat::expect_gt(length(all_models), 200L) # About 100 each of class/reg
-  pred <- suppressWarnings(suppressMessages(predict(all_models, X)))
+  pred <- testthat::expect_output(suppressWarnings(suppressMessages(predict(all_models, X))))
   testthat::expect_identical(nrow(pred), nrow(X))
   testthat::expect_identical(ncol(pred), length(all_models))
   testthat::expect_true(all(unlist(lapply(pred, is.finite))))

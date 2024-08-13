@@ -46,10 +46,10 @@ print(summary(models))
 #> The following models were ensembled: rf, glmnet  
 #> 
 #> Model accuracy:
-#>    model_name metric    value       sd
-#>        <char> <char>    <num>    <num>
-#> 1:         rf   RMSE 1137.043 190.9511
-#> 2:     glmnet   RMSE 1388.369 199.4035
+#>    model_name metric    value        sd
+#>        <char> <char>    <num>     <num>
+#> 1:         rf   RMSE 1041.580  90.36479
+#> 2:     glmnet   RMSE 1097.398 115.44590
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
@@ -64,21 +64,21 @@ print(greedy_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 400, 400, 400 
+#> Summary of sample sizes: 400, 400, 400, 401, 399 
 #> Resampling results:
 #> 
-#>   RMSE     Rsquared   MAE     
-#>   1091.99  0.9274707  596.6285
+#>   RMSE      Rsquared  MAE     
+#>   973.4392  0.939656  557.0054
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  1079.89 
+#> RMSE:  991.436 
 #> Weights:
 #>        [,1]
-#> rf     0.69
-#> glmnet 0.31
+#> rf     0.59
+#> glmnet 0.41
 ```
 
 You can also use caretStack to make a non-linear ensemble
@@ -94,11 +94,11 @@ print(rf_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 400, 400, 400 
+#> Summary of sample sizes: 400, 402, 400, 399, 399 
 #> Resampling results:
 #> 
-#>   RMSE      Rsquared   MAE    
-#>   969.9343  0.9455775  522.821
+#>   RMSE      Rsquared   MAE     
+#>   988.0671  0.9381938  506.0528
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -110,8 +110,8 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 904899.3
-#>                     % Var explained: 94.59
+#>           Mean of squared residuals: 988056.2
+#>                     % Var explained: 93.6
 ```
 
 Use autoplot from ggplot2 to plot ensemble diagnostics:
