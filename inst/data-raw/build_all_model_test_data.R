@@ -3,7 +3,9 @@
 # But I do want to run this every release to make sure that the models
 # we can run predict correctly.
 
-devtools::load_all()
+very_quiet <- function(expr) {
+  testthat::expect_output(suppressWarnings(suppressMessages(expr)))
+}
 
 #################################################################
 # Setup data
@@ -21,61 +23,25 @@ y_bin <- factor(ifelse(y > median(y), "yes", "no"))
 all_models <- data.table::data.table(caret::modelLookup())
 all_models <- unique(all_models[, c("model", "forReg", "probModel")])
 
+java_models <- c(
+  'gbm_h2o',
+  'glmnet_h2o',
+  'bartMachine',
+  'M5',
+  'M5Rules',
+  'J48',
+  'JRip',
+  'LMT',
+  'PART',
+  'OneR',
+  'evtree'
+)
+
+#################################################################
 # Reg
-reg_models <- sort(unique(all_models[which(forReg), ][["model"]]))
-reg_models <- setdiff(reg_models, c(  # Not installed
-  'elm'))
-
-
-# Bin
-bin_models <- sort(unique(all_models[which(probModel), ][["model"]]))
-bin_models <- setdiff(bin_models, "gaussprLinear") # Unbelievably slow.  100 points, 2 columns, 50 hours lol
-
-bin_models <- setdiff(bin_models, c(
-  "bagEarth", "bagEarthGCV", "bagEarthInf", "bagEarthInfGCV",
-  "randomGLM", "bam", "AdaBoost.M1", "AdaBag", 'ada', 'bagFDAGCV', 'treebag',
-  'gamLoess', 'gamSpline', 'vglmCumulative', 'xgbDART', 'vglmAdjCat',
-  'wsrf', 'gamboost', 'glmboost'
-))
-
-#################################################################
-# Class/Reg models
 #################################################################
 
-# We skip these by default, as you need to manually babysit them and install packages
-# and for many models, the install fails, so you need to babysit every time.
-
-# https://github.com/topepo/caret/blob/master/pkg/caret/R/trim.R
-trim_models <- function(x) {
-  for (n in names(x)) {
-    removals <- c(
-      "results", "pred", "bestTune", "call", "dots",
-      "metric", "trainingData", "resample", "resampledCM",
-      "perfNames", "maxmimize", "times"
-    )
-    for (i in removals) {
-      if (i %in% names(x[[n]])) {
-        x[[n]][[i]] <- NULL
-      }
-    }
-    c_removals <- c(
-      "method", "number", "repeats", "p", "initialWindow",
-      "horizon", "fixedWindow", "verboseIter", "returnData",
-      "returnResamp", "savePredictions", "summaryFunction",
-      "selectionFunction", "index", "indexOut", "indexFinal",
-      "timingSamps", "trim", "yLimits"
-    )
-    for (i in c_removals) {
-      if (i %in% names(x[[n]]$control)) x[[n]]$control[i] <- NULL
-    }
-
-    if (!is.null(x[[n]]$modelInfo$trim)) {
-      x[[n]]$finalModel <- x[[n]]$modelInfo$trim(x[[n]]$finalModel)
-    }
-  }
-  x
-}
-
+# From https://github.com/zachmayer/caretEnsemble/issues/324
 # Problem models:
 # bam - array
 # blackboost - matrix, array
@@ -89,37 +55,42 @@ trim_models <- function(x) {
 # rvmRadial - matrix, array
 # spls - matrix, array
 # xyf - matrix, array
-models_reg <- caretList(X, y, methodList = reg_models, tuneLength = 1L, continue_on_fail = TRUE)
-models_reg <- trim_models(models_reg)
+reg_models <- sort(unique(all_models[which(forReg), ][["model"]]))
+reg_models <- setdiff(reg_models, c(  # Can't install or too slow
+  "elm", 'extraTrees', 'foba', 'logicBag', 'mlpSGD', 'mxnet',
+  'mxnetAdam', 'nodeHarvest', 'relaxo', java_models
+))
+
+#################################################################
+# Class
+#################################################################
 
 # Problem models: None!
-models_bin <- caretList(X, y_bin, methodList = bin_models, tuneLength = 1L, continue_on_fail = TRUE)
-models_bin <- trim_models(models_bin)
-
-# Check size
-show_size <- function(x){
-  object_size_bytes <- object.size(x)
-  object_size_mb <- as.numeric(object_size_bytes) / (1024^2)
-  cat("The size is:", object_size_mb, "MB\n")
-
-  sizes <- sapply(x, object.size)
-  sizes <- sizes / sum(sizes)
-  sizes <- sort(sizes)
-  sizes
-}
-print(show_size(models_reg))
-print(show_size(models_bin))
+bin_models <- sort(unique(all_models[which(probModel), ][["model"]]))
+bin_models <- setdiff(bin_models, c(  # Can't install or too slow
+  "gaussprLinear", "adaboost", "amdai", "chaid", "extraTrees",
+  "gpls", "logicBag", "mlpSGD", "mxnet", "mxnetAdam", "nodeHarvest",
+  "ORFlog", "ORFpls", "ORFridge", "ORFsvm", "rrlda", "vbmpRadial",
+  java_models
+))
 
 #################################################################
-# Save data
+# Tests
 #################################################################
-all_models <- c(models_reg, models_bin)
 
-save(
-  all_models,
-  file = file.path("devdata.rda"),
-  ascii = FALSE,
-  version = 3L,
-  compress = "xz",
-  compression_level = 9
-)
+testthat::test_that("Most caret models can predict", {
+
+  # Fit the big caret lists
+  models_reg <- very_quiet(caretList(X, y, methodList = reg_models, tuneLength = 1L, continue_on_fail = TRUE))
+  models_bin <- very_quiet(caretList(X, y_bin, methodList = bin_models, tuneLength = 1L, continue_on_fail = TRUE))
+  all_models <- c(models_reg, models_bin)
+  testthat::expect_gt(length(all_models), 200L) # About 100 each of class/reg
+
+  # Make sure we can predict
+  pred <- very_quiet(predict(all_models, X))
+
+  # Checks
+  testthat::expect_identical(nrow(pred), nrow(X))
+  testthat::expect_identical(ncol(pred), length(all_models))
+  testthat::expect_true(all(unlist(lapply(pred, is.finite))))
+})
