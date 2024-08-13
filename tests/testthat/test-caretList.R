@@ -291,3 +291,32 @@ testthat::test_that("caretList supports custom models", {
   testthat::expect_identical(nrow(stacked_p), nrow(iris))
   testthat::expect_identical(nrow(new_p), 10L)
 })
+
+testthat::test_that("caretList supports models that return an array or matrix", {
+  set.seed(42L)
+  nrows <- 100L
+  ncols <- 2L
+  X <- matrix(stats::rnorm(nrows * ncols), ncol = ncols)
+  y <- X[, 1L] + X[, 2L] + stats::rnorm(nrows) / 10.0
+  y <- factor(ifelse(y > median(y), "yes", "no"))
+
+  colnames(X) <- paste0("X", 1L:ncols)
+  model_names <- c("earth", "gam", "stepLDA") # gam is chatty
+  models <- testthat::expect_output(
+    testthat::expect_warning(
+      caretList(X, y, methodList = model_names, tuneLength = 1L),
+      "Fitting terminated with step failure - check results carefully"
+    ), "correctness rate:"
+  )
+  pred <- predict(models, head(X, 10L))
+  testthat::expect_is(pred, "data.table")
+  testthat::expect_identical(nrow(pred), 10L)
+  testthat::expect_identical(ncol(pred), length(model_names))
+  testthat::expect_true(all(unlist(lapply(pred, is.finite))))
+
+  pred_stack <- predict(models, X)
+  testthat::expect_is(pred_stack, "data.table")
+  testthat::expect_identical(nrow(pred_stack), nrow(X))
+  testthat::expect_identical(ncol(pred_stack), length(model_names))
+  testthat::expect_true(all(unlist(lapply(pred_stack, is.finite))))
+})

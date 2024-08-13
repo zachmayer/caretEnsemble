@@ -24,10 +24,18 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
 
     # Otherwise, predict on newdata
   } else {
+    if (any(object$modelInfo$library %in% c("neuralnet", "klaR"))) {
+      newdata <- as.matrix(newdata) # I hate some of these packages
+    }
     if (is_class) {
-      pred <- caret::predict.train(object, type = "prob", newdata = newdata, ...)
+      pred <- stats::predict(object, type = "prob", newdata = newdata, ...)
+      stopifnot(is.data.frame(pred))
     } else {
-      pred <- caret::predict.train(object, type = "raw", newdata = newdata, ...)
+      pred <- stats::predict(object, type = "raw", newdata = newdata, ...)
+      stopifnot(is.numeric(pred))
+      if (!is.vector(pred)) {
+        pred <- as.vector(pred)
+      }
       stopifnot(
         is.vector(pred),
         is.numeric(pred),
