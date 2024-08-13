@@ -216,12 +216,11 @@ testthat::test_that("permutationImportance handles various edge cases", {
 testthat::context("NAN predictions from rpart")
 ######################################################################
 
-
 testthat::test_that("permutationImportance handles NAN predictions from rpart", {
-  set.seed(42)
+  set.seed(42L)
   model_list <- caretEnsemble::caretList(
-    x = iris[, 1:4],
-    y = iris[, 5],
+    x = iris[, 1L:4L],
+    y = iris[, 5L],
     methodList = "rpart"
   )
   ens <- caretEnsemble(model_list)

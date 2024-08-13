@@ -56,21 +56,21 @@ print(greedy_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 400, 400, 400 
+#> Summary of sample sizes: 399, 401, 400, 400, 400 
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   1019.069  0.9401024  530.9788
+#>   925.6101  0.9454321  513.4172
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  1013.725 
+#> RMSE:  927.4321 
 #> Weights:
 #>        [,1]
-#> rf      0.9
-#> glmnet  0.1
+#> rf     0.76
+#> glmnet 0.24
 ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
@@ -89,11 +89,11 @@ print(rf_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 400, 400, 400 
+#> Summary of sample sizes: 399, 400, 401, 400, 400 
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   1076.369  0.9338026  531.9601
+#>   935.9032  0.9469527  525.7192
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -105,8 +105,8 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 1136154
-#>                     % Var explained: 93.38
+#>           Mean of squared residuals: 919446.8
+#>                     % Var explained: 94.1
 ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
@@ -141,7 +141,7 @@ will work in a variety of environments.
 
 # Package development
 
-This packages uses a Makefile. Use `make help` to see the supported
+This package uses a Makefile. Use `make help` to see the supported
 options.
 
 Use `make fix-style` to fix simple linting errors.
@@ -157,20 +157,17 @@ CHECK and a code coverage check. This runs
 ## First time dev setup:
 
 run `make install` from the git repository to install the dev version of
-caretEnsemble, along with the necessary package dependencies.
-
-# Inspiration and similar packages:
-
-caretEnsemble was inspired by [medley](https://github.com/mewo2/medley),
-which in turn was inspired by Caruana et. al.’s (2004) paper [Ensemble
-Selection from Libraries of
+caretEnsemble, along with the necessary package dependencies. \#
+Inspiration and similar packages: caretEnsemble was inspired by
+[medley](https://github.com/mewo2/medley), which in turn was inspired by
+Caruana et. al.’s (2004) paper [Ensemble Selection from Libraries of
 Models.](http://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
 
 If you want to do something similar in python, check out
-[vecstack](https://github.com/vecxoz/vecstack)
+[vecstack](https://github.com/vecxoz/vecstack).
 
 # Code of Conduct:
 
 Please note that this project is released with a [Contributor Code of
 Conduct](https://github.com/zachmayer/caretEnsemble/blob/master/.github/CONTRIBUTING.md).
-By participating in this project, you agree to abide by its terms.
+By participating in this project you agree to abide by its terms.

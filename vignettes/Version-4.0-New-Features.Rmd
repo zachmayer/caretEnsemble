@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
+set.seed(42L)
 ```
 
 caretEnsemble 4.0.0 introduces many new features! Let's quickly go over them.
@@ -24,10 +25,9 @@ caretEnsemble 4.0.0 introduces many new features! Let's quickly go over them.
 # Multiclass support
 caretEnsemble now fully supports multiclass problems:
 ```{r}
-set.seed(42)
 model_list <- caretEnsemble::caretList(
-  x = iris[, 1:4],
-  y = iris[, 5],
+  x = iris[, 1L:4L],
+  y = iris[, 5L],
   methodList = c("rpart", "rf")
 )
 ```
@@ -62,21 +62,20 @@ print(ls(reg_control))
 # Mixed Resampling Strategies
 Models with different resampling strategies can now be ensembled:
 ```{r}
-set.seed(42)
-y <- iris[, 1]
-x <- iris[, 2:3]
+y <- iris[, 1L]
+x <- iris[, 2L:3L]
 flex_list <- caretEnsemble::caretList(
   x = x,
   y = y,
   methodList = c("rpart", "rf"),
-  trControl = caretEnsemble::defaultControl(y, number = 3)
+  trControl = caretEnsemble::defaultControl(y, number = 3L)
 )
 
 flex_list$glm_boot <- caret::train(
   x = x,
   y = y,
   method = "glm",
-  trControl = caretEnsemble::defaultControl(y, method = "boot", number=50)
+  trControl = caretEnsemble::defaultControl(y, method = "boot", number = 25L)
 )
 
 flex_ens <- caretEnsemble::caretEnsemble(flex_list)
@@ -86,13 +85,17 @@ print(flex_ens)
 # Mixed Model Types
 caretEnsemble now allows ensembling of mixed lists of classification and regression models:
 ```{r}
-set.seed(42)
-X <- iris[,1:4]
-target_class <- iris[, 5]
-target_reg <- as.integer(iris[, 5] == 'virginica')
-model_class <- caret::train(iris[, 1:4], target_class, method = "rf", trControl = caretEnsemble::defaultControl(target_class))
-model_reg <- caret::train(iris[, 1:4], target_reg, method = "rf", trControl = caretEnsemble::defaultControl(target_reg))
-mixed_list <- caretEnsemble::as.caretList(list(class=model_class, reg=model_reg))
+X <- iris[, 1L:4L]
+
+target_class <- iris[, 5L]
+target_reg <- as.integer(iris[, 5L] == "virginica")
+
+ctrl_class <- caretEnsemble::defaultControl(target_class)
+ctrl_reg <- caretEnsemble::defaultControl(target_reg)
+
+model_class <- caret::train(iris[, 1L:4L], target_class, method = "rf", trControl = ctrl_class)
+model_reg <- caret::train(iris[, 1L:4L], target_reg, method = "rf", trControl = ctrl_reg)
+mixed_list <- caretEnsemble::as.caretList(list(class = model_class, reg = model_reg))
 mixed_ens <- caretEnsemble::caretEnsemble(mixed_list)
 print(mixed_ens)
 ```
@@ -100,21 +103,20 @@ print(mixed_ens)
 # Transfer Learning
 caretStack now supports transfer learning for ensembling models trained on different datasets:
 ```{r}
-set.seed(42)
-train_idx <- sample(1:nrow(iris), 100)
+train_idx <- sample.int(nrow(iris), 100L)
 train_data <- iris[train_idx, ]
 new_data <- iris[-train_idx, ]
 
 model_list <- caretEnsemble::caretList(
-  x = train_data[, 1:4],
-  y = train_data[, 5],
+  x = train_data[, 1L:4L],
+  y = train_data[, 5L],
   methodList = c("rpart", "rf")
 )
 
 transfer_ens <- caretEnsemble::caretEnsemble(
   model_list,
-  new_X = new_data[, 1:4],
-  new_y = new_data[, 5]
+  new_X = new_data[, 1L:4L],
+  new_y = new_data[, 5L]
 )
 
 print(transfer_ens)

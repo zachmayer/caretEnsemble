@@ -6,7 +6,10 @@
 \usage{
 defaultControl(
   target,
+  method = "cv",
   number = 5L,
+  savePredictions = "final",
+  index = caret::createFolds(target, k = number, list = TRUE, returnTrain = TRUE),
   is_class = is.factor(target) || is.character(target),
   is_binary = length(unique(target)) == 2L,
   ...
@@ -15,7 +18,13 @@ defaultControl(
 \arguments{
 \item{target}{the target variable.}
 
+\item{method}{the method to use for trainControl.}
+
 \item{number}{the number of folds to use.}
+
+\item{savePredictions}{the type of predictions to save.}
+
+\item{index}{the fold indexes to use.}
 
 \item{is_class}{logical, is this a classification or regression problem.}
 

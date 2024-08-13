@@ -175,14 +175,17 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
 #' models. We also construct explicit fold indexes and return the stacked predictions,
 #' which are needed for stacking. For classification models we return class probabilities.
 #' @param target the target variable.
+#' @param method the method to use for trainControl.
 #' @param number the number of folds to use.
+#' @param savePredictions the type of predictions to save.
+#' @param index the fold indexes to use.
 #' @param is_class logical, is this a classification or regression problem.
 #' @param is_binary logical, is this binary classification.
 #' @param ... other arguments to pass to \code{\link[caret]{trainControl}}
 #' @export
 defaultControl <- function(
     target,
-    method = 'cv',
+    method = "cv",
     number = 5L,
     savePredictions = "final",
     index = caret::createFolds(target, k = number, list = TRUE, returnTrain = TRUE),

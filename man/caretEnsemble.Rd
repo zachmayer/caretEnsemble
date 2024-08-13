@@ -66,7 +66,7 @@ Useful links:
 
 Other contributors:
 \itemize{
-  \item Jared Knowles \email{jknowles@gmail.com} [contributor]
+  \item Jared E. Knowles \email{jknowles@gmail.com} [contributor]
   \item Antón López \email{zach.mayer+get-correct-email@gmail.com} [contributor]
 }
 
