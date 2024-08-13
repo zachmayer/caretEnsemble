@@ -34,7 +34,6 @@ all: clean fix-style document lint spell test
 .PHONY: install-deps
 install-deps:
 	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
-	Rscript -e "if (!requireNamespace('pkgdown', quietly = TRUE)) install.packages('pkgdown')"
 	Rscript -e "devtools::install_deps()"
 	Rscript -e "devtools::install_dev_deps()"
 	Rscript -e "devtools::update_packages()"
@@ -102,6 +101,11 @@ check-win:
 	rm -rf lib/
 	Rscript -e "devtools:::check_win()"
 
+.PHONY: check-rhub
+check-rhub:
+	rm -rf lib/
+	Rscript -e "rhub::rhub_check()"
+
 .PHONY: fix-style
 fix-style:
 	Rscript -e "styler::style_pkg()"
@@ -141,8 +145,9 @@ preview-site:
 	open docs/index.html
 
 .PHONY: release
-release:
-	R -e "devtools::release()"
+release: check-rhub check-win
+	R --no-save --quiet --interactive
+	devtools::release()
 
 .PHONY: dev-guide
 dev-guide:
