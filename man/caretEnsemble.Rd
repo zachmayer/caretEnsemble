@@ -57,17 +57,17 @@ summary(ens)
 Useful links:
 \itemize{
   \item \url{https://github.com/zachmayer/caretEnsemble}
-  \item \url{http://zachmayer.github.io/caretEnsemble/}
   \item Report bugs at \url{https://github.com/zachmayer/caretEnsemble/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Zachary A. Deane-Mayer \email{zach.mayer@gmail.com}
+\strong{Maintainer}: Zachary A. Deane-Mayer \email{zach.mayer@gmail.com} [copyright holder]
 
-Authors:
+Other contributors:
 \itemize{
-  \item Jared E. Knowles \email{jknowles@gmail.com}
+  \item Jared Knowles \email{jknowles@gmail.com} [contributor]
+  \item Antón López \email{zach.mayer+get-correct-email@gmail.com} [contributor]
 }
 
 }

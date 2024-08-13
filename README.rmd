@@ -39,7 +39,11 @@ First, use caretList to fit many models to the same data:
 data(diamonds, package = "ggplot2")
 dat <- data.table::data.table(diamonds)
 dat <- dat[sample.int(nrow(diamonds), 500L), ]
-models <- caretEnsemble::caretList(price ~ ., data = dat, methodList = c("rf", "glmnet"))
+models <- caretEnsemble::caretList(
+  price ~ .,
+  data = dat,
+  methodList = c("rf", "glmnet")
+)
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
@@ -67,9 +71,7 @@ install.packages("caretEnsemble")
 devtools::install_github("zachmayer/caretEnsemble")
 ```
 
-There are also tagged versions of caretEnsemble on github you can install via devtools. For example, to install the original draft of the API:
-
-There are also tagged versions of caretEnsemble on github you can install via devtools. For example, to install the [previous release of caretEnsemble](https://github.com/zachmayer/caretEnsemble/releases/tag/) use:
+There are also tagged versions of caretEnsemble on github you can install via devtools. For example, to install the [previous release of caretEnsemble](https://github.com/zachmayer/caretEnsemble/releases/) use:
 ```{r, eval=FALSE}
 devtools::install_github("zachmayer/caretEnsemble@2.0.3")
 ```
@@ -82,7 +84,7 @@ Use `make fix-style` to fix simple linting errors.
 
 For iterating while writing code, run `make dev`. This runs just `make clean fix-style document lint spell test`, for a quicker local dev loop. Please still run `make all` before making a PR.
 
-use `make all` before making a pull request, which will also run R CMD CHECK and a code coverage check. This runs `make clean fix-style document install build-readme build-vignettes lint spell test check coverage preview-site`.
+Use `make all` before making a pull request, which will also run R CMD CHECK and a code coverage check. This runs `make clean fix-style document install build-readme build-vignettes lint spell test check coverage preview-site`.
 
 ## First time dev setup:
 run `make install` from the git repository to install the dev version of caretEnsemble, along with the necessary package dependencies.
@@ -90,7 +92,7 @@ run `make install` from the git repository to install the dev version of caretEn
 # Inspiration and similar packages:
 caretEnsemble was inspired by [medley](https://github.com/mewo2/medley), which in turn was inspired by Caruana et. al.'s (2004) paper [Ensemble Selection from Libraries of Models.](http://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
 
-If you want to do something similar in python, check out [vecstack](https://github.com/vecxoz/vecstack)
+If you want to do something similar in python, check out [vecstack](https://github.com/vecxoz/vecstack).
 
 # Code of Conduct:
 Please note that this project is released with a [Contributor Code of Conduct](https://github.com/zachmayer/caretEnsemble/blob/master/.github/CONTRIBUTING.md). By participating in this project you agree to abide by its terms.

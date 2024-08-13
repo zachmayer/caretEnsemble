@@ -24,11 +24,12 @@ Size](https://img.shields.io/github/languages/code-size/zachmayer/caretEnsemble.
 [![Discord](https://img.shields.io/discord/1255535052578619524)](https://discord.gg/zgPeSm8a3u)
 <!-- badges: end -->
 
-caretEnsemble is a framework for fitting multiple [caret
-models](https://github.com/topepo/caret) using the same re-sampling
-strategy as well as creating ensembles of such models. Use `caretList`
-to fit multiple models, and then use `caretStack` to stack them using a
-caret model.
+caretEnsemble is a framework for
+[stacking](https://en.wikipedia.org/wiki/Ensemble_learning#Stacking)
+models fit with the [caret](https://topepo.github.io/caret/) package.
+
+Use `caretList` to fit multiple models, and then use `caretStack` to
+stack them with another caret model.
 
 First, use caretList to fit many models to the same data:
 
@@ -36,7 +37,11 @@ First, use caretList to fit many models to the same data:
 data(diamonds, package = "ggplot2")
 dat <- data.table::data.table(diamonds)
 dat <- dat[sample.int(nrow(diamonds), 500L), ]
-models <- caretEnsemble::caretList(price ~ ., data = dat, methodList = c("rf", "glmnet"))
+models <- caretEnsemble::caretList(
+  price ~ .,
+  data = dat,
+  methodList = c("rf", "glmnet")
+)
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
@@ -51,21 +56,21 @@ print(greedy_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 400, 401, 399 
+#> Summary of sample sizes: 400, 400, 400, 400, 400 
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   946.5929  0.9468516  506.8786
+#>   1019.069  0.9401024  530.9788
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  963.298 
+#> RMSE:  1013.725 
 #> Weights:
 #>        [,1]
-#> rf      0.7
-#> glmnet  0.3
+#> rf      0.9
+#> glmnet  0.1
 ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
@@ -84,11 +89,11 @@ print(rf_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 401, 400, 400, 399 
+#> Summary of sample sizes: 400, 400, 400, 400, 400 
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   968.4043  0.9467661  499.4089
+#>   1076.369  0.9338026  531.9601
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -100,8 +105,8 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 881047.1
-#>                     % Var explained: 94.87
+#>           Mean of squared residuals: 1136154
+#>                     % Var explained: 93.38
 ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
@@ -122,12 +127,8 @@ devtools::install_github("zachmayer/caretEnsemble")
 ```
 
 There are also tagged versions of caretEnsemble on github you can
-install via devtools. For example, to install the original draft of the
-API:
-
-There are also tagged versions of caretEnsemble on github you can
 install via devtools. For example, to install the [previous release of
-caretEnsemble](https://github.com/zachmayer/caretEnsemble/releases/tag/)
+caretEnsemble](https://github.com/zachmayer/caretEnsemble/releases/)
 use:
 
 ``` r
@@ -149,7 +150,7 @@ For iterating while writing code, run `make dev`. This runs just
 `make clean fix-style document lint spell test`, for a quicker local dev
 loop. Please still run `make all` before making a PR.
 
-use `make all` before making a pull request, which will also run R CMD
+Use `make all` before making a pull request, which will also run R CMD
 CHECK and a code coverage check. This runs
 `make clean fix-style document install build-readme build-vignettes lint spell test check coverage preview-site`.
 
