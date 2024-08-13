@@ -31,3 +31,4 @@ check_package.R
 ^docs$
 ^pkgdown$
 ^README\.Rmd$
+lib/

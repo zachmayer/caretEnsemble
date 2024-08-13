@@ -99,6 +99,7 @@ check:
 
 .PHONY: check-win
 check-win:
+	rm -rf lib/
 	Rscript -e "devtools:::check_win()"
 
 .PHONY: fix-style
