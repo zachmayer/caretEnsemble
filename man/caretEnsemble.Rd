@@ -56,8 +56,8 @@ summary(ens)
 \seealso{
 Useful links:
 \itemize{
+  \item \url{http://zachmayer.github.io/caretEnsemble/}
   \item \url{https://github.com/zachmayer/caretEnsemble}
-  \item \url{https://zachmayer.github.io/caretEnsemble/}
   \item Report bugs at \url{https://github.com/zachmayer/caretEnsemble/issues}
 }
 
