@@ -133,7 +133,7 @@ print(transfer_ens)
 We can also predict on new data:
 ```{r}
 preds <- predict(transfer_ens, newdata = head(new_data))
-knitr::kable(preds, format="markdown")
+knitr::kable(preds, format = "markdown")
 ```
 
 # Permutation Importance

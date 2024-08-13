@@ -62,7 +62,7 @@ rf_stack <- caretEnsemble::caretStack(models, method = "rf")
 print(rf_stack)
 ```
 
-Use autoplot from ggplot2 to plot ensemble diagnositcs:
+Use autoplot from ggplot2 to plot ensemble diagnostics:
 ```{r, fig.alt="6 panel plot of an ensemble of models fit to the diamonds dataset. The RF model is the best and has the highest weight. The residual plots look good. RMSE is about `r round(min(greedy_stack$ens_model$results$RMSE))`."}
 ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
 ```

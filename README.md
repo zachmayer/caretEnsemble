@@ -46,10 +46,10 @@ print(summary(models))
 #> The following models were ensembled: rf, glmnet  
 #> 
 #> Model accuracy:
-#>    model_name metric     value       sd
-#>        <char> <char>     <num>    <num>
-#> 1:         rf   RMSE  984.9967 192.3488
-#> 2:     glmnet   RMSE 1206.0751 217.0510
+#>    model_name metric    value       sd
+#>        <char> <char>    <num>    <num>
+#> 1:         rf   RMSE 1180.525 180.2056
+#> 2:     glmnet   RMSE 1301.564 174.4400
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
@@ -64,21 +64,21 @@ print(greedy_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 401, 400, 400, 400, 399 
+#> Summary of sample sizes: 400, 400, 400, 400, 400 
 #> Resampling results:
 #> 
-#>   RMSE      Rsquared   MAE     
-#>   979.0064  0.9342773  506.3942
+#>   RMSE      Rsquared  MAE     
+#>   1135.576  0.930478  578.2765
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  985.9732 
+#> RMSE:  1137.89 
 #> Weights:
 #>        [,1]
-#> rf     0.81
-#> glmnet 0.19
+#> rf     0.65
+#> glmnet 0.35
 ```
 
 You can also use caretStack to make a non-linear ensemble
@@ -94,11 +94,11 @@ print(rf_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 399, 400, 401 
+#> Summary of sample sizes: 400, 400, 400, 400, 400 
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   973.1948  0.9402302  500.0689
+#>   1070.944  0.9316113  554.4014
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -110,11 +110,11 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 1127223
-#>                     % Var explained: 92.21
+#>           Mean of squared residuals: 994643.2
+#>                     % Var explained: 93.92
 ```
 
-Use autoplot from ggplot2 to plot ensemble diagnositcs:
+Use autoplot from ggplot2 to plot ensemble diagnostics:
 
 ``` r
 ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
