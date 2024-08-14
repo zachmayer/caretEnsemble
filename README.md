@@ -34,6 +34,7 @@ stack them with another caret model.
 First, use caretList to fit many models to the same data:
 
 ``` r
+set.seed(42L)
 data(diamonds, package = "ggplot2")
 dat <- data.table::data.table(diamonds)
 dat <- dat[sample.int(nrow(diamonds), 500L), ]
@@ -48,8 +49,8 @@ print(summary(models))
 #> Model accuracy:
 #>    model_name metric    value       sd
 #>        <char> <char>    <num>    <num>
-#> 1:         rf   RMSE 1082.884 330.0036
-#> 2:     glmnet   RMSE 1097.115 270.7970
+#> 1:         rf   RMSE 1076.492 215.4737
+#> 2:     glmnet   RMSE 1142.082 105.6022
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
@@ -68,17 +69,17 @@ print(greedy_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   1032.199  0.9255646  603.9255
+#>   969.2517  0.9406218  557.1987
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  1045.609 
+#> RMSE:  989.2085 
 #> Weights:
 #>        [,1]
-#> rf      0.5
-#> glmnet  0.5
+#> rf     0.55
+#> glmnet 0.45
 ```
 
 You can also use caretStack to make a non-linear ensemble
@@ -97,8 +98,8 @@ print(rf_stack)
 #> Summary of sample sizes: 400, 400, 400, 400, 400 
 #> Resampling results:
 #> 
-#>   RMSE      Rsquared   MAE     
-#>   1120.904  0.9126444  547.3487
+#>   RMSE      Rsquared  MAE     
+#>   1081.425  0.930012  540.3294
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -110,8 +111,8 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 1075337
-#>                     % Var explained: 92.54
+#>           Mean of squared residuals: 925377
+#>                     % Var explained: 93.95
 ```
 
 Use autoplot from ggplot2 to plot ensemble diagnostics:

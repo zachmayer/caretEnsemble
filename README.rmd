@@ -39,6 +39,7 @@ Use `caretList` to fit multiple models, and then use `caretStack` to stack them 
 
 First, use caretList to fit many models to the same data:
 ```{r}
+set.seed(42L)
 data(diamonds, package = "ggplot2")
 dat <- data.table::data.table(diamonds)
 dat <- dat[sample.int(nrow(diamonds), 500L), ]
