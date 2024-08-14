@@ -3,7 +3,7 @@
 .PHONY: help
 help:
 	@echo "Available targets:"
-	@echo "  all                    Run clean, fix-style, document, install, readme, vignettes, lint, spell, test, check, coverage, preview-site"
+	@echo "  all                    Run clean, fix-style, document, install, readme, vignettes, lint, spell, test, check-many-preds, check, coverage, preview-site"
 	@echo "  dev                    Run clean, fix-style, document, lint, spell, test"
 	@echo "  install-deps           Install dependencies"
 	@echo "  install                Install the whole package, including dependencies"
@@ -29,7 +29,7 @@ help:
 	@echo "  clean                  Clean up generated files"
 
 .PHONY: all
-all: clean fix-style document install readme vignettes lint spell test check coverage preview-site
+all: clean fix-style document install readme vignettes lint spell test check-many-preds check coverage preview-site
 
 .PHONY: dev
 all: clean fix-style document lint spell test
