@@ -21,7 +21,7 @@ help:
 	@echo "  readme                 Build readme"
 	@echo "  check-win              Run R CMD on the winbuilder service from CRAN"
 	@echo "  check-rhub             Run R CMD on the rhub service"
-	@echo "  check-many-preds      Check that caretList can predict on ~200 caret models"
+	@echo "  check-many-preds       Check that caretList can predict on ~200 caret models"
 	@echo "  release                Release to CRAN"
 	@echo "  preview-site           Preview pkgdown site"
 	@echo "  dev-guide              Open the R package development guide"

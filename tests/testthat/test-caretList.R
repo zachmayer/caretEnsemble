@@ -301,7 +301,11 @@ testthat::test_that("caretList supports models that return an array or matrix", 
   y <- factor(ifelse(y > median(y), "yes", "no"))
 
   colnames(X) <- paste0("X", 1L:ncols)
-  model_names <- c("earth", "gam", "stepLDA") # gam is chatty
+
+  # gam is chatty, so we need expect_warning and expect_output
+  # gam/earth return matrix/array not vector
+  # stepLDA uses klaR and therefore needs X to be a matrix to predict correctly
+  model_names <- c("earth", "gam", "stepLDA")
   models <- testthat::expect_output(
     testthat::expect_warning(
       caretList(X, y, methodList = model_names, tuneLength = 1L),
@@ -319,4 +323,17 @@ testthat::test_that("caretList supports models that return an array or matrix", 
   testthat::expect_identical(nrow(pred_stack), nrow(X))
   testthat::expect_identical(ncol(pred_stack), length(model_names))
   testthat::expect_true(all(unlist(lapply(pred_stack, is.finite))))
+})
+
+testthat::test_that("LDL Calc", {
+  devtools::load_all()
+  data(SampleData, package='LDLcalc')
+  
+  ldl_model = LDLcalc:::LDL_ML_train_StackingAlgorithm(SampleData)
+  testthat::expect_s3_class(ldl_model$stackModel, "caretStack")
+  testthat::expect_s3_class(ldl_model$models, "caretList")
+
+  just_the_bad_models <- ldl_model$stackModel$models['earth']
+  pred = predict(just_the_bad_models, SampleData)
+  
 })

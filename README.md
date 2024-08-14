@@ -46,10 +46,10 @@ print(summary(models))
 #> The following models were ensembled: rf, glmnet  
 #> 
 #> Model accuracy:
-#>    model_name metric    value        sd
-#>        <char> <char>    <num>     <num>
-#> 1:         rf   RMSE 1041.580  90.36479
-#> 2:     glmnet   RMSE 1097.398 115.44590
+#>    model_name metric    value       sd
+#>        <char> <char>    <num>    <num>
+#> 1:         rf   RMSE 1122.243 112.8764
+#> 2:     glmnet   RMSE 1225.133 150.6002
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
@@ -64,21 +64,21 @@ print(greedy_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 400, 400, 401, 399 
+#> Summary of sample sizes: 400, 400, 400, 400, 400 
 #> Resampling results:
 #> 
-#>   RMSE      Rsquared  MAE     
-#>   973.4392  0.939656  557.0054
+#>   RMSE      Rsquared   MAE     
+#>   1068.604  0.9306586  588.6735
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  991.436 
+#> RMSE:  1074.072 
 #> Weights:
 #>        [,1]
-#> rf     0.59
-#> glmnet 0.41
+#> rf     0.64
+#> glmnet 0.36
 ```
 
 You can also use caretStack to make a non-linear ensemble
@@ -94,11 +94,11 @@ print(rf_stack)
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 400, 402, 400, 399, 399 
+#> Summary of sample sizes: 400, 400, 400, 400, 400 
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   988.0671  0.9381938  506.0528
+#>   1132.124  0.9200459  581.9815
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -110,8 +110,8 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 988056.2
-#>                     % Var explained: 93.6
+#>           Mean of squared residuals: 1348600
+#>                     % Var explained: 91.62
 ```
 
 Use autoplot from ggplot2 to plot ensemble diagnostics:
