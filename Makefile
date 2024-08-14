@@ -19,9 +19,9 @@ help:
 	@echo "  build                  Build the package"
 	@echo "  vignettes              Build vignettes"
 	@echo "  readme                 Build readme"
+	@echo "  check-many-preds       Check that caretList can predict on ~200 caret models"
 	@echo "  check-win              Run R CMD on the winbuilder service from CRAN"
 	@echo "  check-rhub             Run R CMD on the rhub service"
-	@echo "  check-many-preds       Check that caretList can predict on ~200 caret models"
 	@echo "  release                Release to CRAN"
 	@echo "  preview-site           Preview pkgdown site"
 	@echo "  dev-guide              Open the R package development guide"
@@ -136,6 +136,10 @@ preview-site:
 	Rscript -e "pkgdown::build_site()"
 	open docs/index.html
 
+.PHONY: check-rev-dep
+check-rev-dep:
+	Rscript -e "revdepcheck:::revdep_check(num_workers = 4); revdepcheck::revdep_summary() "
+
 .PHONY: check-many-preds
 check-many-preds:
 	Rscript inst/data-raw/test-all_models.R
@@ -151,9 +155,8 @@ check-rhub:
 	Rscript -e "rhub::rhub_check(platform='linux')"
 
 .PHONY: release
-release: check-many-preds check-rhub check-win
-	R --no-save --quiet --interactive
-	devtools::release()
+release: check-rev-dep check-many-preds check-rhub check-win
+	R --no-save --quiet --interactive  # Then run devtools::release()
 
 .PHONY: dev-guide
 dev-guide:
