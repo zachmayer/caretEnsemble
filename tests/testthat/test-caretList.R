@@ -324,3 +324,15 @@ testthat::test_that("caretList supports models that return an array or matrix", 
   testthat::expect_identical(ncol(pred_stack), length(model_names))
   testthat::expect_true(all(unlist(lapply(pred_stack, is.finite))))
 })
+
+testthat::test_that("LDL Calc", {
+  data(SampleData, package='LDLcalc')
+  
+  ldl_model = LDLcalc:::LDL_ML_train_StackingAlgorithm(SampleData)
+  testthat::expect_s3_class(ldl_model$stackModel, "caretStack")
+  testthat::expect_s3_class(ldl_model$models, "caretList")
+
+  just_the_bad_models <- ldl_model$stackModel$models['earth']
+  pred = predict(just_the_bad_models, SampleData)
+  
+})
