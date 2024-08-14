@@ -1,4 +1,4 @@
-#NEWS 
+# NEWS 
 
 ## caretEnsemble 4.0.0
 - Multiclass support! caretList, caretStack, and caretEnsemble 
