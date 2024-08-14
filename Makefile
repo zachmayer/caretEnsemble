@@ -180,4 +180,3 @@ clean:
 	rm -f vignettes/caretEnsemble-intro.R
 	Rscript -e "devtools::clean_vignettes()"
 	Rscript -e "devtools::clean_dll()"
-g
