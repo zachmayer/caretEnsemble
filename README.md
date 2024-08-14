@@ -48,8 +48,8 @@ print(summary(models))
 #> Model accuracy:
 #>    model_name metric    value       sd
 #>        <char> <char>    <num>    <num>
-#> 1:         rf   RMSE 1044.363 239.2775
-#> 2:     glmnet   RMSE 1144.750 278.2744
+#> 1:         rf   RMSE 1082.884 330.0036
+#> 2:     glmnet   RMSE 1097.115 270.7970
 ```
 
 Then, use caretEnsemble to make a greedy ensemble of these models
@@ -68,17 +68,17 @@ print(greedy_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   1000.307  0.9372951  543.9684
+#>   1032.199  0.9255646  603.9255
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  1001.834 
+#> RMSE:  1045.609 
 #> Weights:
 #>        [,1]
-#> rf     0.62
-#> glmnet 0.38
+#> rf      0.5
+#> glmnet  0.5
 ```
 
 You can also use caretStack to make a non-linear ensemble
@@ -98,7 +98,7 @@ print(rf_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   924.4763  0.9476619  482.2729
+#>   1120.904  0.9126444  547.3487
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -110,8 +110,8 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 910334.2
-#>                     % Var explained: 94.28
+#>           Mean of squared residuals: 1075337
+#>                     % Var explained: 92.54
 ```
 
 Use autoplot from ggplot2 to plot ensemble diagnostics:

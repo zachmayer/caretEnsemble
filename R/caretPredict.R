@@ -34,7 +34,7 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
       pred <- stats::predict(object, type = "raw", newdata = newdata, ...)
       stopifnot(is.numeric(pred))
       if (!is.vector(pred)) {
-        pred <- pred # as.vector next  # Backwards compatability with older earth and caret::train models
+        pred <- as.vector(pred) # Backwards compatability with older earth and caret::train models
       }
       stopifnot(
         is.vector(pred),

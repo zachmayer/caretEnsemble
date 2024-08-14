@@ -7,6 +7,7 @@ testthat::test_that("LDLcalc package model", {
   test_model <- readRDS(file.path("data", "caretlist_with_bad_earth_model.rds"))
   testthat::expect_s3_class(test_model, "caretList")
 
+  # Replicate the data structure from the LDLcalc package
   dat <- data.table::data.table(
     AGE = c(25L, 78L, 94L, 60L, 82L, 87L),
     CHOL = c(152L, 134L, 187L, 176L, 141L, 109L),
@@ -16,4 +17,9 @@ testthat::test_that("LDLcalc package model", {
   )
 
   pred <- predict(test_model, dat)
+  testthat::expect_s3_class(pred, "data.frame")
+
+  p_earth <- pred[["earth"]]
+  testthat::expect_is(p_earth, "numeric")
+  testthat::expect_true(all(is.finite(p_earth)))
 })
