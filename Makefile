@@ -41,6 +41,7 @@ install-deps:
 	Rscript -e "devtools::install_dev_deps()"
 	Rscript -e "devtools::update_packages()"
 	Rscript -e "devtools::install_github('r-lib/lintr')"
+	Rscript -e "devtools::install_github('r-lib/revdepcheck')"
 
 .PHONY: install
 install: install-deps

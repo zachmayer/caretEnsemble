@@ -32,7 +32,6 @@ Suggests:
     nnet,
     pkgdown,
     randomForest,
-    revdepcheck,
     rmarkdown,
     rhub,
     rpart,
