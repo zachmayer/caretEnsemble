@@ -19,6 +19,7 @@ help:
 	@echo "  build                  Build the package"
 	@echo "  vignettes              Build vignettes"
 	@echo "  readme                 Build readme"
+	@echo "  check-rev-dep          Run reverse dependencies check"
 	@echo "  check-many-preds       Check that caretList can predict on ~200 caret models"
 	@echo "  check-win              Run R CMD on the winbuilder service from CRAN"
 	@echo "  check-rhub             Run R CMD on the rhub service"
@@ -178,3 +179,4 @@ clean:
 	rm -f vignettes/caretEnsemble-intro.R
 	Rscript -e "devtools::clean_vignettes()"
 	Rscript -e "devtools::clean_dll()"
+	Rscript -e "revdepcheck::revdep_reset()"
