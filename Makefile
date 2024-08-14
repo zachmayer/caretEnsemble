@@ -21,6 +21,7 @@ help:
 	@echo "  readme                 Build readme"
 	@echo "  check-win              Run R CMD on the winbuilder service from CRAN"
 	@echo "  check-rhub             Run R CMD on the rhub service"
+	@echo "  check-many-preds       Check that caretList can predict on ~200 caret models"
 	@echo "  release                Release to CRAN"
 	@echo "  preview-site           Preview pkgdown site"
 	@echo "  dev-guide              Open the R package development guide"
@@ -135,6 +136,10 @@ preview-site:
 	Rscript -e "pkgdown::build_site()"
 	open docs/index.html
 
+.PHONY: check-many-preds
+check-many-preds:
+	Rscript inst/data-raw/test-all_models.R
+
 .PHONY: check-win
 check-win:
 	rm -rf lib/
@@ -146,7 +151,7 @@ check-rhub:
 	Rscript -e "rhub::rhub_check(platform='linux')"
 
 .PHONY: release
-release: check-rhub check-win
+release: check-many-preds check-rhub check-win
 	R --no-save --quiet --interactive
 	devtools::release()
 
@@ -158,6 +163,7 @@ dev-guide:
 clean:
 	rm -rf *.Rcheck
 	rm -f *.tar.gz
+	rm -f *.Rout
 	rm -rf man/
 	rm -f README.md
 	rm -f coverage.rds
