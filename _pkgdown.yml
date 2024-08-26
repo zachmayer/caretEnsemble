@@ -10,9 +10,9 @@ template:
     border-color: "#30363d"
     code-bg: "#0d1117"
     code-color: "#c9d1d9"
-    danger: "#A40E26"
     border-radius: 0.5rem
     btn-border-radius: 0.25rem
+    danger: "#A40E26"
   opengraph:
     image:
       src: man/figures/README-greedy-stack-6-plot.png
