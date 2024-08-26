@@ -1,7 +1,6 @@
-ghurl: http://zachmayer.github.io/caretEnsemble/
+url: http://zachmayer.github.io/caretEnsemble/
 template:
   bootstrap: 5
-  theme: default
   light-switch: true
   bslib:
     bg: "#0d1117"
