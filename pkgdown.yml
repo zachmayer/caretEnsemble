@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   caretEnsemble-intro: caretEnsemble-intro.html
   Version-4.0-New-Features: Version-4.0-New-Features.html
-last_built: 2024-09-12T19:19Z
+last_built: 2024-09-12T19:55Z
 urls:
   reference: http://zachmayer.github.io/caretEnsemble/reference
   article: http://zachmayer.github.io/caretEnsemble/articles
