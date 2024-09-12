@@ -36,6 +36,6 @@ for a caretEnsemble object.
 \examples{
 set.seed(42)
 data(models.reg)
-ens <- caretStack(models.reg)
+ens <- caretStack(models.reg[1:2], method = "lm")
 autoplot(ens)
 }
