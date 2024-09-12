@@ -1,5 +1,8 @@
 # NEWS 
 
+## caretEnsemble 4.0.1
+- Speed up the example for autoplot so it runs in <1 second on most platforms
+
 ## caretEnsemble 4.0.0
 - Multiclass support! caretList, caretStack, and caretEnsemble 
 - The greedy optimizer is back! caretEnsemble now uses a greedy optimizer by default. This optimizer can never be worse than the worst single model. caretStack still support all caret models, including glm.

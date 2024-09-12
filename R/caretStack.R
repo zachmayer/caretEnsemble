@@ -460,7 +460,7 @@ stackedTrainResiduals <- function(object, show_class_id = 2L) {
 #' @examples
 #' set.seed(42)
 #' data(models.reg)
-#' ens <- caretStack(models.reg)
+#' ens <- caretStack(models.reg[1:2], method="lm")
 #' autoplot(ens)
 # https://github.com/thomasp85/patchwork/issues/226 — why we need importFrom patchwork plot_layout
 autoplot.caretStack <- function(object, training_data = NULL, xvars = NULL, show_class_id = 2L, ...) {
