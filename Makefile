@@ -37,6 +37,7 @@ all: clean fix-style document lint spell test
 .PHONY: install-deps
 install-deps:
 	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
+	Rscript -e "if (!requireNamespace('pkgdown', quietly = TRUE)) install.packages('pkgdown')"
 	Rscript -e "devtools::install_deps()"
 	Rscript -e "devtools::install_dev_deps()"
 	Rscript -e "devtools::update_packages()"
