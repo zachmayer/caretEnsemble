@@ -3,29 +3,10 @@ template:
   bootstrap: 5
   light-switch: true
   bslib:
-    bg: "#0d1117"  # GhBase0
-    fg: "#c6cdd5"  # GhBase4
-    primary: "#77bdfb"  # GhBlue
-    secondary: "#89929b"  # GhBase3
-    border-color: "#21262d"  # GhBase2
-    code-bg: "#161b22"  # GhBase1
-    code-color: "#c6cdd5"  # GhBase4
+    primary: "#0054AD"
     border-radius: 0.5rem
     btn-border-radius: 0.25rem
-    danger: "#fa7970"  # GhRed
-    success: "#7ce38b"  # GhGreen
-    info: "#a2d2fb"  # GhLightBlue
-    warning: "#faa356"  # GhOrange
-    dark: "#161b22"  # GhBase1
-    light: "#ecf2f8"  # GhBase5
-    font-size-base: 1rem
-    headings-color: "#ecf2f8"  # GhBase5
-    link-color: "#77bdfb"  # GhBlue
-    link-hover-color: "#a2d2fb"  # GhLightBlue
-    navbar-bg: "#161b22"  # GhBase1
-    navbar-fg: "#c6cdd5"  # GhBase4
-    navbar-active-bg: "#21262d"  # GhBase2
-    navbar-active-fg: "#ecf2f8"  # GhBase5
+    danger: "#A6081A"
   opengraph:
     image:
       src: man/figures/README-greedy-stack-6-plot.png
