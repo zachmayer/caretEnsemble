@@ -35,7 +35,8 @@ Suggests:
     rpart,
     spelling,
     testthat,
-    usethis
+    usethis,
+    devtools
 Imports:
     caret,
     data.table,
