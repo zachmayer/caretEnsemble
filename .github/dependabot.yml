@@ -1,0 +1,37 @@
+version: 2
+updates:
+  # Enable version updates for R packages
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # Enable version updates for R packages
+  - package-ecosystem: "r"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "r"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    groups:
+      r-dependencies:
+        patterns:
+          - "*"
