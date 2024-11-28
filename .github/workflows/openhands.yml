@@ -1,0 +1,23 @@
+name: OpenHands Resolver
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  openhands:
+    name: OpenHands Resolver
+    runs-on: ubuntu-latest
+    if: |
+      github.event.issue.state == 'open' &&
+      github.event.sender.login == 'zachmayer' &&
+      contains(github.event.comment.body, '/openhands')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run OpenHands resolver
+        uses: all-hands-ai/openhands-action@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
