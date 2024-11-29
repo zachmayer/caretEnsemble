@@ -1,0 +1,10 @@
+name: Lint GitHub Actions workflows
+on: [push, pull_request]
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: actionlint
+        uses: raven-actions/actionlint@v2

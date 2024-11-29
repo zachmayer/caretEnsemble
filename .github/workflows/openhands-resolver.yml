@@ -19,14 +19,14 @@ permissions:
 
 jobs:
   call-openhands-resolver:
-    if: \${{ github.actor == 'zachmayer' && github.ref == 'refs/heads/main' }}
+    if: ${{ github.actor == 'zachmayer' && github.ref == 'refs/heads/main' }}
     uses: All-Hands-AI/OpenHands/.github/workflows/openhands-resolver.yml@main
     with:
-      macro: \${{ vars.OPENHANDS_MACRO || '@openhands-agent' }}
-      max_iterations: \${{ vars.OPENHANDS_MAX_ITER || 100 }}
+      macro: ${{ vars.OPENHANDS_MACRO || '@openhands-agent' }}
+      max_iterations: ${{ vars.OPENHANDS_MAX_ITER || 50 }}
     secrets:
-      PAT_TOKEN: \${{ secrets.PAT_TOKEN }}
-      PAT_USERNAME: \${{ secrets.PAT_USERNAME }}
-      LLM_MODEL: \${{ secrets.LLM_MODEL }}
-      LLM_API_KEY: \${{ secrets.LLM_API_KEY }}
-      LLM_BASE_URL: \${{ secrets.LLM_BASE_URL }}
+      PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+      PAT_USERNAME: ${{ secrets.PAT_USERNAME }}
+      LLM_MODEL: ${{ secrets.LLM_MODEL }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}

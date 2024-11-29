@@ -7,6 +7,7 @@ help:
 	@echo "  dev                    Run clean, fix-style, document, lint, spell, test"
 	@echo "  install-deps           Install dependencies"
 	@echo "  install                Install the whole package, including dependencies"
+	@echo "  install-mac            Install the package and Mac-specific tools (including actionlint)"
 	@echo "  document               Generate documentation"
 	@echo "  update-test-fixtures   Update test fixtures"
 	@echo "  test                   Run unit tests"
@@ -15,6 +16,7 @@ help:
 	@echo "  check                  Run R CMD check locally"
 	@echo "  fix-style              Auto style the code"
 	@echo "  lint                   Check the code for lint"
+	@echo "  actionlint            Check GitHub Actions workflows for lint"
 	@echo "  spell                  Check spelling"
 	@echo "  build                  Build the package"
 	@echo "  vignettes              Build vignettes"
@@ -47,6 +49,10 @@ install-deps:
 .PHONY: install
 install: install-deps
 	Rscript -e "devtools::install()"
+
+.PHONY: install-mac
+install-mac: install
+	brew install actionlint
 
 .PHONY: document
 document:
@@ -109,6 +115,10 @@ fix-style:
 .PHONY: lint
 lint:
 	Rscript -e "Sys.setenv(LINTR_ERROR_ON_LINT='true'); devtools::load_all(); lintr::lint_package(cache = FALSE)"
+
+.PHONY: actionlint
+actionlint:
+	actionlint .github/workflows/*.yml
 
 .PHONY: spell
 spell:
