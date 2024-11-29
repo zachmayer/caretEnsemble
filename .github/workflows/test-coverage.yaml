@@ -34,7 +34,7 @@ jobs:
         run: make clean && make cobertura.xml
 
       - name: Upload test results to codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
           file: ${{ runner.temp }}/cobertura.xml
