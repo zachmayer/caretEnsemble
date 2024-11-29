@@ -13,8 +13,10 @@ permissions: read-all
 jobs:
   test-coverage:
     runs-on: ubuntu-latest
+    if: (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request') || github.actor != 'dependabot[bot]'
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -38,8 +40,6 @@ jobs:
           file: ${{ runner.temp }}/cobertura.xml
           flags: unittests
           verbose: true
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Test that coverage level is good
         run: make coverage-test
