@@ -69,7 +69,7 @@ jobs:
             --no-analytics \
             --yes-always \
             --verbose \
-            --lint-cmd "make format lint" \
+            --lint-cmd "make fix-style lint" \
             --test-cmd "make test" \
             --message-file combined_instructions.md \
             --auto-commits
