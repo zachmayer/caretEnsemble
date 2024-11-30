@@ -5,20 +5,36 @@ on:
     branches: main
   pull_request:
     branches: main
-    paths:
-      - 'R/**'
-      - 'data/**'
-      - 'tests/**'
-      - 'vignettes/**'
-      - 'DESCRIPTION'
-      - 'NAMESPACE'
 
 name: R CMD CHECK
 
 permissions: read-all
 
 jobs:
+  check-if-r-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      run-r-checks: ${{ steps.check-files.outputs.run-r-checks }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check-files
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "run-r-checks=true" >> $GITHUB_OUTPUT
+          else
+            # Check if any R-related files changed
+            git fetch origin ${{ github.base_ref }}
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}..HEAD)
+            if echo "$CHANGED_FILES" | grep -qE '^(R/|data/|tests/|vignettes/|DESCRIPTION|NAMESPACE)'; then
+              echo "run-r-checks=true" >> $GITHUB_OUTPUT
+            else
+              echo "run-r-checks=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
   R-CMD-check:
+    needs: check-if-r-changes
+    if: needs.check-if-r-changes.outputs.run-r-checks == 'true'
     runs-on: ${{ matrix.config.os }}
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
@@ -62,3 +78,11 @@ jobs:
           needs: check
 
       - run: make check
+
+  skip-r-check:
+    needs: check-if-r-changes
+    if: needs.check-if-r-changes.outputs.run-r-checks == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip R CMD check
+        run: echo "No R-related files changed, skipping R CMD check"
