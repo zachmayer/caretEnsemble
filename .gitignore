@@ -147,3 +147,5 @@ Meta
 /Meta/
 inst/doc
 docs
+.aider*
+.env
