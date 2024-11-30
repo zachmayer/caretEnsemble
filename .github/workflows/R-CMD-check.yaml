@@ -11,6 +11,8 @@ name: R CMD CHECK
 permissions: read-all
 
 jobs:
+  # Only run R CMD check if there are changes to R-related files
+  # R/|data/|tests/|vignettes/|DESCRIPTION|NAMESPACE
   check-if-r-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -54,15 +56,17 @@ jobs:
     steps:
       - name: Check if R changes
         id: should-run
+        shell: bash
         run: |
-          if [ "${{ needs.check-if-r-changes.outputs.run-r-checks }}" = "true" ]; then
-            echo "should_run=true" >> "${GITHUB_OUTPUT}"
+          if ${{ needs.check-if-r-changes.outputs.run-r-checks == 'true' }}; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
           else
-            echo "should_run=false" >> "${GITHUB_OUTPUT}"
+            echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Skip Check
         if: steps.should-run.outputs.should_run != 'true'
+        shell: bash
         run: |
           echo "Skipping R CMD check - no R-related changes"
           exit 0
