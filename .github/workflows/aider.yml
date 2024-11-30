@@ -55,10 +55,12 @@ jobs:
           dest: 'tmp'
           extension: '.md'
           slug_as_folder_name: false
-          label: ''  # No label required
+          label: 'fix-me'
           inject_title: true
           inject_created_at: false
           inject_updated_at: false
+          authors:
+            - zachmayer
 
       - name: Prepare Instructions
         run: |
