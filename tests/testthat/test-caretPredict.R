@@ -40,7 +40,7 @@ testthat::test_that("caretPredict extracts best predictions correctly", {
   sorted_preds <- extractBestPreds(model, sort_preds = TRUE)
 
   testthat::expect_false(identical(unsorted_preds, sorted_preds))
-  testthat::expect_equal(sort(unsorted_preds$rowIndex), sort(sorted_preds$rowIndex))
+  testthat::expect_identical(sort(unsorted_preds$rowIndex), sort(sorted_preds$rowIndex))
 })
 
 testthat::test_that("extractMetric works for different model types", {
