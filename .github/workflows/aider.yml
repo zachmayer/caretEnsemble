@@ -48,13 +48,22 @@ jobs:
       - name: Install Package
         run: make install
 
-      - name: Get Issue Content
-        id: get-issue
-        uses: actions-cool/issues-helper@v3
+      - name: Convert Issue to Markdown
+        uses: eunjae-lee/issue-to-markdown@v1
         with:
-          actions: 'get-issue'
           token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.inputs.issue_number }}
+          dest: 'tmp'
+          extension: '.md'
+          slug_as_folder_name: false
+          label: ''  # No label required
+          inject_title: true
+          inject_created_at: false
+          inject_updated_at: false
+
+      - name: Prepare Instructions
+        run: |
+          cat aider-instructions.md "tmp/${{ github.event.inputs.issue_number }}/index.md" > combined_instructions.md
+          rm -rf tmp/
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -63,11 +72,6 @@ jobs:
 
       - name: Install Aider
         run: pip install -U aider-chat
-
-      - name: Prepare Instructions
-        run: |
-          printf '%s' "${{ steps.get-issue.outputs.issue-body }}" > issue.md
-          cat aider-instructions.md issue.md > combined_instructions.md
 
       - name: Run Aider
         run: |
@@ -91,5 +95,3 @@ jobs:
           title: "fix: Automated fixes for issue #${{ github.event.inputs.issue_number }}"
           body: |
             This PR contains automated fixes for issue #${{ github.event.inputs.issue_number }} using aider.
-            
-            Original issue: ${{ steps.get-issue.outputs.issue-title }}
