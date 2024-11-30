@@ -20,15 +20,15 @@ jobs:
       - id: check-files
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            echo "run-r-checks=true" >> $GITHUB_OUTPUT
+            echo "run-r-checks=true" >> "$GITHUB_OUTPUT"
           else
             # Check if any R-related files changed
-            git fetch origin ${{ github.base_ref }}
-            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}..HEAD)
+            git fetch origin "${{ github.base_ref }}"
+            CHANGED_FILES="$(git diff --name-only "origin/${{ github.base_ref }}"..HEAD)"
             if echo "$CHANGED_FILES" | grep -qE '^(R/|data/|tests/|vignettes/|DESCRIPTION|NAMESPACE)'; then
-              echo "run-r-checks=true" >> $GITHUB_OUTPUT
+              echo "run-r-checks=true" >> "$GITHUB_OUTPUT"
             else
-              echo "run-r-checks=false" >> $GITHUB_OUTPUT
+              echo "run-r-checks=false" >> "$GITHUB_OUTPUT"
             fi
           fi
 
