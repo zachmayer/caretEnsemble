@@ -80,8 +80,10 @@ caretList <- function(
   global_args[["metric"]] <- metric
 
   # Loop through the tuneLists and fit caret models with those specs
-  modelList <- lapply(tuneList, caretTrain, global_args = global_args, 
-                     continue_on_fail = continue_on_fail, trim = trim, sort_preds = sort_preds)
+  modelList <- lapply(tuneList, caretTrain,
+    global_args = global_args,
+    continue_on_fail = continue_on_fail, trim = trim, sort_preds = sort_preds
+  )
   names(modelList) <- names(tuneList)
   nulls <- vapply(modelList, is.null, logical(1L))
   modelList <- modelList[!nulls]

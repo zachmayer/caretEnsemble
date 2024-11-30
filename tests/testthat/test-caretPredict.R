@@ -33,12 +33,12 @@ testthat::test_that("caretPredict extracts best predictions correctly", {
 
   expect_data_table_structure(stacked_preds_class, c("No", "Yes"))
   expect_data_table_structure(stacked_preds_reg, "pred")
-  
+
   # Test sort_preds parameter
   model <- models.class[[1L]]
   unsorted_preds <- extractBestPreds(model, sort_preds = FALSE)
   sorted_preds <- extractBestPreds(model, sort_preds = TRUE)
-  
+
   testthat::expect_false(identical(unsorted_preds, sorted_preds))
   testthat::expect_equal(sort(unsorted_preds$rowIndex), sort(sorted_preds$rowIndex))
 })
