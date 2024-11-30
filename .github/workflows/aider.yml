@@ -1,45 +1,88 @@
-name: Resolve Issue with OpenHands
-
+name: Aider Issue Fix
 on:
-  issues:
-    types: [labeled]
-  pull_request:
-    types: [labeled]
-  issue_comment:
-    types: [created]
-  pull_request_review_comment:
-    types: [created]
-  pull_request_review:
-    types: [submitted]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to fix'
+        required: true
+        type: string
+      model:
+        description: 'Model to use'
+        required: false
+        type: string
+        default: 'claude-3-5-sonnet-20241022'
 
 permissions:
   contents: write
   pull-requests: write
-  issues: write
+  issues: read
 
 jobs:
-  openhands-resolver:
-    if: ${{ github.actor == 'zachmayer' }}
+  aider-fix:
     runs-on: ubuntu-latest
-
+    if: github.actor == 'zachmayer'
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    
     steps:
       - uses: actions/checkout@v4
-      - uses: r-lib/actions/setup-pandoc@v2
+
       - uses: r-lib/actions/setup-r@v2
         with:
-          r-version: release
           use-public-rspm: true
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
-          needs: check
-      - uses: All-Hands-AI/OpenHands/.github/workflows/openhands-resolver.yml@main
+          extra-packages: any::lintr, local::.
+          needs: lint
+
+      - name: Install Package
+        run: make install
+
+      - name: Get Issue Content
+        id: get-issue
+        uses: actions-cool/issues-helper@v3
         with:
-          macro: ${{ vars.OPENHANDS_MACRO || '@openhands-agent' }}
-          max_iterations: ${{ vars.OPENHANDS_MAX_ITER || 50 }}
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-          PAT_USERNAME: ${{ secrets.PAT_USERNAME }}
-          LLM_MODEL: ${{ secrets.LLM_MODEL }}
-          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          actions: 'get-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.inputs.issue_number }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Aider
+        run: pip install -U aider-chat
+
+      - name: Prepare Instructions
+        run: |
+          echo "${{ steps.get-issue.outputs.issue-body }}" > issue.md
+          cat aider-instructions.md issue.md > combined_instructions.md
+
+      - name: Run Aider
+        run: |
+          aider \
+            --model anthropic/${{ github.event.inputs.model }} \
+            --no-analytics \
+            --yes-always \
+            --verbose \
+            --lint-cmd "make format lint" \
+            --test-cmd "make test" \
+            --message-file combined_instructions.md \
+            --auto-commits
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "fix: Automated fixes for issue #${{ github.event.inputs.issue_number }}"
+          branch: aider-fix-issue-${{ github.event.inputs.issue_number }}
+          delete-branch: true
+          title: "fix: Automated fixes for issue #${{ github.event.inputs.issue_number }}"
+          body: |
+            This PR contains automated fixes for issue #${{ github.event.inputs.issue_number }} using aider.
+            
+            Original issue: ${{ steps.get-issue.outputs.issue-title }}
