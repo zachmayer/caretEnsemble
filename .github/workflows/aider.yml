@@ -66,7 +66,7 @@ jobs:
 
       - name: Prepare Instructions
         run: |
-          printf '%s' "${{ steps.get-issue.outputs.body }}" > issue.md
+          printf '%s' "${{ steps.get-issue.outputs.issue-body }}" > issue.md
           cat aider-instructions.md issue.md > combined_instructions.md
 
       - name: Run Aider
