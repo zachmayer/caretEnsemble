@@ -58,10 +58,10 @@ jobs:
         id: should-run
         shell: bash
         run: |
-          if ${{ needs.check-if-r-changes.outputs.run-r-checks == 'true' }}; then
-            echo "should_run=true" >> $GITHUB_OUTPUT
+          if [ "${{ needs.check-if-r-changes.outputs.run-r-checks }}" = "true" ]; then
+            echo "should_run=true" >> "${GITHUB_OUTPUT}"
           else
-            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "should_run=false" >> "${GITHUB_OUTPUT}"
           fi
 
       - name: Skip Check
