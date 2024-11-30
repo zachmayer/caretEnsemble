@@ -2,56 +2,93 @@
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
-    branches: [main, master]
+    branches: main
   pull_request:
-    branches: [main, master]
+    branches: main
 
 name: R CMD CHECK
 
 permissions: read-all
 
 jobs:
-  R-CMD-check:
-    runs-on: ${{ matrix.config.os }}
+  # Only run R CMD check if there are changes to R-related files
+  # R/|data/|tests/|vignettes/|DESCRIPTION|NAMESPACE
+  check-if-r-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      run-r-checks: ${{ steps.check-files.outputs.run-r-checks }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check-files
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "run-r-checks=true" >> "${GITHUB_OUTPUT}"
+          else
+            # Check if any R-related files changed
+            git fetch origin "${{ github.base_ref }}"
+            CHANGED_FILES="$(git diff --name-only "origin/${{ github.base_ref }}"..HEAD)"
+            if echo "${CHANGED_FILES}" | grep -qE '^(R/|data/|tests/|vignettes/|DESCRIPTION|NAMESPACE)'; then
+              echo "run-r-checks=true" >> "${GITHUB_OUTPUT}"
+            else
+              echo "run-r-checks=false" >> "${GITHUB_OUTPUT}"
+            fi
+          fi
 
+  R-CMD-check:
+    needs: check-if-r-changes
+    runs-on: ${{ matrix.config.os }}
+    
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
     strategy:
       fail-fast: false
-      matrix:    # https://en.wikipedia.org/wiki/R_(programming_language)#Version_names
-        config:  # https://github.com/r-hub/rversions  rversions::r_versions()
-
-          # macOS / Widnows on latest
+      matrix:
+        config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-  
-          # Ubuntu on latest, devel, release, oldrel as well as version in DESCRIPTION
           - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,  r: 'release'}  # rversions::r_release()
-          - {os: ubuntu-latest,  r: 'oldrel-1'}  # rversions::r_oldrel()
+          - {os: ubuntu-latest,  r: 'release'}
+          - {os: ubuntu-latest,  r: 'oldrel-1'}
           - {os: ubuntu-latest,  r: 'oldrel-2'}
           - {os: ubuntu-latest,  r: 'oldrel-3'}
-          # - {os: ubuntu-latest,  r: 'oldrel-4'}  After the next major release add this back in
-          - {os: ubuntu-latest,  r: '4.1.0'}  # Oldest supported release. 2021-05-18: 3+ years old
-
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
+          - {os: ubuntu-latest,  r: '4.1.0'}
 
     steps:
+      - name: Check if R changes
+        id: should-run
+        shell: bash
+        run: |
+          if [ "${{ needs.check-if-r-changes.outputs.run-r-checks }}" = "true" ]; then
+            echo "should_run=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "should_run=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Skip Check
+        if: steps.should-run.outputs.should_run != 'true'
+        shell: bash
+        run: |
+          echo "Skipping R CMD check - no R-related changes"
+          exit 0
+
       - uses: actions/checkout@v4
+        if: steps.should-run.outputs.should_run == 'true'
 
       - uses: r-lib/actions/setup-pandoc@v2
+        if: steps.should-run.outputs.should_run == 'true'
 
       - uses: r-lib/actions/setup-r@v2
+        if: steps.should-run.outputs.should_run == 'true'
         with:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
+        if: steps.should-run.outputs.should_run == 'true'
         with:
           extra-packages: any::rcmdcheck
           needs: check
 
       - run: make check
+        if: steps.should-run.outputs.should_run == 'true'
