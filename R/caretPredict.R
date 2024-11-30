@@ -82,7 +82,7 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
 #' If `TRUE`, the function will remove some elements that are not needed from the output model.
 #' @return The output of the `train` function.
 #' @keywords internal
-caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE) {
+caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE, sort_preds = TRUE) {
   # Combine args
   # I think my handling here is correct (update globals with locals, which allows locals be partial)
   # but it would be nice to have some tests
@@ -100,7 +100,7 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
 
   # Only save stacked predictions for the best model
   if ("pred" %in% names(model)) {
-    model[["pred"]] <- extractBestPreds(model)
+    model[["pred"]] <- extractBestPreds(model, sort_preds = sort_preds)
   }
 
   if (trim) {
@@ -147,9 +147,10 @@ aggregate_mean_or_first <- function(x) {
 #' @title Extract the best predictions from a train object
 #' @description Extract the best predictions from a train object.
 #' @param x a train object
+#' @param sort_preds logical, should predictions be sorted by rowIndex. Default TRUE.
 #' @return a data.table::data.table with predictions
 #' @keywords internal
-extractBestPreds <- function(x) {
+extractBestPreds <- function(x, sort_preds = TRUE) {
   stopifnot(methods::is(x, "train"))
   if (is.null(x$pred)) {
     stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
@@ -173,8 +174,10 @@ extractBestPreds <- function(x) {
   data.table::setkeyv(pred, keys)
   pred <- pred[, lapply(.SD, aggregate_mean_or_first), by = keys]
 
-  # Order results consistently
-  data.table::setorderv(pred, keys)
+  # Order results consistently if requested
+  if (sort_preds) {
+    data.table::setorderv(pred, keys)
+  }
 
   # Return
   pred
