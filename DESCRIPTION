@@ -36,7 +36,8 @@ Suggests:
     spelling,
     testthat,
     usethis,
-    devtools
+    devtools,
+    reshape2
 Imports:
     caret,
     data.table,
