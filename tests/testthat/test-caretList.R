@@ -146,6 +146,48 @@ testthat::test_that("predict.caretList works for classification and regression",
 testthat::context("caretList")
 ################################################################
 
+testthat::test_that("caretList respects aggregate_resamples parameter", {
+  # Create a trainControl with repeated CV to ensure multiple resamples per row
+  ctrl <- caret::trainControl(
+    method = "repeatedcv",
+    number = 3,
+    repeats = 2,
+    savePredictions = "final"
+  )
+  
+  # Test with aggregate_resamples = FALSE
+  test_no_agg <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    methodList = c("knn"),
+    trControl = ctrl,
+    aggregate_resamples = FALSE
+  )
+  
+  # Get predictions from the first model
+  preds_no_agg <- test_no_agg[[1]]$pred
+  
+  # Test with aggregate_resamples = TRUE (default)
+  test_agg <- caretList(
+    x = train[, -23L],
+    y = train[, "Class"],
+    methodList = c("knn"),
+    trControl = ctrl
+  )
+  
+  # Get predictions from the first model
+  preds_agg <- test_agg[[1]]$pred
+  
+  # The non-aggregated predictions should have more rows than aggregated ones
+  # since they keep all resamples
+  testthat::expect_gt(nrow(preds_no_agg), nrow(preds_agg))
+  
+  # Both should have rowIndex as first column and same set of columns
+  testthat::expect_identical(names(preds_no_agg)[1], "rowIndex")
+  testthat::expect_identical(names(preds_agg)[1], "rowIndex")
+  testthat::expect_setequal(names(preds_no_agg), names(preds_agg))
+})
+
 testthat::test_that("caretList works for various scenarios", {
   # Basic classification
   test1 <- caretList(
