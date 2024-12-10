@@ -80,9 +80,10 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
 #'  If `TRUE`, the function will return `NULL` if the `train` function fails.
 #' @param trim A logical indicating whether to trim the output model.
 #' If `TRUE`, the function will remove some elements that are not needed from the output model.
+#' @param aggregate_resamples A logical indicating whether to aggregate resamples by taking mean/first value.
 #' @return The output of the `train` function.
 #' @keywords internal
-caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE) {
+caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE, aggregate_resamples = TRUE) {
   # Combine args
   # I think my handling here is correct (update globals with locals, which allows locals be partial)
   # but it would be nice to have some tests
@@ -100,7 +101,7 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
 
   # Only save stacked predictions for the best model
   if ("pred" %in% names(model)) {
-    model[["pred"]] <- extractBestPreds(model)
+    model[["pred"]] <- extractBestPreds(model, aggregate_resamples = aggregate_resamples)
   }
 
   if (trim) {
@@ -147,9 +148,10 @@ aggregate_mean_or_first <- function(x) {
 #' @title Extract the best predictions from a train object
 #' @description Extract the best predictions from a train object.
 #' @param x a train object
+#' @param aggregate_resamples logical, whether to aggregate resamples by taking mean/first value. Default TRUE.
 #' @return a data.table::data.table with predictions
 #' @keywords internal
-extractBestPreds <- function(x) {
+extractBestPreds <- function(x, aggregate_resamples = TRUE) {
   stopifnot(methods::is(x, "train"))
   if (is.null(x$pred)) {
     stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
@@ -167,14 +169,19 @@ extractBestPreds <- function(x) {
   # Drop rows for other tunes
   pred <- pred[best_tune, ]
 
-  # If we have multiple resamples per row
+  # If we have multiple resamples per row and aggregate_resamples is TRUE
   # e.g. for repeated CV, we need to average the predictions
-  keys <- "rowIndex"
-  data.table::setkeyv(pred, keys)
-  pred <- pred[, lapply(.SD, aggregate_mean_or_first), by = keys]
+  if (aggregate_resamples) {
+    keys <- "rowIndex"
+    data.table::setkeyv(pred, keys)
+    pred <- pred[, lapply(.SD, aggregate_mean_or_first), by = keys]
+  } else {
+    # When not aggregating, keep all columns but ensure consistent order
+    data.table::setcolorder(pred, c("rowIndex", setdiff(names(pred), "rowIndex")))
+  }
 
   # Order results consistently
-  data.table::setorderv(pred, keys)
+  data.table::setorderv(pred, "rowIndex")
 
   # Return
   pred
