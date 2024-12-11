@@ -23,6 +23,11 @@
 #' @param metric the metric to use for grid search on the stacking model.
 #' @param trControl a trainControl object to use for training the ensemble model. If NULL, will use defaultControl.
 #' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
+#' @param use_original_features a logical indicating whether to include the original features in the stack.
+#' If TRUE, will include all the original features used in training the models in the stack. If FALSE, will
+#' only include the predictions from the models in the stack.
+#' @param which.var a character vector of the original features to include in the stack. If NULL, will include
+#' all riginal features. If use_original_features is FALSE, this argument is ignored.
 #' @param ... additional arguments to pass to the stacking model
 #' @return S3 caretStack object
 #' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).
@@ -43,6 +48,8 @@ caretStack <- function(
     metric = NULL,
     trControl = NULL,
     excluded_class_id = 1L,
+    use_original_features = FALSE,
+    which.var = NULL,
     ...) {
   # Check all.models
   if (!methods::is(all.models, "caretList")) {
@@ -63,6 +70,51 @@ caretStack <- function(
     new_X <- data.table::as.data.table(new_X)
   }
 
+  # Make sure new_X is not NULL when use_original_features is not NULL
+  if (use_original_features && is.null(new_X)) {
+    warning("use_original_features is ignored when new_X is NULL.", call. = FALSE)
+    use_original_features <- FALSE
+    which.var <- NULL
+  }
+
+  # Check which.var
+  if (!use_original_features && !is.null(which.var)) {
+    warning("which.var is ignored when use_original_features is FALSE.", call. = FALSE)
+    which.var <- NULL
+  }
+
+  # Check which.var is a character vector, a numeric vector, or NULL
+  # and that all variables are in new_X columns or are valid indexes
+  # and convert always to character vector
+  if (use_original_features) {
+    if (is.null(which.var)) {
+      which.var <- colnames(new_X)
+    } else if (is.character(which.var)) {
+      # Check if all variables are in new_X columns
+      ignored_vars <- setdiff(which.var, colnames(new_X))
+      if (length(ignored_vars) > 0L) {
+        warning("The following variables are not in new_X and will be ignored: ",
+          paste(ignored_vars, collapse = ", "), ". Ignoring these variables.",
+          call. = FALSE
+        )
+        which.var <- setdiff(which.var, ignored_vars)
+      }
+    } else if (is.numeric(which.var)) {
+      max_index <- ncol(new_X)
+      if (!all(which.var <= max_index)) {
+        warning("which.var contains indexes that exceed the number of
+        columns in new_X. Maximum allowed index is ",
+          max_index, ". Indexes will be truncated.",
+          call. = FALSE
+        )
+        which.var <- which.var[which.var <= max_index]
+      }
+      # Convert numeric to character
+      which.var <- colnames(new_X)[which.var]
+    } else {
+      stop("which.var must be a character vector, a numeric vector or NULL (to use all the original features).", call. = FALSE)
+    }
+  }
   # Validators
   excluded_class_id <- validateExcludedClass(excluded_class_id)
 
@@ -70,6 +122,11 @@ caretStack <- function(
   preds <- predict.caretList(all.models, newdata = new_X, excluded_class_id = excluded_class_id)
   if (!is.null(new_X)) {
     stopifnot(nrow(preds) == nrow(new_X))
+  }
+
+  # Add original features to the stack if requested
+  if (use_original_features) {
+    preds <- cbind(preds, new_X[, ..which.var])
   }
 
   # Choose the target
@@ -100,7 +157,8 @@ caretStack <- function(
     models = all.models,
     ens_model = model,
     error = model$results,
-    excluded_class_id = excluded_class_id
+    excluded_class_id = excluded_class_id,
+    original_features_included = which.var
   )
   class(out) <- "caretStack"
   out
@@ -165,16 +223,24 @@ predict.caretStack <- function(
     excluded_class_id <- 0L
   }
 
+  # Make sure original features saved in the training data are present in the newdata
+  if (!is.null(newdata) && !is.null(object$original_features_included)) {
+    check_original_features_included(newdata, object$original_features_included)
+  }
+
   # Get predictions from the submodels on the new data
   # We need theres if there's newdata, for passing the base model predictions to the stack model
   # We also need these if we're calculting standard errors for the predictions
-  sub_model_preds <- if (!is.null(newdata) || se) {
-    stats::predict(
+  if (!is.null(newdata) || se) {
+    sub_model_preds <- stats::predict(
       object$models,
       newdata = newdata,
       verbose = verbose,
       excluded_class_id = object[["excluded_class_id"]]
     )
+    if (!is.null(object$original_features_included)) {
+      sub_model_preds <- cbind(sub_model_preds, newdata[, object$original_features_included])
+    }
   }
 
   # Now predict on the stack
@@ -229,6 +295,22 @@ check_caretStack <- function(object) {
   )
 }
 
+#' @title Check original_features_included and newdata
+#' @description Make sure newdata contains all the original features used in training
+#'
+#' @param newdata a data.frame of new data
+#' @param original_features_included a character vector of original features used in training
+#' @keywords internal
+check_original_features_included <- function(newdata, original_features_included) {
+  if (!all(original_features_included %in% colnames(newdata))) {
+    missing_columns <- setdiff(colnames(newdata), original_features_included)
+    stop("newdata does not contain all the original features used in training. Missing columns: ",
+      paste(missing_columns, collapse = ", "),
+      call. = FALSE
+    )
+  }
+}
+
 #' @title Set excluded class id
 #' @description Set the excluded class id for a caretStack object
 #'
@@ -242,6 +324,8 @@ set_excluded_class_id <- function(object, is_class) {
   }
   object
 }
+
+
 
 #' @title Calculate a weighted standard deviation
 #' @description Used to weight deviations among ensembled model predictions
@@ -333,7 +417,19 @@ print.summary.caretStack <- function(x, ...) {
 #' @method varImp caretStack
 #' @export
 varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
+  # Make sure newdata is not NULL when use_original_features is not NULL
+  if (is.null(newdata) && !is.null(object$original_features_included)) {
+    stop("Original features were used in training, but they cannot be used if newdata is NULL. ",
+      "Please provide newdata to compute variable importance.",
+      call. = FALSE
+    )
+  }
   preds <- predict.caretList(object$models, newdata = newdata, excluded_class_id = object$excluded_class_id, ...)
+  if (!is.null(newdata) && !is.null(object$original_features_included)) {
+    newdata <- as.data.frame(newdata)
+    check_original_features_included(newdata, object$original_features_included)
+    preds <- cbind(preds, newdata[, object$original_features_included])
+  }
   imp <- permutationImportance(object$ens_model, preds, normalize = normalize)
   imp
 }
