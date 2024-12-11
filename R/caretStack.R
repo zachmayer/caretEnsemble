@@ -26,8 +26,9 @@
 #' @param use_original_features a logical indicating whether to include the original features in the stack.
 #' If TRUE, will include all the original features used in training the models in the stack. If FALSE, will
 #' only include the predictions from the models in the stack.
-#' @param which.var a character vector of the original features to include in the stack. If NULL, will include
-#' all original features. If use_original_features is FALSE, this argument is ignored.
+#' @param which.var a character vector with the names of the original features to include in the stack or a numeric
+#' vector with the indexes of the original features to include in the stack. If NULL, will include all original
+#' features. If use_original_features is FALSE, this argument is ignored.
 #' @param ... additional arguments to pass to the stacking model
 #' @return S3 caretStack object
 #' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).
@@ -70,51 +71,16 @@ caretStack <- function(
     new_X <- data.table::as.data.table(new_X)
   }
 
-  # Make sure new_X is not NULL when use_original_features is not NULL
-  if (use_original_features && is.null(new_X)) {
-    warning("use_original_features is ignored when new_X is NULL.", call. = FALSE)
-    use_original_features <- FALSE
-    which.var <- NULL
-  }
-
-  # Check which.var
-  if (!use_original_features && !is.null(which.var)) {
-    warning("which.var is ignored when use_original_features is FALSE.", call. = FALSE)
-    which.var <- NULL
-  }
+  # Check use_original_features and which.var
+  updated_params <- check_use_original_features(use_original_features, new_X, which.var)
+  use_original_features <- updated_params$use_original_features
+  which.var <- updated_params$which.var
 
   # Check which.var is a character vector, a numeric vector, or NULL
   # and that all variables are in new_X columns or are valid indexes
   # and convert always to character vector
-  if (use_original_features) {
-    if (is.null(which.var)) {
-      which.var <- colnames(new_X)
-    } else if (is.character(which.var)) {
-      # Check if all variables are in new_X columns
-      ignored_vars <- setdiff(which.var, colnames(new_X))
-      if (length(ignored_vars) > 0L) {
-        warning("The following variables are not in new_X and will be ignored: ",
-          paste(ignored_vars, collapse = ", "), ". Ignoring these variables.",
-          call. = FALSE
-        )
-        which.var <- setdiff(which.var, ignored_vars)
-      }
-    } else if (is.numeric(which.var)) {
-      max_index <- ncol(new_X)
-      if (!all(which.var <= max_index)) {
-        warning("which.var contains indexes that exceed the number of
-        columns in new_X. Maximum allowed index is ",
-          max_index, ". Indexes will be truncated.",
-          call. = FALSE
-        )
-        which.var <- which.var[which.var <= max_index]
-      }
-      # Convert numeric to character
-      which.var <- colnames(new_X)[which.var]
-    } else {
-      stop("which.var must be a character vector, a numeric vector or NULL (to use all the original features).", call. = FALSE)
-    }
-  }
+  which.var <- process_which_var(use_original_features, colnames(new_X), which.var)
+
   # Validators
   excluded_class_id <- validateExcludedClass(excluded_class_id)
 
@@ -126,7 +92,7 @@ caretStack <- function(
 
   # Add original features to the stack if requested
   if (use_original_features) {
-    preds <- cbind(preds, new_X[, ..which.var])
+    preds <- cbind(preds, new_X[, which.var, with = FALSE])
   }
 
   # Choose the target
@@ -162,6 +128,78 @@ caretStack <- function(
   )
   class(out) <- "caretStack"
   out
+}
+
+#' @title Check the parameters use_original_features, new_X, and which.var are consistent
+#' @description Check the parameters use_original_features, new_X, and which.var are consistent
+#' when training a caretStack.
+#' @param use_original_features a logical indicating whether to include the original features in the stack.
+#' @param new_X a data.frame of new data to train the stack on.
+#' @param which.var a vector indicating which original features to include in the stack.
+#' @keywords internal
+check_use_original_features <- function(use_original_features, new_X, which.var) {
+  # Make sure new_X is not NULL when use_original_features is not NULL
+  if (use_original_features && is.null(new_X)) {
+    warning("use_original_features is ignored when new_X is NULL.", call. = FALSE)
+    use_original_features <- FALSE
+    which.var <- NULL
+  }
+
+  # Advertise when which.var is ignored
+  if (!use_original_features && !is.null(which.var)) {
+    warning("which.var is ignored when use_original_features is FALSE.", call. = FALSE)
+    which.var <- NULL
+  }
+
+  list(use_original_features = use_original_features, which.var = which.var)
+}
+
+#' @title Process which.var
+#' @description Process the which.var argument for caretStack.
+#' @param use_original_features a logical indicating whether to include the original features in the stack.
+#' @param feature_colnames a character vector of the names of the original features used to train the stack.
+#' @param which.var a character vector of the names of the original features to include in the stack or a numeric
+#' vector with the indexes of the original features to include in the stack. If NULL, will include all original
+#' features. If use_original_features is FALSE, this argument is ignored.
+#' @keywords internal
+process_which_var <- function(use_original_features, feature_colnames, which.var) {
+  # If use_original_features are not used, which.var is ignored
+  if (!use_original_features) {
+    return(NULL)
+  }
+  # Use all original features when which.var is NULL
+  if (is.null(which.var)) {
+    return(feature_colnames)
+  }
+
+  if (is.character(which.var)) {
+    # Check that all specified variables in which.var are colnames of
+    ignored_vars <- setdiff(which.var, feature_colnames)
+    if (length(ignored_vars) > 0L) {
+      warning("The following variables are not in new_X and will be ignored: ",
+        toString(ignored_vars), ". Ignoring these variables.",
+        call. = FALSE
+      )
+      return(setdiff(which.var, ignored_vars))
+    }
+    return(which.var)
+  }
+  if (is.numeric(which.var)) {
+    max_index <- length(feature_colnames)
+    if (!all(which.var <= max_index)) {
+      warning("which.var contains indexes that exceed the number of columns in new_X. Maximum allowed index is ",
+        max_index, ". Indexes will be truncated.",
+        call. = FALSE
+      )
+      which.var <- which.var[which.var <= max_index]
+    }
+    return(feature_colnames[which.var])
+  }
+  stop(
+    "which.var must be a character vector, a numeric vector or NULL ",
+    "(to use all the original features).",
+    call. = FALSE
+  )
 }
 
 #' @title Make predictions from a caretStack
@@ -225,7 +263,7 @@ predict.caretStack <- function(
 
   # Make sure original features saved in the training data are present in the newdata
   if (!is.null(newdata) && !is.null(object$original_features_included)) {
-    check_original_features_included(newdata, object$original_features_included)
+    check_newdata_features(newdata, object$original_features_included)
   }
 
   # Get predictions from the submodels on the new data
@@ -301,11 +339,11 @@ check_caretStack <- function(object) {
 #' @param newdata a data.frame of new data
 #' @param original_features_included a character vector of original features used in training
 #' @keywords internal
-check_original_features_included <- function(newdata, original_features_included) {
+check_newdata_features <- function(newdata, original_features_included) {
   if (!all(original_features_included %in% colnames(newdata))) {
     missing_columns <- setdiff(colnames(newdata), original_features_included)
     stop("newdata does not contain all the original features used in training. Missing columns: ",
-      paste(missing_columns, collapse = ", "),
+      toString(missing_columns),
       call. = FALSE
     )
   }
@@ -419,7 +457,8 @@ print.summary.caretStack <- function(x, ...) {
 varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
   # Make sure newdata is not NULL when use_original_features is not NULL
   if (is.null(newdata) && !is.null(object$original_features_included)) {
-    stop("Original features were used in training, but they cannot be used if newdata is NULL. ",
+    stop(
+      "Original features were used in training, but they cannot be used if newdata is NULL. ",
       "Please provide newdata to compute variable importance.",
       call. = FALSE
     )
@@ -427,7 +466,7 @@ varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
   preds <- predict.caretList(object$models, newdata = newdata, excluded_class_id = object$excluded_class_id, ...)
   if (!is.null(newdata) && !is.null(object$original_features_included)) {
     newdata <- as.data.frame(newdata)
-    check_original_features_included(newdata, object$original_features_included)
+    check_newdata_features(newdata, object$original_features_included)
     preds <- cbind(preds, newdata[, object$original_features_included])
   }
   imp <- permutationImportance(object$ens_model, preds, normalize = normalize)
