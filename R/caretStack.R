@@ -27,7 +27,7 @@
 #' If TRUE, will include all the original features used in training the models in the stack. If FALSE, will
 #' only include the predictions from the models in the stack.
 #' @param which.var a character vector of the original features to include in the stack. If NULL, will include
-#' all riginal features. If use_original_features is FALSE, this argument is ignored.
+#' all original features. If use_original_features is FALSE, this argument is ignored.
 #' @param ... additional arguments to pass to the stacking model
 #' @return S3 caretStack object
 #' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).
