@@ -197,6 +197,97 @@ testthat::test_that("caretStack handles new data correctly", {
   testthat::expect_identical(ncol(pred_reg), 1L)
 })
 
+testthat::test_that("caretStack handles original all original features correctly", {
+  model_stack_1 <- caretStack(
+    models.class,
+    method = "glmnet",
+    new_X = X.class,
+    new_y = Y.class,
+    use_original_features = TRUE,
+    which.var = colnames(X.class)
+  )
+
+  # Check that the internal variable is correctly set
+  testthat::expect_identical(model_stack_1$original_features_included, colnames(X.class))
+
+  # Check we can predict
+  pred_1 <- predict(model_stack_1, newdata = X.class)
+  testthat::expect_s3_class(pred_1, "data.table")
+  testthat::expect_identical(nrow(pred_1), nrow(X.class))
+  expect_all_finite(pred_1)
+
+  # Do not specify which.var (by default, all columns are used)
+  model_stack_2 <- caretStack(
+    models.class,
+    method = "glmnet",
+    new_X = X.class,
+    new_y = Y.class,
+    use_original_features = TRUE
+  )
+
+  # Check that all columns are used
+  testthat::expect_identical(model_stack_2$original_features_included, colnames(X.class))
+
+  # Check we can predict
+  pred_2 <- predict(model_stack_2, newdata = X.class)
+  testthat::expect_s3_class(pred_2, "data.table")
+  testthat::expect_identical(nrow(pred_2), nrow(X.class))
+  expect_all_finite(pred_2)
+})
+
+testthat::test_that("caretStack handles a subset of original features given its names correctly", {
+  model_stack <- caretStack(
+    models.class,
+    method = "glmnet",
+    new_X = X.class,
+    new_y = Y.class,
+    use_original_features = TRUE,
+    which.var = c("Sepal.Width", "Petal.Length")
+  )
+
+  # Check that the internal variable is correctly set
+  testthat::expect_identical(model_stack$original_features_included, c("Sepal.Width", "Petal.Length"))
+
+  # Check we can predict
+  pred <- predict(model_stack, newdata = X.class)
+  testthat::expect_s3_class(pred, "data.table")
+  testthat::expect_identical(nrow(pred), nrow(X.class))
+  expect_all_finite(pred)
+})
+
+testthat::test_that("caretStack handles a subset of original features given its indexes", {
+  model_stack <- caretStack(
+    models.class,
+    method = "glmnet",
+    new_X = X.class,
+    new_y = Y.class,
+    use_original_features = TRUE,
+    which.var = c(2L, 3L)
+  )
+
+  # Check that the extracted columns are the correct ones
+  testthat::expect_identical(model_stack$original_features_included, colnames(X.class)[c(2L, 3L)])
+
+  # Check we can predict
+  pred <- predict(model_stack, newdata = X.class)
+  testthat::expect_s3_class(pred, "data.table")
+  testthat::expect_identical(nrow(pred), nrow(X.class))
+})
+
+testthat::test_that("We can get variable importance when use_original_features is true", {
+  model_stack <- caretStack(
+    models.class,
+    method = "glmnet",
+    new_X = X.class,
+    new_y = Y.class,
+    use_original_features = TRUE,
+    which.var = c("Sepal.Width", "Petal.Length")
+  )
+  imp <- caret::varImp(model_stack, normalize = TRUE, newdata = X.class)
+
+  testthat::expect_named(imp, c("rf", "glm", "rpart", "treebag", "Sepal.Width", "Petal.Length"))
+})
+
 testthat::test_that("caretStack coerces lists to caretLists", {
   models <- list(
     models.class[[1L]],
@@ -220,6 +311,116 @@ testthat::test_that("caretStack errors if new_y is provided but not new_X", {
     caretStack(models.class, new_y = Y.class),
     "Both new_X and new_y must be NULL, or neither."
   )
+})
+
+testthat::test_that("caretStack warns if use_original_features is provided, but new_X is NULL", {
+  testthat::expect_warning(
+    caretStack(models.class, use_original_features = TRUE, which.var = c("Sepal.Width", "Petal.Length")),
+    "use_original_features is ignored when new_X is NULL."
+  )
+})
+
+testthat::test_that("caretStack warns if which.var is provided, but use_original_features is FALSE", {
+  testthat::expect_warning(
+    caretStack(
+      models.class,
+      use_original_features = FALSE, which.var = c("Sepal.Width", "Petal.Length")
+    ),
+    "which.var is ignored when use_original_features is FALSE."
+  )
+})
+
+testthat::test_that("caretStack warns if which.var contains invalid columns", {
+  # Some other warning messages can be printed due to colinear columns when new_X and new_y are provided
+  warning_messages <- capture_warnings({
+    caretStack(
+      models.class,
+      new_X = X.class, new_y = Y.class,
+      use_original_features = TRUE, which.var = c("Sepal.Width", "Wrong column1", "Wrong column2")
+    )
+  })
+
+  expected_warning_message <- paste0(
+    "The following variables are not in new_X and will be ignored: ",
+    "Wrong column1, Wrong column2. Ignoring these variables."
+  )
+  testthat::expect_true(expected_warning_message %in% warning_messages)
+})
+
+testthat::test_that("caretStack warns if which.var contains invalid indexes", {
+  # Some other warning messages can be printed due to colinear columns when new_X and new_y are provided
+  warning_messages <- capture_warnings({
+    caretStack(
+      models.class,
+      new_X = X.class, new_y = Y.class,
+      use_original_features = TRUE, which.var = c(0L, 1L, 2L, 3L)
+    )
+  })
+
+  expected_warning_message <- "which.var contains indexes that are less or equal than 0. Ignoring these indexes."
+  testthat::expect_true(expected_warning_message %in% warning_messages)
+
+  warning_messages <- capture_warnings({
+    caretStack(
+      models.class,
+      new_X = X.class, new_y = Y.class,
+      use_original_features = TRUE, which.var = c(1L, 2L, 3L, 9L)
+    )
+  })
+
+  max_index <- ncol(X.class)
+  expected_warning_message <- paste0(
+    "which.var contains indexes that exceed the number of columns in new_X. Maximum allowed index is ",
+    max_index, ". Indexes will be truncated."
+  )
+  testthat::expect_true(expected_warning_message %in% warning_messages)
+})
+
+testthat::test_that("caretStack errors when which.var is not a character, integer vector or NULL", {
+  testthat::expect_error(
+    caretStack(
+      models.class,
+      new_X = X.class, new_y = Y.class,
+      use_original_features = TRUE,
+      which.var = list("Sepal.Width", "Petal.Length")
+    ),
+    "which.var must be a character vector, a numeric vector or NULL when use_original_features is TRUE."
+  )
+})
+
+testthat::test_that("caretStack errors when call predict and newdata colnames are not the same used in training", {
+  model_stack <- caretStack(
+    models.class,
+    new_X = X.class, new_y = Y.class,
+    use_original_features = TRUE,
+    which.var = colnames(X.class)
+  )
+  newdata <- X.class
+  colnames(newdata) <- c(
+    "Wrong column1", "Wrong column2", "Wrong column3",
+    "Petal.Width", "Speciesversicolor", "Speciesvirginica"
+  )
+  error_message <- paste0(
+    "newdata does not contain all the original features used in training. ",
+    "Missing columns: Wrong column1, Wrong column2, Wrong column3."
+  )
+
+  testthat::expect_error(predict(model_stack, newdata = newdata), error_message)
+})
+
+testthat::test_that("caretStack errors when call varImp and newdata is null", {
+  model_stack <- caretStack(
+    models.class,
+    new_X = X.class, new_y = Y.class,
+    use_original_features = TRUE,
+    which.var = colnames(X.class)
+  )
+
+  error_message <- paste0(
+    "Original features were used in training, but they cannot be used if newdata is NULL. ",
+    "Please provide newdata to compute variable importance."
+  )
+  testthat::expect_error(caret::varImp(model_stack), error_message)
 })
 
 ######################################################################
