@@ -185,6 +185,12 @@ process_which_var <- function(use_original_features, feature_colnames, which.var
     return(which.var)
   }
   if (is.numeric(which.var)) {
+    if (!all(which.var > 0L)) {
+      warning("which.var contains indexes that are less or equal than 0. Ignoring these indexes.",
+        call. = FALSE
+      )
+      which.var <- which.var[which.var > 0L]
+    }
     max_index <- length(feature_colnames)
     if (!all(which.var <= max_index)) {
       warning("which.var contains indexes that exceed the number of columns in new_X. Maximum allowed index is ",
@@ -196,8 +202,7 @@ process_which_var <- function(use_original_features, feature_colnames, which.var
     return(feature_colnames[which.var])
   }
   stop(
-    "which.var must be a character vector, a numeric vector or NULL ",
-    "(to use all the original features).",
+    "which.var must be a character vector, a numeric vector or NULL when use_original_features is TRUE.",
     call. = FALSE
   )
 }
@@ -343,7 +348,7 @@ check_newdata_features <- function(newdata, original_features_included) {
   if (!all(original_features_included %in% colnames(newdata))) {
     missing_columns <- setdiff(colnames(newdata), original_features_included)
     stop("newdata does not contain all the original features used in training. Missing columns: ",
-      toString(missing_columns),
+      toString(missing_columns), ".",
       call. = FALSE
     )
   }
