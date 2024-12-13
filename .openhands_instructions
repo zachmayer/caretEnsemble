@@ -1,0 +1,62 @@
+# R Code Style Guide and Development Instructions
+
+## Code Style
+
+- Use base R and core packages rather than tidyverse
+- Prefer data.table over data.frame for data manipulation
+- Use :: operator for package functions (e.g., data.table::data.table)
+- Avoid for loops - use vectorized operations
+- Use vapply instead of sapply
+- Keep functions small and focused
+- Write self-documenting code, minimize comments
+- Follow strict R code style guidelines
+
+## Development Workflow
+
+Use the Makefile targets for development:
+
+### Basic Development
+
+- `make dev` - Run basic development cycle (clean, style, document, lint, spell check, test)
+- `make test` - Run unit tests
+- `make lint` - Check code style and quality
+- `make fix-style` - Auto-format code
+- `make spell` - Check spelling
+
+### Documentation
+
+- `make document` - Generate documentation
+- `make readme` - Build README
+- `make vignettes` - Build vignettes
+
+### Testing and Coverage
+
+- `make coverage` - Generate and check coverage reports
+- `make view-coverage` - View coverage report in browser
+- `make check` - Run R CMD check locally
+
+## Package Structure
+
+- Put R code in R/
+- Put tests in tests/testthat/
+- Put data generation scripts in inst/data-raw/
+- Put vignettes in vignettes/
+
+## Testing Guidelines
+
+- Write unit tests for all functions
+- Aim for 100% test coverage
+- Test edge cases and error conditions
+- Use testthat framework
+- Run tests frequently during development
+
+## Dependencies
+
+- Use `make install-deps` to install required packages
+- Minimize external dependencies
+- Prefer base R and established packages
+
+## Getting Help
+
+- Run `make help` to see all available commands
+- See `make dev-guide` for R package development guide
