@@ -140,13 +140,15 @@ jobs:
           fi
 
       - name: Set environment variables
+        env:
+          REVIEW_BODY: ${{ github.event.review.body }}
         run: |
           # Handle pull request events first
           if [ -n "${{ github.event.pull_request.number }}" ]; then
             echo "ISSUE_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
             echo "ISSUE_TYPE=pr" >> $GITHUB_ENV
           # Handle pull request review events
-          elif [ -n "${{ github.event.review.body }}" ]; then
+          elif [ -n "$REVIEW_BODY" ]; then
             echo "ISSUE_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
             echo "ISSUE_TYPE=pr" >> $GITHUB_ENV
           # Handle issue comment events that reference a PR
@@ -159,7 +161,7 @@ jobs:
             echo "ISSUE_TYPE=issue" >> $GITHUB_ENV
           fi
 
-          if [ -n "${{ github.event.review.body }}" ]; then
+          if [ -n "$REVIEW_BODY" ]; then
             echo "COMMENT_ID=${{ github.event.review.id || 'None' }}" >> $GITHUB_ENV
           else
             echo "COMMENT_ID=${{ github.event.comment.id || 'None' }}" >> $GITHUB_ENV
@@ -194,12 +196,17 @@ jobs:
           extra-packages: any::roxygen2
 
       - name: Install OpenHands
+        env:
+          REVIEW_BODY: ${{ github.event.review.body }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          EVENT_NAME: ${{ github.event_name }}
+          LABEL_NAME: ${{ github.event.label.name }}
         run: |
-          if [[ "${{ github.event.label.name }}" == "fix-me-experimental" ]] ||
-             ([[ "${{ github.event_name }}" == "issue_comment" || "${{ github.event_name }}" == "pull_request_review_comment" ]] &&
-              [[ "${{ github.event.comment.body }}" == "@openhands-agent-exp"* ]]) ||
-             ([[ "${{ github.event_name }}" == "pull_request_review" ]] &&
-              [[ "${{ github.event.review.body }}" == "@openhands-agent-exp"* ]]); then
+          if [[ "$LABEL_NAME" == "fix-me-experimental" ]] ||
+             ([[ "$EVENT_NAME" == "issue_comment" || "$EVENT_NAME" == "pull_request_review_comment" ]] &&
+              [[ "$COMMENT_BODY" == "@openhands-agent-exp"* ]]) ||
+             ([[ "$EVENT_NAME" == "pull_request_review" ]] &&
+              [[ "$REVIEW_BODY" == "@openhands-agent-exp"* ]]); then
             python -m pip install --upgrade pip
             pip install git+https://github.com/all-hands-ai/openhands.git
           else
