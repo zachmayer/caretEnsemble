@@ -11,8 +11,7 @@ caretStack(
   metric = NULL,
   trControl = NULL,
   excluded_class_id = 1L,
-  use_original_features = FALSE,
-  which.var = NULL,
+  original_features = NULL,
   ...
 )
 }
@@ -33,13 +32,9 @@ If 0, will include all levels.}
 
 \item{excluded_class_id}{The integer level to exclude from binary classification or multiclass problems.}
 
-\item{use_original_features}{a logical indicating whether to include the original features in the stack.
-If TRUE, will include all the original features used in training the models in the stack. If FALSE, will
-only include the predictions from the models in the stack.}
-
-\item{which.var}{a character vector with the names of the original features to include in the stack or a numeric
-vector with the indexes of the original features to include in the stack. If NULL, will include all original
-features. If use_original_features is FALSE, this argument is ignored.}
+\item{original_features}{a character vector of the names of the original features to include in the stack or
+NULL to not include any features. These features will be added to the stacked predictions from the models to
+train the ensemble model.}
 
 \item{...}{additional arguments to pass to the stacking model}
 }
