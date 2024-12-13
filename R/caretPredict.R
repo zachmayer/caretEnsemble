@@ -100,7 +100,7 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
 
   # Only save stacked predictions for the best model
   if ("pred" %in% names(model)) {
-    model[["pred"]] <- extractBestPreds(model)
+    model[["pred"]] <- extractBestPreds(model, aggregate_resamples = if (!is.null(model_args$aggregate_resamples)) model_args$aggregate_resamples else TRUE)
   }
 
   if (trim) {
@@ -147,9 +147,10 @@ aggregate_mean_or_first <- function(x) {
 #' @title Extract the best predictions from a train object
 #' @description Extract the best predictions from a train object.
 #' @param x a train object
+#' @param aggregate_resamples logical, should resamples be aggregated (default TRUE)
 #' @return a data.table::data.table with predictions
 #' @keywords internal
-extractBestPreds <- function(x) {
+extractBestPreds <- function(x, aggregate_resamples = TRUE) {
   stopifnot(methods::is(x, "train"))
   if (is.null(x$pred)) {
     stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
@@ -167,14 +168,20 @@ extractBestPreds <- function(x) {
   # Drop rows for other tunes
   pred <- pred[best_tune, ]
 
-  # If we have multiple resamples per row
-  # e.g. for repeated CV, we need to average the predictions
-  keys <- "rowIndex"
-  data.table::setkeyv(pred, keys)
-  pred <- pred[, lapply(.SD, aggregate_mean_or_first), by = keys]
-
   # Order results consistently
-  data.table::setorderv(pred, keys)
+  data.table::setorderv(pred, "rowIndex")
+
+  if (aggregate_resamples) {
+    # If we have multiple resamples per row
+    # e.g. for repeated CV, we need to average the predictions
+    keys <- "rowIndex"
+    data.table::setkeyv(pred, keys)
+    pred <- pred[, lapply(.SD, aggregate_mean_or_first), by = keys]
+  } else {
+    # Keep all resamples
+    # Remove columns that are not needed
+    pred[, c("intercept", "Resample") := NULL]
+  }
 
   # Return
   pred

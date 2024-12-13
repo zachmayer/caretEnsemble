@@ -37,7 +37,8 @@ caretList <- function(
     tuneList = NULL,
     metric = NULL,
     continue_on_fail = FALSE,
-    trim = TRUE) {
+    trim = TRUE,
+    aggregate_resamples = TRUE) {
   # Checks
   if (is.null(tuneList) && is.null(methodList)) {
     stop("Please either define a methodList or tuneList", call. = FALSE)
@@ -79,7 +80,11 @@ caretList <- function(
   global_args[["metric"]] <- metric
 
   # Loop through the tuneLists and fit caret models with those specs
-  modelList <- lapply(tuneList, caretTrain, global_args = global_args, continue_on_fail = continue_on_fail, trim = trim)
+  modelList <- lapply(tuneList, function(x) {
+    # Add aggregate_resamples to model args
+    x$aggregate_resamples <- aggregate_resamples
+    caretTrain(x, global_args = global_args, continue_on_fail = continue_on_fail, trim = trim)
+  })
   names(modelList) <- names(tuneList)
   nulls <- vapply(modelList, is.null, logical(1L))
   modelList <- modelList[!nulls]
