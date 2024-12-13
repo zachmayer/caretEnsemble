@@ -61,17 +61,16 @@ jobs:
       github.event_name == 'workflow_call' ||
       github.event.label.name == 'fix-me' ||
       github.event.label.name == 'fix-me-experimental' ||
-      {
-        ((github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') &&
+      (
+        (github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') &&
         contains(github.event.comment.body, inputs.macro || '@openhands-agent') &&
         (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'MEMBER')
-        ) ||
-
-        (github.event_name == 'pull_request_review' &&
+      ) ||
+      (
+        github.event_name == 'pull_request_review' &&
         contains(github.event.review.body, inputs.macro || '@openhands-agent') &&
         (github.event.review.author_association == 'OWNER' || github.event.review.author_association == 'COLLABORATOR' || github.event.review.author_association == 'MEMBER')
-        )
-      }
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -91,17 +90,17 @@ jobs:
 
       - name: Cache pip dependencies
         if: |
-          ! {
+          ! (
             github.event.label.name == 'fix-me-experimental' ||
-            {
+            (
               (github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') &&
               contains(github.event.comment.body, '@openhands-agent-exp')
-            } ||
-            {
+            ) ||
+            (
               github.event_name == 'pull_request_review' &&
               contains(github.event.review.body, '@openhands-agent-exp')
-            }
-          }
+            )
+          )
         uses: actions/cache@v4
         with:
           path: "${{ env.pythonLocation }}/lib/python3.12/site-packages/*"
@@ -205,10 +204,10 @@ jobs:
           LABEL_NAME: ${{ github.event.label.name }}
         run: |
           if [[ "$LABEL_NAME" == "fix-me-experimental" ]] ||
-             { [[ "$EVENT_NAME" == "issue_comment" || "$EVENT_NAME" == "pull_request_review_comment" ]] &&
-              [[ "$COMMENT_BODY" == "@openhands-agent-exp"* ]]; } ||
-             { [[ "$EVENT_NAME" == "pull_request_review" ]] &&
-              [[ "$REVIEW_BODY" == "@openhands-agent-exp"* ]]; }; then
+             [[ "$EVENT_NAME" == "issue_comment" || "$EVENT_NAME" == "pull_request_review_comment" ]] &&
+             [[ "$COMMENT_BODY" == "@openhands-agent-exp"* ]] ||
+             [[ "$EVENT_NAME" == "pull_request_review" ]] &&
+             [[ "$REVIEW_BODY" == "@openhands-agent-exp"* ]]; then
             python -m pip install --upgrade pip
             pip install git+https://github.com/all-hands-ai/openhands.git
           else
