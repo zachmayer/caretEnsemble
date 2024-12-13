@@ -61,7 +61,7 @@ jobs:
       github.event_name == 'workflow_call' ||
       github.event.label.name == 'fix-me' ||
       github.event.label.name == 'fix-me-experimental' ||
-      (
+      {
         ((github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') &&
         contains(github.event.comment.body, inputs.macro || '@openhands-agent') &&
         (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'MEMBER')
@@ -71,7 +71,7 @@ jobs:
         contains(github.event.review.body, inputs.macro || '@openhands-agent') &&
         (github.event.review.author_association == 'OWNER' || github.event.review.author_association == 'COLLABORATOR' || github.event.review.author_association == 'MEMBER')
         )
-      )
+      }
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -91,17 +91,17 @@ jobs:
 
       - name: Cache pip dependencies
         if: |
-          !(
+          ! {
             github.event.label.name == 'fix-me-experimental' ||
-            (
+            {
               (github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') &&
               contains(github.event.comment.body, '@openhands-agent-exp')
-            ) ||
-            (
+            } ||
+            {
               github.event_name == 'pull_request_review' &&
               contains(github.event.review.body, '@openhands-agent-exp')
-            )
-          )
+            }
+          }
         uses: actions/cache@v4
         with:
           path: "${{ env.pythonLocation }}/lib/python3.12/site-packages/*"
@@ -144,35 +144,37 @@ jobs:
           REVIEW_BODY: ${{ github.event.review.body }}
         run: |
           # Handle pull request events first
-          if [ -n "${{ github.event.pull_request.number }}" ]; then
-            echo "ISSUE_NUMBER=${{ github.event.pull_request.number }}" >> "$GITHUB_ENV"
-            echo "ISSUE_TYPE=pr" >> "$GITHUB_ENV"
-          # Handle pull request review events
-          elif [ -n "$REVIEW_BODY" ]; then
-            echo "ISSUE_NUMBER=${{ github.event.pull_request.number }}" >> "$GITHUB_ENV"
-            echo "ISSUE_TYPE=pr" >> "$GITHUB_ENV"
-          # Handle issue comment events that reference a PR
-          elif [ -n "${{ github.event.issue.pull_request }}" ]; then
-            echo "ISSUE_NUMBER=${{ github.event.issue.number }}" >> "$GITHUB_ENV"
-            echo "ISSUE_TYPE=pr" >> "$GITHUB_ENV"
-          # Handle regular issue events
-          else
-            echo "ISSUE_NUMBER=${{ github.event.issue.number }}" >> "$GITHUB_ENV"
-            echo "ISSUE_TYPE=issue" >> "$GITHUB_ENV"
-          fi
+          {
+            if [ -n "${{ github.event.pull_request.number }}" ]; then
+              echo "ISSUE_NUMBER=${{ github.event.pull_request.number }}"
+              echo "ISSUE_TYPE=pr"
+            # Handle pull request review events
+            elif [ -n "$REVIEW_BODY" ]; then
+              echo "ISSUE_NUMBER=${{ github.event.pull_request.number }}"
+              echo "ISSUE_TYPE=pr"
+            # Handle issue comment events that reference a PR
+            elif [ -n "${{ github.event.issue.pull_request }}" ]; then
+              echo "ISSUE_NUMBER=${{ github.event.issue.number }}"
+              echo "ISSUE_TYPE=pr"
+            # Handle regular issue events
+            else
+              echo "ISSUE_NUMBER=${{ github.event.issue.number }}"
+              echo "ISSUE_TYPE=issue"
+            fi
 
-          if [ -n "$REVIEW_BODY" ]; then
-            echo "COMMENT_ID=${{ github.event.review.id || 'None' }}" >> "$GITHUB_ENV"
-          else
-            echo "COMMENT_ID=${{ github.event.comment.id || 'None' }}" >> "$GITHUB_ENV"
-          fi
+            if [ -n "$REVIEW_BODY" ]; then
+              echo "COMMENT_ID=${{ github.event.review.id || 'None' }}"
+            else
+              echo "COMMENT_ID=${{ github.event.comment.id || 'None' }}"
+            fi
 
-          echo "MAX_ITERATIONS=${{ inputs.max_iterations || 50 }}" >> "$GITHUB_ENV"
-          echo "SANDBOX_ENV_GITHUB_TOKEN=${{ secrets.PAT_TOKEN || github.token }}" >> "$GITHUB_ENV"
-          echo "SANDBOX_ENV_BASE_CONTAINER_IMAGE=${{ inputs.base_container_image }}" >> "$GITHUB_ENV"
+            echo "MAX_ITERATIONS=${{ inputs.max_iterations || 50 }}"
+            echo "SANDBOX_ENV_GITHUB_TOKEN=${{ secrets.PAT_TOKEN || github.token }}"
+            echo "SANDBOX_ENV_BASE_CONTAINER_IMAGE=${{ inputs.base_container_image }}"
 
-          # Set branch variables
-          echo "TARGET_BRANCH=${{ inputs.target_branch }}" >> "$GITHUB_ENV"
+            # Set branch variables
+            echo "TARGET_BRANCH=${{ inputs.target_branch }}"
+          } >> "$GITHUB_ENV"
 
       - name: Comment on issue with start message
         uses: actions/github-script@v7
@@ -203,10 +205,10 @@ jobs:
           LABEL_NAME: ${{ github.event.label.name }}
         run: |
           if [[ "$LABEL_NAME" == "fix-me-experimental" ]] ||
-             ([[ "$EVENT_NAME" == "issue_comment" || "$EVENT_NAME" == "pull_request_review_comment" ]] &&
-              [[ "$COMMENT_BODY" == "@openhands-agent-exp"* ]]) ||
-             ([[ "$EVENT_NAME" == "pull_request_review" ]] &&
-              [[ "$REVIEW_BODY" == "@openhands-agent-exp"* ]]); then
+             { [[ "$EVENT_NAME" == "issue_comment" || "$EVENT_NAME" == "pull_request_review_comment" ]] &&
+              [[ "$COMMENT_BODY" == "@openhands-agent-exp"* ]]; } ||
+             { [[ "$EVENT_NAME" == "pull_request_review" ]] &&
+              [[ "$REVIEW_BODY" == "@openhands-agent-exp"* ]]; }; then
             python -m pip install --upgrade pip
             pip install git+https://github.com/all-hands-ai/openhands.git
           else
