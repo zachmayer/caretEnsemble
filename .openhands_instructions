@@ -1,15 +1,22 @@
 # R Code Style Guide and Development Instructions
 
+Your dev environment is *fully setup*. You do not need to install any packages.  They are all installed for you.
+
 ## Code Style
 
 - Use base R and core packages rather than tidyverse
 - Prefer data.table over data.frame for data manipulation
-- Use :: operator for package functions (e.g., data.table::data.table)
+- Use :: operator for package functions (e.g., data.table::data.table).
+  - Do not use `library` or `require`.  Import packages with ::
 - Avoid for loops - use vectorized operations
 - Use vapply instead of sapply
 - Keep functions small and focused
 - Write self-documenting code, minimize comments
 - Follow strict R code style guidelines
+- Write clean, lint-free, readable code
+- Do not use error handling
+- Do not use tryCatch / on.exit / try / withCallingHandlers / etc.
+- Do not write excessive if/then/else statements
 
 ## Development Workflow
 
