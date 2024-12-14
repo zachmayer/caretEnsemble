@@ -25,7 +25,7 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, aggrega
 
     # Otherwise, predict on newdata
   } else {
-    if (any(object$modelInfo$library %in% c("neuralnet", "klaR"))) {
+    if (any(object[["modelInfo"]][["library"]] %in% c("neuralnet", "klaR"))) {
       newdata <- as.matrix(newdata) # I hate some of these packages
     }
     if (is_class) {
@@ -106,8 +106,8 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
 
   if (trim) {
     # Remove some elements that are not needed from the final model
-    if (!is.null(model$modelInfo$trim)) {
-      model$finalModel <- model$modelInfo$trim(model$finalModel)
+    if (!is.null(model[["modelInfo"]][["trim"]])) {
+      model[["finalModel"]] <- model[["modelInfo"]][["trim"]](model[["finalModel"]])
     }
 
     # Remove some elements that are not needed from the train model
@@ -141,7 +141,7 @@ aggregate_mean_or_first <- function(x) {
   if (is.numeric(x)) {
     mean(x)
   } else {
-    x[1L]
+    x[[1L]]
   }
 }
 
@@ -153,7 +153,7 @@ aggregate_mean_or_first <- function(x) {
 #' @keywords internal
 extractBestPreds <- function(x, aggregate_resamples = TRUE) {
   stopifnot(methods::is(x, "train"))
-  if (is.null(x$pred)) {
+  if (is.null(x[["pred"]])) {
     stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
   }
   stopifnot(methods::is(x$pred, "data.frame"))

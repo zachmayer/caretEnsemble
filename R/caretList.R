@@ -70,7 +70,7 @@ caretList <- function(
 
   # ALWAYS save class probs
   trControl[["classProbs"]] <- is_class
-  trControl["savePredictions"] <- "final"
+  trControl[["savePredictions"]] <- "final"
 
   # Capture global arguments for train as a list
   # Squish trControl back onto the global arguments list
@@ -157,7 +157,7 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
     !is.null(names(preds)),
     length(dim(preds)) == 2L
   )
-  all_regression <- all(vapply(object, function(x) x$modelType == "Regression", logical(1L)))
+  all_regression <- all(vapply(object, function(x) x[["modelType"]] == "Regression", logical(1L)))
   if (all_regression) {
     stopifnot(
       length(names(preds)) == length(object),
@@ -309,7 +309,7 @@ c.caretList <- function(...) {
       x
     } else if (inherits(x, "train")) {
       x <- list(x)
-      names(x) <- x[[1L]]$method
+      names(x) <- x[[1L]][["method"]]
       x
     } else {
       stop("class of modelList1 must be 'caretList' or 'train'", call. = FALSE)
@@ -359,7 +359,7 @@ tuneCheck <- function(x) {
   # Check model methods
   stopifnot(is.list(x))
 
-  model_methods <- lapply(x, function(m) m$method)
+  model_methods <- lapply(x, function(m) m[["method"]])
   methodCheck(model_methods)
   method_names <- vapply(x, extractModelName, character(1L))
 
@@ -386,7 +386,7 @@ tuneCheck <- function(x) {
 #' @return validated model info list (i.e. x)
 #' @keywords internal
 checkCustomModel <- function(x) {
-  if (is.null(x$method)) {
+  if (is.null(x[["method"]])) {
     stop(
       "Custom models must be defined with a \"method\" attribute containing the name",
       "by which that model should be referenced. Example: my.glm.model$method <- \"custom_glm\"",
@@ -404,14 +404,14 @@ checkCustomModel <- function(x) {
 #' @keywords internal
 methodCheck <- function(x) {
   # Fetch list of existing caret models
-  supported_models <- unique(caret::modelLookup()$model)
+  supported_models <- unique(caret::modelLookup()[["model"]])
 
   # Split given model methods based on whether or not they
   # are specified as strings or model info lists (ie custom models)
   models <- lapply(x, function(m) {
     if (is.list(m)) {
       checkCustomModel(m)
-      data.table::data.table(type = "custom", model = m$method, stringsAsFactors = FALSE)
+      data.table::data.table(type = "custom", model = m[["method"]], stringsAsFactors = FALSE)
     } else if (is.character(m)) {
       data.table::data.table(type = "native", model = m, stringsAsFactors = FALSE)
     } else {
@@ -426,7 +426,7 @@ methodCheck <- function(x) {
   models <- data.table::rbindlist(models, use.names = TRUE, fill = TRUE)
 
   # Ensure that all non-custom models are valid
-  native_models <- subset(models, get("type") == "native")$model
+  native_models <- subset(models, get("type") == "native")[["model"]]
   bad_models <- setdiff(native_models, supported_models)
 
   if (length(bad_models) > 0L) {
@@ -533,7 +533,7 @@ summary.caretList <- function(object, metric = NULL, ...) {
 #' @method print summary.caretList
 #' @export
 print.summary.caretList <- function(x, ...) {
-  cat("The following models were ensembled:", x$models, " \n")
+  cat("The following models were ensembled:", x[["models"]], " \n")
   cat("\nModel accuracy:\n")
-  print(x$results)
+  print(x[["results"]])
 }
