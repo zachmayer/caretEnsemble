@@ -2,6 +2,13 @@
 
 Your dev environment is *fully setup*. You do not need to install any packages.  They are all installed for you.
 
+Write the *minimal* code neccicary to solve the problem:
+
+- Complexity is bad
+- Branching logic is bad
+- Convoluted error handling or edge case handling is bad
+- Use the fewest lines of code possible to solve the problem
+
 ## Code Style
 
 - Use base R and core packages rather than tidyverse
@@ -17,53 +24,50 @@ Your dev environment is *fully setup*. You do not need to install any packages. 
 - Do not use error handling
 - Do not use tryCatch / on.exit / try / withCallingHandlers / etc.
 - Do not write excessive if/then/else statements
+- Don't install or use new packages. You should already have everything you need.
 
 ## Development Workflow
 
-Use the Makefile targets for development:
+Use the Makefile targets for development. After you make changes, run:
 
-### Basic Development
-
-- `make dev` - Run basic development cycle (clean, style, document, lint, spell check, test)
-- `make test` - Run unit tests
-- `make lint` - Check code style and quality
 - `make fix-style` - Auto-format code
+- `make document` - Check spelling
+- `make lint` - Check code style and quality
 - `make spell` - Check spelling
+- `make test` - Run unit tests
+- `make check` - Run all the cran checks
+- `make coverage-test` - Make sure the code has 100% test coverage
+- You shouldn't really need to run other shell commands that are defined in the Makefile
+  - You will probably still need to run shell commands to find and view files
 
-### Documentation
+If any of these commands fail, fix the issues and iterate on that command until it passes then move on to the next one. When all these commands pass, you are ready to make a pull request.
 
-- `make document` - Generate documentation
-- `make readme` - Build README
-- `make vignettes` - Build vignettes
+You shouldn't need to run the other make commands. If you update the README.rmd (do not edit the README.md), run `make readme`.  If you update a vignette or add a new one, run `make vignettes`.  You shouldn't need to do this though.
 
-### Testing and Coverage
-
-- `make coverage` - Generate and check coverage reports
-- `make view-coverage` - View coverage report in browser
-- `make check` - Run R CMD check locally
+Do not run `make install`, `make update-test-fixtures`, `make release`, `make check-rev-dep`, `make check-win`, `make check-rhub`, `make check-many-preds`, `make check`,  `make preview-site`, `make dev-guide`.  If needed a human will run these commands.
 
 ## Package Structure
 
 - Put R code in R/
 - Put tests in tests/testthat/
-- Put data generation scripts in inst/data-raw/
-- Put vignettes in vignettes/
+- Put vignettes in vignettes/.  You shouldn't really need to do vignettes unless specifically instructed to do so.
+- Use `git grep` to find files that you need
 
 ## Testing Guidelines
 
 - Write unit tests for all functions
+- Write table-driven tests. One simple test that covers many cases.
+  - Test edge cases in these table-driven tests
 - Aim for 100% test coverage
-- Test edge cases and error conditions
+- Be sure to test error conditions, especially cases that should throw errors
 - Use testthat framework
-- Run tests frequently during development
 
-## Dependencies
-
-- Use `make install-deps` to install required packages
-- Minimize external dependencies
-- Prefer base R and established packages
 
 ## Getting Help
 
-- Run `make help` to see all available commands
-- See `make dev-guide` for R package development guide
+These file contain information that will help you understand the code structure and workflow:
+
+- [README.rmd](README.rmd) - The package readme. Contains info for humans, and a human dev guide. Ignore the dev instructures for humans in the readme though and use the dev instructions in this file.
+- [Makefile](Makefile) - The Makefile. Contains many useful commands, but heed the instructions in this file: you won't need to use most of those make commands.
+- [.openhands_instructions](.openhands_instructions) - This file. Contains instructions for you as a developer.
+- [project-tree.txt](project-tree.txt) - A nice clean package directory, ignoring files you dont need to edit. Use this file to navigate the package and understand which files you need to edit. Feel free to re-make this file with `make project-tree.txt` if you've made file or directory changes to see what's changed.
