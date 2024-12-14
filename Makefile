@@ -29,6 +29,7 @@ help:
 	@echo "  preview-site           Preview pkgdown site"
 	@echo "  project-tree.txt       Show a nice clean package directory, ignoring files you dont need to edit"
 	@echo "  clean                  Clean up generated files"
+	@echo "  build-sandbox          Build custom OpenHands sandbox image"
 
 .PHONY: all
 all: clean fix-style document install readme vignettes lint spell test check-many-preds check coverage preview-site
@@ -195,3 +196,7 @@ clean:
 	rm -f vignettes/caretEnsemble-intro.R
 	Rscript -e "devtools::clean_vignettes()"
 	Rscript -e "devtools::clean_dll()"
+
+.PHONY: build-sandbox
+build-sandbox:  ## Build custom OpenHands sandbox image
+	docker build -t openhands-custom .

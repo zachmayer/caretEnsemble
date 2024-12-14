@@ -1,3 +1,5 @@
+Dockerfile
+config.toml
 project-tree.txt
 .openhands_instructions
 .aider.chat.history.md

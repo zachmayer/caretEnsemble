@@ -1,0 +1,2 @@
+[core]
+sandbox_base_container_image = "ghcr.io/OWNER/REPO/openhands-custom:latest" 
