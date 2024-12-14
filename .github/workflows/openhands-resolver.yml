@@ -8,7 +8,7 @@ on:
       max_iterations:
         required: false
         type: number
-        default: 50
+        default: 100
       macro:
         required: false
         type: string
@@ -195,6 +195,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::roxygen2
+      - run: make install
 
       - name: Install OpenHands
         env:
