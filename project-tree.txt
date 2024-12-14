@@ -1,0 +1,78 @@
+.
+├── .Rbuildignore
+├── .codecov.yaml
+├── .coderabbit.yaml
+├── .gitattributes
+├── .github
+│   ├── .gitignore
+│   ├── CONTRIBUTING.md
+│   ├── ISSUE_TEMPLATE.md
+│   ├── dependabot.yml
+│   └── workflows
+│       ├── R-CMD-check.yaml
+│       ├── actionlint.yml
+│       ├── aider.yml
+│       ├── auto-merge-dependabot.yml
+│       ├── lint.yaml
+│       ├── openhands-resolver.yml
+│       ├── pkgdown.yaml
+│       ├── recheck.yml
+│       ├── rhub.yaml
+│       ├── test-coverage.yaml
+│       └── tests.yaml
+├── .gitignore
+├── .lintr
+├── .openhands_instructions
+├── CRAN-SUBMISSION
+├── DESCRIPTION
+├── LICENSE
+├── LICENSE.md
+├── Makefile
+├── NAMESPACE
+├── NEWS.md
+├── R
+│   ├── caretEnsemble.R
+│   ├── caretList.R
+│   ├── caretPredict.R
+│   ├── caretStack.R
+│   ├── greedyOpt.R
+│   ├── package.R
+│   └── permutationImportance.R
+├── README.rmd
+├── _pkgdown.yml
+├── caretEnsemble.Rproj
+├── cran-comments.md
+├── data
+│   ├── X.class.rda
+│   ├── X.reg.rda
+│   ├── Y.class.rda
+│   ├── Y.reg.rda
+│   ├── models.class.rda
+│   └── models.reg.rda
+├── inst
+│   ├── WORDLIST
+│   └── data-raw
+│       ├── build_backwards_compatability_data.R
+│       ├── build_test_data.R
+│       └── test-all_models.R
+├── project-tree.txt
+├── tests
+│   ├── testthat
+│   │   ├── data
+│   │   │   └── caretlist_with_bad_earth_model.rds
+│   │   ├── test-backwards-compatability.R
+│   │   ├── test-caretEnsemble.R
+│   │   ├── test-caretList.R
+│   │   ├── test-caretPredict.R
+│   │   ├── test-caretStack.R
+│   │   ├── test-classSelection.R
+│   │   ├── test-greedyMSE.R
+│   │   ├── test-multiclass.R
+│   │   └── test-permutationImportance.R
+│   └── testthat.R
+└── vignettes
+    ├── .gitignore
+    ├── Version-4.0-New-Features.Rmd
+    └── caretEnsemble-intro.Rmd
+
+11 directories, 65 files
