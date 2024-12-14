@@ -100,10 +100,11 @@ caretList <- function(
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
 #' @param excluded_class_id Integer. The class id to drop when predicting for multiclass
+#' @param aggregate_resamples logical, whether to aggregate resamples by keys. Default is TRUE.
 #' @param ... Other arguments to pass to \code{\link[caret]{predict.train}}
 #' @method predict caretList
 #' @export
-predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...) {
+predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, aggregate_resamples = TRUE, ...) {
   stopifnot(methods::is(object, "caretList"))
 
   # Decided whether to be verbose or quiet
@@ -116,7 +117,7 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   if (!is.null(newdata)) {
     newdata <- data.table::as.data.table(newdata)
   }
-  preds <- apply_fun(object, caretPredict, newdata = newdata, excluded_class_id = excluded_class_id, ...)
+  preds <- apply_fun(object, caretPredict, newdata = newdata, excluded_class_id = excluded_class_id, aggregate_resamples = aggregate_resamples, ...)
   stopifnot(
     is.list(preds),
     length(preds) >= 1L,

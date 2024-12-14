@@ -7,10 +7,11 @@
 #' @param object a \code{\link[caret]{train}} object
 #' @param newdata New data to use for predictions. If NULL, stacked predictions from the training data are returned.
 #' @param excluded_class_id an integer indicating the class to exclude. If 0L, no class is excluded
+#' @param aggregate_resamples logical, whether to aggregate resamples by keys. Default is TRUE.
 #' @param ... additional arguments to pass to \code{\link[caret]{predict.train}}, if newdata is not NULL
 #' @return a data.table
 #' @keywords internal
-caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
+caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, aggregate_resamples = TRUE, ...) {
   stopifnot(methods::is(object, "train"))
 
   # Extract the model type
@@ -18,7 +19,7 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
 
   # If newdata is NULL, return the stacked predictions
   if (is.null(newdata)) {
-    pred <- extractBestPreds(object)
+    pred <- extractBestPreds(object, aggregate_resamples = aggregate_resamples)
     keep_cols <- if (is_class) levels(object) else "pred"
     pred <- pred[, keep_cols, with = FALSE]
 
@@ -147,9 +148,10 @@ aggregate_mean_or_first <- function(x) {
 #' @title Extract the best predictions from a train object
 #' @description Extract the best predictions from a train object.
 #' @param x a train object
+#' @param aggregate_resamples logical, whether to aggregate resamples by keys. Default is TRUE.
 #' @return a data.table::data.table with predictions
 #' @keywords internal
-extractBestPreds <- function(x) {
+extractBestPreds <- function(x, aggregate_resamples = TRUE) {
   stopifnot(methods::is(x, "train"))
   if (is.null(x$pred)) {
     stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
@@ -167,11 +169,14 @@ extractBestPreds <- function(x) {
   # Drop rows for other tunes
   pred <- pred[best_tune, ]
 
-  # If we have multiple resamples per row
-  # e.g. for repeated CV, we need to average the predictions
+  # Set keys for sorting
   keys <- "rowIndex"
   data.table::setkeyv(pred, keys)
-  pred <- pred[, lapply(.SD, aggregate_mean_or_first), by = keys]
+
+  # If aggregate_resamples is TRUE, aggregate by keys
+  if (aggregate_resamples) {
+    pred <- pred[, lapply(.SD, aggregate_mean_or_first), by = keys]
+  }
 
   # Order results consistently
   data.table::setorderv(pred, keys)

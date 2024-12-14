@@ -134,6 +134,36 @@ testthat::test_that("caretStack works with different stacking algorithms", {
   }
 })
 
+testthat::test_that("caretStack handles aggregate_resamples correctly", {
+  # Create a model with multiple resamples
+  set.seed(42)
+  models <- caretList(
+    x = iris[1:100, 1:4],
+    y = iris[1:100, 5],
+    methodList = c("rpart", "glm"),
+    trControl = caret::trainControl(method = "repeatedcv", number = 2, repeats = 2)
+  )
+  
+  # Test with aggregate_resamples = TRUE
+  stack_agg <- caretStack(models, method = "glm", aggregate_resamples = TRUE)
+  pred_agg <- predict(stack_agg, iris[101:150, 1:4])
+  
+  # Test with aggregate_resamples = FALSE
+  stack_no_agg <- caretStack(models, method = "glm", aggregate_resamples = FALSE)
+  pred_no_agg <- predict(stack_no_agg, iris[101:150, 1:4])
+  
+  # Verify predictions are different
+  testthat::expect_false(identical(pred_agg, pred_no_agg))
+  
+  # Verify both predictions have correct dimensions
+  testthat::expect_identical(nrow(pred_agg), 50L)
+  testthat::expect_identical(nrow(pred_no_agg), 50L)
+  
+  # Verify both predictions are valid probabilities
+  testthat::expect_true(all(pred_agg >= 0 & pred_agg <= 1))
+  testthat::expect_true(all(pred_no_agg >= 0 & pred_no_agg <= 1))
+})
+
 testthat::test_that("caretStack handles custom preprocessing", {
   preprocess <- c("center", "scale", "pca")
   for (model_list in list(models.class, models.reg)) {

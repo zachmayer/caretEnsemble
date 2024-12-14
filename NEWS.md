@@ -1,6 +1,7 @@
 # NEWS 
 
 ## caretEnsemble 4.0.1
+- Added aggregate_resamples option to caretStack and related functions to control whether resamples are aggregated
 - Speed up the example for autoplot so it runs in <1 second on most platforms
 
 ## caretEnsemble 4.0.0
