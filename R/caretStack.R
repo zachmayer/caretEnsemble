@@ -258,26 +258,28 @@ check_caretStack <- function(object) {
 #' @param training a logical indicating whether the function is being called during training or prediction
 #' @keywords internal
 check_original_features <- function(original_features, newdata, training = TRUE) {
+  # Use different argument name depending on whether we are training or predicting
+  argument_name <- if (training) "new_X" else "newdata"
+
   # Make sure newdata is not NULL when original_features is not NULL
   if (!is.null(original_features) && is.null(newdata)) {
-    argument_name <- if (training) "new_X" else "newdata"
     stop("original_features was specified, but ", argument_name, " is not provided. ",
       "Please provide ", argument_name, " to use original features.",
       call. = FALSE
     )
   }
 
-  if (is.character(original_features)) {
-    # Check that all specified variables in original_features are present in newdata
-    if (!all(original_features %in% colnames(newdata))) {
-      missing_columns <- setdiff(original_features, colnames(newdata))
-      argument_name <- if (training) "new_X" else "newdata"
-      stop("Not all variables in original_features are present in ", argument_name, ". Missing columns: ",
-        toString(missing_columns), ".",
-        call. = FALSE
-      )
-    }
-  } else if (!is.null(original_features)) {
+  # Check that all specified variables in original_features are present in newdata
+  if (is.character(original_features) && !all(original_features %in% colnames(newdata))) {
+    missing_columns <- setdiff(original_features, colnames(newdata))
+    stop("Not all variables in original_features are present in ", argument_name, ". Missing columns: ",
+      toString(missing_columns), ".",
+      call. = FALSE
+    )
+  }
+
+  # If original featires is not a character vector or NULL, throw an error
+  if (!is.null(original_features) && !is.character(original_features)) {
     stop("original_features must be a character vector with the names ",
       "of the features to include, or NULL to not include any features.",
       call. = FALSE
