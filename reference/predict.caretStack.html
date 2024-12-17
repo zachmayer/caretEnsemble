@@ -65,6 +65,7 @@ weights to get a single, combined vector of predictions.</p>
 <span>  excluded_class_id <span class="op">=</span> <span class="fl">0L</span>,</span>
 <span>  return_class_only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  aggregate_resamples <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -107,6 +108,10 @@ This will make it easier to change prediction probability thresholds if needed i
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>a logical indicating whether to print progress</p></dd>
+
+
+<dt id="arg-aggregate-resamples">aggregate_resamples<a class="anchor" aria-label="anchor" href="#arg-aggregate-resamples"></a></dt>
+<dd><p>logical, whether to aggregate resamples by keys. Default is TRUE.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

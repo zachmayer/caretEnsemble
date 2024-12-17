@@ -87,7 +87,7 @@
 <span><span class="co">#&gt; Model accuracy:</span></span>
 <span><span class="co">#&gt;    model_name metric    value       sd</span></span>
 <span><span class="co">#&gt;        &lt;char&gt; &lt;char&gt;    &lt;num&gt;    &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:         rf   RMSE 1074.682 238.2442</span></span>
+<span><span class="co">#&gt; 1:         rf   RMSE 1076.492 215.4737</span></span>
 <span><span class="co">#&gt; 2:     glmnet   RMSE 1142.082 105.6022</span></span></code></pre></div>
 <p>Then, use caretEnsemble to make a greedy ensemble of these models</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -104,13 +104,13 @@
 <span><span class="co">#&gt; Resampling results:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   RMSE      Rsquared   MAE     </span></span>
-<span><span class="co">#&gt;   992.0694  0.9354531  559.5561</span></span>
+<span><span class="co">#&gt;   969.2517  0.9406218  557.1987</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Tuning parameter 'max_iter' was held constant at a value of 100</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Final model:</span></span>
 <span><span class="co">#&gt; Greedy MSE</span></span>
-<span><span class="co">#&gt; RMSE:  997.4437 </span></span>
+<span><span class="co">#&gt; RMSE:  989.2085 </span></span>
 <span><span class="co">#&gt; Weights:</span></span>
 <span><span class="co">#&gt;        [,1]</span></span>
 <span><span class="co">#&gt; rf     0.55</span></span>
@@ -130,8 +130,8 @@
 <span><span class="co">#&gt; Summary of sample sizes: 400, 400, 400, 400, 400 </span></span>
 <span><span class="co">#&gt; Resampling results:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   RMSE      Rsquared   MAE     </span></span>
-<span><span class="co">#&gt;   979.1918  0.9379759  513.1197</span></span>
+<span><span class="co">#&gt;   RMSE      Rsquared  MAE     </span></span>
+<span><span class="co">#&gt;   1081.425  0.930012  540.3294</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Tuning parameter 'mtry' was held constant at a value of 2</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -143,8 +143,8 @@
 <span><span class="co">#&gt;                      Number of trees: 500</span></span>
 <span><span class="co">#&gt; No. of variables tried at each split: 2</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;           Mean of squared residuals: 887692.1</span></span>
-<span><span class="co">#&gt;                     % Var explained: 94.2</span></span></code></pre></div>
+<span><span class="co">#&gt;           Mean of squared residuals: 925377</span></span>
+<span><span class="co">#&gt;                     % Var explained: 93.95</span></span></code></pre></div>
 <p>Use autoplot from ggplot2 to plot ensemble diagnostics:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">greedy_stack</span>, training_data <span class="op">=</span> <span class="va">dat</span>, xvars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"carat"</span>, <span class="st">"table"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>

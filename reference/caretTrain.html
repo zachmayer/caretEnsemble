@@ -65,7 +65,13 @@ Its an internal function for use with caretList.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">caretTrain</span><span class="op">(</span><span class="va">local_args</span>, <span class="va">global_args</span>, continue_on_fail <span class="op">=</span> <span class="cn">FALSE</span>, trim <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">caretTrain</span><span class="op">(</span></span>
+<span>  <span class="va">local_args</span>,</span>
+<span>  <span class="va">global_args</span>,</span>
+<span>  continue_on_fail <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  trim <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  aggregate_resamples <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -88,6 +94,10 @@ If `TRUE`, the function will return `NULL` if the `train` function fails.</p></d
 <dt id="arg-trim">trim<a class="anchor" aria-label="anchor" href="#arg-trim"></a></dt>
 <dd><p>A logical indicating whether to trim the output model.
 If `TRUE`, the function will remove some elements that are not needed from the output model.</p></dd>
+
+
+<dt id="arg-aggregate-resamples">aggregate_resamples<a class="anchor" aria-label="anchor" href="#arg-aggregate-resamples"></a></dt>
+<dd><p>A logical indicating whether to aggregate stacked predictions Default is TRUE.</p></dd>
 
 </dl></div>
     <div class="section level2">

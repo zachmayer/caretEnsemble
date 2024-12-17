@@ -58,6 +58,7 @@
 <span>  trControl <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  excluded_class_id <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  original_features <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  aggregate_resamples <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -98,6 +99,10 @@ If 0, will include all levels.</p></dd>
 <dd><p>a character vector of the names of the original features to include in the stack or
 NULL to not include any features. These features will be added to the stacked predictions from the models to
 train the ensemble model.</p></dd>
+
+
+<dt id="arg-aggregate-resamples">aggregate_resamples<a class="anchor" aria-label="anchor" href="#arg-aggregate-resamples"></a></dt>
+<dd><p>logical, whether to aggregate resamples by keys. Default is TRUE.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

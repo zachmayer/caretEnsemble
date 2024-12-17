@@ -43,7 +43,102 @@
       <small>Source: <a href="https://github.com/zachmayer/caretEnsemble/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
-  </main></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="4.0.2" id="caretensemble-402">caretEnsemble 4.0.2<a class="anchor" aria-label="anchor" href="#caretensemble-402"></a></h2>
+<div class="section level3">
+<h3 id="new-features-4-0-2">New Features<a class="anchor" aria-label="anchor" href="#new-features-4-0-2"></a></h3>
+<ul><li>Add option to keep resamples for each repeated fold in <code>caretStack</code> and <code>caretList</code>, rather than aggregating to one resample per row in the original data. This can give your stacking model more variance to work with, but can lead to a lot more issues with aligning predictions from different models, particularly ones that use different resampling strategies.</li>
+<li>Add an option to include original features from the raw data in the stack, if stacking on a new dataset rather than on stacked predictions.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="4.0.1" id="caretensemble-401">caretEnsemble 4.0.1<a class="anchor" aria-label="anchor" href="#caretensemble-401"></a></h2><p class="text-muted">CRAN release: 2024-09-12</p>
+<div class="section level3">
+<h3 id="improvements-4-0-1">Improvements<a class="anchor" aria-label="anchor" href="#improvements-4-0-1"></a></h3>
+<ul><li>Added <code>aggregate_resamples</code> option to <code>caretStack</code> and related functions to control whether resamples are aggregated.</li>
+<li>Speed up the example for <code>autoplot</code> so it runs in &lt;1 second on most platforms.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="4.0.0" id="caretensemble-400">caretEnsemble 4.0.0<a class="anchor" aria-label="anchor" href="#caretensemble-400"></a></h2><p class="text-muted">CRAN release: 2024-08-17</p>
+<div class="section level3">
+<h3 id="major-changes-4-0-0">Major Changes<a class="anchor" aria-label="anchor" href="#major-changes-4-0-0"></a></h3>
+<ul><li>Multiclass support! <code>caretList</code>, <code>caretStack</code>, and <code>caretEnsemble</code>.</li>
+<li>The greedy optimizer is back! <code>caretEnsemble</code> now uses a greedy optimizer by default. This optimizer can never be worse than the worst single model. <code>caretStack</code> still supports all caret models, including <code>glm</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="internal-changes-4-0-0">Internal Changes<a class="anchor" aria-label="anchor" href="#internal-changes-4-0-0"></a></h3>
+<ul><li>Refactored some internals for scalability (e.g. <code>data.table</code> for predictions, trim some un-needed data by default).</li>
+<li>Moved all the S3 methods to <code>caretStack</code>, which now supports <code>print</code>, <code>summary</code>, <code>plot</code>, <code>dotplot</code>, and <code>autoplot</code>. <code>caretEnsemble</code> inherits from <code>caretStack</code>, and therefore also supports all of these methods.</li>
+<li>Allow ensembling of mixed lists of classification and regression models.</li>
+<li>Allow ensemble of models with different resampling strategies, so long as they were trained on the same data.</li>
+<li>Allow transfer learning for ensembling models trained on different datasets.</li>
+<li>Added permutation importance as the default importance method for <code>caretLists</code> and <code>caretStacks</code>.</li>
+<li>Add a default <code>trainControl</code> constructor to make it easier to build good controls for training <code>caretLists</code> for stacking with <code>caretStack</code>.</li>
+<li>Expanded test coverage to 100%.</li>
+<li>Sped up test suite (unit tests now run in 20 seconds).</li>
+<li>Delinted codebase: now conforms with all available linters save the object name linter.</li>
+<li>Added a makefile for easier local package development.</li>
+<li>Fixed badges in the readme.</li>
+<li>Added a pkgdown site.</li>
+<li>Switched to GitHub Actions (from Travis) for CI.</li>
+<li>Internal refactoring, optimization, and bug fixes.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.3" id="caretensemble-203">caretEnsemble 2.0.3<a class="anchor" aria-label="anchor" href="#caretensemble-203"></a></h2><p class="text-muted">CRAN release: 2023-09-20</p>
+<div class="section level3">
+<h3 id="bug-fixes-2-0-3">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-2-0-3"></a></h3>
+<ul><li>Fix broken package documentation with new roxygen2.</li>
+<li>Replace deprecated linters with the new versions.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.2" id="caretensemble-202">caretEnsemble 2.0.2<a class="anchor" aria-label="anchor" href="#caretensemble-202"></a></h2><p class="text-muted">CRAN release: 2023-02-09</p>
+<div class="section level3">
+<h3 id="bug-fixes-2-0-2">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-2-0-2"></a></h3>
+<ul><li>Fix broken tests on r-devel.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.1" id="caretensemble-201">caretEnsemble 2.0.1<a class="anchor" aria-label="anchor" href="#caretensemble-201"></a></h2><p class="text-muted">CRAN release: 2019-12-12</p>
+<div class="section level3">
+<h3 id="minor-fixes-2-0-1">Minor Fixes<a class="anchor" aria-label="anchor" href="#minor-fixes-2-0-1"></a></h3>
+<ul><li>Minor fixes to support R 4.0.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.0" id="caretensemble-200">caretEnsemble 2.0.0<a class="anchor" aria-label="anchor" href="#caretensemble-200"></a></h2><p class="text-muted">CRAN release: 2016-02-07</p>
+<div class="section level3">
+<h3 id="major-changes-2-0-0">Major Changes<a class="anchor" aria-label="anchor" href="#major-changes-2-0-0"></a></h3>
+<ul><li>
+<code>caretEnsemble</code> now inherits from <code>caretStack</code>.</li>
+<li>Removed the optimizers and now use a <code>glm</code> for <code>caretEnsemble</code> (optimizers will be added back as <code>caret.train</code> models in a future release).</li>
+<li>Cleaned up namespace (all dependencies are explicit imports, rather than implicit imports or dependencies).</li>
+<li>Removed S3 functions that are not really S3 functions (e.g. <code>autoplot</code> and <code>fortify</code>). We will either make those true S3 classes, or inherit from the packages that define them in a future release.</li>
+<li>Fixed the build on Travis and locally.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.5" id="caretensemble-105">caretEnsemble 1.0.5<a class="anchor" aria-label="anchor" href="#caretensemble-105"></a></h2>
+<div class="section level3">
+<h3 id="improvements-1-0-5">Improvements<a class="anchor" aria-label="anchor" href="#improvements-1-0-5"></a></h3>
+<ul><li>Change output for predict functions to better align with other predict methods in R (<code>predict.caretEnsemble</code> and <code>predict.caretStack</code>).</li>
+<li>Update documentation for predict methods to better explain the model disagreement calculation.</li>
+<li>Speed and memory improvements by switching to <code>data.table</code> for some internals.</li>
+<li>Modified the formula for a weighted standard deviation in the model disagreement calculation.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0" id="caretensemble-10---first-cran-release">caretEnsemble 1.0 - First CRAN release<a class="anchor" aria-label="anchor" href="#caretensemble-10---first-cran-release"></a></h2>
+<div class="section level3">
+<h3 id="introduction-1-0">Introduction<a class="anchor" aria-label="anchor" href="#introduction-1-0"></a></h3>
+<ul><li>
+<code>caretEnsemble</code> is a new package for making ensembles of <a href="https://CRAN.R-project.org/package=caret/" class="external-link">caret</a> models.</li>
+</ul></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

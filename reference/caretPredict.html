@@ -62,7 +62,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">caretPredict</span><span class="op">(</span><span class="va">object</span>, newdata <span class="op">=</span> <span class="cn">NULL</span>, excluded_class_id <span class="op">=</span> <span class="fl">1L</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">caretPredict</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  excluded_class_id <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  aggregate_resamples <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -79,6 +85,10 @@
 
 <dt id="arg-excluded-class-id">excluded_class_id<a class="anchor" aria-label="anchor" href="#arg-excluded-class-id"></a></dt>
 <dd><p>an integer indicating the class to exclude. If 0L, no class is excluded</p></dd>
+
+
+<dt id="arg-aggregate-resamples">aggregate_resamples<a class="anchor" aria-label="anchor" href="#arg-aggregate-resamples"></a></dt>
+<dd><p>logical, whether to aggregate resamples by keys. Default is TRUE.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
