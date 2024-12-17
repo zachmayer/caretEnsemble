@@ -18,6 +18,7 @@ table #' Create a list of several train models from the caret package
 #' @param continue_on_fail logical, should a valid caretList be returned that
 #' excludes models that fail, default is FALSE
 #' @param trim logical should the train models be trimmed to save memory and speed up stacking
+#' @param aggregate_resamples logical, whether to aggregate stacked predictions. Default is TRUE.
 #' @return A list of \code{\link[caret]{train}} objects. If the model fails to build,
 #' it is dropped from the list.
 #' @export
@@ -37,7 +38,8 @@ caretList <- function(
     tuneList = NULL,
     metric = NULL,
     continue_on_fail = FALSE,
-    trim = TRUE) {
+    trim = TRUE,
+    aggregate_resamples = TRUE) {
   # Checks
   if (is.null(tuneList) && is.null(methodList)) {
     stop("Please either define a methodList or tuneList", call. = FALSE)
@@ -79,7 +81,14 @@ caretList <- function(
   global_args[["metric"]] <- metric
 
   # Loop through the tuneLists and fit caret models with those specs
-  modelList <- lapply(tuneList, caretTrain, global_args = global_args, continue_on_fail = continue_on_fail, trim = trim)
+  modelList <- lapply(
+    tuneList,
+    caretTrain,
+    global_args = global_args,
+    continue_on_fail = continue_on_fail,
+    trim = trim,
+    aggregate_resamples = aggregate_resamples
+  )
   names(modelList) <- names(tuneList)
   nulls <- vapply(modelList, is.null, logical(1L))
   modelList <- modelList[!nulls]
@@ -105,13 +114,12 @@ caretList <- function(
 #' @method predict caretList
 #' @export
 predict.caretList <- function(
-  object,
-  newdata = NULL,
-  verbose = FALSE,
-  excluded_class_id = 1L,
-  aggregate_resamples = TRUE,
-  ...
-) {
+    object,
+    newdata = NULL,
+    verbose = FALSE,
+    excluded_class_id = 1L,
+    aggregate_resamples = TRUE,
+    ...) {
   stopifnot(methods::is(object, "caretList"))
 
   # Decided whether to be verbose or quiet

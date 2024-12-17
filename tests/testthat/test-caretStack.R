@@ -134,36 +134,6 @@ testthat::test_that("caretStack works with different stacking algorithms", {
   }
 })
 
-testthat::test_that("caretStack handles aggregate_resamples correctly", {
-  # Create a model with multiple resamples
-  set.seed(42L)
-  models <- caretList(
-    x = iris[1L:100L, 1L:4L],
-    y = iris[1L:100L, 5L],
-    methodList = c("rpart", "glm"),
-    trControl = caret::trainControl(method = "repeatedcv", number = 2L, repeats = 2L)
-  )
-
-  # Test with aggregate_resamples = TRUE
-  stack_agg <- caretStack(models, method = "glm", aggregate_resamples = TRUE)
-  pred_agg <- predict(stack_agg, iris[101L:150L, 1L:4L])
-
-  # Test with aggregate_resamples = FALSE
-  stack_no_agg <- caretStack(models, method = "glm", aggregate_resamples = FALSE)
-  pred_no_agg <- predict(stack_no_agg, iris[101L:150L, 1L:4L])
-
-  # Verify predictions are different
-  testthat::expect_false(identical(pred_agg, pred_no_agg))
-
-  # Verify both predictions have correct dimensions
-  testthat::expect_identical(nrow(pred_agg), 50L)
-  testthat::expect_identical(nrow(pred_no_agg), 50L)
-
-  # Verify both predictions are valid probabilities
-  testthat::expect_true(all(pred_agg >= 0.0 & pred_agg <= 1.0))
-  testthat::expect_true(all(pred_no_agg >= 0.0 & pred_no_agg <= 1.0))
-})
-
 testthat::test_that("caretStack handles custom preprocessing", {
   preprocess <- c("center", "scale", "pca")
   for (model_list in list(models.class, models.reg)) {
@@ -495,4 +465,47 @@ testthat::test_that("set_excluded_class_id warning if unset", {
   )
 
   testthat::expect_identical(new_ensemble$excluded_class_id, 1L)
+})
+
+######################################################################
+testthat::context("Aggregate resamples")
+######################################################################
+
+testthat::test_that("caretList handles aggregate_resamples correctly", {
+  set.seed(42L)
+
+  xvars <- colnames(iris)[2L:5L]
+  yvar <- colnames(iris)[1L]
+
+  repeats <- 5L
+
+  models_agg <- caretList(
+    x = iris[, xvars],
+    y = iris[, yvar],
+    methodList = c("glm", "lm"),
+    trControl = caret::trainControl(method = "repeatedcv", number = 5L, repeats = repeats),
+    aggregate_resamples = TRUE
+  )
+
+  models_no_agg <- caretList(
+    x = iris[, xvars],
+    y = iris[, yvar],
+    methodList = c("glm", "lm"),
+    trControl = caret::trainControl(method = "repeatedcv", number = 5L, repeats = repeats),
+    aggregate_resamples = FALSE
+  )
+
+  # Test stacked predictionswith aggregate_resamples = TRUE
+  pred_agg <- predict(models_agg, aggregate_resamples = TRUE)
+  pred_no_agg <- predict(models_no_agg, aggregate_resamples = FALSE)
+
+  # Aggregated stacked predictions should have the same number of rows as the input data:
+  testthat::expect_identical(nrow(pred_agg), nrow(iris))
+
+  # Non-aggregated stacked predictions should input rows X repeats rows
+  testthat::expect_identical(nrow(pred_no_agg), nrow(iris) * repeats)
+
+  # Both stacks should have one column per model
+  testthat::expect_identical(ncol(pred_agg), 2L)
+  testthat::expect_identical(ncol(pred_no_agg), 2L)
 })

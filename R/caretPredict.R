@@ -81,9 +81,10 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, aggrega
 #'  If `TRUE`, the function will return `NULL` if the `train` function fails.
 #' @param trim A logical indicating whether to trim the output model.
 #' If `TRUE`, the function will remove some elements that are not needed from the output model.
+#' @param aggregate_resamples A logical indicating whether to aggregate stacked predections. Default is TRUE.
 #' @return The output of the `train` function.
 #' @keywords internal
-caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE) {
+caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE, aggregate_resamples = TRUE) {
   # Combine args
   # I think my handling here is correct (update globals with locals, which allows locals be partial)
   # but it would be nice to have some tests
@@ -101,7 +102,7 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
 
   # Only save stacked predictions for the best model
   if ("pred" %in% names(model)) {
-    model[["pred"]] <- extractBestPreds(model)
+    model[["pred"]] <- extractBestPreds(model, aggregate_resamples = aggregate_resamples)
   }
 
   if (trim) {
