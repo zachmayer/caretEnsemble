@@ -1,3 +1,8 @@
+project-tree.txt
+.openhands_instructions
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v3
 coverage.rds
 coverage-report.html
 cobertura.xml

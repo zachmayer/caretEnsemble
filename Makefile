@@ -27,7 +27,7 @@ help:
 	@echo "  check-rhub             Run R CMD on the rhub service"
 	@echo "  release                Release to CRAN"
 	@echo "  preview-site           Preview pkgdown site"
-	@echo "  dev-guide              Open the R package development guide"
+	@echo "  project-tree.txt       Show a nice clean package directory, ignoring files you dont need to edit"
 	@echo "  clean                  Clean up generated files"
 
 .PHONY: all
@@ -174,6 +174,10 @@ release: check-rev-dep check-many-preds check-rhub check-win
 .PHONY: dev-guide
 dev-guide:
 	open https://r-pkgs.org/whole-game.html
+
+.PHONY: project-tree.txt
+project-tree.txt:
+	tree -a -I ".aider*|coverage*|lib|.DS_Store|.RHistory|.Rproj.user|*.png|doc|Meta|docs|.env|revdep|.git|man|README.md|.Rhistory" --prune > project-tree.txt
 
 .PHONY: clean
 clean:

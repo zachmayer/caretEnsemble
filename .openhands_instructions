@@ -1,0 +1,109 @@
+# R Code Style Guide and Development Instructions
+
+## Overall guidance
+
+Your dev environment is *fully setup*. You do not need to install any packages.  They are all installed for you.
+
+Write the *minimal* code neccicary to solve the problem:
+
+- Complexity is bad
+- Branching logic is bad
+- Convoluted error handling or edge case handling is bad
+- Use the fewest lines of code possible to solve the problem
+- Use the make commands in the Development to make sure your code works
+  - If these commands do not pass, you are not done with your work
+- Once lint/tests etc pass and you feel your work is complete, update [NEWS.md](NEWS.md) with a short description of your changes for the release log.
+- Before you do any work, make a plan!
+  - Your plan should be detailed, feel free to use a lot of tokens
+  - Use <planning> tags for your plan
+  - After you make a plan, score it with <plan-score> tags
+    - 0-100 on the likelihood that it fuffils the request
+    - 0-100 on complexity
+  - If the plan does not score above 80 on fulfills request, make a new plan
+  - If the plan does not score above 50 on complexity, make a new plan
+  - Repeat <planning> and <plan-score> until you have a good plan
+  - Finally, use a <reflection> tag to review your plan
+  - Once you've got a <reflection> tag, you are ready to start working on the request.
+
+## Development Workflow
+
+Use the Makefile targets for development. After you make changes, run:
+
+- `make fix-style` - Auto-format code
+- `make document` - Check spelling
+- `make lint` - Check code style and quality
+- `make spell` - Check spelling
+- `make test` - Run unit tests
+- `make check` - Run all the cran checks
+- `make coverage-test` - Make sure the code has 100% test coverage
+- You shouldn't really need to run other shell commands that are defined in the Makefile
+  - You will probably still need to run shell commands to find and view files
+
+If any of these commands fail, fix the issues and iterate on that command until it passes then move on to the next one. When all these commands pass, you are ready to make a pull request.
+
+You shouldn't need to run the other make commands. If you update the README.rmd (do not edit the README.md), run `make readme`.  If you update a vignette or add a new one, run `make vignettes`.  You shouldn't need to do this though.
+
+Do not run `make install`, `make update-test-fixtures`, `make release`, `make check-rev-dep`, `make check-win`, `make check-rhub`, `make check-many-preds`, `make check`,  `make preview-site`, `make dev-guide`.  If needed a human will run these commands.
+
+## Code Style
+
+- Use base R and core packages rather than tidyverse
+- Prefer data.table over data.frame for data manipulation
+- Use :: operator for package functions (e.g., data.table::data.table).
+  - Do not use `library` or `require`.  Import packages with ::
+- Avoid for loops - use vectorized operations
+- Use vapply instead of sapply
+- Keep functions small and focused
+- Write self-documenting code, minimize comments
+- Follow strict R code style guidelines
+- Write clean, lint-free, readable code
+- Do not use error handling
+- Do not use tryCatch / on.exit / try / withCallingHandlers / etc.
+- Do not write excessive if/then/else statements
+- Don't install or use new packages. You should already have everything you need.
+- Write clean, modular code
+- Use Roxygen2 to document your code
+- Write at least one unit test for your work
+- Don't add new packages. If you need to install an R package, something is wrong.
+- Prefer S3 classes over S4 and R5 classes when creating new classes
+- Avoid tidyverse packages unless absolutely necessary
+- ggplot2 and reshape2 are acceptable exceptions
+- Always use ggplot2 for plotting
+- Always use data.table::data.table for data manipulation
+- Avoid base data.frame and plyr completely
+- Prefer glmnet or xgboost for modeling tasks
+- Avoid for loops and sapply loops where possible
+- Look for built-in vectorized functions before writing loops
+- Consider vectorized operations from approved packages only if built-in functions aren't available
+- make sure all files end in newlines
+
+## Package Structure
+
+- Put R code in R/
+- Put tests in tests/testthat/
+- Put vignettes in vignettes/.  You shouldn't really need to do vignettes unless specifically instructed to do so.
+- Use `git grep` to find files that you need
+
+## Testing Guidelines
+
+- Write unit tests for all functions
+- Write table-driven tests. One simple test that covers many cases.
+  - Test edge cases in these table-driven tests
+- Aim for 100% test coverage
+- Be sure to test error conditions, especially cases that should throw errors
+- Use testthat framework
+
+## Getting Help
+
+These file contain information that will help you understand the code structure and workflow:
+
+- [README.rmd](README.rmd) - The package readme. Contains info for humans, and a human dev guide. Ignore the dev instructures for humans in the readme though and use the dev instructions in this file.
+- [Makefile](Makefile) - The Makefile. Contains many useful commands, but heed the instructions in this file: you won't need to use most of those make commands.
+- [.openhands_instructions](.openhands_instructions) - This file. Contains instructions for you as a developer.
+- [project-tree.txt](project-tree.txt) - A nice clean package directory, ignoring files you dont need to edit. Use this file to navigate the package and understand which files you need to edit. Feel free to re-make this file with `make project-tree.txt` if you've made file or directory changes to see what's changed.
+- Feel free to use `git` commands to see what's changed recently. Don't forget you are non-interactive so you need to run non-interactive commands like `git status` or `git diff` with `-c` or `--no-pager` flags.  E.g.:
+  - `git log --no-merges --pretty=format:"%H|%an|%ad|%s" --date=iso -n 10` to see recent commits
+  - `git rev-parse HEAD` to see the current commit hash
+  - `git diff-tree --no-commit-id --name-only -r HEAD` to see the files that have changed in the last commit
+  - `git log -1 --pretty=%B` to see the commit message of the last commit
+  - `git diff --name-only HEAD~1 HEAD` List files changed between two commits

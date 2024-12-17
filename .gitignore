@@ -1,3 +1,9 @@
+
+# Aider
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v3
+
 # huge XML/HTML file messes up git stats lol
 coverage.rds
 coverage-report.html
