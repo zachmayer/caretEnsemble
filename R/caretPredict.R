@@ -81,7 +81,7 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, aggrega
 #'  If `TRUE`, the function will return `NULL` if the `train` function fails.
 #' @param trim A logical indicating whether to trim the output model.
 #' If `TRUE`, the function will remove some elements that are not needed from the output model.
-#' @param aggregate_resamples A logical indicating whether to aggregate stacked predections. Default is TRUE.
+#' @param aggregate_resamples A logical indicating whether to aggregate stacked predictions Default is TRUE.
 #' @return The output of the `train` function.
 #' @keywords internal
 caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE, aggregate_resamples = TRUE) {

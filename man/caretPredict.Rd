@@ -4,7 +4,13 @@
 \alias{caretPredict}
 \title{Prediction wrapper for \code{\link[caret]{train}}}
 \usage{
-caretPredict(object, newdata = NULL, excluded_class_id = 1L, ...)
+caretPredict(
+  object,
+  newdata = NULL,
+  excluded_class_id = 1L,
+  aggregate_resamples = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{a \code{\link[caret]{train}} object}
@@ -12,6 +18,8 @@ caretPredict(object, newdata = NULL, excluded_class_id = 1L, ...)
 \item{newdata}{New data to use for predictions. If NULL, stacked predictions from the training data are returned.}
 
 \item{excluded_class_id}{an integer indicating the class to exclude. If 0L, no class is excluded}
+
+\item{aggregate_resamples}{logical, whether to aggregate resamples by keys. Default is TRUE.}
 
 \item{...}{additional arguments to pass to \code{\link[caret]{predict.train}}, if newdata is not NULL}
 }

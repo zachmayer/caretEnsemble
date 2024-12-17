@@ -4,10 +4,12 @@
 \alias{extractBestPreds}
 \title{Extract the best predictions from a train object}
 \usage{
-extractBestPreds(x)
+extractBestPreds(x, aggregate_resamples = TRUE)
 }
 \arguments{
 \item{x}{a train object}
+
+\item{aggregate_resamples}{logical, whether to aggregate resamples by keys. Default is TRUE.}
 }
 \value{
 a data.table::data.table with predictions

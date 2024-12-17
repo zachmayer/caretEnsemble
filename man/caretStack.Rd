@@ -12,6 +12,7 @@ caretStack(
   trControl = NULL,
   excluded_class_id = 1L,
   original_features = NULL,
+  aggregate_resamples = TRUE,
   ...
 )
 }
@@ -35,6 +36,8 @@ If 0, will include all levels.}
 \item{original_features}{a character vector of the names of the original features to include in the stack or
 NULL to not include any features. These features will be added to the stacked predictions from the models to
 train the ensemble model.}
+
+\item{aggregate_resamples}{logical, whether to aggregate resamples by keys. Default is TRUE.}
 
 \item{...}{additional arguments to pass to the stacking model}
 }
