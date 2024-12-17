@@ -11,7 +11,8 @@ caretList(
   tuneList = NULL,
   metric = NULL,
   continue_on_fail = FALSE,
-  trim = TRUE
+  trim = TRUE,
+  aggregate_resamples = TRUE
 )
 }
 \arguments{
@@ -36,6 +37,8 @@ specification of model-specific parameters (e.g. passing trace=FALSE to nnet)}
 excludes models that fail, default is FALSE}
 
 \item{trim}{logical should the train models be trimmed to save memory and speed up stacking}
+
+\item{aggregate_resamples}{logical, whether to aggregate stacked predictions. Default is TRUE.}
 }
 \value{
 A list of \code{\link[caret]{train}} objects. If the model fails to build,
@@ -51,7 +54,7 @@ caretList(
   head(iris, 50),
   methodList = c("glm", "lm"),
   tuneList = list(
-    nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1)
+    nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1L)
   )
 )
 }

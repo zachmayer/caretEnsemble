@@ -19,5 +19,5 @@ A caret model specification consists of 2 parts: a model (as a string) and
 the arguments to the train call for fitting that model
 }
 \examples{
-caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
+caretModelSpec("rf", tuneLength = 5L, preProcess = "ica")
 }

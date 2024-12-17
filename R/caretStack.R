@@ -26,6 +26,7 @@
 #' @param original_features a character vector of the names of the original features to include in the stack or
 #' NULL to not include any features. These features will be added to the stacked predictions from the models to
 #' train the ensemble model.
+#' @param aggregate_resamples logical, whether to aggregate resamples by keys. Default is TRUE.
 #' @param ... additional arguments to pass to the stacking model
 #' @return S3 caretStack object
 #' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).
@@ -47,6 +48,7 @@ caretStack <- function(
     trControl = NULL,
     excluded_class_id = 1L,
     original_features = NULL,
+    aggregate_resamples = TRUE,
     ...) {
   # Check all.models
   if (!methods::is(all.models, "caretList")) {
@@ -74,7 +76,12 @@ caretStack <- function(
   excluded_class_id <- validateExcludedClass(excluded_class_id)
 
   # Predict for each model. If new_X is NULL, will return stacked predictions
-  preds <- predict.caretList(all.models, newdata = new_X, excluded_class_id = excluded_class_id)
+  preds <- predict.caretList(
+    all.models,
+    newdata = new_X,
+    excluded_class_id = excluded_class_id,
+    aggregate_resamples = aggregate_resamples
+  )
   if (!is.null(new_X)) {
     stopifnot(nrow(preds) == nrow(new_X))
   }
@@ -138,6 +145,7 @@ caretStack <- function(
 #' the output of the model, you should have that process consume probabilities for each class.
 #' This will make it easier to change prediction probability thresholds if needed in the future.
 #' @param verbose a logical indicating whether to print progress
+#' @param aggregate_resamples logical, whether to aggregate resamples by keys. Default is TRUE.
 #' @param ... arguments to pass to \code{\link[caret]{predict.train}} for the ensemble model.
 #' Do not specify type here. For classification, type will always be prob, and for regression, type will always be raw.
 #' @return a data.table of predictions
@@ -162,6 +170,7 @@ predict.caretStack <- function(
     excluded_class_id = 0L,
     return_class_only = FALSE,
     verbose = FALSE,
+    aggregate_resamples = TRUE,
     ...) {
   # Check the object
   check_caretStack(object)
@@ -191,7 +200,8 @@ predict.caretStack <- function(
       object$models,
       newdata = newdata,
       verbose = verbose,
-      excluded_class_id = object[["excluded_class_id"]]
+      excluded_class_id = object[["excluded_class_id"]],
+      aggregate_resamples = aggregate_resamples
     )
     if (!is.null(object$original_features)) {
       sub_model_preds <- cbind(sub_model_preds, newdata[, object$original_features])
@@ -206,6 +216,7 @@ predict.caretStack <- function(
     object$ens_model,
     newdata = if (!is.null(newdata)) sub_model_preds,
     excluded_class_id = excluded_class_id,
+    aggregate_resamples = aggregate_resamples,
     ...
   )
 

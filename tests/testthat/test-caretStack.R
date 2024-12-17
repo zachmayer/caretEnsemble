@@ -466,3 +466,46 @@ testthat::test_that("set_excluded_class_id warning if unset", {
 
   testthat::expect_identical(new_ensemble$excluded_class_id, 1L)
 })
+
+######################################################################
+testthat::context("Aggregate resamples")
+######################################################################
+
+testthat::test_that("caretList handles aggregate_resamples correctly", {
+  set.seed(42L)
+
+  xvars <- colnames(iris)[2L:5L]
+  yvar <- colnames(iris)[1L]
+
+  repeats <- 5L
+
+  models_agg <- caretList(
+    x = iris[, xvars],
+    y = iris[, yvar],
+    methodList = c("glm", "lm"),
+    trControl = caret::trainControl(method = "repeatedcv", number = 5L, repeats = repeats),
+    aggregate_resamples = TRUE
+  )
+
+  models_no_agg <- caretList(
+    x = iris[, xvars],
+    y = iris[, yvar],
+    methodList = c("glm", "lm"),
+    trControl = caret::trainControl(method = "repeatedcv", number = 5L, repeats = repeats),
+    aggregate_resamples = FALSE
+  )
+
+  # Test stacked predictionswith aggregate_resamples = TRUE
+  pred_agg <- predict(models_agg, aggregate_resamples = TRUE)
+  pred_no_agg <- predict(models_no_agg, aggregate_resamples = FALSE)
+
+  # Aggregated stacked predictions should have the same number of rows as the input data:
+  testthat::expect_identical(nrow(pred_agg), nrow(iris))
+
+  # Non-aggregated stacked predictions should input rows X repeats rows
+  testthat::expect_identical(nrow(pred_no_agg), nrow(iris) * repeats)
+
+  # Both stacks should have one column per model
+  testthat::expect_identical(ncol(pred_agg), 2L)
+  testthat::expect_identical(ncol(pred_no_agg), 2L)
+})

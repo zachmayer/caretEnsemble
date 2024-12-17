@@ -4,7 +4,14 @@
 \alias{predict.caretList}
 \title{Create a matrix of predictions for each of the models in a caretList}
 \usage{
-\method{predict}{caretList}(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...)
+\method{predict}{caretList}(
+  object,
+  newdata = NULL,
+  verbose = FALSE,
+  excluded_class_id = 1L,
+  aggregate_resamples = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{an object of class caretList}
@@ -15,6 +22,8 @@
 bar is shown. Default FALSE.}
 
 \item{excluded_class_id}{Integer. The class id to drop when predicting for multiclass}
+
+\item{aggregate_resamples}{logical, whether to aggregate resamples by keys. Default is TRUE.}
 
 \item{...}{Other arguments to pass to \code{\link[caret]{predict.train}}}
 }

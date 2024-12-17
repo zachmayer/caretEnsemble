@@ -49,7 +49,7 @@ print(summary(models))
 #> Model accuracy:
 #>    model_name metric    value       sd
 #>        <char> <char>    <num>    <num>
-#> 1:         rf   RMSE 1074.682 238.2442
+#> 1:         rf   RMSE 1076.492 215.4737
 #> 2:     glmnet   RMSE 1142.082 105.6022
 ```
 
@@ -69,13 +69,13 @@ print(greedy_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   992.0694  0.9354531  559.5561
+#>   969.2517  0.9406218  557.1987
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  997.4437 
+#> RMSE:  989.2085 
 #> Weights:
 #>        [,1]
 #> rf     0.55
@@ -98,8 +98,8 @@ print(rf_stack)
 #> Summary of sample sizes: 400, 400, 400, 400, 400 
 #> Resampling results:
 #> 
-#>   RMSE      Rsquared   MAE     
-#>   979.1918  0.9379759  513.1197
+#>   RMSE      Rsquared  MAE     
+#>   1081.425  0.930012  540.3294
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -111,8 +111,8 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 887692.1
-#>                     % Var explained: 94.2
+#>           Mean of squared residuals: 925377
+#>                     % Var explained: 93.95
 ```
 
 Use autoplot from ggplot2 to plot ensemble diagnostics:
@@ -163,14 +163,13 @@ options.
 
 Use `make fix-style` to fix simple linting errors.
 
-For iterating while writing code, run `make dev`. This runs just `make
-clean fix-style document lint spell test`, for a quicker local dev loop.
-Please still run `make all` before making a PR.
+For iterating while writing code, run `make dev`. This runs just
+`make clean fix-style document lint spell test`, for a quicker local dev
+loop. Please still run `make all` before making a PR.
 
 Use `make all` before making a pull request, which will also run R CMD
-CHECK and a code coverage check. This runs `make clean fix-style
-document install build-readme build-vignettes lint spell test check
-coverage preview-site`.
+CHECK and a code coverage check. This runs
+`make clean fix-style document install build-readme build-vignettes lint spell test check coverage preview-site`.
 
 ## First time dev setup:
 

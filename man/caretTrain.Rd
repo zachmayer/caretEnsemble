@@ -4,7 +4,13 @@
 \alias{caretTrain}
 \title{Wrapper to train caret models}
 \usage{
-caretTrain(local_args, global_args, continue_on_fail = FALSE, trim = TRUE)
+caretTrain(
+  local_args,
+  global_args,
+  continue_on_fail = FALSE,
+  trim = TRUE,
+  aggregate_resamples = TRUE
+)
 }
 \arguments{
 \item{local_args}{A list of arguments to pass to the `train` function.}
@@ -16,6 +22,8 @@ If `TRUE`, the function will return `NULL` if the `train` function fails.}
 
 \item{trim}{A logical indicating whether to trim the output model.
 If `TRUE`, the function will remove some elements that are not needed from the output model.}
+
+\item{aggregate_resamples}{A logical indicating whether to aggregate stacked predictions Default is TRUE.}
 }
 \value{
 The output of the `train` function.

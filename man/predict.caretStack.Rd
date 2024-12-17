@@ -12,6 +12,7 @@
   excluded_class_id = 0L,
   return_class_only = FALSE,
   verbose = FALSE,
+  aggregate_resamples = TRUE,
   ...
 )
 }
@@ -37,6 +38,8 @@ the output of the model, you should have that process consume probabilities for 
 This will make it easier to change prediction probability thresholds if needed in the future.}
 
 \item{verbose}{a logical indicating whether to print progress}
+
+\item{aggregate_resamples}{logical, whether to aggregate resamples by keys. Default is TRUE.}
 
 \item{...}{arguments to pass to \code{\link[caret]{predict.train}} for the ensemble model.
 Do not specify type here. For classification, type will always be prob, and for regression, type will always be raw.}

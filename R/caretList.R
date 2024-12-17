@@ -18,6 +18,7 @@ table #' Create a list of several train models from the caret package
 #' @param continue_on_fail logical, should a valid caretList be returned that
 #' excludes models that fail, default is FALSE
 #' @param trim logical should the train models be trimmed to save memory and speed up stacking
+#' @param aggregate_resamples logical, whether to aggregate stacked predictions. Default is TRUE.
 #' @return A list of \code{\link[caret]{train}} objects. If the model fails to build,
 #' it is dropped from the list.
 #' @export
@@ -27,7 +28,7 @@ table #' Create a list of several train models from the caret package
 #'   head(iris, 50),
 #'   methodList = c("glm", "lm"),
 #'   tuneList = list(
-#'     nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1)
+#'     nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1L)
 #'   )
 #' )
 caretList <- function(
@@ -37,7 +38,8 @@ caretList <- function(
     tuneList = NULL,
     metric = NULL,
     continue_on_fail = FALSE,
-    trim = TRUE) {
+    trim = TRUE,
+    aggregate_resamples = TRUE) {
   # Checks
   if (is.null(tuneList) && is.null(methodList)) {
     stop("Please either define a methodList or tuneList", call. = FALSE)
@@ -70,7 +72,7 @@ caretList <- function(
 
   # ALWAYS save class probs
   trControl[["classProbs"]] <- is_class
-  trControl["savePredictions"] <- "final"
+  trControl[["savePredictions"]] <- "final"
 
   # Capture global arguments for train as a list
   # Squish trControl back onto the global arguments list
@@ -79,7 +81,14 @@ caretList <- function(
   global_args[["metric"]] <- metric
 
   # Loop through the tuneLists and fit caret models with those specs
-  modelList <- lapply(tuneList, caretTrain, global_args = global_args, continue_on_fail = continue_on_fail, trim = trim)
+  modelList <- lapply(
+    tuneList,
+    caretTrain,
+    global_args = global_args,
+    continue_on_fail = continue_on_fail,
+    trim = trim,
+    aggregate_resamples = aggregate_resamples
+  )
   names(modelList) <- names(tuneList)
   nulls <- vapply(modelList, is.null, logical(1L))
   modelList <- modelList[!nulls]
@@ -100,10 +109,17 @@ caretList <- function(
 #' @param verbose Logical. If FALSE no progress bar is printed if TRUE a progress
 #' bar is shown. Default FALSE.
 #' @param excluded_class_id Integer. The class id to drop when predicting for multiclass
+#' @param aggregate_resamples logical, whether to aggregate resamples by keys. Default is TRUE.
 #' @param ... Other arguments to pass to \code{\link[caret]{predict.train}}
 #' @method predict caretList
 #' @export
-predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, ...) {
+predict.caretList <- function(
+    object,
+    newdata = NULL,
+    verbose = FALSE,
+    excluded_class_id = 1L,
+    aggregate_resamples = TRUE,
+    ...) {
   stopifnot(methods::is(object, "caretList"))
 
   # Decided whether to be verbose or quiet
@@ -116,7 +132,14 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   if (!is.null(newdata)) {
     newdata <- data.table::as.data.table(newdata)
   }
-  preds <- apply_fun(object, caretPredict, newdata = newdata, excluded_class_id = excluded_class_id, ...)
+  preds <- apply_fun(
+    object,
+    caretPredict,
+    newdata = newdata,
+    excluded_class_id = excluded_class_id,
+    aggregate_resamples = aggregate_resamples,
+    ...
+  )
   stopifnot(
     is.list(preds),
     length(preds) >= 1L,
@@ -156,7 +179,7 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
     !is.null(names(preds)),
     length(dim(preds)) == 2L
   )
-  all_regression <- all(vapply(object, function(x) x$modelType == "Regression", logical(1L)))
+  all_regression <- all(vapply(object, function(x) x[["modelType"]] == "Regression", logical(1L)))
   if (all_regression) {
     stopifnot(
       length(names(preds)) == length(object),
@@ -308,7 +331,7 @@ c.caretList <- function(...) {
       x
     } else if (inherits(x, "train")) {
       x <- list(x)
-      names(x) <- x[[1L]]$method
+      names(x) <- x[[1L]][["method"]]
       x
     } else {
       stop("class of modelList1 must be 'caretList' or 'train'", call. = FALSE)
@@ -342,7 +365,7 @@ c.caretList <- function(...) {
 #' @export
 #' @return a list of lists
 #' @examples
-#' caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
+#' caretModelSpec("rf", tuneLength = 5L, preProcess = "ica")
 caretModelSpec <- function(method = "rf", ...) {
   out <- list(method = method, ...)
   out
@@ -358,7 +381,7 @@ tuneCheck <- function(x) {
   # Check model methods
   stopifnot(is.list(x))
 
-  model_methods <- lapply(x, function(m) m$method)
+  model_methods <- lapply(x, function(m) m[["method"]])
   methodCheck(model_methods)
   method_names <- vapply(x, extractModelName, character(1L))
 
@@ -385,7 +408,7 @@ tuneCheck <- function(x) {
 #' @return validated model info list (i.e. x)
 #' @keywords internal
 checkCustomModel <- function(x) {
-  if (is.null(x$method)) {
+  if (is.null(x[["method"]])) {
     stop(
       "Custom models must be defined with a \"method\" attribute containing the name",
       "by which that model should be referenced. Example: my.glm.model$method <- \"custom_glm\"",
@@ -403,14 +426,14 @@ checkCustomModel <- function(x) {
 #' @keywords internal
 methodCheck <- function(x) {
   # Fetch list of existing caret models
-  supported_models <- unique(caret::modelLookup()$model)
+  supported_models <- unique(caret::modelLookup()[["model"]])
 
   # Split given model methods based on whether or not they
   # are specified as strings or model info lists (ie custom models)
   models <- lapply(x, function(m) {
     if (is.list(m)) {
       checkCustomModel(m)
-      data.table::data.table(type = "custom", model = m$method, stringsAsFactors = FALSE)
+      data.table::data.table(type = "custom", model = m[["method"]], stringsAsFactors = FALSE)
     } else if (is.character(m)) {
       data.table::data.table(type = "native", model = m, stringsAsFactors = FALSE)
     } else {
@@ -425,7 +448,7 @@ methodCheck <- function(x) {
   models <- data.table::rbindlist(models, use.names = TRUE, fill = TRUE)
 
   # Ensure that all non-custom models are valid
-  native_models <- subset(models, get("type") == "native")$model
+  native_models <- subset(models, get("type") == "native")[["model"]]
   bad_models <- setdiff(native_models, supported_models)
 
   if (length(bad_models) > 0L) {
@@ -532,7 +555,7 @@ summary.caretList <- function(object, metric = NULL, ...) {
 #' @method print summary.caretList
 #' @export
 print.summary.caretList <- function(x, ...) {
-  cat("The following models were ensembled:", x$models, " \n")
+  cat("The following models were ensembled:", x[["models"]], " \n")
   cat("\nModel accuracy:\n")
-  print(x$results)
+  print(x[["results"]])
 }

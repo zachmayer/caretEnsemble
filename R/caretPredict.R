@@ -7,24 +7,25 @@
 #' @param object a \code{\link[caret]{train}} object
 #' @param newdata New data to use for predictions. If NULL, stacked predictions from the training data are returned.
 #' @param excluded_class_id an integer indicating the class to exclude. If 0L, no class is excluded
+#' @param aggregate_resamples logical, whether to aggregate resamples by keys. Default is TRUE.
 #' @param ... additional arguments to pass to \code{\link[caret]{predict.train}}, if newdata is not NULL
 #' @return a data.table
 #' @keywords internal
-caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
-  stopifnot(methods::is(object, "train"))
+caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, aggregate_resamples = TRUE, ...) {
+  stopifnot(is.logical(aggregate_resamples), length(aggregate_resamples) == 1L, methods::is(object, "train"))
 
   # Extract the model type
   is_class <- isClassifierAndValidate(object, validate_for_stacking = is.null(newdata))
 
   # If newdata is NULL, return the stacked predictions
   if (is.null(newdata)) {
-    pred <- extractBestPreds(object)
+    pred <- extractBestPreds(object, aggregate_resamples = aggregate_resamples)
     keep_cols <- if (is_class) levels(object) else "pred"
     pred <- pred[, keep_cols, with = FALSE]
 
     # Otherwise, predict on newdata
   } else {
-    if (any(object$modelInfo$library %in% c("neuralnet", "klaR"))) {
+    if (any(object[["modelInfo"]][["library"]] %in% c("neuralnet", "klaR"))) {
       newdata <- as.matrix(newdata) # I hate some of these packages
     }
     if (is_class) {
@@ -80,9 +81,11 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, ...) {
 #'  If `TRUE`, the function will return `NULL` if the `train` function fails.
 #' @param trim A logical indicating whether to trim the output model.
 #' If `TRUE`, the function will remove some elements that are not needed from the output model.
+#' @param aggregate_resamples A logical indicating whether to aggregate stacked predictions Default is TRUE.
 #' @return The output of the `train` function.
 #' @keywords internal
-caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE) {
+caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE, aggregate_resamples = TRUE) {
+  stopifnot(is.logical(aggregate_resamples), length(aggregate_resamples) == 1L)
   # Combine args
   # I think my handling here is correct (update globals with locals, which allows locals be partial)
   # but it would be nice to have some tests
@@ -100,13 +103,13 @@ caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim =
 
   # Only save stacked predictions for the best model
   if ("pred" %in% names(model)) {
-    model[["pred"]] <- extractBestPreds(model)
+    model[["pred"]] <- extractBestPreds(model, aggregate_resamples = aggregate_resamples)
   }
 
   if (trim) {
     # Remove some elements that are not needed from the final model
-    if (!is.null(model$modelInfo$trim)) {
-      model$finalModel <- model$modelInfo$trim(model$finalModel)
+    if (!is.null(model[["modelInfo"]][["trim"]])) {
+      model[["finalModel"]] <- model[["modelInfo"]][["trim"]](model[["finalModel"]])
     }
 
     # Remove some elements that are not needed from the train model
@@ -140,18 +143,19 @@ aggregate_mean_or_first <- function(x) {
   if (is.numeric(x)) {
     mean(x)
   } else {
-    x[1L]
+    x[[1L]]
   }
 }
 
 #' @title Extract the best predictions from a train object
 #' @description Extract the best predictions from a train object.
 #' @param x a train object
+#' @param aggregate_resamples logical, whether to aggregate resamples by keys. Default is TRUE.
 #' @return a data.table::data.table with predictions
 #' @keywords internal
-extractBestPreds <- function(x) {
-  stopifnot(methods::is(x, "train"))
-  if (is.null(x$pred)) {
+extractBestPreds <- function(x, aggregate_resamples = TRUE) {
+  stopifnot(is.logical(aggregate_resamples), length(aggregate_resamples) == 1L, methods::is(x, "train"))
+  if (is.null(x[["pred"]])) {
     stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
   }
   stopifnot(methods::is(x$pred, "data.frame"))
@@ -167,11 +171,14 @@ extractBestPreds <- function(x) {
   # Drop rows for other tunes
   pred <- pred[best_tune, ]
 
-  # If we have multiple resamples per row
-  # e.g. for repeated CV, we need to average the predictions
+  # Set keys for sorting
   keys <- "rowIndex"
   data.table::setkeyv(pred, keys)
-  pred <- pred[, lapply(.SD, aggregate_mean_or_first), by = keys]
+
+  # If aggregate_resamples is TRUE, aggregate by keys
+  if (aggregate_resamples) {
+    pred <- pred[, lapply(.SD, aggregate_mean_or_first), by = keys]
+  }
 
   # Order results consistently
   data.table::setorderv(pred, keys)
