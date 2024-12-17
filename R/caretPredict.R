@@ -155,6 +155,7 @@ aggregate_mean_or_first <- function(x) {
 #' @return a data.table::data.table with predictions
 #' @keywords internal
 extractBestPreds <- function(x, aggregate_resamples = TRUE) {
+  stopifnot(is.logical(aggregate_resamples), length(aggregate_resamples) == 1L)
   stopifnot(methods::is(x, "train"))
   if (is.null(x[["pred"]])) {
     stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
