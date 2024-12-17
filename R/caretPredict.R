@@ -13,6 +13,7 @@
 #' @keywords internal
 caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, aggregate_resamples = TRUE, ...) {
   stopifnot(methods::is(object, "train"))
+  stopifnot(is.logical(aggregate_resamples), length(aggregate_resamples) == 1L)
 
   # Extract the model type
   is_class <- isClassifierAndValidate(object, validate_for_stacking = is.null(newdata))
