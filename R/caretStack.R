@@ -76,7 +76,12 @@ caretStack <- function(
   excluded_class_id <- validateExcludedClass(excluded_class_id)
 
   # Predict for each model. If new_X is NULL, will return stacked predictions
-  preds <- predict.caretList(all.models, newdata = new_X, excluded_class_id = excluded_class_id, aggregate_resamples = aggregate_resamples)
+  preds <- predict.caretList(
+    all.models,
+    newdata = new_X,
+    excluded_class_id = excluded_class_id,
+    aggregate_resamples = aggregate_resamples
+  )
   if (!is.null(new_X)) {
     stopifnot(nrow(preds) == nrow(new_X))
   }

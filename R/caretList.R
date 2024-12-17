@@ -27,7 +27,7 @@ table #' Create a list of several train models from the caret package
 #'   head(iris, 50),
 #'   methodList = c("glm", "lm"),
 #'   tuneList = list(
-#'     nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1)
+#'     nnet = caretModelSpec(method = "nnet", trace = FALSE, tuneLength = 1L)
 #'   )
 #' )
 caretList <- function(
@@ -104,7 +104,14 @@ caretList <- function(
 #' @param ... Other arguments to pass to \code{\link[caret]{predict.train}}
 #' @method predict caretList
 #' @export
-predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_class_id = 1L, aggregate_resamples = TRUE, ...) {
+predict.caretList <- function(
+  object,
+  newdata = NULL,
+  verbose = FALSE,
+  excluded_class_id = 1L,
+  aggregate_resamples = TRUE,
+  ...
+) {
   stopifnot(methods::is(object, "caretList"))
 
   # Decided whether to be verbose or quiet
@@ -117,7 +124,14 @@ predict.caretList <- function(object, newdata = NULL, verbose = FALSE, excluded_
   if (!is.null(newdata)) {
     newdata <- data.table::as.data.table(newdata)
   }
-  preds <- apply_fun(object, caretPredict, newdata = newdata, excluded_class_id = excluded_class_id, aggregate_resamples = aggregate_resamples, ...)
+  preds <- apply_fun(
+    object,
+    caretPredict,
+    newdata = newdata,
+    excluded_class_id = excluded_class_id,
+    aggregate_resamples = aggregate_resamples,
+    ...
+  )
   stopifnot(
     is.list(preds),
     length(preds) >= 1L,
@@ -343,7 +357,7 @@ c.caretList <- function(...) {
 #' @export
 #' @return a list of lists
 #' @examples
-#' caretModelSpec("rf", tuneLength = 5, preProcess = "ica")
+#' caretModelSpec("rf", tuneLength = 5L, preProcess = "ica")
 caretModelSpec <- function(method = "rf", ...) {
   out <- list(method = method, ...)
   out
