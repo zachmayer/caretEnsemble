@@ -12,8 +12,7 @@
 #' @return a data.table
 #' @keywords internal
 caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, aggregate_resamples = TRUE, ...) {
-  stopifnot(methods::is(object, "train"))
-  stopifnot(is.logical(aggregate_resamples), length(aggregate_resamples) == 1L)
+  stopifnot(is.logical(aggregate_resamples), length(aggregate_resamples) == 1L, methods::is(object, "train"))
 
   # Extract the model type
   is_class <- isClassifierAndValidate(object, validate_for_stacking = is.null(newdata))
@@ -155,8 +154,7 @@ aggregate_mean_or_first <- function(x) {
 #' @return a data.table::data.table with predictions
 #' @keywords internal
 extractBestPreds <- function(x, aggregate_resamples = TRUE) {
-  stopifnot(is.logical(aggregate_resamples), length(aggregate_resamples) == 1L)
-  stopifnot(methods::is(x, "train"))
+  stopifnot(is.logical(aggregate_resamples), length(aggregate_resamples) == 1L, methods::is(x, "train"))
   if (is.null(x[["pred"]])) {
     stop("No predictions saved during training. Please set savePredictions = 'final' in trainControl", call. = FALSE)
   }
