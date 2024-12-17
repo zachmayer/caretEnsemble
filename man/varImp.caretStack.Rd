@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{An object of class caretStack}
 
-\item{newdata}{the data to use for computing importance. If NULL, will use the stacked predictions from the models.}
+\item{newdata}{the data to use for computing importance. If NULL, will use the stacked predictions from the models}
 
 \item{normalize}{a logical indicating whether to normalize the importances to sum to one.}
 

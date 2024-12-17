@@ -11,6 +11,7 @@ caretStack(
   metric = NULL,
   trControl = NULL,
   excluded_class_id = 1L,
+  original_features = NULL,
   ...
 )
 }
@@ -30,6 +31,10 @@ If 0, will include all levels.}
 \item{trControl}{a trainControl object to use for training the ensemble model. If NULL, will use defaultControl.}
 
 \item{excluded_class_id}{The integer level to exclude from binary classification or multiclass problems.}
+
+\item{original_features}{a character vector of the names of the original features to include in the stack or
+NULL to not include any features. These features will be added to the stacked predictions from the models to
+train the ensemble model.}
 
 \item{...}{additional arguments to pass to the stacking model}
 }

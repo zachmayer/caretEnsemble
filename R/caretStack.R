@@ -23,6 +23,9 @@
 #' @param metric the metric to use for grid search on the stacking model.
 #' @param trControl a trainControl object to use for training the ensemble model. If NULL, will use defaultControl.
 #' @param excluded_class_id The integer level to exclude from binary classification or multiclass problems.
+#' @param original_features a character vector of the names of the original features to include in the stack or
+#' NULL to not include any features. These features will be added to the stacked predictions from the models to
+#' train the ensemble model.
 #' @param ... additional arguments to pass to the stacking model
 #' @return S3 caretStack object
 #' @references Caruana, R., Niculescu-Mizil, A., Crew, G., & Ksikes, A. (2004).
@@ -43,6 +46,7 @@ caretStack <- function(
     metric = NULL,
     trControl = NULL,
     excluded_class_id = 1L,
+    original_features = NULL,
     ...) {
   # Check all.models
   if (!methods::is(all.models, "caretList")) {
@@ -63,6 +67,9 @@ caretStack <- function(
     new_X <- data.table::as.data.table(new_X)
   }
 
+  # Check if original_features is a character vector and remove ignored variables
+  check_original_features(original_features, new_X, training = TRUE)
+
   # Validators
   excluded_class_id <- validateExcludedClass(excluded_class_id)
 
@@ -70,6 +77,11 @@ caretStack <- function(
   preds <- predict.caretList(all.models, newdata = new_X, excluded_class_id = excluded_class_id)
   if (!is.null(new_X)) {
     stopifnot(nrow(preds) == nrow(new_X))
+  }
+
+  # Add original features to the stack if requested
+  if (!is.null(original_features)) {
+    preds <- cbind(preds, new_X[, original_features, with = FALSE])
   }
 
   # Choose the target
@@ -100,7 +112,8 @@ caretStack <- function(
     models = all.models,
     ens_model = model,
     error = model$results,
-    excluded_class_id = excluded_class_id
+    excluded_class_id = excluded_class_id,
+    original_features = original_features
   )
   class(out) <- "caretStack"
   out
@@ -165,16 +178,24 @@ predict.caretStack <- function(
     excluded_class_id <- 0L
   }
 
+  # Make sure all original_features are present in newdata
+  if (!is.null(object$original_features)) {
+    check_original_features(object$original_features, newdata, training = FALSE)
+  }
+
   # Get predictions from the submodels on the new data
   # We need theres if there's newdata, for passing the base model predictions to the stack model
   # We also need these if we're calculting standard errors for the predictions
-  sub_model_preds <- if (!is.null(newdata) || se) {
-    stats::predict(
+  if (!is.null(newdata) || se) {
+    sub_model_preds <- stats::predict(
       object$models,
       newdata = newdata,
       verbose = verbose,
       excluded_class_id = object[["excluded_class_id"]]
     )
+    if (!is.null(object$original_features)) {
+      sub_model_preds <- cbind(sub_model_preds, newdata[, object$original_features])
+    }
   }
 
   # Now predict on the stack
@@ -227,6 +248,43 @@ check_caretStack <- function(object) {
     methods::is(object$models, "caretList"),
     methods::is(object$ens_model, "train")
   )
+}
+
+#' @title Check original_features parameter
+#' @description Check the original_features parameter for caretStack, predict.caretStack and varImp.caretStack
+#'
+#' @param original_features a character vector with the names of the original features to include in the stack
+#' @param newdata the data to use for train a model or make predictions
+#' @param training a logical indicating whether the function is being called during training or prediction
+#' @keywords internal
+check_original_features <- function(original_features, newdata, training = TRUE) {
+  # Use different argument name depending on whether we are training or predicting
+  argument_name <- if (training) "new_X" else "newdata"
+
+  # Make sure newdata is not NULL when original_features is not NULL
+  if (!is.null(original_features) && is.null(newdata)) {
+    stop("original_features was specified, but ", argument_name, " is not provided. ",
+      "Please provide ", argument_name, " to use original features.",
+      call. = FALSE
+    )
+  }
+
+  # Check that all specified variables in original_features are present in newdata
+  if (is.character(original_features) && !all(original_features %in% colnames(newdata))) {
+    missing_columns <- setdiff(original_features, colnames(newdata))
+    stop("Not all variables in original_features are present in ", argument_name, ". Missing columns: ",
+      toString(missing_columns), ".",
+      call. = FALSE
+    )
+  }
+
+  # If original featires is not a character vector or NULL, throw an error
+  if (!is.null(original_features) && !is.character(original_features)) {
+    stop("original_features must be a character vector with the names ",
+      "of the features to include, or NULL to not include any features.",
+      call. = FALSE
+    )
+  }
 }
 
 #' @title Set excluded class id
@@ -326,14 +384,20 @@ print.summary.caretStack <- function(x, ...) {
 #' @title Variable importance for caretStack
 #' @description This is a function to extract variable importance from a caretStack.
 #' @param object An object of class caretStack
-#' @param newdata the data to use for computing importance. If NULL, will use the stacked predictions from the models.
+#' @param newdata the data to use for computing importance. If NULL, will use the stacked predictions from the models
 #' @param normalize a logical indicating whether to normalize the importances to sum to one.
 #' @param ... passed to predict.caretList
 #' @importFrom caret varImp
 #' @method varImp caretStack
 #' @export
 varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
+  # Make sure newdata is not NULL when original features is not NULL
+  check_original_features(object$original_features, newdata, training = FALSE)
   preds <- predict.caretList(object$models, newdata = newdata, excluded_class_id = object$excluded_class_id, ...)
+  if (!is.null(newdata) && !is.null(object$original_features)) {
+    newdata <- data.table::as.data.table(newdata)
+    preds <- cbind(preds, newdata[, object$original_features, with = FALSE])
+  }
   imp <- permutationImportance(object$ens_model, preds, normalize = normalize)
   imp
 }
