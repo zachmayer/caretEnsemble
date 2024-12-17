@@ -86,6 +86,7 @@ caretPredict <- function(object, newdata = NULL, excluded_class_id = 1L, aggrega
 #' @return The output of the `train` function.
 #' @keywords internal
 caretTrain <- function(local_args, global_args, continue_on_fail = FALSE, trim = TRUE, aggregate_resamples = TRUE) {
+  stopifnot(is.logical(aggregate_resamples), length(aggregate_resamples) == 1L)
   # Combine args
   # I think my handling here is correct (update globals with locals, which allows locals be partial)
   # but it would be nice to have some tests
