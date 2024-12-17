@@ -57,6 +57,7 @@
 <span>  metric <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  trControl <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  excluded_class_id <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  original_features <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -91,6 +92,12 @@ If 0, will include all levels.</p></dd>
 
 <dt id="arg-excluded-class-id">excluded_class_id<a class="anchor" aria-label="anchor" href="#arg-excluded-class-id"></a></dt>
 <dd><p>The integer level to exclude from binary classification or multiclass problems.</p></dd>
+
+
+<dt id="arg-original-features">original_features<a class="anchor" aria-label="anchor" href="#arg-original-features"></a></dt>
+<dd><p>a character vector of the names of the original features to include in the stack or
+NULL to not include any features. These features will be added to the stacked predictions from the models to
+train the ensemble model.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
