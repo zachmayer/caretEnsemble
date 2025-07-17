@@ -26,9 +26,6 @@ jobs:
           use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::covr, any::xml2, any::testthat, any::htmltools, any::DT
-          needs: coverage
 
       - name: Run unit tests and report coverage
         run: make clean && make cobertura.xml

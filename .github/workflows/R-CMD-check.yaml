@@ -86,9 +86,6 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         if: steps.should-run.outputs.should_run == 'true'
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
 
       - run: make check
         if: steps.should-run.outputs.should_run == 'true'

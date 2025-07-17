@@ -36,7 +36,13 @@ Suggests:
     spelling,
     testthat,
     usethis,
-    devtools
+    devtools,
+    roxygen2,
+    xml2,
+    htmltools,
+    DT,
+    pkgdown,
+    rcmdcheck
 Imports:
     caret,
     data.table,

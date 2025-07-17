@@ -15,6 +15,4 @@ jobs:
       with:
         use-public-rspm: true
     - uses: r-lib/actions/setup-r-dependencies@v2
-      with:
-            extra-packages: any::roxygen2
     - run: make test
