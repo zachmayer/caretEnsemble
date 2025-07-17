@@ -2,7 +2,7 @@ Package: caretEnsemble
 Type: Package
 Title: Ensembles of Caret Models
 Version: 4.0.2
-Date: 2024-11-27
+Date: 2025-11-17
 Authors@R: c(person(c("Zachary", "A."), "Deane-Mayer", role = c("aut", "cre", "cph"), email = "zach.mayer@gmail.com"),
     person(c("Jared", "E.", "Knowles"), role="ctb", email="jknowles@gmail.com"),
     person("Antón", "López", role="ctb", email="anton.gomez.lopez@rai.usc.es")
