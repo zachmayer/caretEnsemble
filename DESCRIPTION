@@ -42,7 +42,8 @@ Suggests:
     htmltools,
     DT,
     pkgdown,
-    rcmdcheck
+    rcmdcheck,
+    cyclocomp
 Imports:
     caret,
     data.table,
