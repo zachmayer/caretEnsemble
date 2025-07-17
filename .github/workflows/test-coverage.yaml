@@ -37,7 +37,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
-          file: ${{ runner.temp }}/cobertura.xml
+          files: ${{ runner.temp }}/cobertura.xml
           flags: unittests
           verbose: true
 
