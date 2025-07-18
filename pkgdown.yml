@@ -1,10 +1,10 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   caretEnsemble-intro: caretEnsemble-intro.html
   Version-4.0-New-Features: Version-4.0-New-Features.html
-last_built: 2024-12-17T21:58Z
+last_built: 2025-07-18T01:51Z
 urls:
   reference: http://zachmayer.github.io/caretEnsemble/reference
   article: http://zachmayer.github.io/caretEnsemble/articles
