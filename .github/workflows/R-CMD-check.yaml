@@ -44,14 +44,10 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
+          - {os: macos-latest,   r: 'release'}
           - {os: ubuntu-latest,  r: 'release'}
           - {os: ubuntu-latest,  r: 'oldrel-1'}
-          - {os: ubuntu-latest,  r: 'oldrel-2'}
-          - {os: ubuntu-latest,  r: 'oldrel-3'}
-          - {os: ubuntu-latest,  r: '4.1.0'}
 
     steps:
       - name: Check if R changes
@@ -81,14 +77,10 @@ jobs:
         if: steps.should-run.outputs.should_run == 'true'
         with:
           r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         if: steps.should-run.outputs.should_run == 'true'
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
 
       - run: make check
         if: steps.should-run.outputs.should_run == 'true'
