@@ -623,3 +623,181 @@ autoplot.caretStack <- function(object, training_data = NULL, xvars = NULL, show
   }
   out
 }
+
+
+
+#' @title Plot Variable Importance from a caretStack Model
+#'
+#' @description
+#' This function plots the variable importance from a stacked ensemble model (`caretStack`),
+#' separating original features from new (engineered) features. It optionally includes
+#' cross-group summary statistics (mean, sum, or max) from one feature group into the other
+#' for visual reference. It returns a \code{ggplot} object if all variables are treated as new,
+#' or a \code{patchwork} object containing two plots (original and new features).
+#' This is useful for diagnosing which group of features contributes more to the stacked model.
+#'
+#' @param stack_model A \code{caretStack} model trained using \code{caretEnsemble}.
+#' It should have an attribute \code{original_features} listing the original input variables.
+#' If this attribute is missing, all variables are treated as "new".
+#'
+#' @param newdata A data frame containing the data used for calculating variable importance.
+#' Typically this should be the validation or test set.
+#'
+#' @param stat_type Optional character string indicating which summary statistic
+#' of the opposite group to include as a gray bar for reference.
+#' Must be one of \code{"mean"}, \code{"sum"}, or \code{"max"}. If \code{NULL} or invalid,
+#' no statistic is shown, and a warning will be issued if invalid.
+#'
+#' @return A \code{ggplot} object if no original features attribute is found,
+#' or a \code{patchwork} object with two bar plots:
+#' one for original features (in blue) and one for new features (in red).
+#' If \code{stat_type} is provided, a gray bar appears in each plot representing
+#' the selected summary statistic from the opposite group (e.g., mean of new features
+#' shown in the original features plot).
+#'
+#' @details
+#' - Variable importance is computed using \code{varImp} from the \code{caret} package.
+#' - If the model lacks the \code{original_features} attribute, all variables are considered new.
+#' - Requires the packages: \code{data.table}, \code{ggplot2}, \code{caret}, and \code{patchwork}.
+#'
+#' @importFrom caret varImp
+#' @importFrom data.table data.table as.data.table set setnames rbindlist :=
+#' @importFrom ggplot2 ggplot aes geom_bar coord_flip scale_fill_manual guides theme_minimal labs ylim
+#' @importFrom patchwork plot_layout
+#' @export
+
+plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
+  # Variables para NSE en data.table y ggplot
+  method <- weight <- type <- is_stat <- NULL
+
+  # Extraer importancia de variables
+  imp <- caret::varImp(stack_model, scale = TRUE, useModel = FALSE, newdata = newdata)
+
+  # Convertir a data.table
+  wghtFrame <- data.table::as.data.table(imp)
+  data.table::set(wghtFrame, j = "method", value = names(imp))
+  data.table::setnames(wghtFrame, c("weight", "method"))
+
+  # Ordenar por importancia
+  wghtFrame <- wghtFrame[order(-weight)]
+
+  # Extraer features originales
+  original_features <- stack_model[["original_features"]]
+
+  # Validar stat_type
+  valid_stats <- c("mean", "sum", "max")
+  if (!is.null(stat_type) && !(stat_type %in% valid_stats)) {
+    warning(
+      "stat_type must be 'mean', 'sum', or 'max'. Este parámetro será ignorado.",
+      call. = FALSE
+    )
+    stat_type <- NULL
+  }
+
+  # Caso 1: sin features originales → todo es "New"
+  if (is.null(original_features)) {
+    wghtFrame[, type := "New"]
+    wghtFrame[, is_stat := FALSE]
+
+    ggplot2::ggplot(
+      wghtFrame,
+      ggplot2::aes(x = reorder(method, weight), y = weight, fill = is_stat)
+    ) +
+      ggplot2::geom_bar(stat = "identity") +
+      ggplot2::coord_flip() +
+      ggplot2::scale_fill_manual(values = c("FALSE" = "red", "TRUE" = "gray")) +
+      ggplot2::guides(fill = "none") +
+      ggplot2::theme_minimal() +
+      ggplot2::labs(
+        title = "Variable Importance - New Features",
+        x = "Variable", y = "Importance"
+      )
+  } else {
+    # Clasificar variables
+    wghtFrame[, type := ifelse(method %in% original_features, "Original", "New")]
+    wghtFrame[, is_stat := FALSE]
+
+    imp_original <- wghtFrame[type == "Original"]
+    imp_new <- wghtFrame[type == "New"]
+
+    # Agregar estadísticas cruzadas si corresponde
+    if (!is.null(stat_type)) {
+      stat_label <- switch(stat_type,
+        mean = "Mean",
+        sum = "Sum",
+        max = "Maximum"
+      )
+
+      stat_value_for_original <- switch(stat_type,
+        mean = mean(imp_new$weight, na.rm = TRUE),
+        sum = sum(imp_new$weight, na.rm = TRUE),
+        max = max(imp_new$weight, na.rm = TRUE)
+      )
+
+      stat_value_for_new <- switch(stat_type,
+        mean = mean(imp_original$weight, na.rm = TRUE),
+        sum = sum(imp_original$weight, na.rm = TRUE),
+        max = max(imp_original$weight, na.rm = TRUE)
+      )
+
+      # Etiquetas
+      stat_label_original <- paste0(stat_label, " (New)")
+      stat_label_new <- paste0(stat_label, " (Original)")
+
+      # Agregar filas estadísticas
+      if (nrow(imp_original) > 0L) {
+        imp_original <- data.table::rbindlist(list(
+          imp_original,
+          data.table::data.table(
+            method = stat_label_original,
+            weight = stat_value_for_original,
+            type = "Original",
+            is_stat = TRUE
+          )
+        ), use.names = TRUE)
+      }
+      if (nrow(imp_new) > 0L) {
+        imp_new <- data.table::rbindlist(list(
+          imp_new,
+          data.table::data.table(
+            method = stat_label_new,
+            weight = stat_value_for_new,
+            type = "New",
+            is_stat = TRUE
+          )
+        ), use.names = TRUE)
+      }
+    }
+
+    # Límite uniforme de eje Y
+    max_weight <- max(c(imp_original$weight, imp_new$weight), na.rm = TRUE)
+
+    # Gráfico de Original Features
+    p1 <- ggplot2::ggplot(
+      imp_original,
+      ggplot2::aes(x = reorder(method, weight), y = weight, fill = is_stat)
+    ) +
+      ggplot2::geom_bar(stat = "identity") +
+      ggplot2::coord_flip() +
+      ggplot2::scale_fill_manual(values = c("FALSE" = "blue", "TRUE" = "gray")) +
+      ggplot2::guides(fill = "none") +
+      ggplot2::theme_minimal() +
+      ggplot2::labs(title = "Original Features", x = "Variable", y = "Importance") +
+      ggplot2::ylim(0L, max_weight)
+
+    # Gráfico de New Features
+    p2 <- ggplot2::ggplot(
+      imp_new,
+      ggplot2::aes(x = reorder(method, weight), y = weight, fill = is_stat)
+    ) +
+      ggplot2::geom_bar(stat = "identity") +
+      ggplot2::coord_flip() +
+      ggplot2::scale_fill_manual(values = c("FALSE" = "red", "TRUE" = "gray")) +
+      ggplot2::guides(fill = "none") +
+      ggplot2::theme_minimal() +
+      ggplot2::labs(title = "New Features", x = "Variable", y = "Importance") +
+      ggplot2::ylim(0L, max_weight)
+
+    p1 + p2 + patchwork::plot_layout(ncol = 2L)
+  }
+}

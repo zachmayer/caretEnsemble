@@ -509,3 +509,79 @@ testthat::test_that("caretList handles aggregate_resamples correctly", {
   testthat::expect_identical(ncol(pred_agg), 2L)
   testthat::expect_identical(ncol(pred_no_agg), 2L)
 })
+
+
+######################################################################
+testthat::context("plot_variable_importance function")
+######################################################################
+
+testthat::test_that("plot_variable_importance returns ggplot or patchwork objects", {
+  # Train model with original_features (we have two graphics)
+  stack_model <- caretStack(
+    models.class,
+    method = "glmnet",
+    new_X = X.class,
+    new_y = Y.class,
+    original_features = colnames(X.class)
+  )
+
+  # Case without stat_type
+  p <- plot_variable_importance(stack_model, newdata = X.class)
+  testthat::expect_s3_class(p, "patchwork")
+
+  # Case of valid stat_type
+  p_mean <- plot_variable_importance(stack_model, newdata = X.class, stat_type = "mean")
+  testthat::expect_s3_class(p_mean, "patchwork")
+
+  # Case of invalid stat_type: warning and ignored
+  testthat::expect_warning(
+    {
+      p_warn <- plot_variable_importance(stack_model, newdata = X.class, stat_type = "invalid")
+    },
+    "stat_type must be 'mean', 'sum', or 'max'"
+  )
+  testthat::expect_s3_class(p_warn, "patchwork")
+
+  # Case without original_features
+  stack_model_no_orig <- caretStack(
+    models.class,
+    method = "glmnet",
+    new_X = X.class,
+    new_y = Y.class,
+    original_features = NULL
+  )
+  p_new <- plot_variable_importance(stack_model_no_orig, newdata = X.class)
+  testthat::expect_s3_class(p_new, "ggplot")
+})
+
+
+testthat::test_that("plot_variable_importance plots correct titles and colors", {
+  stack_model <- caretStack(
+    models.class,
+    method = "glmnet",
+    new_X = X.class,
+    new_y = Y.class,
+    original_features = colnames(X.class)
+  )
+
+  p <- plot_variable_importance(stack_model, newdata = X.class, stat_type = "max")
+
+  # Extraer gráficos individuales si es patchwork
+  if (inherits(p, "patchwork")) {
+    plots <- list(p[[1L]], p[[2L]])
+  } else {
+    plots <- list(p)
+  }
+
+  # Comprobación de títulos
+  titles <- vapply(plots, function(g) g$labels$title, FUN.VALUE = character(1L))
+  testthat::expect_true(any(grepl("Original Features", titles, fixed = TRUE)))
+  testthat::expect_true(any(grepl("New Features", titles, fixed = TRUE)))
+
+  # Comprobación de colores
+  fills <- unique(unlist(lapply(plots, function(g) {
+    ggplot2::ggplot_build(g)$data[[1L]]$fill
+  })))
+  testthat::expect_true(any(grepl("blue", fills, fixed = TRUE)))
+  testthat::expect_true(any(grepl("red", fills, fixed = TRUE)))
+})
