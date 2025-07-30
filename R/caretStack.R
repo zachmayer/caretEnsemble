@@ -667,34 +667,34 @@ autoplot.caretStack <- function(object, training_data = NULL, xvars = NULL, show
 #' @export
 
 plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
-  # Variables para NSE en data.table y ggplot
+  # Variables for NSE in data.table and ggplot
   method <- weight <- type <- is_stat <- NULL
 
-  # Extraer importancia de variables
+  # Extract variable importance
   imp <- caret::varImp(stack_model, scale = TRUE, useModel = FALSE, newdata = newdata)
 
-  # Convertir a data.table
+  # Convert to data.table
   wghtFrame <- data.table::as.data.table(imp)
   data.table::set(wghtFrame, j = "method", value = names(imp))
   data.table::setnames(wghtFrame, c("weight", "method"))
 
-  # Ordenar por importancia
+  # Sort by importance
   wghtFrame <- wghtFrame[order(-weight)]
 
-  # Extraer features originales
+  # Extract original features
   original_features <- stack_model[["original_features"]]
 
-  # Validar stat_type
+  # Validate stat_type
   valid_stats <- c("mean", "sum", "max")
   if (!is.null(stat_type) && !(stat_type %in% valid_stats)) {
     warning(
-      "stat_type must be 'mean', 'sum', or 'max'. Este parámetro será ignorado.",
+      "stat_type must be 'mean', 'sum', or 'max'. This parameter will be ignored.",
       call. = FALSE
     )
     stat_type <- NULL
   }
 
-  # Caso 1: sin features originales → todo es "New"
+  # Case 1: no original features → everything is "New"
   if (is.null(original_features)) {
     wghtFrame[, type := "New"]
     wghtFrame[, is_stat := FALSE]
@@ -713,38 +713,38 @@ plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
         x = "Variable", y = "Importance"
       )
   } else {
-    # Clasificar variables
+    # Classify variables
     wghtFrame[, type := ifelse(method %in% original_features, "Original", "New")]
     wghtFrame[, is_stat := FALSE]
 
     imp_original <- wghtFrame[type == "Original"]
     imp_new <- wghtFrame[type == "New"]
 
-    # Agregar estadísticas cruzadas si corresponde
+    # Add cross-group statistics if applicable
     if (!is.null(stat_type)) {
       stat_label <- switch(stat_type,
-        mean = "Mean",
-        sum = "Sum",
-        max = "Maximum"
+                           mean = "Mean",
+                           sum = "Sum",
+                           max = "Maximum"
       )
 
       stat_value_for_original <- switch(stat_type,
-        mean = mean(imp_new$weight, na.rm = TRUE),
-        sum = sum(imp_new$weight, na.rm = TRUE),
-        max = max(imp_new$weight, na.rm = TRUE)
+                                        mean = mean(imp_new$weight, na.rm = TRUE),
+                                        sum = sum(imp_new$weight, na.rm = TRUE),
+                                        max = max(imp_new$weight, na.rm = TRUE)
       )
 
       stat_value_for_new <- switch(stat_type,
-        mean = mean(imp_original$weight, na.rm = TRUE),
-        sum = sum(imp_original$weight, na.rm = TRUE),
-        max = max(imp_original$weight, na.rm = TRUE)
+                                   mean = mean(imp_original$weight, na.rm = TRUE),
+                                   sum = sum(imp_original$weight, na.rm = TRUE),
+                                   max = max(imp_original$weight, na.rm = TRUE)
       )
 
-      # Etiquetas
+      # Labels
       stat_label_original <- paste0(stat_label, " (New)")
       stat_label_new <- paste0(stat_label, " (Original)")
 
-      # Agregar filas estadísticas
+      # Add statistical rows
       if (nrow(imp_original) > 0L) {
         imp_original <- data.table::rbindlist(list(
           imp_original,
@@ -769,10 +769,10 @@ plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
       }
     }
 
-    # Límite uniforme de eje Y
+    # Uniform Y-axis limit
     max_weight <- max(c(imp_original$weight, imp_new$weight), na.rm = TRUE)
 
-    # Gráfico de Original Features
+    # Plot for Original Features
     p1 <- ggplot2::ggplot(
       imp_original,
       ggplot2::aes(x = reorder(method, weight), y = weight, fill = is_stat)
@@ -785,7 +785,7 @@ plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
       ggplot2::labs(title = "Original Features", x = "Variable", y = "Importance") +
       ggplot2::ylim(0L, max_weight)
 
-    # Gráfico de New Features
+    # Plot for New Features
     p2 <- ggplot2::ggplot(
       imp_new,
       ggplot2::aes(x = reorder(method, weight), y = weight, fill = is_stat)
@@ -801,3 +801,4 @@ plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
     p1 + p2 + patchwork::plot_layout(ncol = 2L)
   }
 }
+

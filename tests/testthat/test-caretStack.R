@@ -516,7 +516,7 @@ testthat::context("plot_variable_importance function")
 ######################################################################
 
 testthat::test_that("plot_variable_importance returns ggplot or patchwork objects", {
-  # Train model with original_features (we have two graphics)
+  # Train model with original_features (we have two plots)
   stack_model <- caretStack(
     models.class,
     method = "glmnet",
@@ -529,11 +529,11 @@ testthat::test_that("plot_variable_importance returns ggplot or patchwork object
   p <- plot_variable_importance(stack_model, newdata = X.class)
   testthat::expect_s3_class(p, "patchwork")
 
-  # Case of valid stat_type
+  # Case with valid stat_type
   p_mean <- plot_variable_importance(stack_model, newdata = X.class, stat_type = "mean")
   testthat::expect_s3_class(p_mean, "patchwork")
 
-  # Case of invalid stat_type: warning and ignored
+  # Case with invalid stat_type: should trigger a warning and be ignored
   testthat::expect_warning(
     {
       p_warn <- plot_variable_importance(stack_model, newdata = X.class, stat_type = "invalid")
@@ -566,19 +566,19 @@ testthat::test_that("plot_variable_importance plots correct titles and colors", 
 
   p <- plot_variable_importance(stack_model, newdata = X.class, stat_type = "max")
 
-  # Extraer gráficos individuales si es patchwork
+  # Extract individual plots if it is a patchwork object
   if (inherits(p, "patchwork")) {
     plots <- list(p[[1L]], p[[2L]])
   } else {
     plots <- list(p)
   }
 
-  # Comprobación de títulos
+  # Check plot titles
   titles <- vapply(plots, function(g) g$labels$title, FUN.VALUE = character(1L))
   testthat::expect_true(any(grepl("Original Features", titles, fixed = TRUE)))
   testthat::expect_true(any(grepl("New Features", titles, fixed = TRUE)))
 
-  # Comprobación de colores
+  # Check fill colors
   fills <- unique(unlist(lapply(plots, function(g) {
     ggplot2::ggplot_build(g)$data[[1L]]$fill
   })))
