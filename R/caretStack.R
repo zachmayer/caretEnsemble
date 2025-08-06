@@ -664,6 +664,7 @@ autoplot.caretStack <- function(object, training_data = NULL, xvars = NULL, show
 #' @importFrom data.table data.table as.data.table set setnames rbindlist :=
 #' @importFrom ggplot2 ggplot aes geom_bar coord_flip scale_fill_manual guides theme_minimal labs ylim
 #' @importFrom patchwork plot_layout
+#' @importFrom stats reorder
 #' @export
 
 plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
@@ -723,21 +724,21 @@ plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
     # Add cross-group statistics if applicable
     if (!is.null(stat_type)) {
       stat_label <- switch(stat_type,
-                           mean = "Mean",
-                           sum = "Sum",
-                           max = "Maximum"
+        mean = "Mean",
+        sum = "Sum",
+        max = "Maximum"
       )
 
       stat_value_for_original <- switch(stat_type,
-                                        mean = mean(imp_new$weight, na.rm = TRUE),
-                                        sum = sum(imp_new$weight, na.rm = TRUE),
-                                        max = max(imp_new$weight, na.rm = TRUE)
+        mean = mean(imp_new$weight, na.rm = TRUE),
+        sum = sum(imp_new$weight, na.rm = TRUE),
+        max = max(imp_new$weight, na.rm = TRUE)
       )
 
       stat_value_for_new <- switch(stat_type,
-                                   mean = mean(imp_original$weight, na.rm = TRUE),
-                                   sum = sum(imp_original$weight, na.rm = TRUE),
-                                   max = max(imp_original$weight, na.rm = TRUE)
+        mean = mean(imp_original$weight, na.rm = TRUE),
+        sum = sum(imp_original$weight, na.rm = TRUE),
+        max = max(imp_original$weight, na.rm = TRUE)
       )
 
       # Labels
@@ -801,4 +802,3 @@ plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
     p1 + p2 + patchwork::plot_layout(ncol = 2L)
   }
 }
-
