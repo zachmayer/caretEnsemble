@@ -18,7 +18,7 @@ jobs:
     outputs:
       run-r-checks: ${{ steps.check-files.outputs.run-r-checks }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - id: check-files
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
@@ -67,7 +67,7 @@ jobs:
           echo "Skipping R CMD check - no R-related changes"
           exit 0
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.should-run.outputs.should_run == 'true'
 
       - uses: r-lib/actions/setup-pandoc@v2
