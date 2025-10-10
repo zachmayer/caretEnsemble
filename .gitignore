@@ -155,3 +155,4 @@ inst/doc
 docs
 .aider*
 .env
+.Rhistory

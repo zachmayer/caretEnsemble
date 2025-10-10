@@ -11,7 +11,7 @@ plot_group(imp_dt, title, fill_colors, y_max)
 
 \item{title}{Title for the plot.}
 
-\item{fill_colors}{Named vector: `FALSE` = normal bar color, `TRUE` = gray for statistic bar.}
+\item{fill_colors}{Named vector specifying colors for each fill group.}
 
 \item{y_max}{Numeric maximum for the y-axis.}
 }

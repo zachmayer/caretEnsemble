@@ -52,23 +52,29 @@ testthat::test_that("add_cross_group_stats splits correctly and adds stats", {
   testthat::expect_true(any(imp_list_mean$imp_new$is_stat))
 })
 
-testthat::test_that("plot_group returns ggplot object with correct limits", {
+testthat::test_that("plot_group returns ggplot object with correct title", {
   dt <- data.table::data.table(
     method = c("x1", "x2"),
     weight = c(0.2, 0.8),
     is_stat = c(FALSE, FALSE)
   )
 
-  p <- plot_group(dt, "Test Plot", c("FALSE" = "blue", "TRUE" = "gray"), y_max = 1L)
+  # Add fill_group
+  dt[, fill_group := "New Features"]
+
+  fill_palette <- c("New Features" = "red", Stat = "gray")
+
+  p <- plot_group(dt, "Test Plot", fill_colors = fill_palette, y_max = 1L)
 
   testthat::expect_s3_class(p, "ggplot")
   testthat::expect_identical(p$labels$title, "Test Plot")
 })
 
+
 # --------------------------------------------------------------------
 # Unit tests for plot_variable_importance
 # --------------------------------------------------------------------
-testthat::test_that("plot_variable_importance returns ggplot or patchwork objects", {
+testthat::test_that("plot_variable_importance returns ggplot objects", {
   stack_model <- caretStack(
     models.class,
     method = "glmnet",
@@ -79,11 +85,15 @@ testthat::test_that("plot_variable_importance returns ggplot or patchwork object
 
   # Case without stat_type
   p <- plot_variable_importance(stack_model, newdata = X.class)
-  testthat::expect_s3_class(p, "patchwork")
+  testthat::expect_s3_class(p, "ggplot")
+  facet_vars <- ggplot2::ggplot_build(p)$layout$panel_params
+  testthat::expect_length(facet_vars, 2L)
 
   # Case with valid stat_type
   p_mean <- plot_variable_importance(stack_model, newdata = X.class, stat_type = "mean")
-  testthat::expect_s3_class(p_mean, "patchwork")
+  testthat::expect_s3_class(p_mean, "ggplot")
+  facet_vars <- ggplot2::ggplot_build(p_mean)$layout$panel_params
+  testthat::expect_length(facet_vars, 2L)
 
   # Case with invalid stat_type: should throw an error
   expect_error(
@@ -101,6 +111,8 @@ testthat::test_that("plot_variable_importance returns ggplot or patchwork object
   )
   p_new <- plot_variable_importance(stack_model_no_orig, newdata = X.class)
   testthat::expect_s3_class(p_new, "ggplot")
+  facet_vars <- ggplot2::ggplot_build(p_new)$layout$panel_params
+  testthat::expect_length(facet_vars, 1L)
 })
 
 testthat::test_that("plot_variable_importance plots correct titles and colors", {
@@ -114,24 +126,18 @@ testthat::test_that("plot_variable_importance plots correct titles and colors", 
 
   p <- plot_variable_importance(stack_model, newdata = X.class, stat_type = "max")
 
-  # Extract individual plots if patchwork object
-  if (inherits(p, "patchwork")) {
-    plots <- list(p[[1L]], p[[2L]])
-  } else {
-    plots <- list(p)
-  }
+  # Check general plot title
+  testthat::expect_identical(p$labels$title, "Variable Importance")
 
-  # Check plot titles
-  titles <- vapply(plots, function(g) g$labels$title, FUN.VALUE = character(1L))
-  testthat::expect_true(any(grepl("Original Features", titles, fixed = TRUE)))
-  testthat::expect_true(any(grepl("New Features", titles, fixed = TRUE)))
+  # Check that facet variable exists and includes both types
+  facet_var <- unique(p$data$type)
+  testthat::expect_true(all(c("Original", "New") %in% facet_var))
 
   # Check bar fill colors
-  fills <- unique(unlist(lapply(plots, function(g) {
-    ggplot2::ggplot_build(g)$data[[1L]]$fill
-  })))
+  fills <- unique(ggplot2::ggplot_build(p)$data[[1L]]$fill)
   testthat::expect_true(any(grepl("blue", fills, fixed = TRUE)))
   testthat::expect_true(any(grepl("red", fills, fixed = TRUE)))
+  testthat::expect_true(any(grepl("gray", fills, fixed = TRUE)))
 })
 
 # --------------------------------------------------------------------
@@ -151,7 +157,9 @@ testthat::test_that("plot_variable_importance works for individual base models",
     )
 
     p <- plot_variable_importance(stack_model, newdata = X.class)
-    testthat::expect_s3_class(p, "patchwork")
+    testthat::expect_s3_class(p, "ggplot")
+    facet_vars <- ggplot2::ggplot_build(p)$layout$panel_params
+    testthat::expect_length(facet_vars, 2L)
   }
 
   # Methods to test for regression
@@ -167,5 +175,7 @@ testthat::test_that("plot_variable_importance works for individual base models",
 
     p <- plot_variable_importance(stack_model, newdata = X.reg)
     testthat::expect_s3_class(p, "ggplot")
+    facet_vars <- ggplot2::ggplot_build(p)$layout$panel_params
+    testthat::expect_length(facet_vars, 1L)
   }
 })

@@ -20,9 +20,8 @@ Must be one of \code{"mean"}, \code{"sum"}, or \code{"max"}. If \code{NULL}, no 
 If invalid, an error is thrown.}
 }
 \value{
-A \code{ggplot} object if no original features attribute is found,
-or a \code{patchwork} object with two bar plots:
-one for original features (in blue) and one for new features (in red).
+A \code{ggplot} object. If the model includes both original and new features,
+the plot will contain two facets ("Original Features" and "New Features").
 If \code{stat_type} is provided, a gray bar appears in each plot representing
 the selected summary statistic from the opposite group (e.g., mean of new features
 shown in the original features plot).
@@ -31,12 +30,12 @@ shown in the original features plot).
 This function plots the variable importance from a stacked ensemble model (`caretStack`),
 separating original features from new (engineered) features. It optionally includes
 cross-group summary statistics (mean, sum, or max) from one feature group into the other
-for visual reference. It returns a \code{ggplot} object if all variables are treated as new,
-or a \code{patchwork} object containing two plots (original and new features).
+for visual reference. It returns a \code{ggplot} object; if both original and new features
+are present, the plot will contain two facets (original and new features) within the same figure.
 This is useful for diagnosing which group of features contributes more to the stacked model.
 }
 \details{
 - Variable importance is computed using \code{caret::varImp}.
 - If the model lacks the \code{original_features} attribute, all variables are considered new.
-- Requires the packages: \code{data.table}, \code{ggplot2}, \code{caret}, and \code{patchwork}.
+- Requires the packages: \code{data.table}, \code{ggplot2}, and \code{caret}.
 }

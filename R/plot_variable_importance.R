@@ -8,8 +8,9 @@
 #' @param newdata A data frame used for calculating variable importance.
 #' @return `data.table` with columns `method` (variable names) and `weight` (importance).
 prepare_importance <- function(stack_model, newdata) {
+  weight <- NULL # due to NSE notes in R CMD check
   # Extract variable importance using caret::varImp
-  imp <- caret::varImp(stack_model, newdata = newdata)
+  imp <- caret::varImp(stack_model, newdata = newdata, normalize = TRUE)
 
   # Convert to data.table and rename columns
   imp_dt <- data.table::as.data.table(imp)
@@ -25,8 +26,9 @@ prepare_importance <- function(stack_model, newdata) {
 #' Add cross-group statistics to the importance table
 #'
 #' @description
-#' Classifies variables as "Original" or "New" and optionally adds a gray bar
-#' representing a summary statistic (mean, sum, max) from the opposite group.
+#' Classifies each variable as either "Original" or "New" and optionally appends
+#' a summary statistic (mean, sum, or max) of the opposite group. The added statistic
+#' is flagged with `is_stat = TRUE` and can be used for plotting a reference bar.
 #'
 #' @param imp_dt data.table from `prepare_importance`.
 #' @param original_features Character vector of original features.
@@ -34,6 +36,7 @@ prepare_importance <- function(stack_model, newdata) {
 #' @return List with `imp_original` and `imp_new` data.tables.
 add_cross_group_stats <- function(imp_dt, original_features, stat_type = NULL) {
   # Classify variables
+  type <- method <- is_stat <- NULL # due to NSE notes in R CMD check
   imp_dt[, type := ifelse(method %in% original_features, "Original", "New")]
   imp_dt[, is_stat := FALSE]
 
@@ -99,11 +102,12 @@ add_cross_group_stats <- function(imp_dt, original_features, stat_type = NULL) {
 #'
 #' @param imp_dt data.table with columns `method`, `weight`, `is_stat`.
 #' @param title Title for the plot.
-#' @param fill_colors Named vector: `FALSE` = normal bar color, `TRUE` = gray for statistic bar.
+#' @param fill_colors Named vector specifying colors for each fill group.
 #' @param y_max Numeric maximum for the y-axis.
 #' @return ggplot object.
 plot_group <- function(imp_dt, title, fill_colors, y_max) {
-  ggplot2::ggplot(imp_dt, ggplot2::aes(x = stats::reorder(method, weight), y = weight, fill = is_stat)) +
+  method <- weight <- fill_group <- NULL # due to NSE notes in R CMD check
+  ggplot2::ggplot(imp_dt, ggplot2::aes(x = stats::reorder(method, weight), y = weight, fill = fill_group)) +
     ggplot2::geom_bar(stat = "identity") +
     ggplot2::coord_flip() +
     ggplot2::scale_fill_manual(values = fill_colors) +
@@ -119,8 +123,8 @@ plot_group <- function(imp_dt, title, fill_colors, y_max) {
 #' This function plots the variable importance from a stacked ensemble model (`caretStack`),
 #' separating original features from new (engineered) features. It optionally includes
 #' cross-group summary statistics (mean, sum, or max) from one feature group into the other
-#' for visual reference. It returns a \code{ggplot} object if all variables are treated as new,
-#' or a \code{patchwork} object containing two plots (original and new features).
+#' for visual reference. It returns a \code{ggplot} object; if both original and new features
+#' are present, the plot will contain two facets (original and new features) within the same figure.
 #' This is useful for diagnosing which group of features contributes more to the stacked model.
 #'
 #' @param stack_model A \code{caretStack} model trained using \code{caretEnsemble}.
@@ -135,9 +139,8 @@ plot_group <- function(imp_dt, title, fill_colors, y_max) {
 #' Must be one of \code{"mean"}, \code{"sum"}, or \code{"max"}. If \code{NULL}, no statistic is shown.
 #' If invalid, an error is thrown.
 #'
-#' @return A \code{ggplot} object if no original features attribute is found,
-#' or a \code{patchwork} object with two bar plots:
-#' one for original features (in blue) and one for new features (in red).
+#' @return A \code{ggplot} object. If the model includes both original and new features,
+#' the plot will contain two facets ("Original Features" and "New Features").
 #' If \code{stat_type} is provided, a gray bar appears in each plot representing
 #' the selected summary statistic from the opposite group (e.g., mean of new features
 #' shown in the original features plot).
@@ -145,11 +148,12 @@ plot_group <- function(imp_dt, title, fill_colors, y_max) {
 #' @details
 #' - Variable importance is computed using \code{caret::varImp}.
 #' - If the model lacks the \code{original_features} attribute, all variables are considered new.
-#' - Requires the packages: \code{data.table}, \code{ggplot2}, \code{caret}, and \code{patchwork}.
+#' - Requires the packages: \code{data.table}, \code{ggplot2}, and \code{caret}.
 #'
 #' @importFrom data.table :=
 #' @export
 plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
+  fill_group <- is_stat <- group <- NULL # due to NSE notes in R CMD check
   # Prepare importance table
   imp_dt <- prepare_importance(stack_model, newdata)
   original_features <- stack_model[["original_features"]]
@@ -162,10 +166,10 @@ plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
 
   # Case 1: No original features → all variables treated as "New"
   if (is.null(original_features)) {
-    imp_dt[, type := "New"]
-    imp_dt[, is_stat := FALSE]
+    imp_dt[, fill_group := "New Features"]
     plot_group(
-      imp_dt, "Variable Importance - New Features", c("FALSE" = "red", "TRUE" = "gray"),
+      imp_dt, "Variable Importance - New Features",
+      fill_colors = c("New Features" = "red"),
       max(imp_dt$weight, na.rm = TRUE)
     )
   } else {
@@ -173,10 +177,24 @@ plot_variable_importance <- function(stack_model, newdata, stat_type = NULL) {
     imp_list <- add_cross_group_stats(imp_dt, original_features, stat_type)
     max_weight <- max(c(imp_list$imp_original$weight, imp_list$imp_new$weight), na.rm = TRUE)
 
-    p1 <- plot_group(imp_list$imp_original, "Original Features", c("FALSE" = "blue", "TRUE" = "gray"), max_weight)
-    p2 <- plot_group(imp_list$imp_new, "New Features", c("FALSE" = "red", "TRUE" = "gray"), max_weight)
+    # Add group labels
+    imp_list$imp_original[, group := "Original Features"]
+    imp_list$imp_new[, group := "New Features"]
 
-    # Combine plots side by side
-    p1 + p2 + patchwork::plot_layout(ncol = 2L)
+    # Combine datasets
+    combined_dt <- data.table::rbindlist(list(imp_list$imp_original, imp_list$imp_new))
+
+    # Fill colors
+    combined_dt[, fill_group := ifelse(is_stat, "Stat", group)]
+    fill_palette <- c("Original Features" = "blue", "New Features" = "red", Stat = "gray")
+
+    # Plot with facets
+    plot_group(
+      combined_dt,
+      "Variable Importance",
+      fill_colors = fill_palette,
+      max_weight
+    ) +
+      ggplot2::facet_grid(. ~ group)
   }
 }

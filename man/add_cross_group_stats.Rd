@@ -17,6 +17,7 @@ add_cross_group_stats(imp_dt, original_features, stat_type = NULL)
 List with `imp_original` and `imp_new` data.tables.
 }
 \description{
-Classifies variables as "Original" or "New" and optionally adds a gray bar
-representing a summary statistic (mean, sum, max) from the opposite group.
+Classifies each variable as either "Original" or "New" and optionally appends
+a summary statistic (mean, sum, or max) of the opposite group. The added statistic
+is flagged with `is_stat = TRUE` and can be used for plotting a reference bar.
 }
