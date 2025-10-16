@@ -14,6 +14,7 @@
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/X.reg.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/Y.class.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/Y.reg.html</loc></url>
+<url><loc>http://zachmayer.github.io/caretEnsemble/reference/add_cross_group_stats.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/aggregate_mean_or_first.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/as.caretList.default.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/as.caretList.html</loc></url>
@@ -56,9 +57,12 @@
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/permutationImportance.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/plot.caretList.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/plot.caretStack.html</loc></url>
+<url><loc>http://zachmayer.github.io/caretEnsemble/reference/plot_group.html</loc></url>
+<url><loc>http://zachmayer.github.io/caretEnsemble/reference/plot_variable_importance.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/predict.caretList.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/predict.caretStack.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/predict.greedyMSE.html</loc></url>
+<url><loc>http://zachmayer.github.io/caretEnsemble/reference/prepare_importance.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/print.caretStack.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/print.greedyMSE.html</loc></url>
 <url><loc>http://zachmayer.github.io/caretEnsemble/reference/print.summary.caretList.html</loc></url>
