@@ -144,7 +144,7 @@ pip-log.txt
 .DS_Store
 
 # R
-.RHistory
+.Rhistory
 .Rproj.user
 caretEnsemble_test_plots.png
 doc
@@ -155,3 +155,4 @@ inst/doc
 docs
 .aider*
 .env
+.Rhistory
