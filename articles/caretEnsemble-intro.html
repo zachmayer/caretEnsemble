@@ -69,7 +69,7 @@
                         <h4 data-toc-skip class="author">Zach
 Deane-Mayer</h4>
             
-            <h4 data-toc-skip class="date">2025-10-16</h4>
+            <h4 data-toc-skip class="date">2026-01-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/zachmayer/caretEnsemble/blob/main/vignettes/caretEnsemble-intro.Rmd" class="external-link"><code>vignettes/caretEnsemble-intro.Rmd</code></a></small>
       <div class="d-none name"><code>caretEnsemble-intro.Rmd</code></div>
@@ -217,7 +217,7 @@ are identical across all models. Lets take a closer look at our list of
 models:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">lattice</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lattice/man/xyplot.html" class="external-link">xyplot</a></span><span class="op">(</span><span class="fu">caret</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/caret/man/resamples.html" class="external-link">resamples</a></span><span class="op">(</span><span class="va">model_list</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="caretEnsemble-intro_files/figure-html/unnamed-chunk-6-1.png" alt="X/Y scatter plot of rpart vs glmnet AUCs on the Sonar dataset. The glmnet model is better for 4 out of 5 resamples." width="700"></p>
+<p><img src="caretEnsemble-intro_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="X/Y scatter plot of rpart vs glmnet AUCs on the Sonar dataset. The glmnet model is better for 4 out of 5 resamples." width="700"></p>
 <p>As you can see from this plot, these 2 models are uncorrelated, and
 the rpart model is occasionally anti-predictive, with a one re-sample
 showing AUC of 0.46.</p>
@@ -360,7 +360,7 @@ subsets of the data.</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

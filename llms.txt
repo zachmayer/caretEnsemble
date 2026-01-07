@@ -1,0 +1,318 @@
+# caretEnsemble
+
+caretEnsemble is a framework for
+[stacking](https://en.wikipedia.org/wiki/Ensemble_learning#Stacking)
+models fit with the [caret](https://topepo.github.io/caret/) package.
+
+Use `caretList` to fit multiple models, and then use `caretStack` to
+stack them with another caret model.
+
+First, use caretList to fit many models to the same data:
+
+``` r
+set.seed(42L)
+data(diamonds, package = "ggplot2")
+dat <- data.table::data.table(diamonds)
+dat <- dat[sample.int(nrow(diamonds), 500L), ]
+models <- caretEnsemble::caretList(
+  price ~ .,
+  data = dat,
+  methodList = c("rf", "glmnet")
+)
+print(summary(models))
+#> The following models were ensembled: rf, glmnet  
+#> 
+#> Model accuracy:
+#>    model_name metric    value       sd
+#>        <char> <char>    <num>    <num>
+#> 1:         rf   RMSE 1074.682 238.2442
+#> 2:     glmnet   RMSE 1142.082 105.6022
+```
+
+Then, use caretEnsemble to make a greedy ensemble of these models
+
+``` r
+greedy_stack <- caretEnsemble::caretEnsemble(models)
+print(greedy_stack)
+#> The following models were ensembled: rf, glmnet  
+#> 
+#> caret::train model:
+#> Greedy Mean Squared Error Optimizer 
+#> 
+#> No pre-processing
+#> Resampling: Cross-Validated (5 fold) 
+#> Summary of sample sizes: 400, 400, 400, 400, 400 
+#> Resampling results:
+#> 
+#>   RMSE      Rsquared   MAE     
+#>   992.0694  0.9354531  559.5561
+#> 
+#> Tuning parameter 'max_iter' was held constant at a value of 100
+#> 
+#> Final model:
+#> Greedy MSE
+#> RMSE:  997.4437 
+#> Weights:
+#>        [,1]
+#> rf     0.55
+#> glmnet 0.45
+```
+
+You can also use caretStack to make a non-linear ensemble
+
+``` r
+rf_stack <- caretEnsemble::caretStack(models, method = "rf")
+#> note: only 1 unique complexity parameters in default grid. Truncating the grid to 1 .
+print(rf_stack)
+#> The following models were ensembled: rf, glmnet  
+#> 
+#> caret::train model:
+#> Random Forest 
+#> 
+#> No pre-processing
+#> Resampling: Cross-Validated (5 fold) 
+#> Summary of sample sizes: 400, 400, 400, 400, 400 
+#> Resampling results:
+#> 
+#>   RMSE      Rsquared   MAE     
+#>   979.1918  0.9379759  513.1197
+#> 
+#> Tuning parameter 'mtry' was held constant at a value of 2
+#> 
+#> Final model:
+#> 
+#> Call:
+#>  randomForest(x = x, y = y, mtry = param$mtry) 
+#>                Type of random forest: regression
+#>                      Number of trees: 500
+#> No. of variables tried at each split: 2
+#> 
+#>           Mean of squared residuals: 887692.1
+#>                     % Var explained: 94.2
+```
+
+Use autoplot from ggplot2 to plot ensemble diagnostics:
+
+``` r
+ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
+```
+
+![6 panel plot of an ensemble of models fit to the diamonds dataset. The
+RF model is the best and has the highest weight. The residual plots look
+good. RMSE is about \`r
+round(min(greedy_stack\$ens_model\$results\$RMSE))\`.](reference/figures/README-greedy-stack-6-plot-1.png)
+
+``` r
+ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
+```
+
+![6 panel plot of an ensemble of models fit to the diamonds dataset. The
+RF model is the best and has the highest weight. The residual plots look
+good. RMSE is about \`r
+round(min(rf_stack\$ens_model\$results\$RMSE))\`.](reference/figures/README-unnamed-chunk-5-1.png)
+
+# Installation
+
+### Install the stable version from [CRAN](https://CRAN.R-project.org/package=caretEnsemble/):
+
+``` r
+install.packages("caretEnsemble")
+```
+
+### Install the dev version from github:
+
+``` r
+devtools::install_github("zachmayer/caretEnsemble")
+```
+
+There are also tagged versions of caretEnsemble on github you can
+install via devtools. For example, to install the [previous release of
+caretEnsemble](https://github.com/zachmayer/caretEnsemble/releases/)
+use:
+
+``` r
+devtools::install_github("zachmayer/caretEnsemble@2.0.3")
+```
+
+This is useful if the latest release breaks some aspect of your
+workflow. caretEnsemble is pure R with no compilation, so this command
+will work in a variety of environments.
+
+# Package development
+
+This package uses a Makefile. Use `make help` to see the supported
+options.
+
+Use `make fix-style` to fix simple linting errors.
+
+For iterating while writing code, run `make dev`. This runs just
+`make clean fix-style document lint spell test`, for a quicker local dev
+loop. Please still run `make all` before making a PR.
+
+Use `make all` before making a pull request, which will also run R CMD
+CHECK and a code coverage check. This runs
+`make clean fix-style document install build-readme build-vignettes lint spell test check coverage preview-site`.
+
+## First time dev setup:
+
+run `make install` from the git repository to install the dev version of
+caretEnsemble, along with the necessary package dependencies. \#
+Inspiration and similar packages: caretEnsemble was inspired by
+[medley](https://github.com/mewo2/medley), which in turn was inspired by
+Caruana et. al.’s (2004) paper [Ensemble Selection from Libraries of
+Models.](http://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
+
+If you want to do something similar in python, check out
+[vecstack](https://github.com/vecxoz/vecstack).
+
+# Code of Conduct:
+
+Please note that this project is released with a [Contributor Code of
+Conduct](https://github.com/zachmayer/caretEnsemble/blob/master/.github/CONTRIBUTING.md).
+By participating in this project you agree to abide by its terms.
+
+# Package index
+
+## All functions
+
+- [`add_cross_group_stats()`](http://zachmayer.github.io/caretEnsemble/reference/add_cross_group_stats.md)
+  : Add cross-group statistics to the importance table
+
+- [`as.caretList()`](http://zachmayer.github.io/caretEnsemble/reference/as.caretList.md)
+  : Convert object to caretList object
+
+- [`as.caretList(`*`<default>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/as.caretList.default.md)
+  : Convert object to caretList object - For Future Use
+
+- [`as.caretList(`*`<list>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/as.caretList.list.md)
+  : Convert list to caretList
+
+- [`autoplot(`*`<caretStack>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/autoplot.caretStack.md)
+  : Convenience function for more in-depth diagnostic plots of
+  caretStack objects
+
+- [`c(`*`<caretList>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/c.caretList.md)
+  : S3 definition for concatenating caretList
+
+- [`c(`*`<train>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/c.train.md)
+  : S3 definition for concatenating train objects
+
+- [`caretEnsemble()`](http://zachmayer.github.io/caretEnsemble/reference/caretEnsemble.md)
+  : Combine several predictive models via weights
+
+- [`caretList()`](http://zachmayer.github.io/caretEnsemble/reference/caretList.md)
+  : Create a list of several train models from the caret package
+
+- [`caretModelSpec()`](http://zachmayer.github.io/caretEnsemble/reference/caretModelSpec.md)
+  : Generate a specification for fitting a caret model
+
+- [`caretStack()`](http://zachmayer.github.io/caretEnsemble/reference/caretStack.md)
+  : Combine several predictive models via stacking
+
+- [`defaultControl()`](http://zachmayer.github.io/caretEnsemble/reference/defaultControl.md)
+  : Construct a default train control for use with caretList
+
+- [`defaultMetric()`](http://zachmayer.github.io/caretEnsemble/reference/defaultMetric.md)
+  : Construct a default metric
+
+- [`dotplot(`*`<caretStack>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/dotplot.caretStack.md)
+  : Comparison dotplot for a caretStack object
+
+- [`extractMetric()`](http://zachmayer.github.io/caretEnsemble/reference/extractMetric.md)
+  : Generic function to extract accuracy metrics from various model
+  objects
+
+- [`extractMetric(`*`<caretList>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/extractMetric.caretList.md)
+  :
+
+  Extract accuracy metrics from a
+  [`caretList`](http://zachmayer.github.io/caretEnsemble/reference/caretList.md)
+  object
+
+- [`extractMetric(`*`<caretStack>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/extractMetric.caretStack.md)
+  :
+
+  Extract accuracy metrics from a
+  [`caretStack`](http://zachmayer.github.io/caretEnsemble/reference/caretStack.md)
+  object
+
+- [`extractMetric(`*`<train>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/extractMetric.train.md)
+  :
+
+  Extract accuracy metrics from a
+  [`train`](https://rdrr.io/pkg/caret/man/train.html) model
+
+- [`greedyMSE()`](http://zachmayer.github.io/caretEnsemble/reference/greedyMSE.md)
+  : Greedy optimization for MSE
+
+- [`greedyMSE_caret()`](http://zachmayer.github.io/caretEnsemble/reference/greedyMSE_caret.md)
+  : caret interface for greedyMSE
+
+- [`permutationImportance()`](http://zachmayer.github.io/caretEnsemble/reference/permutationImportance.md)
+  : Permutation Importance
+
+- [`plot(`*`<caretList>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/plot.caretList.md)
+  : Plot a caretList object
+
+- [`plot(`*`<caretStack>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/plot.caretStack.md)
+  : Plot a caretStack object
+
+- [`plot_group()`](http://zachmayer.github.io/caretEnsemble/reference/plot_group.md)
+  : Plot a group of variable importances
+
+- [`plot_variable_importance()`](http://zachmayer.github.io/caretEnsemble/reference/plot_variable_importance.md)
+  : Plot Variable Importance from a caretStack Model
+
+- [`predict(`*`<caretList>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/predict.caretList.md)
+  : Create a matrix of predictions for each of the models in a caretList
+
+- [`predict(`*`<caretStack>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/predict.caretStack.md)
+  : Make predictions from a caretStack
+
+- [`predict(`*`<greedyMSE>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/predict.greedyMSE.md)
+  : Predict method for greedyMSE
+
+- [`prepare_importance()`](http://zachmayer.github.io/caretEnsemble/reference/prepare_importance.md)
+  : Prepare variable importance data.table from a caretStack
+
+- [`print(`*`<caretStack>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/print.caretStack.md)
+  : Print a caretStack object
+
+- [`print(`*`<greedyMSE>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/print.greedyMSE.md)
+  : Print method for greedyMSE
+
+- [`print(`*`<summary.caretList>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/print.summary.caretList.md)
+  : Print a summary.caretList object
+
+- [`print(`*`<summary.caretStack>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/print.summary.caretStack.md)
+  : Print a summary.caretStack object
+
+- [`` `[`( ``*`<caretList>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/sub-.caretList.md)
+  : Index a caretList
+
+- [`summary(`*`<caretList>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/summary.caretList.md)
+  : Summarize a caretList
+
+- [`summary(`*`<caretStack>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/summary.caretStack.md)
+  : Summarize a caretStack object
+
+- [`tuneCheck()`](http://zachmayer.github.io/caretEnsemble/reference/tuneCheck.md)
+  : Check that the tuning parameters list supplied by the user is valid
+
+- [`varImp(`*`<caretStack>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/varImp.caretStack.md)
+  : Variable importance for caretStack
+
+- [`varImp(`*`<greedyMSE>`*`)`](http://zachmayer.github.io/caretEnsemble/reference/varImp.greedyMSE.md)
+  : variable importance for a greedyMSE model
+
+- [`wtd.sd()`](http://zachmayer.github.io/caretEnsemble/reference/wtd.sd.md)
+  : Calculate a weighted standard deviation
+
+# Articles
+
+### All vignettes
+
+- [A Brief Introduction to
+  caretEnsemble](http://zachmayer.github.io/caretEnsemble/articles/caretEnsemble-intro.md):
+- [Version 4.0 New
+  Features](http://zachmayer.github.io/caretEnsemble/articles/Version-4.0-New-Features.md):
