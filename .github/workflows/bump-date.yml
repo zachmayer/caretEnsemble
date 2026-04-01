@@ -2,7 +2,7 @@ name: Bump DESCRIPTION Date
 
 on:
   schedule:
-    - cron: '0 0 1 * *'
+    - cron: '0 0 28 * *'
   workflow_dispatch:
 
 permissions:
@@ -23,8 +23,24 @@ jobs:
           echo "today=$TODAY" >> "$GITHUB_OUTPUT"
 
       - uses: peter-evans/create-pull-request@v8
+        id: create-pr
         with:
           commit-message: "bump_date to ${{ steps.bump.outputs.today }}"
           title: "bump_date to ${{ steps.bump.outputs.today }}"
           body: "Automated monthly bump of the `Date` field in DESCRIPTION."
-          branch: bump-date
+          branch: bump-date-auto
+          delete-branch: true
+
+      - name: Enable auto-merge
+        if: steps.create-pr.outputs.pull-request-number
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-approve
+        if: steps.create-pr.outputs.pull-request-number
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
