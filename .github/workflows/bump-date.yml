@@ -1,0 +1,30 @@
+name: Bump DESCRIPTION Date
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump-date:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Update Date in DESCRIPTION
+        id: bump
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          sed -i "s/^Date: .*/Date: $TODAY/" DESCRIPTION
+          echo "today=$TODAY" >> "$GITHUB_OUTPUT"
+
+      - uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "bump_date to ${{ steps.bump.outputs.today }}"
+          title: "bump_date to ${{ steps.bump.outputs.today }}"
+          body: "Automated monthly bump of the `Date` field in DESCRIPTION."
+          branch: bump-date
