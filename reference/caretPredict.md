@@ -6,7 +6,7 @@ features: - If newdata is null, return stacked predictions from the
 training job, rather than in-sample predictions. - Always returns
 probabilities for classification models. - Optionally drops one
 predicted class for classification models. - Always returns a
-[`data.table`](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+[`data.table`](https://rdrr.io/pkg/data.table/man/data.table.html)
 
 ## Usage
 

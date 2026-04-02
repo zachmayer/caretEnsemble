@@ -34,12 +34,12 @@ summary(meta_model)
 #> 
 #> Model Importance:
 #>  rpart    glm 
-#> 0.1269 0.8731 
+#> 0.1405 0.8595 
 #> 
 #> Model accuracy:
 #>    model_name metric     value         sd
 #>        <char> <char>     <num>      <num>
-#> 1:   ensemble   RMSE 0.5709763 0.05535683
-#> 2:      rpart   RMSE 0.8325594 0.29191430
-#> 3:        glm   RMSE 0.5636149 0.06308322
+#> 1:   ensemble   RMSE 0.5682643 0.05767253
+#> 2:      rpart   RMSE 0.8334089 0.21435945
+#> 3:        glm   RMSE 0.5627433 0.06821899
 ```

@@ -27,7 +27,7 @@ caretList(
   [`train`](https://rdrr.io/pkg/caret/man/train.html). Don't use the
   formula interface, its slower and buggier compared to the X, y
   interface. Use a
-  [`data.table`](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+  [`data.table`](https://rdrr.io/pkg/data.table/man/data.table.html)
   for X. Particularly if you have a large dataset and/or many models,
   using a data.table will avoid unnecessary copies of your data and can
   save a lot of time and RAM. These arguments will determine which train

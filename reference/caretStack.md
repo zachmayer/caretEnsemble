@@ -112,11 +112,11 @@ caretStack(models, method = "glm")
 #> 
 #> No pre-processing
 #> Resampling: Cross-Validated (5 fold) 
-#> Summary of sample sizes: 39, 40, 41, 39, 41 
+#> Summary of sample sizes: 40, 40, 40, 40, 40 
 #> Resampling results:
 #> 
-#>   RMSE       Rsquared    MAE     
-#>   0.1789553  0.09387589  0.135978
+#>   RMSE       Rsquared   MAE      
+#>   0.1810296  0.1078031  0.1348091
 #> 
 #> 
 #> Final model:
@@ -125,9 +125,9 @@ caretStack(models, method = "glm")
 #> 
 #> Coefficients:
 #> (Intercept)        rpart          glm  
-#>      0.6755       0.4072       0.1276  
+#>      0.8108       0.1772       0.2663  
 #> 
 #> Degrees of Freedom: 49 Total (i.e. Null);  47 Residual
 #> Null Deviance:       1.478 
-#> Residual Deviance: 1.444     AIC: -27.34
+#> Residual Deviance: 1.455     AIC: -26.96
 ```
