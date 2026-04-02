@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.PAT_BUMP_DATE }}
 
       - name: Update Date in DESCRIPTION
         id: bump
@@ -25,6 +27,7 @@ jobs:
       - uses: peter-evans/create-pull-request@v8
         id: create-pr
         with:
+          token: ${{ secrets.PAT_BUMP_DATE }}
           commit-message: "bump_date to ${{ steps.bump.outputs.today }}"
           title: "bump_date to ${{ steps.bump.outputs.today }}"
           body: "Automated monthly bump of the `Date` field in DESCRIPTION."
