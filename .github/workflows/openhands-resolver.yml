@@ -176,7 +176,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Comment on issue with start message
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.PAT_TOKEN || github.token }}
           script: |
@@ -270,7 +270,7 @@ jobs:
           fi
 
       - name: Comment on issue
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         if: always() # Comment on issue even if the previous steps fail
         with:
           github-token: ${{ secrets.PAT_TOKEN || github.token }}
