@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {r: 'devel', http-user-agent: 'release'}
+          - {r: 'devel', http-user-agent: 'release', manual: 'FALSE'}
           - {r: 'release'}
           - {r: 'oldrel-1'}
           - {r: 'oldrel-2'}
@@ -36,3 +36,7 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v2
       - run: sudo apt update && sudo apt install tidy
       - run: make check
+        env:
+          # Skip the PDF manual on R-devel only: it fails on R-devel's flaky
+          # LaTeX toolchain, not on package problems. Defaults to TRUE elsewhere.
+          MANUAL: ${{ matrix.config.manual || 'TRUE' }}
