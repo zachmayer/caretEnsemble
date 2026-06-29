@@ -101,10 +101,16 @@ view-coverage: coverage-report.html
 .PHONY: coverage
 coverage: cobertura.xml coverage-report.html view-coverage coverage-test
 
+# Build the PDF manual during check by default. The monthly workflow overrides
+# this to FALSE for the R-devel job only: there the PDF build exercises
+# R-devel's transient LaTeX toolchain, not the package. release + oldrel still
+# build the manual strictly and catch any real Rd problems.
+MANUAL ?= TRUE
+
 .PHONY: check
 check:
-	Rscript -e "devtools::check(cran = FALSE, remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
-	Rscript -e "devtools::check(cran = TRUE , remote = TRUE, manual = TRUE, force_suggests = TRUE, error_on = 'note')"
+	Rscript -e "devtools::check(cran = FALSE, remote = TRUE, manual = $(MANUAL), force_suggests = TRUE, error_on = 'note')"
+	Rscript -e "devtools::check(cran = TRUE , remote = TRUE, manual = $(MANUAL), force_suggests = TRUE, error_on = 'note')"
 
 .PHONY: fix-style
 fix-style:
