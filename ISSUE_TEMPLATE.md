@@ -19,6 +19,7 @@ dat\[\[“Class”\]\]
 models \<- caretEnsemble::caretList( X, y, methodList=c(‘glm’, ‘rpart’)
 ) ens \<- caretEnsemble::caretStack(models) print(ens)
 
+
     If you have some data that would be too difficult to construct using `caret::twoClassSim` or `caret::SLC14_1`, then you can always make a subset of your original data, using e.g. `head()`, `subset()` or the indices. Then use e.g. `dput()` to give us something that can be put in R immediately, e.g. `dput(head(iris, 4))`
 
     If you must use `dput(head())`, please first remove an columns from your dataset that are not necessary to reproduce the error.
@@ -33,6 +34,7 @@ Please cut/paste the output. If your version of caret or caretEnsemble
 is old, upgrade them with:
 
 ``` r
+
 update.packages(oldPkgs="caret", ask=FALSE)
 devtools::install_github("zachmayer/caretEnsemble")
 ```

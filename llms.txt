@@ -10,6 +10,7 @@ stack them with another caret model.
 First, use caretList to fit many models to the same data:
 
 ``` r
+
 set.seed(42L)
 data(diamonds, package = "ggplot2")
 dat <- data.table::data.table(diamonds)
@@ -32,6 +33,7 @@ print(summary(models))
 Then, use caretEnsemble to make a greedy ensemble of these models
 
 ``` r
+
 greedy_stack <- caretEnsemble::caretEnsemble(models)
 print(greedy_stack)
 #> The following models were ensembled: rf, glmnet  
@@ -61,6 +63,7 @@ print(greedy_stack)
 You can also use caretStack to make a non-linear ensemble
 
 ``` r
+
 rf_stack <- caretEnsemble::caretStack(models, method = "rf")
 #> note: only 1 unique complexity parameters in default grid. Truncating the grid to 1 .
 print(rf_stack)
@@ -94,6 +97,7 @@ print(rf_stack)
 Use autoplot from ggplot2 to plot ensemble diagnostics:
 
 ``` r
+
 ggplot2::autoplot(greedy_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
@@ -103,6 +107,7 @@ good. RMSE is about \`r
 round(min(greedy_stack\$ens_model\$results\$RMSE))\`.](reference/figures/README-greedy-stack-6-plot-1.png)
 
 ``` r
+
 ggplot2::autoplot(rf_stack, training_data = dat, xvars = c("carat", "table"))
 ```
 
@@ -116,12 +121,14 @@ round(min(rf_stack\$ens_model\$results\$RMSE))\`.](reference/figures/README-unna
 ### Install the stable version from [CRAN](https://CRAN.R-project.org/package=caretEnsemble/):
 
 ``` r
+
 install.packages("caretEnsemble")
 ```
 
 ### Install the dev version from github:
 
 ``` r
+
 devtools::install_github("zachmayer/caretEnsemble")
 ```
 
@@ -131,6 +138,7 @@ caretEnsemble](https://github.com/zachmayer/caretEnsemble/releases/)
 use:
 
 ``` r
+
 devtools::install_github("zachmayer/caretEnsemble@2.0.3")
 ```
 

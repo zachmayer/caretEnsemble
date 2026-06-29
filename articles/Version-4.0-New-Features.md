@@ -8,6 +8,7 @@ them.
 caretEnsemble now fully supports multiclass problems:
 
 ``` r
+
 model_list <- caretEnsemble::caretList(
   x = iris[, 1L:4L],
   y = iris[, 5L],
@@ -29,6 +30,7 @@ The new version uses a greedy optimizer by default, ensuring the
 ensemble is never worse than the worst single model:
 
 ``` r
+
 ens <- caretEnsemble::caretEnsemble(model_list)
 print(summary(ens))
 #> The following models were ensembled: rpart, rf  
@@ -53,6 +55,7 @@ caretStack (and by extension, caretEnsemble) now supports various S3
 methods:
 
 ``` r
+
 print(ens)
 #> The following models were ensembled: rpart, rf  
 #> 
@@ -98,6 +101,7 @@ print(summary(ens))
 ```
 
 ``` r
+
 plot(ens)
 ```
 
@@ -107,6 +111,7 @@ rpart model is
 bad.](Version-4.0-New-Features_files/figure-html/unnamed-chunk-5-1.png)
 
 ``` r
+
 ggplot2::autoplot(ens)
 ```
 
@@ -123,6 +128,7 @@ indexes based on the target, return stacked predictions, and use
 probability estimates for classification models.
 
 ``` r
+
 class_control <- caretEnsemble::defaultControl(iris$Species)
 print(ls(class_control))
 #>  [1] "adaptive"          "allowParallel"     "classProbs"       
@@ -137,6 +143,7 @@ print(ls(class_control))
 ```
 
 ``` r
+
 reg_control <- caretEnsemble::defaultControl(iris$Sepal.Length)
 print(ls(reg_control))
 #>  [1] "adaptive"          "allowParallel"     "classProbs"       
@@ -155,6 +162,7 @@ print(ls(reg_control))
 Models with different resampling strategies can now be ensembled:
 
 ``` r
+
 y <- iris[, 1L]
 x <- iris[, 2L:3L]
 flex_list <- caretEnsemble::caretList(
@@ -205,6 +213,7 @@ caretEnsemble now allows ensembling of mixed lists of classification and
 regression models:
 
 ``` r
+
 X <- iris[, 1L:4L]
 
 target_class <- iris[, 5L]
@@ -250,6 +259,7 @@ caretStack now supports transfer learning for ensembling models trained
 on different datasets:
 
 ``` r
+
 train_idx <- sample.int(nrow(iris), 100L)
 train_data <- iris[train_idx, ]
 new_data <- iris[-train_idx, ]
@@ -298,6 +308,7 @@ print(transfer_ens)
 We can also predict on new data:
 
 ``` r
+
 preds <- predict(transfer_ens, newdata = head(new_data))
 knitr::kable(preds, format = "markdown")
 ```
@@ -317,6 +328,7 @@ Permutation importance is now the default method for variable importance
 in caretLists and caretStacks:
 
 ``` r
+
 importance <- caret::varImp(transfer_ens)
 print(round(importance, 2L))
 #>     rpart_setosa rpart_versicolor  rpart_virginica        rf_setosa 

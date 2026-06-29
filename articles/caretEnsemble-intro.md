@@ -33,6 +33,7 @@ model and will be discussed in more detail later. First, lets build an
 example dataset (adapted from the caret vignette):
 
 ``` r
+
 data(Sonar, package = "mlbench")
 set.seed(107L)
 inTrain <- caret::createDataPartition(y = Sonar$Class, p = 0.75, list = FALSE)
@@ -41,6 +42,7 @@ testing <- Sonar[-inTrain, ]
 ```
 
 ``` r
+
 model_list <- caretEnsemble::caretList(
   Class ~ .,
   data = training,
@@ -62,6 +64,7 @@ preferred). We can use the `predict` function to extract predictions
 from this object for new data:
 
 ``` r
+
 p <- predict(model_list, newdata = head(testing))
 knitr::kable(p, format = "markdown")
 ```
@@ -82,6 +85,7 @@ model, and can also be used to pass arguments through `train` down to
 the component functions (e.g. `trace=FALSE` for `nnet`):
 
 ``` r
+
 model_list_big <- caretEnsemble::caretList(
   Class ~ .,
   data = training,
@@ -119,6 +123,7 @@ this package, as it will ensure the resampling indexes are identical
 across all models. Lets take a closer look at our list of models:
 
 ``` r
+
 lattice::xyplot(caret::resamples(model_list))
 ```
 
@@ -135,6 +140,7 @@ from caret (caret has a lot of convenient functions for analyzing lists
 of models):
 
 ``` r
+
 caret::modelCor(caret::resamples(model_list))
 #>           glmnet     rpart
 #> glmnet 1.0000000 0.5172171
@@ -146,6 +152,7 @@ are fairly uncorrelated, but their overall accuracy is similar. We do a
 simple, linear greedy optimization on AUC using caretEnsemble:
 
 ``` r
+
 greedy_ensemble <- caretEnsemble::caretEnsemble(model_list)
 print(summary(greedy_ensemble))
 #> The following models were ensembled: glmnet, rpart  
@@ -163,6 +170,7 @@ print(summary(greedy_ensemble))
 ```
 
 ``` r
+
 model_preds <- predict(model_list, newdata = testing, excluded_class_id = 2L)
 ens_preds <- predict(greedy_ensemble, newdata = testing, excluded_class_id = 2L)
 model_preds$ensemble <- ens_preds
@@ -181,6 +189,7 @@ for rock. M is the positive class, so we exclude class 2L from our
 predictions. You can set excluded_class_id = 0L
 
 ``` r
+
 p <- predict(greedy_ensemble, newdata = head(testing), excluded_class_id = 0L)
 knitr::kable(p, format = "markdown")
 ```
@@ -198,6 +207,7 @@ We can also use varImp to extract the variable importances from each
 member of the ensemble, as well as the final ensemble model:
 
 ``` r
+
 round(caret::varImp(greedy_ensemble), 4L)
 #> glmnet_M glmnet_R  rpart_M  rpart_R 
 #>   0.3331   0.3802   0.1441   0.1426
@@ -206,6 +216,7 @@ round(caret::varImp(greedy_ensemble), 4L)
 ## caretStack
 
 ``` r
+
 glm_ensemble <- caretEnsemble::caretStack(model_list, method = "glm")
 model_preds2 <- model_preds
 model_preds2$ensemble <- predict(glm_ensemble, newdata = testing, excluded_class_id = 2L)
@@ -228,6 +239,7 @@ generally require large sets of resamples to train on (n=50 or higher
 for bootstrap samples). Lets try one anyways:
 
 ``` r
+
 gbm_ensemble <- caretEnsemble::caretStack(
   model_list,
   method = "gbm",
