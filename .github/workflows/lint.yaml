@@ -24,10 +24,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: local::.
-
-      - name: Install
-        run: make install
+          extra-packages: any::lintr, any::spelling, any::devtools, local::.
 
       - name: Lint
         run: make lint
