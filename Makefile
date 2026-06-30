@@ -5,10 +5,7 @@ help:
 	@echo "Available targets:"
 	@echo "  all                    Run clean, fix-style, document, install, readme, vignettes, lint, spell, test, check-many-preds, check, coverage, preview-site"
 	@echo "  dev                    Run clean, fix-style, document, lint, spell, test"
-	@echo "  install-deps           Install dependencies"
-	@echo "  install                Install the whole package, including dependencies"
-	@echo "  install-mac            Install the package and Mac-specific tools (including actionlint)"
-	@echo "  install-models         Install caret model packages (for check-many-preds)"
+	@echo "  install                Complete macOS dev env: tools, R deps, all CRAN-reachable caret model packages, and the package"
 	@echo "  document               Generate documentation"
 	@echo "  update-test-fixtures   Update test fixtures"
 	@echo "  test                   Run unit tests"
@@ -37,26 +34,15 @@ all: clean fix-style document install readme vignettes lint spell test check-man
 .PHONY: dev
 dev: clean fix-style document lint spell test
 
-.PHONY: install-deps
-install-deps:
+.PHONY: install
+install:
+	brew install actionlint gh
+	gh auth setup-git
 	Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak')"
 	Rscript -e "pak::local_install_dev_deps()"
 	Rscript -e "pak::pak('r-lib/revdepcheck')"
-	$(MAKE) install-models
-
-.PHONY: install
-install: install-deps
+	Rscript -e "libs <- unique(unlist(lapply(caret::getModelInfo(), function(m) m[['library']]))); avail <- rownames(available.packages(repos = 'https://cloud.r-project.org')); m <- setdiff(intersect(libs, avail), rownames(installed.packages())); if (length(m)) install.packages(m, repos = 'https://cloud.r-project.org')"
 	Rscript -e "devtools::install()"
-
-.PHONY: install-mac
-install-mac:
-	brew install actionlint gh
-	gh auth setup-git
-	$(MAKE) install
-
-.PHONY: install-models
-install-models:
-	Rscript -e "libs <- unique(unlist(lapply(caret::getModelInfo(), function(m) m[['library']]))); m <- setdiff(libs, rownames(installed.packages())); if (length(m)) install.packages(m, repos = 'https://cloud.r-project.org')"
 
 .PHONY: document
 document:
