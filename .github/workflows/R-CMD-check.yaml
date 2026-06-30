@@ -70,16 +70,16 @@ jobs:
       - uses: actions/checkout@v7
         if: steps.should-run.outputs.should_run == 'true'
 
-      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-pandoc@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
         if: steps.should-run.outputs.should_run == 'true'
 
-      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
         if: steps.should-run.outputs.should_run == 'true'
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
+      - uses: r-lib/actions/setup-r-dependencies@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
         if: steps.should-run.outputs.should_run == 'true'
 
       - run: make check
