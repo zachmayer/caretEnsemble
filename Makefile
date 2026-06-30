@@ -41,6 +41,7 @@ install-deps:
 	Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak')"
 	Rscript -e "pak::local_install_dev_deps()"
 	Rscript -e "pak::pak('r-lib/revdepcheck')"
+	Rscript -e "libs <- unique(unlist(lapply(caret::getModelInfo(), function(m) m[['library']]))); m <- setdiff(libs, rownames(installed.packages())); if (length(m)) install.packages(m, repos = 'https://cloud.r-project.org')"
 
 .PHONY: install
 install: install-deps
