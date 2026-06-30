@@ -8,6 +8,7 @@ help:
 	@echo "  install-deps           Install dependencies"
 	@echo "  install                Install the whole package, including dependencies"
 	@echo "  install-mac            Install the package and Mac-specific tools (including actionlint)"
+	@echo "  install-models         Install caret model packages (for check-many-preds)"
 	@echo "  document               Generate documentation"
 	@echo "  update-test-fixtures   Update test fixtures"
 	@echo "  test                   Run unit tests"
@@ -41,7 +42,7 @@ install-deps:
 	Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak')"
 	Rscript -e "pak::local_install_dev_deps()"
 	Rscript -e "pak::pak('r-lib/revdepcheck')"
-	Rscript -e "libs <- unique(unlist(lapply(caret::getModelInfo(), function(m) m[['library']]))); m <- setdiff(libs, rownames(installed.packages())); if (length(m)) install.packages(m, repos = 'https://cloud.r-project.org')"
+	$(MAKE) install-models
 
 .PHONY: install
 install: install-deps
@@ -52,6 +53,10 @@ install-mac:
 	brew install actionlint gh
 	gh auth setup-git
 	$(MAKE) install
+
+.PHONY: install-models
+install-models:
+	Rscript -e "libs <- unique(unlist(lapply(caret::getModelInfo(), function(m) m[['library']]))); m <- setdiff(libs, rownames(installed.packages())); if (length(m)) install.packages(m, repos = 'https://cloud.r-project.org')"
 
 .PHONY: document
 document:
