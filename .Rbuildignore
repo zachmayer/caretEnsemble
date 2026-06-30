@@ -3,6 +3,8 @@ project-tree.txt
 .aider.chat.history.md
 .aider.input.history
 .aider.tags.cache.v3
+^\.claude$
+^CLAUDE\.md$
 coverage.rds
 coverage-report.html
 cobertura.xml
