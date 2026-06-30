@@ -293,6 +293,10 @@ testthat::test_that("caretList supports custom models", {
 })
 
 testthat::test_that("caretList supports models that return an array or matrix", {
+  # These models come from Suggests; skip if unavailable (e.g. a CRAN flavor
+  # where klaR can't be installed) so the check NOTEs/skips instead of erroring.
+  testthat::skip_if_not_installed("earth")
+  testthat::skip_if_not_installed("klaR")
   set.seed(42L)
   nrows <- 100L
   ncols <- 2L
