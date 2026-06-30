@@ -13,9 +13,7 @@ cobertura.xml
 lib/
 
 # Reverse deps data
-revdep/checks.noindex
-revdep/data.sqlite
-revdep/library.noindex
+revdep/
 
 #################
 ## Eclipse

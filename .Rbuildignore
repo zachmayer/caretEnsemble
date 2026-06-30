@@ -29,7 +29,7 @@ travis_wait_*
 .github/*
 ^doc$
 ^Meta$
-revdep/*
+^revdep$
 ^CRAN-SUBMISSION$
 check_package.R
 ^\.github$
