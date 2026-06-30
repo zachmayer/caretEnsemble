@@ -49,6 +49,8 @@ install: install-deps
 .PHONY: install-mac
 install-mac: install
 	brew install actionlint
+	brew install gh
+	gh auth setup-git
 
 .PHONY: document
 document:
