@@ -34,7 +34,7 @@ help:
 all: clean fix-style document install readme vignettes lint spell test check-many-preds check coverage preview-site
 
 .PHONY: dev
-all: clean fix-style document lint spell test
+dev: clean fix-style document lint spell test
 
 .PHONY: install-deps
 install-deps:
