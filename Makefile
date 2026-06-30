@@ -38,12 +38,9 @@ all: clean fix-style document lint spell test
 
 .PHONY: install-deps
 install-deps:
-	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
-	Rscript -e "if (!requireNamespace('pkgdown', quietly = TRUE)) install.packages('pkgdown')"
-	Rscript -e "devtools::install_deps()"
-	Rscript -e "devtools::install_dev_deps()"
-	Rscript -e "devtools::update_packages()"
-	Rscript -e "devtools::install_github('r-lib/revdepcheck')"
+	Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak')"
+	Rscript -e "pak::local_install_dev_deps()"
+	Rscript -e "pak::pak('r-lib/revdepcheck')"
 
 .PHONY: install
 install: install-deps
@@ -164,13 +161,13 @@ check-many-preds:
 
 .PHONY: check-win
 check-win:
-	rm -rf lib/
-	Rscript -e "devtools:::check_win()"
+	Rscript -e "devtools::check_win_devel()"
+	Rscript -e "devtools::check_win_release()"
+	Rscript -e "devtools::check_win_oldrelease()"
 
 .PHONY: check-rhub
 check-rhub:
-	rm -rf lib/
-	Rscript -e "rhub::rhub_check(platform='linux')"
+	Rscript -e "rhub::rhub_check(platforms = 'linux')"
 
 .PHONY: release
 release: check-rev-dep check-many-preds check-rhub check-win
