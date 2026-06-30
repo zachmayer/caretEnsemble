@@ -47,10 +47,10 @@ install: install-deps
 	Rscript -e "devtools::install()"
 
 .PHONY: install-mac
-install-mac: install
-	brew install actionlint
-	brew install gh
+install-mac:
+	brew install actionlint gh
 	gh auth setup-git
+	$(MAKE) install
 
 .PHONY: document
 document:
@@ -181,7 +181,7 @@ dev-guide:
 
 .PHONY: project-tree.txt
 project-tree.txt:
-	tree -a -I ".aider*|coverage*|lib|.DS_Store|.RHistory|.Rproj.user|*.png|doc|Meta|docs|.env|revdep|.git|man|README.md|.Rhistory" --prune > project-tree.txt
+	tree -a -I "coverage*|lib|.DS_Store|.RHistory|.Rproj.user|*.png|doc|Meta|docs|.env|revdep|.git|man|README.md|.Rhistory|.claude" --prune > project-tree.txt
 
 .PHONY: clean
 clean:
