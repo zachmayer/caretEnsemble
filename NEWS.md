@@ -5,6 +5,7 @@
 ## New Features
 - Add option to keep resamples for each repeated fold in `caretStack` and `caretList`, rather than aggregating to one resample per row in the original data. This can give your stacking model more variance to work with, but can lead to a lot more issues with aligning predictions from different models, particularly ones that use different resampling strategies.
 - Add an option to include original features from the raw data in the stack, if stacking on a new dataset rather than on stacked predictions.
+- Add `plot_variable_importance()` to visualize variable importance for `caretStack` and `caretEnsemble` models.
 
 # caretEnsemble 4.0.1
 
