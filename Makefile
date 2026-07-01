@@ -23,7 +23,8 @@ help:
 	@echo "  check-many-preds       Check that caretList can predict on ~200 caret models"
 	@echo "  check-win              Run R CMD on the winbuilder service from CRAN"
 	@echo "  check-rhub             Run R CMD on the rhub service"
-	@echo "  release                Release to CRAN"
+	@echo "  release                Prepare release: run all checks, then open the release checklist issue"
+	@echo "  submit-cran            Submit to CRAN (requires the release checklist issue to be closed)"
 	@echo "  preview-site           Preview pkgdown site"
 	@echo "  project-tree.txt       Show a nice clean package directory, ignoring files you dont need to edit"
 	@echo "  clean                  Clean up generated files"
@@ -165,7 +166,15 @@ check-rhub:
 
 .PHONY: release
 release: check-rev-dep check-many-preds check-rhub check-win
-	R --no-save --quiet --interactive  # Then run devtools::release()
+	Rscript -e 'usethis::use_release_issue(version = as.character(read.dcf("DESCRIPTION")[, "Version"]))'
+
+.PHONY: submit-cran
+submit-cran:
+	@version="$$(Rscript -e 'cat(as.character(read.dcf("DESCRIPTION")[, "Version"]))')"; \
+	title="Release caretEnsemble $$version"; \
+	gh issue list --state closed --search "$$title in:title" --json title --jq '.[].title' | grep -Fxq "$$title" || { echo "ERROR: no CLOSED issue '$$title' found. Run 'make release', complete and close the checklist, then retry."; exit 1; }; \
+	echo "Closed release issue '$$title' found. Launching R — now run:  devtools::submit_cran()"
+	R --no-save --quiet --interactive
 
 .PHONY: dev-guide
 dev-guide:
