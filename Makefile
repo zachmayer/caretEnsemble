@@ -12,6 +12,7 @@ help:
 	@echo "  coverage               Generate coverage reports"
 	@echo "  view-coverage          View coverage report"
 	@echo "  check                  Run R CMD check locally"
+	@echo "  url-check              Check that URLs in the package resolve (part of release)"
 	@echo "  fix-style              Auto style the code"
 	@echo "  lint                   Check the code for lint"
 	@echo "  actionlint            Check GitHub Actions workflows for lint"
@@ -105,6 +106,10 @@ check:
 	Rscript -e "devtools::check(cran = FALSE, remote = TRUE, manual = $(MANUAL), force_suggests = TRUE, error_on = 'note')"
 	Rscript -e "devtools::check(cran = TRUE , remote = TRUE, manual = $(MANUAL), force_suggests = TRUE, error_on = 'note')"
 
+.PHONY: url-check
+url-check:
+	Rscript -e "urlchecker::url_check()"
+
 .PHONY: fix-style
 fix-style:
 	Rscript -e "styler::style_pkg()"
@@ -166,7 +171,7 @@ check-rhub:
 	Rscript -e "rhub::rhub_check(platforms = 'linux')"
 
 .PHONY: release
-release: check-rev-dep check-many-preds check-rhub check-win
+release: check url-check readme check-many-preds check-rev-dep check-rhub check-win
 	Rscript -e 'usethis::use_release_issue(version = as.character(read.dcf("DESCRIPTION")[, "Version"]))'
 
 .PHONY: submit-cran

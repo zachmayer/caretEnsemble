@@ -6,11 +6,13 @@ shouldn't be automated.
 
 ## 1. Prepare — `make release`
 
-Runs every check, then opens a GitHub *"Release caretEnsemble x.y.z"* checklist issue.
+Runs the full prep checklist, then opens a GitHub *"Release caretEnsemble x.y.z"* checklist issue:
 
-- **Blocks** (real pass/fail): `revdepcheck`, `check-many-preds`.
-- **Fire-and-forget** (dispatched, not gated): `rhub` (a GitHub Actions run) and
-  `check-win` (3 win-builder emails). Confirm their results before submitting.
+- `check` — local `R CMD check --as-cran` (remote + manual).
+- `url-check` — `urlchecker::url_check()` (advisory: surfaces broken/redirecting URLs; does not hard-fail).
+- `readme` — `devtools::build_readme()` (regenerates `README.md`; commit the refresh).
+- `check-many-preds`, `check-rev-dep` — **block** on real pass/fail.
+- `check-rhub`, `check-win` — **fire-and-forget** (dispatched, not gated); confirm their results (Actions / 3 win-builder emails) before submitting.
 
 ## 2. Review & approve — *manual*
 

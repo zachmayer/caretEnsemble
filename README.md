@@ -49,7 +49,7 @@ print(summary(models))
 #> Model accuracy:
 #>    model_name metric    value       sd
 #>        <char> <char>    <num>    <num>
-#> 1:         rf   RMSE 1074.682 238.2442
+#> 1:         rf   RMSE 1075.619 237.4499
 #> 2:     glmnet   RMSE 1142.082 105.6022
 ```
 
@@ -69,13 +69,13 @@ print(greedy_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   992.0694  0.9354531  559.5561
+#>   974.1608  0.9353576  558.3467
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  997.4437 
+#> RMSE:  995.7783 
 #> Weights:
 #>        [,1]
 #> rf     0.55
@@ -99,7 +99,7 @@ print(rf_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   979.1918  0.9379759  513.1197
+#>   936.8824  0.9436947  486.9744
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -111,7 +111,7 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 887692.1
+#>           Mean of squared residuals: 887795.7
 #>                     % Var explained: 94.2
 ```
 
