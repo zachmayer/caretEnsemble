@@ -14,14 +14,14 @@ Downloads](https://cranlogs.r-pkg.org/badges/last-month/caretEnsemble)](https://
 [![R-CMD-check](https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml)
 [![Tests](https://github.com/zachmayer/caretEnsemble/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/zachmayer/caretEnsemble/actions/workflows/tests.yaml)
 [![Code
-Coverage](https://codecov.io/gh/zachmayer/caretEnsemble/graph/badge.svg?token=IEtOlZDYMs)](https://codecov.io/gh/zachmayer/caretEnsemble)
+Coverage](https://app.codecov.io/gh/zachmayer/caretEnsemble/graph/badge.svg?token=IEtOlZDYMs)](https://app.codecov.io/gh/zachmayer/caretEnsemble)
 [![CodeFactor](https://www.codefactor.io/repository/github/zachmayer/caretEnsemble/badge)](https://www.codefactor.io/repository/github/zachmayer/caretEnsemble)
 [![r-universe status
 badge](https://zachmayer.r-universe.dev/badges/caretEnsemble)](https://zachmayer.r-universe.dev/caretEnsemble)
 [![Code
 Size](https://img.shields.io/github/languages/code-size/zachmayer/caretEnsemble.svg)](https://github.com/zachmayer/caretEnsemble)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](https://badges.mit-license.org)
-[![Discord](https://img.shields.io/discord/1255535052578619524)](https://discord.gg/zgPeSm8a3u)
+[![Discord](https://img.shields.io/discord/1255535052578619524)](https://discord.com/invite/zgPeSm8a3u)
 <!-- badges: end -->
 
 caretEnsemble is a framework for
@@ -49,7 +49,7 @@ print(summary(models))
 #> Model accuracy:
 #>    model_name metric    value       sd
 #>        <char> <char>    <num>    <num>
-#> 1:         rf   RMSE 1074.682 238.2442
+#> 1:         rf   RMSE 1075.619 237.4499
 #> 2:     glmnet   RMSE 1142.082 105.6022
 ```
 
@@ -69,13 +69,13 @@ print(greedy_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   992.0694  0.9354531  559.5561
+#>   974.1608  0.9353576  558.3467
 #> 
 #> Tuning parameter 'max_iter' was held constant at a value of 100
 #> 
 #> Final model:
 #> Greedy MSE
-#> RMSE:  997.4437 
+#> RMSE:  995.7783 
 #> Weights:
 #>        [,1]
 #> rf     0.55
@@ -99,7 +99,7 @@ print(rf_stack)
 #> Resampling results:
 #> 
 #>   RMSE      Rsquared   MAE     
-#>   979.1918  0.9379759  513.1197
+#>   936.8824  0.9436947  486.9744
 #> 
 #> Tuning parameter 'mtry' was held constant at a value of 2
 #> 
@@ -111,7 +111,7 @@ print(rf_stack)
 #>                      Number of trees: 500
 #> No. of variables tried at each split: 2
 #> 
-#>           Mean of squared residuals: 887692.1
+#>           Mean of squared residuals: 887795.7
 #>                     % Var explained: 94.2
 ```
 
@@ -178,7 +178,7 @@ caretEnsemble, along with the necessary package dependencies. \#
 Inspiration and similar packages: caretEnsemble was inspired by
 [medley](https://github.com/mewo2/medley), which in turn was inspired by
 Caruana et. al.’s (2004) paper [Ensemble Selection from Libraries of
-Models.](http://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
+Models.](https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
 
 If you want to do something similar in python, check out
 [vecstack](https://github.com/vecxoz/vecstack).

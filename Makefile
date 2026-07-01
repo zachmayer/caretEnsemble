@@ -5,15 +5,15 @@ help:
 	@echo "Available targets:"
 	@echo "  all                    Run clean, fix-style, document, install, readme, vignettes, lint, spell, test, check-many-preds, check, coverage, preview-site"
 	@echo "  dev                    Run clean, fix-style, document, lint, spell, test"
-	@echo "  install-deps           Install dependencies"
-	@echo "  install                Install the whole package, including dependencies"
-	@echo "  install-mac            Install the package and Mac-specific tools (including actionlint)"
+	@echo "  install                Complete macOS dev env: tools, R deps, all CRAN-reachable caret model packages, and the package"
 	@echo "  document               Generate documentation"
+	@echo "  update-deps            Update package dependencies to their latest versions"
 	@echo "  update-test-fixtures   Update test fixtures"
 	@echo "  test                   Run unit tests"
 	@echo "  coverage               Generate coverage reports"
 	@echo "  view-coverage          View coverage report"
 	@echo "  check                  Run R CMD check locally"
+	@echo "  url-check              Check that URLs in the package resolve (part of release)"
 	@echo "  fix-style              Auto style the code"
 	@echo "  lint                   Check the code for lint"
 	@echo "  actionlint            Check GitHub Actions workflows for lint"
@@ -25,7 +25,9 @@ help:
 	@echo "  check-many-preds       Check that caretList can predict on ~200 caret models"
 	@echo "  check-win              Run R CMD on the winbuilder service from CRAN"
 	@echo "  check-rhub             Run R CMD on the rhub service"
-	@echo "  release                Release to CRAN"
+	@echo "  release                Prepare release: run all checks, then open the release checklist issue"
+	@echo "  submit-cran            Submit to CRAN (requires the release checklist issue to be closed)"
+	@echo "  post-release           After CRAN accepts + you merge to main: GitHub release + dev-version bump"
 	@echo "  preview-site           Preview pkgdown site"
 	@echo "  project-tree.txt       Show a nice clean package directory, ignoring files you dont need to edit"
 	@echo "  clean                  Clean up generated files"
@@ -34,24 +36,22 @@ help:
 all: clean fix-style document install readme vignettes lint spell test check-many-preds check coverage preview-site
 
 .PHONY: dev
-all: clean fix-style document lint spell test
-
-.PHONY: install-deps
-install-deps:
-	Rscript -e "if (!requireNamespace('devtools', quietly = TRUE)) install.packages('devtools')"
-	Rscript -e "if (!requireNamespace('pkgdown', quietly = TRUE)) install.packages('pkgdown')"
-	Rscript -e "devtools::install_deps()"
-	Rscript -e "devtools::install_dev_deps()"
-	Rscript -e "devtools::update_packages()"
-	Rscript -e "devtools::install_github('r-lib/revdepcheck')"
+dev: clean fix-style document lint spell test
 
 .PHONY: install
-install: install-deps
+install:
+	brew install actionlint gh pandoc
+	brew install --cask mactex-no-gui
+	gh auth setup-git
+	Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak')"
+	Rscript -e "pak::local_install_dev_deps()"
+	Rscript -e "pak::pak(c('r-lib/revdepcheck', 'urlchecker'))"
+	Rscript -e "libs <- unique(unlist(lapply(caret::getModelInfo(), function(m) m[['library']]))); avail <- rownames(available.packages(repos = 'https://cloud.r-project.org')); m <- setdiff(intersect(libs, avail), rownames(installed.packages())); if (length(m)) install.packages(m, repos = 'https://cloud.r-project.org')"
 	Rscript -e "devtools::install()"
 
-.PHONY: install-mac
-install-mac: install
-	brew install actionlint
+.PHONY: update-deps
+update-deps:
+	Rscript -e "pak::local_install_dev_deps()"
 
 .PHONY: document
 document:
@@ -112,6 +112,10 @@ check:
 	Rscript -e "devtools::check(cran = FALSE, remote = TRUE, manual = $(MANUAL), force_suggests = TRUE, error_on = 'note')"
 	Rscript -e "devtools::check(cran = TRUE , remote = TRUE, manual = $(MANUAL), force_suggests = TRUE, error_on = 'note')"
 
+.PHONY: url-check
+url-check:
+	Rscript -e "urlchecker::url_check()"
+
 .PHONY: fix-style
 fix-style:
 	Rscript -e "styler::style_pkg()"
@@ -164,17 +168,35 @@ check-many-preds:
 
 .PHONY: check-win
 check-win:
-	rm -rf lib/
-	Rscript -e "devtools:::check_win()"
+	Rscript -e "devtools::check_win_devel()"
+	Rscript -e "devtools::check_win_release()"
+	Rscript -e "devtools::check_win_oldrelease()"
 
 .PHONY: check-rhub
 check-rhub:
-	rm -rf lib/
-	Rscript -e "rhub::rhub_check(platform='linux')"
+	Rscript -e "rhub::rhub_check(platforms = 'linux')"
 
 .PHONY: release
-release: check-rev-dep check-many-preds check-rhub check-win
-	R --no-save --quiet --interactive  # Then run devtools::release()
+release: update-deps readme check url-check check-many-preds check-rev-dep check-rhub check-win
+	Rscript -e 'usethis::use_release_issue(version = as.character(read.dcf("DESCRIPTION")[, "Version"]))'
+
+.PHONY: submit-cran
+submit-cran:
+	echo "devtools::submit_cran()"
+	R --no-save --quiet --interactive
+
+.PHONY: post-release
+post-release:
+	@curr_branch="$$(git rev-parse --abbrev-ref HEAD)"; \
+	if [ "$$curr_branch" != "main" ]; then echo "ERROR: post-release must run on 'main' (current: $$curr_branch)."; exit 1; fi; \
+	if [ -n "$$(git status --porcelain)" ]; then echo "ERROR: working tree is not clean."; exit 1; fi; \
+	git fetch --quiet origin main; \
+	if [ "$$(git rev-parse HEAD)" != "$$(git rev-parse origin/main)" ]; then echo "ERROR: local main is not level with origin/main -- pull first."; exit 1; fi
+	Rscript -e "usethis::use_github_release()"
+	git switch -c bump-dev-version
+	Rscript -e "usethis::use_dev_version(push = FALSE)"
+	git push -u origin bump-dev-version
+	gh pr create --fill --title "Use dev version"
 
 .PHONY: dev-guide
 dev-guide:
@@ -182,7 +204,7 @@ dev-guide:
 
 .PHONY: project-tree.txt
 project-tree.txt:
-	tree -a -I ".aider*|coverage*|lib|.DS_Store|.RHistory|.Rproj.user|*.png|doc|Meta|docs|.env|revdep|.git|man|README.md|.Rhistory" --prune > project-tree.txt
+	tree -a -I "coverage*|lib|.DS_Store|.RHistory|.Rproj.user|*.png|doc|Meta|docs|.env|revdep|.git|man|README.md|.Rhistory|.claude" --prune > project-tree.txt
 
 .PHONY: clean
 clean:

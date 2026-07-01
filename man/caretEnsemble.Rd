@@ -56,7 +56,7 @@ summary(ens)
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://zachmayer.github.io/caretEnsemble/}
+  \item \url{https://zachmayer.github.io/caretEnsemble/}
   \item \url{https://github.com/zachmayer/caretEnsemble}
   \item Report bugs at \url{https://github.com/zachmayer/caretEnsemble/issues}
 }
@@ -64,6 +64,11 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Zachary A. Deane-Mayer \email{zach.mayer@gmail.com} [copyright holder]
+
+Authors:
+\itemize{
+  \item Zachary A. Deane-Mayer \email{zach.mayer@gmail.com} [copyright holder]
+}
 
 Other contributors:
 \itemize{
