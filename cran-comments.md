@@ -10,4 +10,9 @@
 There were no ERRORs, WARNINGs, or NOTEs
 
 ## Changes
-This release fixes a test that errored on a CRAN check machine where the suggested package 'klaR' was unavailable; the test now skips when its suggested dependencies are absent. New features are listed in NEWS.md.
+This release fixes a test that errored on a CRAN check machine where the suggested package 'klaR' was unavailable; the test now skips when its suggested dependencies are absent.
+
+New features:
+* Keep per-fold resamples in `caretStack`/`caretList` instead of aggregating them.
+* Include original raw-data features in the stack.
+* `plot_variable_importance()` for `caretStack`/`caretEnsemble` models.
