@@ -39,12 +39,12 @@ dev: clean fix-style document lint spell test
 
 .PHONY: install
 install:
-	brew install actionlint gh
+	brew install actionlint gh pandoc
 	brew install --cask mactex-no-gui
 	gh auth setup-git
 	Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak')"
 	Rscript -e "pak::local_install_dev_deps()"
-	Rscript -e "pak::pak('r-lib/revdepcheck')"
+	Rscript -e "pak::pak(c('r-lib/revdepcheck', 'urlchecker'))"
 	Rscript -e "libs <- unique(unlist(lapply(caret::getModelInfo(), function(m) m[['library']]))); avail <- rownames(available.packages(repos = 'https://cloud.r-project.org')); m <- setdiff(intersect(libs, avail), rownames(installed.packages())); if (length(m)) install.packages(m, repos = 'https://cloud.r-project.org')"
 	Rscript -e "devtools::install()"
 
