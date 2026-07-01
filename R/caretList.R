@@ -474,6 +474,7 @@ extractCaretTarget <- function(...) {
 #' or other type (e.g. sparse matrix). See Details below.
 #' @param y a numeric or factor vector containing the outcome for each sample.
 #' @param ... ignored
+#' @exportS3Method extractCaretTarget default
 #' @keywords internal
 extractCaretTarget.default <- function(x, y, ...) {
   y
@@ -484,7 +485,7 @@ extractCaretTarget.default <- function(x, y, ...) {
 #' @param form A formula of the form y ~ x1 + x2 + ...
 #' @param data Data frame from which variables specified in formula are preferentially to be taken.
 #' @param ... ignored
-#' @method extractCaretTarget formula
+#' @exportS3Method extractCaretTarget formula
 #' @keywords internal
 extractCaretTarget.formula <- function(form, data, ...) {
   y <- stats::model.response(stats::model.frame(form, data))

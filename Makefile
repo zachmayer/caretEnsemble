@@ -172,7 +172,7 @@ check-rhub:
 	Rscript -e "rhub::rhub_check(platforms = 'linux')"
 
 .PHONY: release
-release: check url-check readme check-many-preds check-rev-dep check-rhub check-win
+release: readme check url-check check-many-preds check-rev-dep check-rhub check-win
 	Rscript -e 'usethis::use_release_issue(version = as.character(read.dcf("DESCRIPTION")[, "Version"]))'
 
 .PHONY: submit-cran
@@ -185,8 +185,16 @@ submit-cran:
 
 .PHONY: post-release
 post-release:
+	@curr_branch="$$(git rev-parse --abbrev-ref HEAD)"; \
+	if [ "$$curr_branch" != "main" ]; then echo "ERROR: post-release must run on 'main' (current: $$curr_branch)."; exit 1; fi; \
+	if [ -n "$$(git status --porcelain)" ]; then echo "ERROR: working tree is not clean."; exit 1; fi; \
+	git fetch --quiet origin main; \
+	if [ "$$(git rev-parse HEAD)" != "$$(git rev-parse origin/main)" ]; then echo "ERROR: local main is not level with origin/main -- pull first."; exit 1; fi
 	Rscript -e "usethis::use_github_release()"
-	Rscript -e "usethis::use_dev_version(push = TRUE)"
+	git switch -c bump-dev-version
+	Rscript -e "usethis::use_dev_version(push = FALSE)"
+	git push -u origin bump-dev-version
+	gh pr create --fill --title "Use dev version"
 
 .PHONY: dev-guide
 dev-guide:
