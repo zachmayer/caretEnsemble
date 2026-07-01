@@ -7,6 +7,7 @@ help:
 	@echo "  dev                    Run clean, fix-style, document, lint, spell, test"
 	@echo "  install                Complete macOS dev env: tools, R deps, all CRAN-reachable caret model packages, and the package"
 	@echo "  document               Generate documentation"
+	@echo "  update-deps            Update package dependencies to their latest versions"
 	@echo "  update-test-fixtures   Update test fixtures"
 	@echo "  test                   Run unit tests"
 	@echo "  coverage               Generate coverage reports"
@@ -47,6 +48,10 @@ install:
 	Rscript -e "pak::pak(c('r-lib/revdepcheck', 'urlchecker'))"
 	Rscript -e "libs <- unique(unlist(lapply(caret::getModelInfo(), function(m) m[['library']]))); avail <- rownames(available.packages(repos = 'https://cloud.r-project.org')); m <- setdiff(intersect(libs, avail), rownames(installed.packages())); if (length(m)) install.packages(m, repos = 'https://cloud.r-project.org')"
 	Rscript -e "devtools::install()"
+
+.PHONY: update-deps
+update-deps:
+	Rscript -e "pak::local_install_dev_deps()"
 
 .PHONY: document
 document:
@@ -172,7 +177,7 @@ check-rhub:
 	Rscript -e "rhub::rhub_check(platforms = 'linux')"
 
 .PHONY: release
-release: readme check url-check check-many-preds check-rev-dep check-rhub check-win
+release: update-deps readme check url-check check-many-preds check-rev-dep check-rhub check-win
 	Rscript -e 'usethis::use_release_issue(version = as.character(read.dcf("DESCRIPTION")[, "Version"]))'
 
 .PHONY: submit-cran
