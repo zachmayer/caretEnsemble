@@ -9,6 +9,12 @@
 ## R CMD check results
 There were no ERRORs, WARNINGs, or NOTEs
 
+## revdepcheck results
+We checked 8 reverse dependencies (6 from CRAN + 2 from Bioconductor), comparing R CMD check results across CRAN and dev versions of this package.
+
+ * We saw 0 new problems
+ * We failed to check 0 packages
+
 ## Changes
 This release fixes a test that errored on a CRAN check machine where the suggested package 'klaR' was unavailable; the test now skips when its suggested dependencies are absent.
 

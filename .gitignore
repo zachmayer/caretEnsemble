@@ -12,8 +12,10 @@ cobertura.xml
 # weirdness from covr::package_coverage
 lib/
 
-# Reverse deps data
-revdep/
+# Reverse deps: ignore the heavy regenerated data, but track the .md summaries
+revdep/checks.noindex
+revdep/library.noindex
+revdep/data.sqlite
 
 #################
 ## Eclipse
