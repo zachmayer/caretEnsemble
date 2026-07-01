@@ -54,7 +54,7 @@ Imports:
     rlang
 License: MIT + file LICENSE
 VignetteBuilder: knitr
-RoxygenNote: 7.3.3
 LazyData: true
 Language: en-US
 Encoding: UTF-8
+Config/roxygen2/version: 8.0.0

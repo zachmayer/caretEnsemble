@@ -65,6 +65,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Zachary A. Deane-Mayer \email{zach.mayer@gmail.com} [copyright holder]
 
+Authors:
+\itemize{
+  \item Zachary A. Deane-Mayer \email{zach.mayer@gmail.com} [copyright holder]
+}
+
 Other contributors:
 \itemize{
   \item Jared E. Knowles \email{jknowles@gmail.com} [contributor]
