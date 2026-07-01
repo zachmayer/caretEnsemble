@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - {r: 'devel', http-user-agent: 'release', manual: 'FALSE'}
+          - {r: 'devel', http-user-agent: 'release'}
           - {r: 'release'}
           - {r: 'oldrel-1'}
           - {r: 'oldrel-2'}
@@ -33,10 +33,9 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
       - uses: r-lib/actions/setup-r-dependencies@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
-      - uses: r-lib/actions/setup-tinytex@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2
-      - run: sudo apt update && sudo apt install tidy
+      # Full TeX Live (not TinyTeX) so the PDF manual builds with every LaTeX
+      # package already present -- no on-demand tlmgr installs to flake on
+      # R-devel around the spring TeX Live rollover. MANUAL defaults to TRUE in
+      # the Makefile, so every R version (devel included) builds the manual.
+      - run: sudo apt-get update && sudo apt-get install -y tidy texlive-full
       - run: make check
-        env:
-          # Skip the PDF manual on R-devel only: it fails on R-devel's flaky
-          # LaTeX toolchain, not on package problems. Defaults to TRUE elsewhere.
-          MANUAL: ${{ matrix.config.manual || 'TRUE' }}
