@@ -14,14 +14,14 @@ Downloads](https://cranlogs.r-pkg.org/badges/last-month/caretEnsemble)](https://
 [![R-CMD-check](https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml)
 [![Tests](https://github.com/zachmayer/caretEnsemble/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/zachmayer/caretEnsemble/actions/workflows/tests.yaml)
 [![Code
-Coverage](https://codecov.io/gh/zachmayer/caretEnsemble/graph/badge.svg?token=IEtOlZDYMs)](https://codecov.io/gh/zachmayer/caretEnsemble)
+Coverage](https://app.codecov.io/gh/zachmayer/caretEnsemble/graph/badge.svg?token=IEtOlZDYMs)](https://app.codecov.io/gh/zachmayer/caretEnsemble)
 [![CodeFactor](https://www.codefactor.io/repository/github/zachmayer/caretEnsemble/badge)](https://www.codefactor.io/repository/github/zachmayer/caretEnsemble)
 [![r-universe status
 badge](https://zachmayer.r-universe.dev/badges/caretEnsemble)](https://zachmayer.r-universe.dev/caretEnsemble)
 [![Code
 Size](https://img.shields.io/github/languages/code-size/zachmayer/caretEnsemble.svg)](https://github.com/zachmayer/caretEnsemble)
 [![License](http://img.shields.io/:license-mit-blue.svg?style=flat)](https://badges.mit-license.org)
-[![Discord](https://img.shields.io/discord/1255535052578619524)](https://discord.gg/zgPeSm8a3u)
+[![Discord](https://img.shields.io/discord/1255535052578619524)](https://discord.com/invite/zgPeSm8a3u)
 <!-- badges: end -->
 
 caretEnsemble is a framework for
@@ -178,7 +178,7 @@ caretEnsemble, along with the necessary package dependencies. \#
 Inspiration and similar packages: caretEnsemble was inspired by
 [medley](https://github.com/mewo2/medley), which in turn was inspired by
 Caruana et. al.’s (2004) paper [Ensemble Selection from Libraries of
-Models.](http://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
+Models.](https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf)
 
 If you want to do something similar in python, check out
 [vecstack](https://github.com/vecxoz/vecstack).
