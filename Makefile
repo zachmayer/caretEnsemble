@@ -40,6 +40,7 @@ dev: clean fix-style document lint spell test
 .PHONY: install
 install:
 	brew install actionlint gh
+	brew install --cask mactex-no-gui
 	gh auth setup-git
 	Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak')"
 	Rscript -e "pak::local_install_dev_deps()"
