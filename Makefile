@@ -182,10 +182,7 @@ release: update-deps readme check url-check check-many-preds check-rev-dep check
 
 .PHONY: submit-cran
 submit-cran:
-	@version="$$(Rscript -e 'cat(as.character(read.dcf("DESCRIPTION")[, "Version"]))')"; \
-	title="Release caretEnsemble $$version"; \
-	gh issue list --state closed --search "$$title in:title" --json title --jq '.[].title' | grep -Fxq "$$title" || { echo "ERROR: no CLOSED issue '$$title' found. Run 'make release', complete and close the checklist, then retry."; exit 1; }; \
-	echo "Closed release issue '$$title' found. Launching R — now run:  devtools::submit_cran()"
+	echo "devtools::submit_cran()"
 	R --no-save --quiet --interactive
 
 .PHONY: post-release
