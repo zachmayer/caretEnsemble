@@ -25,6 +25,7 @@ help:
 	@echo "  check-rhub             Run R CMD on the rhub service"
 	@echo "  release                Prepare release: run all checks, then open the release checklist issue"
 	@echo "  submit-cran            Submit to CRAN (requires the release checklist issue to be closed)"
+	@echo "  post-release           After CRAN accepts + you merge to main: GitHub release + dev-version bump"
 	@echo "  preview-site           Preview pkgdown site"
 	@echo "  project-tree.txt       Show a nice clean package directory, ignoring files you dont need to edit"
 	@echo "  clean                  Clean up generated files"
@@ -175,6 +176,11 @@ submit-cran:
 	gh issue list --state closed --search "$$title in:title" --json title --jq '.[].title' | grep -Fxq "$$title" || { echo "ERROR: no CLOSED issue '$$title' found. Run 'make release', complete and close the checklist, then retry."; exit 1; }; \
 	echo "Closed release issue '$$title' found. Launching R — now run:  devtools::submit_cran()"
 	R --no-save --quiet --interactive
+
+.PHONY: post-release
+post-release:
+	Rscript -e "usethis::use_github_release()"
+	Rscript -e "usethis::use_dev_version(push = TRUE)"
 
 .PHONY: dev-guide
 dev-guide:

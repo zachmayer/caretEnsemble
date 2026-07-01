@@ -23,6 +23,7 @@ todo.txt
 ^\.travis\.yml$
 ^cran-comments\.md$
 ^CONDUCT\.md$
+^RELEASE\.md$
 inst/docs
 inst/examples
 travis_wait_*
