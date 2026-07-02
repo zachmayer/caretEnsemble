@@ -2,6 +2,8 @@
 
 ## caretEnsemble 4.0.2
 
+CRAN release: 2026-07-01
+
 ### New Features
 
 - Add option to keep resamples for each repeated fold in `caretStack`
@@ -13,6 +15,10 @@
 - Add an option to include original features from the raw data in the
   stack, if stacking on a new dataset rather than on stacked
   predictions.
+- Add
+  [`plot_variable_importance()`](http://zachmayer.github.io/caretEnsemble/reference/plot_variable_importance.md)
+  to visualize variable importance for `caretStack` and `caretEnsemble`
+  models.
 
 ## caretEnsemble 4.0.1
 

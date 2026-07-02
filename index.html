@@ -87,7 +87,7 @@
 <span><span class="co">#&gt; Model accuracy:</span></span>
 <span><span class="co">#&gt;    model_name metric    value       sd</span></span>
 <span><span class="co">#&gt;        &lt;char&gt; &lt;char&gt;    &lt;num&gt;    &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:         rf   RMSE 1074.682 238.2442</span></span>
+<span><span class="co">#&gt; 1:         rf   RMSE 1075.619 237.4499</span></span>
 <span><span class="co">#&gt; 2:     glmnet   RMSE 1142.082 105.6022</span></span></code></pre></div>
 <p>Then, use caretEnsemble to make a greedy ensemble of these models</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -104,13 +104,13 @@
 <span><span class="co">#&gt; Resampling results:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   RMSE      Rsquared   MAE     </span></span>
-<span><span class="co">#&gt;   992.0694  0.9354531  559.5561</span></span>
+<span><span class="co">#&gt;   974.1608  0.9353576  558.3467</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Tuning parameter 'max_iter' was held constant at a value of 100</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Final model:</span></span>
 <span><span class="co">#&gt; Greedy MSE</span></span>
-<span><span class="co">#&gt; RMSE:  997.4437 </span></span>
+<span><span class="co">#&gt; RMSE:  995.7783 </span></span>
 <span><span class="co">#&gt; Weights:</span></span>
 <span><span class="co">#&gt;        [,1]</span></span>
 <span><span class="co">#&gt; rf     0.55</span></span>
@@ -131,7 +131,7 @@
 <span><span class="co">#&gt; Resampling results:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   RMSE      Rsquared   MAE     </span></span>
-<span><span class="co">#&gt;   979.1918  0.9379759  513.1197</span></span>
+<span><span class="co">#&gt;   936.8824  0.9436947  486.9744</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Tuning parameter 'mtry' was held constant at a value of 2</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -143,7 +143,7 @@
 <span><span class="co">#&gt;                      Number of trees: 500</span></span>
 <span><span class="co">#&gt; No. of variables tried at each split: 2</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;           Mean of squared residuals: 887692.1</span></span>
+<span><span class="co">#&gt;           Mean of squared residuals: 887795.7</span></span>
 <span><span class="co">#&gt;                     % Var explained: 94.2</span></span></code></pre></div>
 <p>Use autoplot from ggplot2 to plot ensemble diagnostics:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -183,7 +183,7 @@
 <div class="section level2">
 <h2 id="first-time-dev-setup">First time dev setup:<a class="anchor" aria-label="anchor" href="#first-time-dev-setup"></a>
 </h2>
-<p>run <code>make install</code> from the git repository to install the dev version of caretEnsemble, along with the necessary package dependencies. # Inspiration and similar packages: caretEnsemble was inspired by <a href="https://github.com/mewo2/medley" class="external-link">medley</a>, which in turn was inspired by Caruana et. al.’s (2004) paper <a href="http://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf" class="external-link">Ensemble Selection from Libraries of Models.</a></p>
+<p>run <code>make install</code> from the git repository to install the dev version of caretEnsemble, along with the necessary package dependencies. # Inspiration and similar packages: caretEnsemble was inspired by <a href="https://github.com/mewo2/medley" class="external-link">medley</a>, which in turn was inspired by Caruana et. al.’s (2004) paper <a href="https://www.cs.cornell.edu/~caruana/ctp/ct.papers/caruana.icml04.icdm06long.pdf" class="external-link">Ensemble Selection from Libraries of Models.</a></p>
 <p>If you want to do something similar in python, check out <a href="https://github.com/vecxoz/vecstack" class="external-link">vecstack</a>.</p>
 </div>
 </div>
@@ -240,12 +240,12 @@
 <li><a href="https://www.rdocumentation.org/packages/caretEnsemble" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/last-month/caretEnsemble" alt="CRAN Downloads"></a></li>
 <li><a href="https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/zachmayer/caretEnsemble/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main" alt="R-CMD-check"></a></li>
 <li><a href="https://github.com/zachmayer/caretEnsemble/actions/workflows/tests.yaml" class="external-link"><img src="https://github.com/zachmayer/caretEnsemble/actions/workflows/tests.yaml/badge.svg?branch=main" alt="Tests"></a></li>
-<li><a href="https://codecov.io/gh/zachmayer/caretEnsemble" class="external-link"><img src="https://codecov.io/gh/zachmayer/caretEnsemble/graph/badge.svg?token=IEtOlZDYMs" alt="Code Coverage"></a></li>
+<li><a href="https://app.codecov.io/gh/zachmayer/caretEnsemble" class="external-link"><img src="https://app.codecov.io/gh/zachmayer/caretEnsemble/graph/badge.svg?token=IEtOlZDYMs" alt="Code Coverage"></a></li>
 <li><a href="https://www.codefactor.io/repository/github/zachmayer/caretEnsemble" class="external-link"><img src="https://www.codefactor.io/repository/github/zachmayer/caretEnsemble/badge" alt="CodeFactor"></a></li>
 <li><a href="https://zachmayer.r-universe.dev/caretEnsemble" class="external-link"><img src="https://zachmayer.r-universe.dev/badges/caretEnsemble" alt="r-universe status badge"></a></li>
 <li><a href="https://github.com/zachmayer/caretEnsemble" class="external-link"><img src="https://img.shields.io/github/languages/code-size/zachmayer/caretEnsemble.svg" alt="Code Size"></a></li>
 <li><a href="https://badges.mit-license.org" class="external-link"><img src="http://img.shields.io/:license-mit-blue.svg?style=flat" alt="License"></a></li>
-<li><a href="https://discord.gg/zgPeSm8a3u" class="external-link"><img src="https://img.shields.io/discord/1255535052578619524" alt="Discord"></a></li>
+<li><a href="https://discord.com/invite/zgPeSm8a3u" class="external-link"><img src="https://img.shields.io/discord/1255535052578619524" alt="Discord"></a></li>
 </ul>
 </div>
 

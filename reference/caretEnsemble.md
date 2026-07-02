@@ -64,7 +64,7 @@ multi-class problems
 
 Useful links:
 
-- <http://zachmayer.github.io/caretEnsemble/>
+- <https://zachmayer.github.io/caretEnsemble/>
 
 - <https://github.com/zachmayer/caretEnsemble>
 
@@ -74,6 +74,10 @@ Useful links:
 
 **Maintainer**: Zachary A. Deane-Mayer <zach.mayer@gmail.com>
 \[copyright holder\]
+
+Authors:
+
+- Zachary A. Deane-Mayer <zach.mayer@gmail.com> \[copyright holder\]
 
 Other contributors:
 
