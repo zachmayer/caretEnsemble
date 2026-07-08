@@ -86,7 +86,10 @@ testthat::test_that("Most caret models can predict", {
   models_reg <- very_quiet(caretList(X, y, methodList = reg_models, tuneLength = 1L, continue_on_fail = TRUE))
   models_bin <- very_quiet(caretList(X, y_bin, methodList = bin_models, tuneLength = 1L, continue_on_fail = TRUE))
   all_models <- c(models_reg, models_bin)
-  testthat::expect_gt(length(all_models), 200L) # About 100 each of class/reg
+  # ~200 caret models fit here (about 100 each of class/reg). ~19 model packages have been
+  # archived from CRAN, so this floors just below the current count instead of pinning an
+  # exact, drifting number. Still fails hard if caretEnsemble can't fit the bulk of models.
+  testthat::expect_gte(length(all_models), 195L)
 
   # Make sure we can predict
   pred <- very_quiet(predict(all_models, head(X, 5L)))
