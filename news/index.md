@@ -1,5 +1,7 @@
 # Changelog
 
+## caretEnsemble (development version)
+
 ## caretEnsemble 4.0.2
 
 CRAN release: 2026-07-01
