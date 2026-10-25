@@ -11,7 +11,7 @@ caretEnsemble x.y.z”* checklist issue:
 
 - `check` — local `R CMD check --as-cran` (remote + manual).
 - `url-check` —
-  [`urlchecker::url_check()`](https://rdrr.io/pkg/urlchecker/man/url_check.html)
+  [`urlchecker::url_check()`](https://urlchecker.r-lib.org/reference/url_check.html)
   (advisory: surfaces broken/redirecting URLs; does not hard-fail).
 - `readme` —
   [`devtools::build_readme()`](https://devtools.r-lib.org/reference/build_readme.html)

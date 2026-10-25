@@ -208,7 +208,7 @@ member of the ensemble, as well as the final ensemble model:
 
 ``` r
 
-round(caret::varImp(greedy_ensemble), 4L)
+round(caret::varImp(greedy_ensemble), 4L)  # nolint: namespace_linter. Not attached in vignettes.
 #> glmnet_M glmnet_R  rpart_M  rpart_R 
 #>   0.3331   0.3802   0.1441   0.1426
 ```

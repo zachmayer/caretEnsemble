@@ -112,7 +112,7 @@ bad.](Version-4.0-New-Features_files/figure-html/unnamed-chunk-5-1.png)
 
 ``` r
 
-ggplot2::autoplot(ens)
+ggplot2::autoplot(ens)  # nolint: namespace_linter. Not attached in vignettes.
 ```
 
 ![A 4-panel plot for glmnet, rpart, and an ensemble. The ensemble has
@@ -329,7 +329,7 @@ in caretLists and caretStacks:
 
 ``` r
 
-importance <- caret::varImp(transfer_ens)
+importance <- caret::varImp(transfer_ens)  # nolint: namespace_linter. Not attached in vignettes.
 print(round(importance, 2L))
 #>     rpart_setosa rpart_versicolor  rpart_virginica        rf_setosa 
 #>             0.36             0.00             0.00             0.00 
