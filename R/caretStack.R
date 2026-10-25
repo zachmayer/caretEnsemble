@@ -41,15 +41,15 @@
 #' )
 #' caretStack(models, method = "glm")
 caretStack <- function(
-    all.models,
-    new_X = NULL,
-    new_y = NULL,
-    metric = NULL,
-    trControl = NULL,
-    excluded_class_id = 1L,
-    original_features = NULL,
-    aggregate_resamples = TRUE,
-    ...) {
+  all.models,
+  new_X = NULL,
+  new_y = NULL,
+  metric = NULL,
+  trControl = NULL,
+  excluded_class_id = 1L,
+  original_features = NULL,
+  aggregate_resamples = TRUE,
+  ...) {
   # Check all.models
   if (!methods::is(all.models, "caretList")) {
     warning("Attempting to coerce all.models to a caretList.", call. = FALSE)
@@ -163,15 +163,15 @@ caretStack <- function(
 #' meta_model <- caretStack(models, method = "lm")
 #' RMSE(predict(meta_model, iris[101:150, 1:2]), iris[101:150, 3])
 predict.caretStack <- function(
-    object,
-    newdata = NULL,
-    se = FALSE,
-    level = 0.95,
-    excluded_class_id = 0L,
-    return_class_only = FALSE,
-    verbose = FALSE,
-    aggregate_resamples = TRUE,
-    ...) {
+  object,
+  newdata = NULL,
+  se = FALSE,
+  level = 0.95,
+  excluded_class_id = 0L,
+  return_class_only = FALSE,
+  verbose = FALSE,
+  aggregate_resamples = TRUE,
+  ...) {
   # Check the object
   check_caretStack(object)
 
@@ -225,7 +225,7 @@ predict.caretStack <- function(
   # IF return_class_only, factor of class levels
   # ELSE, data.table of predictions
   if (se) {
-    imp <- caret::varImp(object, newdata = newdata, normalize = TRUE)
+    imp <- varImp(object, newdata = newdata, normalize = TRUE)
     std_error <- as.matrix(sub_model_preds[, names(imp), with = FALSE])
     std_error <- apply(std_error, 1L, wtd.sd, w = imp, na.rm = TRUE)
     std_error <- stats::qnorm(level) * std_error
@@ -370,7 +370,7 @@ summary.caretStack <- function(object, ...) {
   metric <- object$ens_model$metric
   out <- list(
     models = toString(names(object$models)),
-    imp = round(caret::varImp(object), 4L),
+    imp = round(varImp(object), 4L),
     metric = metric,
     results = extractMetric(object, metric = metric)
   )
@@ -433,7 +433,7 @@ varImp.caretStack <- function(object, newdata = NULL, normalize = TRUE, ...) {
 #' lattice::dotplot(meta_model)
 dotplot.caretStack <- function(x, ...) {
   resamps <- caret::resamples(x$models)
-  lattice::dotplot(resamps, ...)
+  dotplot(resamps, ...)
 }
 
 #' @title Extract accuracy metrics from a \code{\link[caretEnsemble]{caretStack}} object
@@ -556,7 +556,7 @@ autoplot.caretStack <- function(object, training_data = NULL, xvars = NULL, show
     ggplot2::theme_bw()
 
   # Model Weights
-  imp <- caret::varImp(object[["ens_model"]][["finalModel"]])
+  imp <- varImp(object[["ens_model"]][["finalModel"]])
   wghtFrame <- data.table::as.data.table(imp)
   data.table::set(wghtFrame, j = "method", value = row.names(imp))
   names(wghtFrame) <- c("weights", "method")

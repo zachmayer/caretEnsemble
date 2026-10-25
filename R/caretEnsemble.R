@@ -33,10 +33,10 @@
 #' ens <- caretEnsemble(models)
 #' summary(ens)
 caretEnsemble <- function(
-    all.models,
-    excluded_class_id = 0L,
-    tuneLength = 1L,
-    ...) {
+  all.models,
+  excluded_class_id = 0L,
+  tuneLength = 1L,
+  ...) {
   out <- caretStack(
     all.models,
     excluded_class_id = excluded_class_id,
