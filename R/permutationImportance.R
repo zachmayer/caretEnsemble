@@ -87,9 +87,9 @@ shuffled_mae <- function(model, original_data, target, pred_type, shuffle_idx) {
 #' @return A named numeric vector of variable importances.
 #' @export
 permutationImportance <- function(
-    model,
-    newdata,
-    normalize = TRUE) {
+  model,
+  newdata,
+  normalize = TRUE) {
   # Checks
   stopifnot(
     methods::is(model, "train") || methods::is(model, "caretStack"),

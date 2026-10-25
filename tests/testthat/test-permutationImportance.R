@@ -27,9 +27,9 @@ train_model <- function(x, y, method = "rpart", ...) {
 }
 
 check_importance_scores <- function(
-    imp,
-    expected_names = paste0("x", seq_len(5L)),
-    expected_length = length(expected_names)) {
+  imp,
+  expected_names = paste0("x", seq_len(5L)),
+  expected_length = length(expected_names)) {
   testthat::expect_type(imp, "double")
   testthat::expect_true(all(is.finite(imp)))
   testthat::expect_named(imp, expected_names)

@@ -32,14 +32,14 @@ table #' Create a list of several train models from the caret package
 #'   )
 #' )
 caretList <- function(
-    ...,
-    trControl = NULL,
-    methodList = NULL,
-    tuneList = NULL,
-    metric = NULL,
-    continue_on_fail = FALSE,
-    trim = TRUE,
-    aggregate_resamples = TRUE) {
+  ...,
+  trControl = NULL,
+  methodList = NULL,
+  tuneList = NULL,
+  metric = NULL,
+  continue_on_fail = FALSE,
+  trim = TRUE,
+  aggregate_resamples = TRUE) {
   # Checks
   if (is.null(tuneList) && is.null(methodList)) {
     stop("Please either define a methodList or tuneList", call. = FALSE)
@@ -114,12 +114,12 @@ caretList <- function(
 #' @method predict caretList
 #' @export
 predict.caretList <- function(
-    object,
-    newdata = NULL,
-    verbose = FALSE,
-    excluded_class_id = 1L,
-    aggregate_resamples = TRUE,
-    ...) {
+  object,
+  newdata = NULL,
+  verbose = FALSE,
+  excluded_class_id = 1L,
+  aggregate_resamples = TRUE,
+  ...) {
   stopifnot(methods::is(object, "caretList"))
 
   # Decided whether to be verbose or quiet
@@ -207,14 +207,14 @@ predict.caretList <- function(
 #' @param ... other arguments to pass to \code{\link[caret]{trainControl}}
 #' @export
 defaultControl <- function(
-    target,
-    method = "cv",
-    number = 5L,
-    savePredictions = "final",
-    index = caret::createFolds(target, k = number, list = TRUE, returnTrain = TRUE),
-    is_class = is.factor(target) || is.character(target),
-    is_binary = length(unique(target)) == 2L,
-    ...) {
+  target,
+  method = "cv",
+  number = 5L,
+  savePredictions = "final",
+  index = caret::createFolds(target, k = number, list = TRUE, returnTrain = TRUE),
+  is_class = is.factor(target) || is.character(target),
+  is_binary = length(unique(target)) == 2L,
+  ...) {
   stopifnot(savePredictions %in% c("final", "all"))
   caret::trainControl(
     method = method,

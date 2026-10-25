@@ -10,7 +10,7 @@
 prepare_importance <- function(stack_model, newdata) {
   weight <- NULL # due to NSE notes in R CMD check
   # Extract variable importance using caret::varImp
-  imp <- caret::varImp(stack_model, newdata = newdata, normalize = TRUE)
+  imp <- varImp(stack_model, newdata = newdata, normalize = TRUE)
 
   # Convert to data.table and rename columns
   imp_dt <- data.table::as.data.table(imp)

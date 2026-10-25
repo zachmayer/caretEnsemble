@@ -52,7 +52,7 @@ plot(ens)
 ```
 
 ```{r, fig.alt="A 4-panel plot for glmnet, rpart, and an ensemble. The ensemble has the highest ROC and is slighly better than the glmnet. The rpart model is bad. The glmnet has the highest weight, and the residuals look biased."}
-ggplot2::autoplot(ens)
+ggplot2::autoplot(ens)  # nolint: namespace_linter. Not attached in vignettes.
 ```
 
 # Improved Default trainControl
@@ -139,7 +139,7 @@ knitr::kable(preds, format = "markdown")
 # Permutation Importance
 Permutation importance is now the default method for variable importance in caretLists and caretStacks:
 ```{r}
-importance <- caret::varImp(transfer_ens)
+importance <- caret::varImp(transfer_ens)  # nolint: namespace_linter. Not attached in vignettes.
 print(round(importance, 2L))
 ```
 

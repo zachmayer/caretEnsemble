@@ -9,7 +9,10 @@ permissions:
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    # Dependabot must be both the PR's author and this run's actor: the author
+    # alone would arm a PR someone else pushed onto Dependabot's branch; the
+    # actor alone, Dependabot acting on someone else's PR.
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]' }}
     steps:
       - name: Enable auto-merge for Dependabot PRs
         run: gh pr merge --auto --squash "$PR_URL"

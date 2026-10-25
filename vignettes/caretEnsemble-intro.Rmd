@@ -106,7 +106,7 @@ knitr::kable(p, format = "markdown")
 
 We can also use varImp to extract the variable importances from each member of the ensemble, as well as the final ensemble model:
 ```{r}
-round(caret::varImp(greedy_ensemble), 4L)
+round(caret::varImp(greedy_ensemble), 4L)  # nolint: namespace_linter. Not attached in vignettes.
 ```
 
 ## caretStack
