@@ -54,7 +54,7 @@ jobs:
       image: ${{ matrix.config.container }}
 
     steps:
-      - uses: r-hub/actions/checkout@31960d331f579d85cb0c868fce1dce2aaf132935 # v1.7.5
+      - uses: r-hub/actions/checkout@02be5ffbeae2b0d553da66acded089da11a1fb8f # v1.8.1
       - uses: r-hub/actions/platform-info@02be5ffbeae2b0d553da66acded089da11a1fb8f # v1.8.1
         with:
           token: ${{ secrets.RHUB_TOKEN }}
@@ -79,7 +79,7 @@ jobs:
         config: ${{ fromJson(needs.setup.outputs.platforms) }}
 
     steps:
-      - uses: r-hub/actions/checkout@31960d331f579d85cb0c868fce1dce2aaf132935 # v1.7.5
+      - uses: r-hub/actions/checkout@02be5ffbeae2b0d553da66acded089da11a1fb8f # v1.8.1
       - uses: r-hub/actions/setup-r@02be5ffbeae2b0d553da66acded089da11a1fb8f # v1.8.1
         with:
           job-config: ${{ matrix.config.job-config }}
