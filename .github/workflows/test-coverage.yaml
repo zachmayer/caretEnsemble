@@ -8,12 +8,12 @@ on:
 
 name: test-coverage
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   test-coverage:
     runs-on: ubuntu-latest
-    if: (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request') || github.actor != 'dependabot[bot]'
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

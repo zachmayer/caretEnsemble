@@ -1,6 +1,9 @@
 name: Lint GitHub Actions workflows
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   actionlint:
     runs-on: ubuntu-latest
@@ -10,3 +13,12 @@ jobs:
           persist-credentials: false
       - name: actionlint
         uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2
+      # https://docs.zizmor.sh
+      # Audits every workflow in the repo and dependabot.yml for security
+      # flaws. The action pins zizmor itself, so new rules arrive only with a
+      # Dependabot bump, which merges only once they pass.
+      - uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
+        with:
+          min-severity: medium
+          advanced-security: false
+          annotations: true

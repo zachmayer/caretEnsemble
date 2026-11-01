@@ -1,18 +1,20 @@
 name: Auto-merge Dependabot PRs
 
-on: pull_request_target
+# Privileged trigger, but the job checks out nothing: PR code never runs here.
+on: pull_request_target # zizmor: ignore[dangerous-triggers]
 
-permissions:
-  pull-requests: write
-  contents: write
+permissions: {}
 
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
-    # Dependabot must be both the PR's author and this run's actor: the author
-    # alone would arm a PR someone else pushed onto Dependabot's branch; the
-    # actor alone, Dependabot acting on someone else's PR.
-    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]' }}
+    # Only someone with write access can push to Dependabot's branch, and they
+    # can push to main anyway. Accepted: reopening a closed Dependabot PR, which
+    # Triage allows, gets it armed for auto-merge.
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Enable auto-merge for Dependabot PRs
         run: gh pr merge --auto --squash "$PR_URL"

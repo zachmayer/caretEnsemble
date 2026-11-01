@@ -9,6 +9,9 @@ on:
           - most
 
 name: Reverse dependency check
+
+permissions:
+  contents: read
   
 jobs:
     revdep_check:

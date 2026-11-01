@@ -11,7 +11,8 @@ on:
 
 name: pkgdown.yaml
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   pkgdown:
