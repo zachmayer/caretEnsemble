@@ -8,7 +8,8 @@ on:
 
 name: R CMD CHECK
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   # Only run R CMD check if there are changes to R-related files
@@ -18,17 +19,19 @@ jobs:
     outputs:
       run-r-checks: ${{ steps.check-files.outputs.run-r-checks }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - id: check-files
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             echo "run-r-checks=true" >> "${GITHUB_OUTPUT}"
           else
             # Check if any R-related files changed
-            git fetch origin "${{ github.base_ref }}"
-            CHANGED_FILES="$(git diff --name-only "origin/${{ github.base_ref }}"..HEAD)"
+            git fetch origin "${BASE_REF}"
+            CHANGED_FILES="$(git diff --name-only "origin/${BASE_REF}"..HEAD)"
             if echo "${CHANGED_FILES}" | grep -qE '^(R/|data/|tests/|vignettes/|DESCRIPTION|NAMESPACE)'; then
               echo "run-r-checks=true" >> "${GITHUB_OUTPUT}"
             else
@@ -69,7 +72,7 @@ jobs:
           echo "Skipping R CMD check - no R-related changes"
           exit 0
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
         if: steps.should-run.outputs.should_run == 'true'
