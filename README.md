@@ -15,6 +15,7 @@ Downloads](https://cranlogs.r-pkg.org/badges/last-month/caretEnsemble)](https://
 [![Tests](https://github.com/zachmayer/caretEnsemble/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/zachmayer/caretEnsemble/actions/workflows/tests.yaml)
 [![Code
 Coverage](https://app.codecov.io/gh/zachmayer/caretEnsemble/graph/badge.svg?token=IEtOlZDYMs)](https://app.codecov.io/gh/zachmayer/caretEnsemble)
+[![CodeFactor](https://www.codefactor.io/repository/github/zachmayer/caretEnsemble/badge)](https://www.codefactor.io/repository/github/zachmayer/caretEnsemble)
 [![r-universe status
 badge](https://zachmayer.r-universe.dev/badges/caretEnsemble)](https://zachmayer.r-universe.dev/caretEnsemble)
 [![Code
