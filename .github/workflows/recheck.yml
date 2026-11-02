@@ -16,6 +16,6 @@ permissions:
 jobs:
     revdep_check:
       name: Reverse check ${{ inputs.which }} dependents
-      uses: r-devel/recheck/.github/workflows/recheck.yml@ef259e57a8712b89bfb3093a73e082f5fdde79fe # v1
+      uses: r-devel/recheck/.github/workflows/recheck.yml@1a934fef37ec1a6073b25a22fdb09a5e81f02238 # v1
       with:
         which: ${{ inputs.which }}
