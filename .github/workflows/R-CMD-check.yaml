@@ -19,7 +19,7 @@ jobs:
     outputs:
       run-r-checks: ${{ steps.check-files.outputs.run-r-checks }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - id: check-files
@@ -72,21 +72,21 @@ jobs:
           echo "Skipping R CMD check - no R-related changes"
           exit 0
 
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
         if: steps.should-run.outputs.should_run == 'true'
 
-      - uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+      - uses: r-lib/actions/setup-pandoc@v2.14.0
         if: steps.should-run.outputs.should_run == 'true'
 
-      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+      - uses: r-lib/actions/setup-r@v2.14.0
         if: steps.should-run.outputs.should_run == 'true'
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+      - uses: r-lib/actions/setup-r-dependencies@v2.14.0
         if: steps.should-run.outputs.should_run == 'true'
 
       - run: make check

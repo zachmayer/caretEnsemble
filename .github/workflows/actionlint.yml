@@ -8,16 +8,16 @@ jobs:
   actionlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: actionlint
-        uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
+        uses: raven-actions/actionlint@v2.2.0
       # https://docs.zizmor.sh
       # Audits every workflow in the repo and dependabot.yml for security
       # flaws. The action pins zizmor itself, so new rules arrive only with a
       # Dependabot bump, which merges only once they pass.
-      - uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+      - uses: zizmorcore/zizmor-action@v0.8.1
         with:
           min-severity: medium
           advanced-security: false
