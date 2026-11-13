@@ -22,3 +22,12 @@ jobs:
           min-severity: medium
           advanced-security: false
           annotations: true
+      # Dependabot's merge waits on this job, so on its PRs this job verifies the
+      # lockfile too: the Verify lockfile workflow is not a required check. Only on
+      # its PRs, so a bad release of the unpinned extension (that workflow says why)
+      # can't turn every other run red.
+      - name: Verify actions.lock
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh extension install github/gh-actions-lock && gh actions-lock --verify

@@ -31,8 +31,7 @@ workflows:
     '.github/workflows/tests.yaml':
         - 'actions/checkout@v7.0.1'
         - 'r-lib/actions@v2.14.0'
-    '.github/workflows/verify-lockfile.yaml':
-        - 'actions/checkout@v7.0.1'
+    '.github/workflows/verify-lockfile.yaml': []
 dependencies:
     'actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae':
         ref: 'v5.0.5'
