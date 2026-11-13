@@ -33,6 +33,9 @@ jobs:
       contents: read
     env:
       GH_TOKEN: ${{ github.token }}
+      # The fetched tree has no .git, so this names the repo root: the extension
+      # needs it to resolve an action in this repo (`uses: $/...`).
+      GH_ACTIONS_LOCK_REPO_ROOT: ${{ github.workspace }}
     steps:
       # The tree at this commit, fetched without the checkout action.
       - run: gh api "repos/$GITHUB_REPOSITORY/tarball/$GITHUB_SHA" | tar -xz --strip-components=1
