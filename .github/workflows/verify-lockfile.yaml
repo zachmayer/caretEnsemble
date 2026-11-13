@@ -1,0 +1,47 @@
+name: Verify lockfile
+# Fails when .github/workflows/actions.lock is out of step with the workflows,
+# most often a `uses:` it doesn't cover. GitHub refuses to start a workflow
+# that uses an action the lockfile doesn't cover, and that workflow's checks
+# vanish from the pull request instead of failing, so this is the check that
+# goes red. It uses no actions itself, so it starts whatever state the lockfile
+# is in. To fix a failure, run `gh actions-lock` and commit the result.
+#
+# Runs when a workflow, an action, or the lockfile changes.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/**'
+      - '**/action.yml'
+      - '**/action.yaml'
+  pull_request:
+    paths:
+      - '.github/**'
+      - '**/action.yml'
+      - '**/action.yaml'
+  workflow_dispatch:
+
+# None by default; the job grants itself what it reads.
+permissions: {}
+
+jobs:
+  verify-lockfile:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      # The fetched tree has no .git, so this names the repo root: the extension
+      # needs it to resolve an action in this repo (`uses: $/...`).
+      GH_ACTIONS_LOCK_REPO_ROOT: ${{ github.workspace }}
+    steps:
+      # The tree at this commit, fetched without the checkout action.
+      - run: gh api "repos/$GITHUB_REPOSITORY/tarball/$GITHUB_SHA" | tar -xz --strip-components=1
+      # Unpinned, always latest. No Dependabot ecosystem tracks a gh extension,
+      # so a pin would only age, and an old verifier can pass a lockfile the
+      # runner rejects. It is GitHub's own tool, alone in a job whose token only
+      # reads this repo.
+      - run: gh extension install github/gh-actions-lock
+      - run: gh actions-lock --verify
